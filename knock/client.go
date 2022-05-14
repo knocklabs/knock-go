@@ -36,6 +36,7 @@ type Client struct {
 
 	// base URL for the API
 	baseURL *url.URL
+	Users   UsersService
 }
 
 // ClientOption provides a variadic option for configuring the client
@@ -103,6 +104,8 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 		}
 	}
 
+	c.Users = &usersService{client: c}
+
 	return c, nil
 }
 
@@ -157,7 +160,7 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 		// check here to make sure that errorRes is populated. If
 		// not, we return the full response back to the user, so
 		// they can debug the issue.
-		// TODO(fatih): fix the behavior on the API side
+		// TODO: fix the behavior on the API side
 		if *errorRes == (errorResponse{}) {
 			return &Error{
 				msg:  "internal error, response body doesn't match error type signature",
@@ -187,7 +190,7 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 		}
 	}
 
-	// this means we don't care about unmrarshaling the response body into v
+	// this means we don't care about un-marshalling the response body into v
 	if v == nil {
 		return nil
 	}
@@ -252,7 +255,7 @@ type accessTokenTransport struct {
 }
 
 func (t *accessTokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Add("Authorization", "Bearer: "+t.token)
+	req.Header.Add("Authorization", "Bearer "+t.token)
 	return t.rt.RoundTrip(req)
 }
 
