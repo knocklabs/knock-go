@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"reflect"
 	"time"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
 
@@ -27,13 +29,15 @@ func NewUsersService(client *Client) *usersService {
 	}
 }
 
-type UserProperties map[string]interface{}
-
 type User struct {
-	ID         string `json:"id"`
-	Properties UserProperties
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID               string                 `mapstructure:"id"`
+	Name             string                 `mapstructure:"name"`
+	Email            string                 `mapstructure:"email"`
+	Phone_Number     string                 `mapstructure:"phone_number"`
+	Avatar           string                 `mapstructure:"avatar"`
+	CreatedAt        time.Time              `mapstructure:"created_at"`
+	UpdatedAt        time.Time              `mapstructure:"updated_at"`
+	CustomProperties map[string]interface{} `mapstructure:",remain"`
 }
 
 type GetUserRequest struct {
@@ -52,16 +56,58 @@ type IdentifyUserRequest struct {
 	CreatedAt  string
 }
 
+func BuildUserStruct(input map[string]interface{}) (*User, error) {
+	delete(input, "__typename")
+
+	user := User{}
+
+	stringToDateTimeHook := func(
+		f reflect.Type,
+		t reflect.Type,
+		data interface{}) (interface{}, error) {
+		if t == reflect.TypeOf(time.Time{}) && f == reflect.TypeOf("") {
+			return time.Parse(time.RFC3339, data.(string))
+		}
+
+		return data, nil
+	}
+
+	config := mapstructure.DecoderConfig{
+		DecodeHook: stringToDateTimeHook,
+		Result:     &user,
+	}
+
+	decoder, err := mapstructure.NewDecoder(&config)
+	if err != nil {
+		return nil, err
+	}
+
+	err = decoder.Decode(input)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*User, error) {
 	path := usersAPIPath(getReq.ID)
-	req, err := us.client.newRequest(http.MethodGet, path, nil)
 
+	req, err := us.client.newRequest(http.MethodGet, path, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for get user")
 	}
 
-	user := &User{}
-	err = us.client.do(ctx, req, &user)
+	var userResultMap map[string]interface{}
+	err = us.client.do(ctx, req, &userResultMap)
+	fmt.Printf("result: %+v", userResultMap)
+
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := BuildUserStruct(userResultMap)
+
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +120,7 @@ func (us *usersService) Delete(ctx context.Context, deleteReq *DeleteUserRequest
 	req, err := us.client.newRequest(http.MethodDelete, path, nil)
 
 	if err != nil {
-		return errors.Wrap(err, "error creating request for delete database")
+		return errors.Wrap(err, "error creating request for delete user")
 	}
 
 	err = us.client.do(ctx, req, nil)
