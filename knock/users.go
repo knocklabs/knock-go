@@ -2,6 +2,7 @@ package knock
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -15,6 +16,8 @@ import (
 // Users API endpoints.
 type UsersService interface {
 	Get(context.Context, *GetUserRequest) (*User, error)
+	Delete(context.Context, *DeleteUserRequest) error
+	Identify(context.Context, *IdentifyUserRequest) (*User, error)
 }
 
 type usersService struct {
@@ -33,7 +36,7 @@ type User struct {
 	ID               string                 `mapstructure:"id"`
 	Name             string                 `mapstructure:"name"`
 	Email            string                 `mapstructure:"email"`
-	Phone_Number     string                 `mapstructure:"phone_number"`
+	PhoneNumber      string                 `mapstructure:"phone_number"`
 	Avatar           string                 `mapstructure:"avatar"`
 	CreatedAt        time.Time              `mapstructure:"created_at"`
 	UpdatedAt        time.Time              `mapstructure:"updated_at"`
@@ -51,14 +54,19 @@ type DeleteUserRequest struct {
 }
 
 type IdentifyUserRequest struct {
-	ID         string
-	Properties map[string]interface{}
-	CreatedAt  string
+	ID               string `json:"id"`
+	Name             string `json:"name"`
+	Email            string `json:"email"`
+	Avatar           string `json:"avatar,omitempty"`
+	PhoneNumber      string `json:"phone_number,omitempty"`
+	CustomProperties map[string]interface{}
 }
 
-func BuildUserStruct(input map[string]interface{}) (*User, error) {
+// toUserWithCustomProperties takes a map of keys returned from an API
+// response and returns a User struct, correctly handling the remapping
+// of custom properties that may be present in user data.
+func toUserWithCustomProperties(input map[string]interface{}) (*User, error) {
 	delete(input, "__typename")
-
 	user := User{}
 
 	stringToDateTimeHook := func(
@@ -90,6 +98,25 @@ func BuildUserStruct(input map[string]interface{}) (*User, error) {
 	return &user, nil
 }
 
+// IdentifyUserRequests can contain arbitrary customer data that must be stored, and must be mapped
+// appropriately to
+func (identifyReq *IdentifyUserRequest) toMapWithCustomProperties() map[string]interface{} {
+	flatMap := make(map[string]interface{})
+
+	// Note that marshalling and then immediately un-marshalling transforms struct keys
+	// into the parameter names accepted by the API (i.e. PhoneNumber -> phone_number)
+	data, _ := json.Marshal(identifyReq)
+	json.Unmarshal(data, &flatMap)
+
+	// Move all keys from a nested key in the map to the top level of the map
+	for k, v := range flatMap["CustomProperties"].(map[string]interface{}) {
+		flatMap[k] = v
+	}
+	delete(flatMap, "CustomProperties")
+
+	return flatMap
+}
+
 func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*User, error) {
 	path := usersAPIPath(getReq.ID)
 
@@ -98,16 +125,13 @@ func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*User,
 		return nil, errors.Wrap(err, "error creating request for get user")
 	}
 
-	var userResultMap map[string]interface{}
-	err = us.client.do(ctx, req, &userResultMap)
-	fmt.Printf("result: %+v", userResultMap)
-
+	var getResponse map[string]interface{}
+	err = us.client.do(ctx, req, &getResponse)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := BuildUserStruct(userResultMap)
-
+	user, err := toUserWithCustomProperties(getResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -125,6 +149,30 @@ func (us *usersService) Delete(ctx context.Context, deleteReq *DeleteUserRequest
 
 	err = us.client.do(ctx, req, nil)
 	return err
+}
+
+func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*User, error) {
+	path := usersAPIPath(identifyReq.ID)
+
+	identifyBody := identifyReq.toMapWithCustomProperties()
+	req, err := us.client.newRequest(http.MethodPut, path, identifyBody)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request for identify user")
+	}
+
+	var identifyResponse map[string]interface{}
+	err = us.client.do(ctx, req, identifyResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := toUserWithCustomProperties(identifyResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func usersAPIPath(userId string) string {
