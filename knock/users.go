@@ -73,12 +73,12 @@ func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserR
 
 	body, err := us.client.do(ctx, req, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request for get user")
+		return nil, errors.Wrap(err, "error making request for identify user")
 	}
 
 	user, err := parseRawResponseCustomProperties(body)
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request for get user")
+		return nil, errors.Wrap(err, "error parsing request for identify user")
 	}
 
 	return user, nil
@@ -131,11 +131,13 @@ func (identifyReq *IdentifyUserRequest) toMapWithCustomProperties() map[string]i
 	data, _ := json.Marshal(identifyReq)
 	json.Unmarshal(data, &flatMap)
 
-	// Move all keys from a nested key in the map to the top level of the map
-	for k, v := range flatMap["CustomProperties"].(map[string]interface{}) {
-		flatMap[k] = v
+	if flatMap["CustomProperties"] != nil {
+		// Move all keys from a nested key in the map to the top level of the map
+		for k, v := range flatMap["CustomProperties"].(map[string]interface{}) {
+			flatMap[k] = v
+		}
+		delete(flatMap, "CustomProperties")
 	}
-	delete(flatMap, "CustomProperties")
 
 	return flatMap
 }
