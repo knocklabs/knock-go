@@ -110,11 +110,11 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 }
 
 // do makes an HTTP request and populates the given struct v from the response.
-func (c *Client) do(ctx context.Context, req *http.Request, v interface{}) error {
+func (c *Client) do(ctx context.Context, req *http.Request, v interface{}) ([]byte, error) {
 	req = req.WithContext(ctx)
 	res, err := c.client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer res.Body.Close()
 
@@ -124,10 +124,10 @@ func (c *Client) do(ctx context.Context, req *http.Request, v interface{}) error
 // handleResponse makes an HTTP request and populates the given struct v from
 // the response.  This is meant for internal testing and shouldn't be used
 // directly. Instead please use `Client.do`.
-func (c *Client) handleResponse(ctx context.Context, res *http.Response, v interface{}) error {
+func (c *Client) handleResponse(ctx context.Context, res *http.Response, v interface{}) ([]byte, error) {
 	out, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if res.StatusCode >= 400 {
@@ -142,7 +142,7 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 		if err != nil {
 			var jsonErr *json.SyntaxError
 			if errors.As(err, &jsonErr) {
-				return &Error{
+				return nil, &Error{
 					msg:  "malformed error response body received",
 					Code: ErrResponseMalformed,
 					Meta: map[string]string{
@@ -152,7 +152,7 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 					},
 				}
 			}
-			return err
+			return nil, err
 		}
 
 		// json.Unmarshal doesn't return an error if the response
@@ -162,7 +162,7 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 		// they can debug the issue.
 		// TODO: fix the behavior on the API side
 		if *errorRes == (errorResponse{}) {
-			return &Error{
+			return nil, &Error{
 				msg:  "internal error, response body doesn't match error type signature",
 				Code: ErrInternal,
 				Meta: map[string]string{
@@ -184,7 +184,7 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 			errCode = ErrRetry
 		}
 
-		return &Error{
+		return nil, &Error{
 			msg:  errorRes.Message,
 			Code: errCode,
 		}
@@ -192,14 +192,14 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 
 	// this means we don't care about un-marshalling the response body into v
 	if v == nil {
-		return nil
+		return out, nil
 	}
 
 	err = json.Unmarshal(out, &v)
 	if err != nil {
 		var jsonErr *json.SyntaxError
 		if errors.As(err, &jsonErr) {
-			return &Error{
+			return nil, &Error{
 				msg:  "malformed response body received",
 				Code: ErrResponseMalformed,
 				Meta: map[string]string{
@@ -208,10 +208,10 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 				},
 			}
 		}
-		return err
+		return nil, err
 	}
 
-	return nil
+	return out, nil
 }
 
 func (c *Client) newRequest(method string, path string, body interface{}) (*http.Request, error) {

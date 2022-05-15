@@ -8,16 +8,15 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
 
 // UsersService is an interface for communicating with the PlanetScale
 // Users API endpoints.
 type UsersService interface {
+	Identify(context.Context, *IdentifyUserRequest) (*User, error)
 	Get(context.Context, *GetUserRequest) (*User, error)
 	Delete(context.Context, *DeleteUserRequest) error
-	Identify(context.Context, *IdentifyUserRequest) (*User, error)
 }
 
 type usersService struct {
@@ -33,14 +32,14 @@ func NewUsersService(client *Client) *usersService {
 }
 
 type User struct {
-	ID               string                 `mapstructure:"id"`
-	Name             string                 `mapstructure:"name"`
-	Email            string                 `mapstructure:"email"`
-	PhoneNumber      string                 `mapstructure:"phone_number"`
-	Avatar           string                 `mapstructure:"avatar"`
-	CreatedAt        time.Time              `mapstructure:"created_at"`
-	UpdatedAt        time.Time              `mapstructure:"updated_at"`
-	CustomProperties map[string]interface{} `mapstructure:",remain"`
+	ID               string    `json:"id"`
+	Name             string    `json:"name"`
+	Email            string    `json:"email"`
+	PhoneNumber      string    `json:"phone_number"`
+	Avatar           string    `json:"avatar"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
+	CustomProperties map[string]interface{}
 }
 
 type GetUserRequest struct {
@@ -62,18 +61,6 @@ type IdentifyUserRequest struct {
 	CustomProperties map[string]interface{}
 }
 
-func (us *usersService) Delete(ctx context.Context, deleteReq *DeleteUserRequest) error {
-	path := usersAPIPath(deleteReq.ID)
-	req, err := us.client.newRequest(http.MethodDelete, path, nil)
-
-	if err != nil {
-		return errors.Wrap(err, "error creating request for delete user")
-	}
-
-	err = us.client.do(ctx, req, nil)
-	return err
-}
-
 func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*User, error) {
 	path := usersAPIPath(identifyReq.ID)
 
@@ -84,58 +71,54 @@ func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserR
 		return nil, errors.Wrap(err, "error creating request for identify user")
 	}
 
-	var identifyResponse map[string]interface{}
-	err = us.client.do(ctx, req, identifyResponse)
+	body, err := us.client.do(ctx, req, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error making request for get user")
 	}
 
-	user, err := toUserWithCustomProperties(identifyResponse)
+	user, err := parseRawResponseCustomProperties(body)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error parsing request for get user")
 	}
 
 	return user, nil
 }
 
-func usersAPIPath(userId string) string {
-	return fmt.Sprintf("v1/users/%s", userId)
+func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*User, error) {
+	path := usersAPIPath(getReq.ID)
+
+	req, err := us.client.newRequest(http.MethodGet, path, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request for get user")
+	}
+
+	body, err := us.client.do(ctx, req, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request for get user")
+	}
+
+	user, err := parseRawResponseCustomProperties(body)
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request for get user")
+	}
+
+	return user, nil
 }
 
-// toUserWithCustomProperties takes a map of keys returned from an API
-// response and returns a User struct, correctly handling the remapping
-// of custom properties that may be present in user data.
-func toUserWithCustomProperties(input map[string]interface{}) (*User, error) {
-	delete(input, "__typename")
-	user := User{}
+func (us *usersService) Delete(ctx context.Context, deleteReq *DeleteUserRequest) error {
+	path := usersAPIPath(deleteReq.ID)
+	req, err := us.client.newRequest(http.MethodDelete, path, nil)
 
-	stringToDateTimeHook := func(
-		f reflect.Type,
-		t reflect.Type,
-		data interface{}) (interface{}, error) {
-		if t == reflect.TypeOf(time.Time{}) && f == reflect.TypeOf("") {
-			return time.Parse(time.RFC3339, data.(string))
-		}
-
-		return data, nil
-	}
-
-	config := mapstructure.DecoderConfig{
-		DecodeHook: stringToDateTimeHook,
-		Result:     &user,
-	}
-
-	decoder, err := mapstructure.NewDecoder(&config)
 	if err != nil {
-		return nil, err
+		return errors.Wrap(err, "error creating request for delete user")
 	}
 
-	err = decoder.Decode(input)
-	if err != nil {
-		return nil, err
-	}
+	_, err = us.client.do(ctx, req, nil)
+	return err
+}
 
-	return &user, nil
+func usersAPIPath(userId string) string {
+	return fmt.Sprintf("v1/users/%s", userId)
 }
 
 // IdentifyUserRequests can contain arbitrary customer data that must be stored, and must be mapped
@@ -157,24 +140,25 @@ func (identifyReq *IdentifyUserRequest) toMapWithCustomProperties() map[string]i
 	return flatMap
 }
 
-func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*User, error) {
-	path := usersAPIPath(getReq.ID)
-
-	req, err := us.client.newRequest(http.MethodGet, path, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "error creating request for get user")
-	}
-
-	var getResponse map[string]interface{}
-	err = us.client.do(ctx, req, &getResponse)
+func parseRawResponseCustomProperties(rawResponse []byte) (*User, error) {
+	user := User{}
+	err := json.Unmarshal(rawResponse, &user)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := toUserWithCustomProperties(getResponse)
-	if err != nil {
-		return nil, err
+	// Create a map of the full API response, removing keys explicitly defined in the struct
+	// Any remaining keys are custom properties, which will be added to the struct's CustomProperties field
+	var customProperties map[string]interface{}
+	json.Unmarshal(rawResponse, &customProperties)
+	val := reflect.ValueOf(user)
+	for i := 0; i < val.Type().NumField(); i++ {
+		delete(customProperties, val.Type().Field(i).Tag.Get("json"))
 	}
+	// This is returned in API responses but is not used
+	delete(customProperties, "__typename")
 
-	return user, nil
+	user.CustomProperties = customProperties
+
+	return &user, nil
 }
