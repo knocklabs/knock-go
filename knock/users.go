@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// UsersService is an interface for communicating with the PlanetScale
+// UsersService is an interface for communicating with the Knock
 // Users API endpoints.
 type UsersService interface {
 	Identify(context.Context, *IdentifyUserRequest) (*User, error)
@@ -138,7 +138,6 @@ func (identifyReq *IdentifyUserRequest) toMapWithCustomProperties() map[string]i
 		}
 		delete(flatMap, "CustomProperties")
 	}
-
 	return flatMap
 }
 

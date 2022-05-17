@@ -5,11 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 
 	"github.com/hashicorp/go-cleanhttp"
+	"moul.io/http2curl"
 )
 
 const (
@@ -35,8 +37,9 @@ type Client struct {
 	client *http.Client
 
 	// base URL for the API
-	baseURL *url.URL
-	Users   UsersService
+	baseURL   *url.URL
+	Users     UsersService
+	Workflows WorkflowsService
 }
 
 // ClientOption provides a variadic option for configuring the client
@@ -105,6 +108,7 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 	}
 
 	c.Users = &usersService{client: c}
+	c.Workflows = &workflowsService{client: c}
 
 	return c, nil
 }
@@ -160,7 +164,6 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 		// check here to make sure that errorRes is populated. If
 		// not, we return the full response back to the user, so
 		// they can debug the issue.
-		// TODO: fix the behavior on the API side
 		if *errorRes == (errorResponse{}) {
 			return nil, &Error{
 				msg:  "internal error, response body doesn't match error type signature",
@@ -256,6 +259,9 @@ type accessTokenTransport struct {
 
 func (t *accessTokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.Header.Add("Authorization", "Bearer "+t.token)
+	// TODO remove debug log tools when initial development is complete
+	command, _ := http2curl.GetCurlCommand(req)
+	fmt.Printf("\n\n%s\n\n", command)
 	return t.rt.RoundTrip(req)
 }
 
