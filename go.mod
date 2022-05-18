@@ -7,6 +7,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2
 	github.com/pkg/errors v0.9.1
 	moul.io/http2curl v1.0.0
+	github.com/google/go-querystring v1.1.0
 )
 
 require (

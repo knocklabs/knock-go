@@ -40,6 +40,7 @@ type Client struct {
 	baseURL   *url.URL
 	Users     UsersService
 	Workflows WorkflowsService
+	Messages  MessagesService
 }
 
 // ClientOption provides a variadic option for configuring the client
@@ -109,6 +110,7 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 
 	c.Users = &usersService{client: c}
 	c.Workflows = &workflowsService{client: c}
+	c.Messages = &messagesService{client: c}
 
 	return c, nil
 }
@@ -133,6 +135,8 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 	if err != nil {
 		return nil, err
 	}
+	// TODO remove debug logs
+	fmt.Printf("response body:\n%s\n", out)
 
 	if res.StatusCode >= 400 {
 		// errorResponse represents an error response from the API
@@ -261,7 +265,7 @@ func (t *accessTokenTransport) RoundTrip(req *http.Request) (*http.Response, err
 	req.Header.Add("Authorization", "Bearer "+t.token)
 	// TODO remove debug log tools when initial development is complete
 	command, _ := http2curl.GetCurlCommand(req)
-	fmt.Printf("\n\n%s\n\n", command)
+	fmt.Printf("request:\n%s\n", command)
 	return t.rt.RoundTrip(req)
 }
 
