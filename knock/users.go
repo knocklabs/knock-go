@@ -15,10 +15,10 @@ import (
 // UsersService is an interface for communicating with the Knock
 // Users API endpoints.
 type UsersService interface {
-	Identify(context.Context, *IdentifyUserRequest) (*User, error)
-	Get(context.Context, *GetUserRequest) (*User, error)
+	Identify(context.Context, *IdentifyUserRequest) (*IdentifyUserResponse, error)
+	Get(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	Delete(context.Context, *DeleteUserRequest) error
-	Merge(context.Context, *MergeUserRequest) (*User, error)
+	Merge(context.Context, *MergeUserRequest) (*MergeUserResponse, error)
 	GetMessages(context.Context, *GetUserMessagesRequest) (*GetUserMessagesResponse, error)
 }
 
@@ -86,7 +86,13 @@ type GetUserMessagesResponse struct {
 	Messages []*Message `json:"items"`
 }
 
-func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*User, error) {
+type GetUserResponse struct {
+	User *User
+}
+type MergeUserResponse = GetUserResponse
+type IdentifyUserResponse = GetUserResponse
+
+func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*IdentifyUserResponse, error) {
 	path := usersAPIPath(identifyReq.ID)
 
 	identifyBody := identifyReq.toMapWithCustomProperties()
@@ -106,10 +112,12 @@ func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserR
 		return nil, errors.Wrap(err, "error parsing request for identify user")
 	}
 
-	return user, nil
+	return &IdentifyUserResponse{
+		User: user,
+	}, nil
 }
 
-func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*User, error) {
+func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*GetUserResponse, error) {
 	path := usersAPIPath(getReq.ID)
 
 	req, err := us.client.newRequest(http.MethodGet, path, nil)
@@ -127,7 +135,9 @@ func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*User,
 		return nil, errors.Wrap(err, "error parsing request for get user")
 	}
 
-	return user, nil
+	return &GetUserResponse{
+		User: user,
+	}, nil
 }
 
 func (us *usersService) Delete(ctx context.Context, deleteReq *DeleteUserRequest) error {
@@ -146,7 +156,7 @@ func usersAPIPath(userId string) string {
 	return fmt.Sprintf("v1/users/%s", userId)
 }
 
-func (us *usersService) Merge(ctx context.Context, mergeReq *MergeUserRequest) (*User, error) {
+func (us *usersService) Merge(ctx context.Context, mergeReq *MergeUserRequest) (*MergeUserResponse, error) {
 	path := fmt.Sprintf("%s/merge", usersAPIPath(mergeReq.ID))
 
 	req, err := us.client.newRequest(http.MethodPost, path, mergeReq)
@@ -158,8 +168,14 @@ func (us *usersService) Merge(ctx context.Context, mergeReq *MergeUserRequest) (
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request for merge user")
 	}
+	user, err := parseRawUserResponseCustomProperties(body)
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request for get user")
+	}
 
-	return parseRawUserResponseCustomProperties(body)
+	return &MergeUserResponse{
+		User: user,
+	}, nil
 }
 
 func (us *usersService) GetMessages(ctx context.Context, getUserMessagesReq *GetUserMessagesRequest) (*GetUserMessagesResponse, error) {

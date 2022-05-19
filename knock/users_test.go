@@ -34,16 +34,18 @@ func TestUsers_Get(t *testing.T) {
 		ID: id,
 	})
 
-	want := &User{
-		Name:        name,
-		ID:          id,
-		Email:       email,
-		PhoneNumber: phone_number,
-		CreatedAt:   time.Time{},
-		UpdatedAt:   time.Date(2022, time.May, 15, 22, 19, 44, 915000000, time.UTC),
-		CustomProperties: map[string]interface{}{
-			"welcome":     "to jurassic park",
-			"middle-name": "alfred",
+	want := &GetUserResponse{
+		User: &User{
+			Name:        name,
+			ID:          id,
+			Email:       email,
+			PhoneNumber: phone_number,
+			CreatedAt:   time.Time{},
+			UpdatedAt:   time.Date(2022, time.May, 15, 22, 19, 44, 915000000, time.UTC),
+			CustomProperties: map[string]interface{}{
+				"welcome":     "to jurassic park",
+				"middle-name": "alfred",
+			},
 		},
 	}
 
@@ -77,16 +79,18 @@ func TestUsers_Identify(t *testing.T) {
 			"middle-name": "alfred",
 		}})
 
-	want := &User{
-		Name:        name,
-		ID:          id,
-		Email:       email,
-		PhoneNumber: phone_number,
-		CreatedAt:   time.Time{},
-		UpdatedAt:   time.Date(2022, time.May, 15, 22, 19, 44, 915000000, time.UTC),
-		CustomProperties: map[string]interface{}{
-			"welcome":     "to jurassic park",
-			"middle-name": "alfred",
+	want := &IdentifyUserResponse{
+		User: &User{
+			Name:        name,
+			ID:          id,
+			Email:       email,
+			PhoneNumber: phone_number,
+			CreatedAt:   time.Time{},
+			UpdatedAt:   time.Date(2022, time.May, 15, 22, 19, 44, 915000000, time.UTC),
+			CustomProperties: map[string]interface{}{
+				"welcome":     "to jurassic park",
+				"middle-name": "alfred",
+			},
 		},
 	}
 
@@ -114,16 +118,18 @@ func TestUsers_Merge(t *testing.T) {
 		FromUserID: "cool2",
 	})
 
-	want := &User{
-		ID:          "nice2",
-		Name:        "nice2",
-		Email:       "nice2@nice2.nice2",
-		PhoneNumber: "100",
-		CustomProperties: map[string]interface{}{
-			"cool": "cool",
-			"nice": "nice",
+	want := &MergeUserResponse{
+		User: &User{
+			ID:          "nice2",
+			Name:        "nice2",
+			Email:       "nice2@nice2.nice2",
+			PhoneNumber: "100",
+			CustomProperties: map[string]interface{}{
+				"cool": "cool",
+				"nice": "nice",
+			},
+			UpdatedAt: time.Date(2022, time.May, 18, 12, 03, 36, 128000000, time.UTC),
 		},
-		UpdatedAt: time.Date(2022, time.May, 18, 12, 03, 36, 128000000, time.UTC),
 	}
 
 	c.Assert(err, qt.IsNil)
