@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/google/go-querystring/query"
 	"github.com/pkg/errors"
 )
 
@@ -17,6 +18,8 @@ type UsersService interface {
 	Identify(context.Context, *IdentifyUserRequest) (*User, error)
 	Get(context.Context, *GetUserRequest) (*User, error)
 	Delete(context.Context, *DeleteUserRequest) error
+	Merge(context.Context, *MergeUserRequest) (*User, error)
+	GetMessages(context.Context, *GetUserMessagesRequest) (*GetUserMessagesResponse, error)
 }
 
 type usersService struct {
@@ -61,6 +64,28 @@ type IdentifyUserRequest struct {
 	CustomProperties map[string]interface{}
 }
 
+type MergeUserRequest struct {
+	// User unique identifier
+	ID         string
+	FromUserID string `json:"from_user_id"`
+}
+
+type GetUserMessagesRequest struct {
+	// User unique identifier
+	ID        string          `url:"-"`
+	PageSize  int             `url:"page_size,omitempty"`
+	After     string          `url:"after,omitempty"`
+	Before    string          `url:"before,omitempty"`
+	Source    string          `url:"source,omitempty"`
+	Tenant    string          `url:"tenant,omitempty"`
+	Status    []MessageStatus `url:"status,omitempty"`
+	ChannelID string          `url:"channel_id,omitempty"`
+}
+
+type GetUserMessagesResponse struct {
+	Messages []*Message `json:"items"`
+}
+
 func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*User, error) {
 	path := usersAPIPath(identifyReq.ID)
 
@@ -76,7 +101,7 @@ func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserR
 		return nil, errors.Wrap(err, "error making request for identify user")
 	}
 
-	user, err := parseRawResponseCustomProperties(body)
+	user, err := parseRawUserResponseCustomProperties(body)
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing request for identify user")
 	}
@@ -97,7 +122,7 @@ func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*User,
 		return nil, errors.Wrap(err, "error making request for get user")
 	}
 
-	user, err := parseRawResponseCustomProperties(body)
+	user, err := parseRawUserResponseCustomProperties(body)
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing request for get user")
 	}
@@ -121,6 +146,45 @@ func usersAPIPath(userId string) string {
 	return fmt.Sprintf("v1/users/%s", userId)
 }
 
+func (us *usersService) Merge(ctx context.Context, mergeReq *MergeUserRequest) (*User, error) {
+	path := fmt.Sprintf("%s/merge", usersAPIPath(mergeReq.ID))
+
+	req, err := us.client.newRequest(http.MethodPost, path, mergeReq)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request for merge user")
+	}
+
+	body, err := us.client.do(ctx, req, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request for merge user")
+	}
+
+	return parseRawUserResponseCustomProperties(body)
+}
+
+func (us *usersService) GetMessages(ctx context.Context, getUserMessagesReq *GetUserMessagesRequest) (*GetUserMessagesResponse, error) {
+
+	queryString, _ := query.Values(getUserMessagesReq)
+	path := fmt.Sprintf("%s/messages?%s", usersAPIPath(getUserMessagesReq.ID), queryString.Encode())
+
+	req, err := us.client.newRequest(http.MethodGet, path, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request for get user messages")
+	}
+	getUserMessagesResponse := &GetUserMessagesResponse{}
+
+	_, err = us.client.do(ctx, req, getUserMessagesResponse)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request for get user messages")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request for get user messages")
+	}
+
+	return getUserMessagesResponse, nil
+}
+
 // IdentifyUserRequests can contain arbitrary customer data that must be stored, and must be mapped
 // appropriately to one big flat list of key value pairs.
 func (identifyReq *IdentifyUserRequest) toMapWithCustomProperties() map[string]interface{} {
@@ -141,7 +205,7 @@ func (identifyReq *IdentifyUserRequest) toMapWithCustomProperties() map[string]i
 	return flatMap
 }
 
-func parseRawResponseCustomProperties(rawResponse []byte) (*User, error) {
+func parseRawUserResponseCustomProperties(rawResponse []byte) (*User, error) {
 	user := User{}
 	err := json.Unmarshal(rawResponse, &user)
 	if err != nil {
