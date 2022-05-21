@@ -42,6 +42,7 @@ type Client struct {
 	Workflows   WorkflowsService
 	Messages    MessagesService
 	ChannelData ChannelDataService
+	Feed        FeedService
 }
 
 // ClientOption provides a variadic option for configuring the client
@@ -113,6 +114,7 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 	c.Workflows = &workflowsService{client: c}
 	c.Messages = &messagesService{client: c}
 	c.ChannelData = &channelDataService{client: c}
+	c.Feed = &feedService{client: c}
 
 	return c, nil
 }
