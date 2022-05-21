@@ -141,7 +141,7 @@ func TestUsers_GetMessages(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		out := `{"items":[{"__cursor":"bigcursor","__typename":"Message","archived_at":null,"channel_id":"5da042d7-02ee-46ed-8b91-9b5717da2028","data":{"middle-name":"alfred","welcome":"to jurassic park"},"id":"29GmBF0R3ZG506vyc3H9mDa","inserted_at":"2022-05-17T00:34:18.277163Z","read_at":null,"recipient":"tom","seen_at":null,"source":{"__typename":"NotificationSource","key":"test","version_id":"4dae021a-ba51-473f-9038-77041da8131c"},"status":"delivered","tenant":null,"updated_at":"2022-05-17T00:34:18.318283Z","workflow":"test"}],"page_info":{"__typename":"PageInfo","after":"aftercursor","before":null,"page_size":1}}`
+		out := `{"items":[{"__cursor":"big-cursor","__typename":"Message","archived_at":null,"channel_id":"5da042d7-02ee-46ed-8b91-9b5717da2028","data":{"middle-name":"alfred","welcome":"to jurassic park"},"id":"29GmBF0R3ZG506vyc3H9mDa","inserted_at":"2022-05-17T00:34:18.277163Z","read_at":null,"recipient":"tom","seen_at":null,"source":{"__typename":"NotificationSource","key":"test","version_id":"4dae021a-ba51-473f-9038-77041da8131c"},"status":"delivered","tenant":null,"updated_at":"2022-05-17T00:34:18.318283Z","workflow":"test"}],"page_info":{"__typename":"PageInfo","after":"after-cursor","before":null,"page_size":1}}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
@@ -158,19 +158,17 @@ func TestUsers_GetMessages(t *testing.T) {
 		PageSize: 1,
 	})
 
-	insertedAt, _ := time.Parse(time.RFC3339, "2022-05-17T00:34:18.277163Z")
-	updatedAt, _ := time.Parse(time.RFC3339, "2022-05-17T00:34:18.318283Z")
 	want := &GetUserMessagesResponse{
 		Messages: []*Message{
 			{
-				Cursor:     "bigcursor",
+				Cursor:     "big-cursor",
 				ID:         "29GmBF0R3ZG506vyc3H9mDa",
 				ChannelID:  "5da042d7-02ee-46ed-8b91-9b5717da2028",
 				Recipient:  "tom",
 				Workflow:   "test",
 				Status:     "delivered",
-				InsertedAt: insertedAt,
-				UpdatedAt:  updatedAt,
+				InsertedAt: ParseAPITimestamp("2022-05-17T00:34:18.277163Z"),
+				UpdatedAt:  ParseAPITimestamp("2022-05-17T00:34:18.318283Z"),
 				Data: map[string]interface{}{
 					"welcome":     "to jurassic park",
 					"middle-name": "alfred",

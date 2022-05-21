@@ -79,7 +79,7 @@ type MessageActivity struct {
 	ID     string                 `json:"id"`
 	Data   map[string]interface{} `json:"data"`
 	Actor  *User                  `json:"actor"`
-	// Recipient string                 `json:"recipient"`
+	// Recipient string                 `json:"recipient"` TODO: recipients
 }
 
 type ListMessagesRequest struct {

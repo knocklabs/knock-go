@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	qt "github.com/frankban/quicktest"
 )
@@ -48,7 +47,7 @@ func TestFeed_Get(t *testing.T) {
 								ID:        "c121a5ea-8f2c-4c60-ab40-9966047d5bea",
 								Name:      "Some User",
 								Email:     "some-user@knock.app",
-								UpdatedAt: parseAPITimestamp("2021-05-08T20:40:01.340Z"),
+								UpdatedAt: ParseAPITimestamp("2021-05-08T20:40:01.340Z"),
 							},
 						},
 					},
@@ -57,16 +56,16 @@ func TestFeed_Get(t *testing.T) {
 							ID:        "c121a5ea-8f2c-4c60-ab40-9966047d5bea",
 							Name:      "Some User",
 							Email:     "some-user@knock.app",
-							UpdatedAt: parseAPITimestamp("2021-05-08T20:40:01.340Z"),
+							UpdatedAt: ParseAPITimestamp("2021-05-08T20:40:01.340Z"),
 						},
 					},
 					TotalActivities: 1,
 					TotalActors:     1,
 					Source:          NotificationSource{Key: "merged-changes", VersionID: "7251cd3f-0028-4d1a-9466-ee79522ba3de"},
-					ReadAt:          parseAPITimestamp("2021-05-13T02:45:28.559124Z"),
-					InsertedAt:      parseAPITimestamp("2021-05-11T00:50:09.904531Z"),
-					UpdatedAt:       parseAPITimestamp("2021-05-13T02:45:28.559863Z"),
-					SeenAt:          parseAPITimestamp("2021-05-11T00:51:43.617550Z"),
+					ReadAt:          ParseAPITimestamp("2021-05-13T02:45:28.559124Z"),
+					InsertedAt:      ParseAPITimestamp("2021-05-11T00:50:09.904531Z"),
+					UpdatedAt:       ParseAPITimestamp("2021-05-13T02:45:28.559863Z"),
+					SeenAt:          ParseAPITimestamp("2021-05-11T00:51:43.617550Z"),
 				},
 			},
 			FeedMetadata: &FeedMetadata{
@@ -84,9 +83,4 @@ func TestFeed_Get(t *testing.T) {
 
 	c.Assert(err, qt.IsNil)
 	c.Assert(have, qt.DeepEquals, want)
-}
-
-func parseAPITimestamp(input string) time.Time {
-	out, _ := time.Parse(time.RFC3339, input)
-	return out
 }
