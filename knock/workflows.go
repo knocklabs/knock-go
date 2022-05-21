@@ -52,15 +52,15 @@ func workflowsAPIPath(workflowId string) string {
 	return fmt.Sprintf("v1/workflows/%s", workflowId)
 }
 
-func (us *workflowsService) Trigger(ctx context.Context, triggerReq *TriggerWorkflowRequest) (*TriggerWorkflowResponse, error) {
+func (ws *workflowsService) Trigger(ctx context.Context, triggerReq *TriggerWorkflowRequest) (*TriggerWorkflowResponse, error) {
 	path := fmt.Sprintf("%s/trigger", workflowsAPIPath(triggerReq.Workflow))
-	req, err := us.client.newRequest(http.MethodPost, path, triggerReq)
+	req, err := ws.client.newRequest(http.MethodPost, path, triggerReq)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for trigger workflow")
 	}
 	workflowResponse := &TriggerWorkflowResponse{}
-	_, err = us.client.do(ctx, req, workflowResponse)
+	_, err = ws.client.do(ctx, req, workflowResponse)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request for trigger workflow")
@@ -69,14 +69,14 @@ func (us *workflowsService) Trigger(ctx context.Context, triggerReq *TriggerWork
 	return workflowResponse, nil
 }
 
-func (us *workflowsService) Cancel(ctx context.Context, cancelReq *CancelWorkflowRequest) error {
+func (ws *workflowsService) Cancel(ctx context.Context, cancelReq *CancelWorkflowRequest) error {
 	path := fmt.Sprintf("%s/cancel", workflowsAPIPath(cancelReq.Workflow))
-	req, err := us.client.newRequest(http.MethodPost, path, cancelReq)
+	req, err := ws.client.newRequest(http.MethodPost, path, cancelReq)
 	if err != nil {
 		return errors.Wrap(err, "error creating request to cancel workflow")
 	}
 
-	_, err = us.client.do(ctx, req, nil)
+	_, err = ws.client.do(ctx, req, nil)
 	if err != nil {
 		return errors.Wrap(err, "error making request to cancel workflow")
 	}

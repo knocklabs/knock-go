@@ -93,7 +93,7 @@ type MergeUserResponse = GetUserResponse
 type IdentifyUserResponse = GetUserResponse
 
 func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*IdentifyUserResponse, error) {
-	path := usersAPIPath(identifyReq.ID)
+	path := UsersAPIPath(identifyReq.ID)
 
 	identifyBody := identifyReq.toMapWithCustomProperties()
 	req, err := us.client.newRequest(http.MethodPut, path, identifyBody)
@@ -118,7 +118,7 @@ func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserR
 }
 
 func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*GetUserResponse, error) {
-	path := usersAPIPath(getReq.ID)
+	path := UsersAPIPath(getReq.ID)
 
 	req, err := us.client.newRequest(http.MethodGet, path, nil)
 	if err != nil {
@@ -141,7 +141,7 @@ func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*GetUs
 }
 
 func (us *usersService) Delete(ctx context.Context, deleteReq *DeleteUserRequest) error {
-	path := usersAPIPath(deleteReq.ID)
+	path := UsersAPIPath(deleteReq.ID)
 	req, err := us.client.newRequest(http.MethodDelete, path, nil)
 
 	if err != nil {
@@ -152,12 +152,12 @@ func (us *usersService) Delete(ctx context.Context, deleteReq *DeleteUserRequest
 	return err
 }
 
-func usersAPIPath(userId string) string {
+func UsersAPIPath(userId string) string {
 	return fmt.Sprintf("v1/users/%s", userId)
 }
 
 func (us *usersService) Merge(ctx context.Context, mergeReq *MergeUserRequest) (*MergeUserResponse, error) {
-	path := fmt.Sprintf("%s/merge", usersAPIPath(mergeReq.ID))
+	path := fmt.Sprintf("%s/merge", UsersAPIPath(mergeReq.ID))
 
 	req, err := us.client.newRequest(http.MethodPost, path, mergeReq)
 	if err != nil {
@@ -181,7 +181,7 @@ func (us *usersService) Merge(ctx context.Context, mergeReq *MergeUserRequest) (
 func (us *usersService) GetMessages(ctx context.Context, getUserMessagesReq *GetUserMessagesRequest) (*GetUserMessagesResponse, error) {
 
 	queryString, _ := query.Values(getUserMessagesReq)
-	path := fmt.Sprintf("%s/messages?%s", usersAPIPath(getUserMessagesReq.ID), queryString.Encode())
+	path := fmt.Sprintf("%s/messages?%s", UsersAPIPath(getUserMessagesReq.ID), queryString.Encode())
 
 	req, err := us.client.newRequest(http.MethodGet, path, nil)
 	if err != nil {

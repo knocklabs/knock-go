@@ -26,9 +26,9 @@ func NewMessagesService(client *Client) *messagesService {
 	}
 }
 
-type MessageStatus string
-
 const messagesAPIBasePath = "/v1/messages"
+
+type MessageStatus string
 
 const (
 	Queued      MessageStatus = "queued"
@@ -82,7 +82,7 @@ type ListMessagesResponse struct {
 	PageInfo PageInfoMessages `json:"page_info"`
 }
 
-func (us *messagesService) List(ctx context.Context, listReq *ListMessagesRequest) (*ListMessagesResponse, error) {
+func (ms *messagesService) List(ctx context.Context, listReq *ListMessagesRequest) (*ListMessagesResponse, error) {
 
 	queryString, err := query.Values(listReq)
 	if err != nil {
@@ -90,14 +90,14 @@ func (us *messagesService) List(ctx context.Context, listReq *ListMessagesReques
 	}
 	path := fmt.Sprintf("%s?%s", messagesAPIBasePath, queryString.Encode())
 
-	req, err := us.client.newRequest(http.MethodGet, path, listReq)
+	req, err := ms.client.newRequest(http.MethodGet, path, listReq)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to list messages")
 	}
 	listMessagesResponse := &ListMessagesResponse{}
 
-	_, err = us.client.do(ctx, req, listMessagesResponse)
+	_, err = ms.client.do(ctx, req, listMessagesResponse)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to list messages")
