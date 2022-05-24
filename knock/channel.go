@@ -13,9 +13,9 @@ type ChannelDataService interface {
 	SetForUser(context.Context, *SetUserChannelDataRequest) (*SetUserChannelDataResponse, error)
 	DeleteForUser(context.Context, *DeleteUserChannelDataRequest) error
 
-	// GetForObject(context.Context, *GetObjectChannelDataRequest) (*GetObjectChannelDataResponse, error)
-	// SetForObject(context.Context, *SetObjectChannelDataRequest) (*SetObjectChannelDataResponse, error)
-	// DeleteForObject(context.Context, *DeleteObjectChannelDataRequest) (*DeleteObjectChannelDataResponse, error)
+	GetForObject(context.Context, *GetObjectChannelDataRequest) (*GetObjectChannelDataResponse, error)
+	SetForObject(context.Context, *SetObjectChannelDataRequest) (*SetObjectChannelDataResponse, error)
+	DeleteForObject(context.Context, *DeleteObjectChannelDataRequest) error
 }
 
 type channelDataService struct {
@@ -39,7 +39,9 @@ type GetUserChannelDataRequest struct {
 	UserID    string
 	ChannelID string
 }
-type DeleteUserChannelDataRequest = GetUserChannelDataRequest
+type GetUserChannelDataResponse struct {
+	ChannelData map[string]interface{} `json:"data"`
+}
 
 type SetUserChannelDataRequest struct {
 	UserID    string                 `json:"-"`
@@ -47,36 +49,46 @@ type SetUserChannelDataRequest struct {
 	Data      map[string]interface{} `json:"data"`
 }
 
-type GetUserChannelDataResponse struct {
-	ChannelData map[string]interface{} `json:"data"`
-}
 type SetUserChannelDataResponse = GetUserChannelDataResponse
-type DeleteUserChannelDataResponse = GetUserChannelDataResponse
+
+type DeleteUserChannelDataRequest = GetUserChannelDataRequest
+
+type GetObjectChannelDataRequest struct {
+	Collection string
+	ChannelID  string
+	ObjectID   string
+}
+type GetObjectChannelDataResponse = GetUserChannelDataResponse
+
+type SetObjectChannelDataRequest = GetObjectChannelDataRequest
+type SetObjectChannelDataResponse = GetUserChannelDataResponse
+
+type DeleteObjectChannelDataRequest = GetObjectChannelDataRequest
 
 func usersChannelDataAPIPath(userID string, channelID string) string {
 	return fmt.Sprintf("%s/channel_data/%s", UsersAPIPath(userID), channelID)
 }
 
-// func objectChannelDataAPIPath(collectionID string, objectID string, channelID string) string {
-// 	return fmt.Sprintf("v1/object/%s/%s/channel_data/%s", collectionID, objectID, channelID)
-// }
+func objectChannelDataAPIPath(collection string, objectID string, channelID string) string {
+	return fmt.Sprintf("v1/object/%s/%s/channel_data/%s", collection, objectID, channelID)
+}
 
 func (cds *channelDataService) GetForUser(ctx context.Context, getChannelDataReq *GetUserChannelDataRequest) (*GetUserChannelDataResponse, error) {
 	path := usersChannelDataAPIPath(getChannelDataReq.UserID, getChannelDataReq.ChannelID)
 
 	req, err := cds.client.newRequest(http.MethodGet, path, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating request for get user")
+		return nil, errors.Wrap(err, "error creating request for channel data for user")
 	}
 
 	channelDataResponse := &GetUserChannelDataResponse{}
 	_, err = cds.client.do(ctx, req, channelDataResponse)
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request for get user")
+		return nil, errors.Wrap(err, "error making request for channel data for user")
 	}
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request for get user")
+		return nil, errors.Wrap(err, "error parsing request for channel data for user")
 	}
 
 	return channelDataResponse, nil
@@ -87,17 +99,17 @@ func (cds *channelDataService) SetForUser(ctx context.Context, getChannelDataReq
 
 	req, err := cds.client.newRequest(http.MethodPut, path, getChannelDataReq)
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating request for get user")
+		return nil, errors.Wrap(err, "error creating request to set channel data for user")
 	}
 
 	channelDataResponse := &SetUserChannelDataResponse{}
 	_, err = cds.client.do(ctx, req, channelDataResponse)
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request for get user")
+		return nil, errors.Wrap(err, "error making request to set channel data for user")
 	}
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request for get user")
+		return nil, errors.Wrap(err, "error parsing request to set channel data for user")
 	}
 
 	return channelDataResponse, nil
@@ -108,38 +120,79 @@ func (cds *channelDataService) DeleteForUser(ctx context.Context, deleteUserChan
 
 	req, err := cds.client.newRequest(http.MethodDelete, path, nil)
 	if err != nil {
-		errors.Wrap(err, "error creating request for get user")
+		errors.Wrap(err, "error creating request to delete channel data for a user")
 	}
 
 	_, err = cds.client.do(ctx, req, nil)
 	if err != nil {
-		return errors.Wrap(err, "error making request for get user")
+		return errors.Wrap(err, "error making request to delete channel data for a user")
 	}
 
 	if err != nil {
-		return errors.Wrap(err, "error parsing request for get user")
+		return errors.Wrap(err, "error parsing request to delete channel data for a user")
 	}
 
 	return nil
 }
 
-func (cds *channelDataService) GetForObject(ctx context.Context, getChannelDataReq *GetUserChannelDataRequest) (*GetUserChannelDataResponse, error) {
-	path := usersChannelDataAPIPath(getChannelDataReq.UserID, getChannelDataReq.ChannelID)
+func (cds *channelDataService) GetForObject(ctx context.Context, getChannelDataReq *GetObjectChannelDataRequest) (*GetObjectChannelDataResponse, error) {
+	path := objectChannelDataAPIPath(getChannelDataReq.Collection, getChannelDataReq.ObjectID, getChannelDataReq.ChannelID)
 
 	req, err := cds.client.newRequest(http.MethodGet, path, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating request for get user")
+		return nil, errors.Wrap(err, "error creating request to get object channel data")
 	}
 
 	channelDataResponse := &GetUserChannelDataResponse{}
 	_, err = cds.client.do(ctx, req, channelDataResponse)
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request for get user")
+		return nil, errors.Wrap(err, "error making request to get object channel data")
 	}
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request for  get user")
+		return nil, errors.Wrap(err, "error parsing request to get object channel data")
 	}
 
 	return channelDataResponse, nil
+}
+
+func (cds *channelDataService) SetForObject(ctx context.Context, getChannelDataReq *SetObjectChannelDataRequest) (*SetObjectChannelDataResponse, error) {
+	path := objectChannelDataAPIPath(getChannelDataReq.Collection, getChannelDataReq.ObjectID, getChannelDataReq.ChannelID)
+
+	req, err := cds.client.newRequest(http.MethodPut, path, getChannelDataReq)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to set object channel data")
+	}
+
+	channelDataResponse := &SetObjectChannelDataResponse{}
+	_, err = cds.client.do(ctx, req, channelDataResponse)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to set object channel data")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to set object channel data")
+	}
+
+	return channelDataResponse, nil
+}
+
+func (cds *channelDataService) DeleteForObject(ctx context.Context, deleteObjectChannelDataReq *DeleteObjectChannelDataRequest) error {
+	path := objectChannelDataAPIPath(deleteObjectChannelDataReq.Collection, deleteObjectChannelDataReq.ObjectID, deleteObjectChannelDataReq.ChannelID)
+
+	req, err := cds.client.newRequest(http.MethodDelete, path, nil)
+	if err != nil {
+		errors.Wrap(err, "error creating request to delete object channel data")
+	}
+
+	_, err = cds.client.do(ctx, req, nil)
+	if err != nil {
+		return errors.Wrap(err, "error making request to delete object channel data")
+	}
+
+	if err != nil {
+		return errors.Wrap(err, "error parsing request to delete object channel data")
+	}
+
+	return nil
 }
