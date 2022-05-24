@@ -72,14 +72,14 @@ type MergeUserRequest struct {
 
 type GetUserMessagesRequest struct {
 	// User unique identifier
-	ID        string          `url:"-"`
-	PageSize  int             `url:"page_size,omitempty"`
-	After     string          `url:"after,omitempty"`
-	Before    string          `url:"before,omitempty"`
-	Source    string          `url:"source,omitempty"`
-	Tenant    string          `url:"tenant,omitempty"`
-	Status    []MessageStatus `url:"status,omitempty"`
-	ChannelID string          `url:"channel_id,omitempty"`
+	ID        string              `url:"-"`
+	PageSize  int                 `url:"page_size,omitempty"`
+	After     string              `url:"after,omitempty"`
+	Before    string              `url:"before,omitempty"`
+	Source    string              `url:"source,omitempty"`
+	Tenant    string              `url:"tenant,omitempty"`
+	Status    []UserMessageStatus `url:"status,omitempty"`
+	ChannelID string              `url:"channel_id,omitempty"`
 }
 
 type GetUserMessagesResponse struct {

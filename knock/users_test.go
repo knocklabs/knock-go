@@ -167,8 +167,8 @@ func TestUsers_GetMessages(t *testing.T) {
 				Recipient:  "tom",
 				Workflow:   "test",
 				Status:     "delivered",
-				InsertedAt: ParseAPITimestamp("2022-05-17T00:34:18.277163Z"),
-				UpdatedAt:  ParseAPITimestamp("2022-05-17T00:34:18.318283Z"),
+				InsertedAt: ParseRFC3339Timestamp("2022-05-17T00:34:18.277163Z"),
+				UpdatedAt:  ParseRFC3339Timestamp("2022-05-17T00:34:18.318283Z"),
 				Data: map[string]interface{}{
 					"welcome":     "to jurassic park",
 					"middle-name": "alfred",

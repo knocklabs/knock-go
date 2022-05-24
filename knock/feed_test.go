@@ -15,7 +15,7 @@ func TestFeed_Get(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		out := `{"entries":[{"__typename":"FeedItem","__cursor":"g3QAAAABZAACaWRtAAAAGzFzTXRJc1J2WnRZZjg2YU9ma00yUENwQzZYYw==","activities":[{"__typename":"Activity","actor":{"__typename":"User","id":"c121a5ea-8f2c-4c60-ab40-9966047d5bea","created_at":null,"updated_at":"2021-05-08T20:40:01.340Z","email":"some-user@knock.app","name":"Some User"},"data":{"dest_environment_name":"Production","src_environment_name":"Development","total_merged":1},"id":"1sMtIwNnDIV52a8G8kmymzDVExQ","inserted_at":"2021-05-11T00:50:09.895759Z","recipient":{"__typename":"User","id":"c121a5ea-8f2c-4c60-ab40-9966047d5bea","created_at":null,"updated_at":"2021-05-08T20:40:01.340Z","email":"some-user@knock.app","name":"Some User"},"updated_at":"2021-05-11T00:50:09.895759Z"}],"actors":[{"__typename":"User","id":"c121a5ea-8f2c-4c60-ab40-9966047d5bea","created_at":null,"updated_at":"2021-05-08T20:40:01.340Z","email":"some-user@knock.app","name":"Some User"}],"archived_at":null,"blocks":[{"content":"**{{ actor.name }}** merged {{ total_merged }} {% if total_merged == 1 %} change {% else %} changes {% endif %}\nfrom **{{ src_environment_name }}** into **{{ dest_environment_name }}**.","name":"body","rendered":"<p><strong>The person</strong> merged 1  change \nfrom <strong>Development</strong> into <strong>Production</strong>.</p>","type":"markdown"},{"content":"{{ vars.app_url }}/{{ account_slug }}/commits","name":"action_url","rendered":"https://example.com/thing/commits","type":"text"}],"data":{"dest_environment_name":"Production","src_environment_name":"Development","total_merged":1},"id":"1sMtIsRvZtYf86aOfkM2PCpC6Xc","inserted_at":"2021-05-11T00:50:09.904531Z","read_at":"2021-05-13T02:45:28.559124Z","seen_at":"2021-05-11T00:51:43.617550Z","source":{"__typename":"WorkflowSource","key":"merged-changes","version_id":"7251cd3f-0028-4d1a-9466-ee79522ba3de"},"tenant":null,"total_activities":1,"total_actors":1,"updated_at":"2021-05-13T02:45:28.559863Z"}],"vars":{"app_name":"The app name"},"meta":{"__typename":"FeedMetadata","unread_count":10,"unseen_count":20},"page_info":{"__typename":"PageInfo","after":null,"before":null,"page_size":50}}`
+		out := `{"entries":[{"__typename":"FeedItem","__cursor":"g3QAAAABZAACaWRtAAAAGzFzTXRJc1J2WnRZZjg2YU9ma00yUENwQzZYYw==","activities":[{"__typename":"Activity","actor":{"__typename":"User","id":"c121a5ea-8f2c-4c60-ab40-9966047d5bea","created_at":null,"updated_at":"2021-05-08T20:40:01.340Z","email":"some-user@knock.app","name":"Some User"},"data":{"dest_environment_name":"Production","src_environment_name":"Development","total_merged":1},"id":"activity-id","inserted_at":"2021-05-11T00:50:09.895759Z","recipient":{"__typename":"User","id":"c121a5ea-8f2c-4c60-ab40-9966047d5bea","created_at":null,"updated_at":"2021-05-08T20:40:01.340Z","email":"some-user@knock.app","name":"Some User"},"updated_at":"2021-05-11T00:50:09.895759Z"}],"actors":[{"__typename":"User","id":"c121a5ea-8f2c-4c60-ab40-9966047d5bea","created_at":null,"updated_at":"2021-05-08T20:40:01.340Z","email":"some-user@knock.app","name":"Some User"}],"archived_at":null,"blocks":[{"content":"**{{ actor.name }}** merged {{ total_merged }} {% if total_merged == 1 %} change {% else %} changes {% endif %}\nfrom **{{ src_environment_name }}** into **{{ dest_environment_name }}**.","name":"body","rendered":"<p><strong>The person</strong> merged 1  change \nfrom <strong>Development</strong> into <strong>Production</strong>.</p>","type":"markdown"},{"content":"{{ vars.app_url }}/{{ account_slug }}/commits","name":"action_url","rendered":"https://example.com/thing/commits","type":"text"}],"data":{"dest_environment_name":"Production","src_environment_name":"Development","total_merged":1},"id":"1sMtIsRvZtYf86aOfkM2PCpC6Xc","inserted_at":"2021-05-11T00:50:09.904531Z","read_at":"2021-05-13T02:45:28.559124Z","seen_at":"2021-05-11T00:51:43.617550Z","source":{"__typename":"WorkflowSource","key":"merged-changes","version_id":"7251cd3f-0028-4d1a-9466-ee79522ba3de"},"tenant":null,"total_activities":1,"total_actors":1,"updated_at":"2021-05-13T02:45:28.559863Z"}],"vars":{"app_name":"The app name"},"meta":{"__typename":"FeedMetadata","unread_count":10,"unseen_count":20},"page_info":{"__typename":"PageInfo","after":null,"before":null,"page_size":50}}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
@@ -37,7 +37,7 @@ func TestFeed_Get(t *testing.T) {
 				{
 					Activities: []*MessageActivity{
 						{
-							ID: "1sMtIwNnDIV52a8G8kmymzDVExQ",
+							ID: "activity-id",
 							Data: map[string]interface{}{
 								"dest_environment_name": "Production",
 								"src_environment_name":  "Development",
@@ -47,7 +47,7 @@ func TestFeed_Get(t *testing.T) {
 								ID:        "c121a5ea-8f2c-4c60-ab40-9966047d5bea",
 								Name:      "Some User",
 								Email:     "some-user@knock.app",
-								UpdatedAt: ParseAPITimestamp("2021-05-08T20:40:01.340Z"),
+								UpdatedAt: ParseRFC3339Timestamp("2021-05-08T20:40:01.340Z"),
 							},
 						},
 					},
@@ -56,16 +56,16 @@ func TestFeed_Get(t *testing.T) {
 							ID:        "c121a5ea-8f2c-4c60-ab40-9966047d5bea",
 							Name:      "Some User",
 							Email:     "some-user@knock.app",
-							UpdatedAt: ParseAPITimestamp("2021-05-08T20:40:01.340Z"),
+							UpdatedAt: ParseRFC3339Timestamp("2021-05-08T20:40:01.340Z"),
 						},
 					},
 					TotalActivities: 1,
 					TotalActors:     1,
 					Source:          NotificationSource{Key: "merged-changes", VersionID: "7251cd3f-0028-4d1a-9466-ee79522ba3de"},
-					ReadAt:          ParseAPITimestamp("2021-05-13T02:45:28.559124Z"),
-					InsertedAt:      ParseAPITimestamp("2021-05-11T00:50:09.904531Z"),
-					UpdatedAt:       ParseAPITimestamp("2021-05-13T02:45:28.559863Z"),
-					SeenAt:          ParseAPITimestamp("2021-05-11T00:51:43.617550Z"),
+					ReadAt:          ParseRFC3339Timestamp("2021-05-13T02:45:28.559124Z"),
+					InsertedAt:      ParseRFC3339Timestamp("2021-05-11T00:50:09.904531Z"),
+					UpdatedAt:       ParseRFC3339Timestamp("2021-05-13T02:45:28.559863Z"),
+					SeenAt:          ParseRFC3339Timestamp("2021-05-11T00:51:43.617550Z"),
 				},
 			},
 			FeedMetadata: &FeedMetadata{
