@@ -49,6 +49,12 @@ func TestFeed_Get(t *testing.T) {
 								Email:     "some-user@knock.app",
 								UpdatedAt: ParseRFC3339Timestamp("2021-05-08T20:40:01.340Z"),
 							},
+							Recipient: &User{
+								ID:        "c121a5ea-8f2c-4c60-ab40-9966047d5bea",
+								Name:      "Some User",
+								Email:     "some-user@knock.app",
+								UpdatedAt: ParseRFC3339Timestamp("2021-05-08T20:40:01.34Z"),
+							},
 						},
 					},
 					Actors: []*User{
