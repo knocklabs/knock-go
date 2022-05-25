@@ -17,6 +17,7 @@ type MessagesService interface {
 	GetActivities(context.Context, *GetMessageActivitiesRequest) (*GetMessageActivitiesResponse, error)
 	GetContent(context.Context, *GetMessageContentRequest) (*GetMessageContentResponse, error)
 	SetStatus(context.Context, *SetStatusRequest) (*SetStatusResponse, error)
+	DeleteStatus(context.Context, *DeleteStatusRequest) (*DeleteStatusResponse, error)
 }
 
 type messagesService struct {
@@ -50,7 +51,7 @@ const (
 type MessageStatus string
 
 const (
-	NotSent  MessageStatus = "not_sent"
+	NotSent  MessageStatus = "seen"
 	Read     MessageStatus = "read"
 	Archived MessageStatus = "archived"
 )
@@ -141,8 +142,10 @@ type SetStatusRequest struct {
 	ID     string
 	Status MessageStatus
 }
-
 type SetStatusResponse = GetMessageResponse
+
+type DeleteStatusRequest = SetStatusRequest
+type DeleteStatusResponse = GetMessageResponse
 
 func (ms *messagesService) List(ctx context.Context, listReq *ListMessagesRequest) (*ListMessagesResponse, error) {
 
@@ -261,4 +264,23 @@ func (ms *messagesService) SetStatus(ctx context.Context, setStatusReq *SetStatu
 	}
 
 	return setMessageStatusResponse, nil
+}
+
+func (ms *messagesService) DeleteStatus(ctx context.Context, deleteStatusReq *DeleteStatusRequest) (*DeleteStatusResponse, error) {
+
+	path := fmt.Sprintf("%s/%s", messagesAPIPath(deleteStatusReq.ID), deleteStatusReq.Status)
+
+	req, err := ms.client.newRequest(http.MethodDelete, path, nil)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to delete message status")
+	}
+	deleteMessageStatusResponse := &SetStatusResponse{Message: &Message{}}
+	_, err = ms.client.do(ctx, req, deleteMessageStatusResponse.Message)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to delete message status")
+	}
+
+	return deleteMessageStatusResponse, nil
 }
