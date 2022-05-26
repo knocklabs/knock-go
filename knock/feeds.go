@@ -37,7 +37,7 @@ type FeedItem struct {
 	Actors          []*User            `json:"actors"`
 	TotalActivities int                `json:"total_activities"`
 	TotalActors     int                `json:"total_actors"`
-	// Blocks
+	// Blocks TODO blocks
 	Data       map[string]interface{} `json:"vars"`
 	InsertedAt time.Time              `json:"inserted_at"`
 	UpdatedAt  time.Time              `json:"updated_at"`

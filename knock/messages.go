@@ -102,7 +102,7 @@ type MessageContent struct {
 
 type ListMessagesRequest struct {
 	PageSize  int                 `url:"page_size,omitempty"`
-	Cursor    int                 `url:"page_size,omitempty"`
+	Cursor    string              `url:"page_size,omitempty"`
 	Before    string              `url:"before,omitempty"`
 	After     string              `url:"after,omitempty"`
 	Source    string              `url:"source,omitempty"`

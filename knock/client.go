@@ -43,6 +43,7 @@ type Client struct {
 	Messages    MessagesService
 	ChannelData ChannelDataService
 	Feed        FeedService
+	Object      ObjectService
 }
 
 // ClientOption provides a variadic option for configuring the client
@@ -115,6 +116,7 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 	c.Messages = &messagesService{client: c}
 	c.ChannelData = &channelDataService{client: c}
 	c.Feed = &feedService{client: c}
+	c.Object = &objectService{client: c}
 
 	return c, nil
 }
