@@ -74,9 +74,11 @@ func TestUsers_Identify(t *testing.T) {
 	phone_number := "+11234567890"
 
 	user, err := client.Users.Identify(ctx, &IdentifyUserRequest{
-		ID: id,
-		CustomProperties: map[string]interface{}{
-			"middle-name": "alfred",
+		User: &User{
+			ID: id,
+			CustomProperties: map[string]interface{}{
+				"middle-name": "alfred",
+			},
 		}})
 
 	want := &IdentifyUserResponse{
@@ -182,4 +184,96 @@ func TestUsers_GetMessages(t *testing.T) {
 
 	c.Assert(err, qt.IsNil)
 	c.Assert(have, qt.DeepEquals, want)
+}
+
+func TestUsers_BulkIdentify(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"b19d032a-fc3b-4a54-9f54-369484527201","inserted_at":"2022-05-27T11:12:08.281201Z","name":"users.identify","processed_rows":0,"progress_path":"/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201","started_at":null,"status":"queued","updated_at":"2022-05-27T11:12:08.286507Z"}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	// ctx, client := RealTestClient() //TODO remove any test client commented code
+
+	user, err := client.Users.BulkIdentify(ctx, &BulkIdentifyUserRequest{
+		Users: []*User{
+			{
+				Name:        "John Hammond",
+				ID:          "user-123",
+				Email:       "jhammond@ingen.net",
+				PhoneNumber: "+11234567890",
+				CustomProperties: map[string]interface{}{
+					"welcome":     "to jurassic park",
+					"middle-name": "alfred1",
+				},
+			},
+			{
+				Name:        "John Hammond2",
+				ID:          "user-1234",
+				Email:       "jhammond2@ingen.net",
+				PhoneNumber: "+11234567891",
+				CustomProperties: map[string]interface{}{
+					"welcome":     "to jurassic park",
+					"middle-name": "alfred2",
+				},
+			},
+		},
+	})
+
+	want := &BulkIdentifyUserResponse{
+		BulkOperation: &BulkOperation{
+			ID:                 "b19d032a-fc3b-4a54-9f54-369484527201",
+			EstimatedTotalRows: 2,
+			ProgressPath:       "/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201",
+			Status:             BulkOperationQueued,
+			InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
+			UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
+		},
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(user, qt.DeepEquals, want)
+}
+
+func TestUsers_BulkDelete(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"0fb6a596-b579-455e-9a01-32b41fa5613a","inserted_at":"2022-05-27T11:26:50.869070Z","name":"users.delete","processed_rows":0,"progress_path":"/v1/bulk_operations/0fb6a596-b579-455e-9a01-32b41fa5613a","started_at":null,"status":"queued","updated_at":"2022-05-27T11:26:50.879642Z"}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	user, err := client.Users.BulkDelete(ctx, &BulkDeleteUserRequest{UserIDs: []string{
+		"user-123",
+		"user-1234",
+	}})
+
+	want := &BulkIdentifyUserResponse{
+		BulkOperation: &BulkOperation{
+			ID:                 "0fb6a596-b579-455e-9a01-32b41fa5613a",
+			EstimatedTotalRows: 2,
+			ProgressPath:       "/v1/bulk_operations/0fb6a596-b579-455e-9a01-32b41fa5613a",
+			Status:             BulkOperationQueued,
+			InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:26:50.869070Z"),
+			UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:26:50.879642Z"),
+		},
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(user, qt.DeepEquals, want)
 }

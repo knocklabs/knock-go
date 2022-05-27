@@ -195,7 +195,7 @@ func TestMessages_GetActivities(t *testing.T) {
 	// ctx, client := RealTestClient() //TODO remove any test client commented code
 
 	have, err := client.Messages.GetActivities(ctx, &GetMessageActivitiesRequest{
-		ID: "29Gm3nVijCsi2gsmrLLTpDDtHAE",
+		ID: "29Gm3nVijCsi2GSMsLLTpDDtHAE",
 	})
 
 	if err != nil {
@@ -234,7 +234,7 @@ func TestMessages_GetContent(t *testing.T) { // TODO replace with real API test
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		out := `{"__typename":"MessageContent","id":"264os2yt574e1T3jblzjbh7Qa69","data":{"bcc":"bcc@example.com","cc":"cc@example.com","from":{"email":"info-app@example.com","name":"Example App"},"html_body":"<p>example</p>","reply_to":"reply-to@example.com","subject":"Example Notification","text_body":"example","to":"user@example.com"},"inserted_at":"2021-04-06T12:00:00Z"}`
+		out := `{"__typename":"MessageContent","id":"message-id","data":{"bcc":"bcc@example.com","cc":"cc@example.com","from":{"email":"info-app@example.com","name":"Example App"},"html_body":"<p>example</p>","reply_to":"reply-to@example.com","subject":"Example Notification","text_body":"example","to":"user@example.com"},"inserted_at":"2021-04-06T12:00:00Z"}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
@@ -247,7 +247,7 @@ func TestMessages_GetContent(t *testing.T) { // TODO replace with real API test
 	// ctx, client := RealTestClient() //TODO remove any test client commented code
 
 	have, err := client.Messages.GetContent(ctx, &GetMessageContentRequest{
-		ID: "264os2yt574e1T3jblzjbh7Qa69",
+		ID: "message-id",
 	})
 
 	if err != nil {
@@ -256,7 +256,7 @@ func TestMessages_GetContent(t *testing.T) { // TODO replace with real API test
 
 	want := &GetMessageContentResponse{
 		Content: &MessageContent{
-			ID:         "264os2yt574e1T3jblzjbh7Qa69",
+			ID:         "message-id",
 			InsertedAt: ParseRFC3339Timestamp("2021-04-06T12:00:00Z"),
 			Data: map[string]interface{}{
 				"bcc":       "bcc@example.com",
@@ -294,7 +294,7 @@ func TestMessages_SetStatus(t *testing.T) { // TODO
 	// ctx, client := RealTestClient() //TODO remove any test client commented code
 
 	have, err := client.Messages.SetStatus(ctx, &SetStatusRequest{
-		ID:     "29GlZCBxKZ79J9Uquf4HXiUZNfH",
+		ID:     "29GlZCBxKZ79J9UQuf4HXiUZNfH",
 		Status: Archived,
 	})
 
@@ -348,7 +348,7 @@ func TestMessages_DeleteStatus(t *testing.T) { // TODO
 	// ctx, client := RealTestClient() //TODO remove any test client commented code
 
 	have, err := client.Messages.DeleteStatus(ctx, &SetStatusRequest{
-		ID:     "29GlZCBxKZ79J9Uquf4HXiUZNfH",
+		ID:     "29GlZCBxKZ79J9UQuf4HXiUZNfH",
 		Status: Archived,
 	})
 
@@ -378,6 +378,73 @@ func TestMessages_DeleteStatus(t *testing.T) { // TODO
 			"welcome":     "to jurassic park",
 		},
 	}}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(have, qt.DeepEquals, want)
+}
+
+func TestMessages_BatchSetStatus(t *testing.T) { // TODO
+
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `[{"__cursor":null,"__typename":"Message","archived_at":"2022-05-27T20:45:27.808275Z","channel_id":"5da042d7-02ee-46ed-8b91-9b5717da2028","data":null,"id":"29Gm3rDIQLyh0Bm8s0q7GrBSfk6","inserted_at":"2022-05-17T00:33:19.199798Z","read_at":null,"recipient":"tom","seen_at":null,"source":{"__typename":"NotificationSource","key":"test","version_id":"4dae021a-ba51-473f-9038-77041da8131c"},"status":"delivered","tenant":null,"updated_at":"2022-05-17T00:33:19.209478Z","workflow":"test"},{"__cursor":null,"__typename":"Message","archived_at":"2022-05-27T20:45:27.808275Z","channel_id":"5da042d7-02ee-46ed-8b91-9b5717da2028","data":null,"id":"29GmBDexT8qOXks4NcnPqs6CePd","inserted_at":"2022-05-17T00:34:18.276054Z","read_at":null,"recipient":"tom3","seen_at":null,"source":{"__typename":"NotificationSource","key":"test","version_id":"4dae021a-ba51-473f-9038-77041da8131c"},"status":"delivered","tenant":null,"updated_at":"2022-05-17T00:34:18.317618Z","workflow":"test"}]`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	// ctx, client := RealTestClient() //TODO remove any test client commented code
+
+	have, err := client.Messages.BatchSetStatus(ctx, &BatchSetStatusRequest{
+		MessageIDs: []string{
+			"29GmBDexT8qOXks4NcnPqs6CePd",
+			"29Gm3rDIQLyh0Bm8s0q7GrBSfk6",
+		},
+		Status: Archived,
+	})
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	want := &BatchSetStatusResponse{
+		Messages: []*Message{
+			{
+				ID:        "29Gm3rDIQLyh0Bm8s0q7GrBSfk6",
+				ChannelID: "5da042d7-02ee-46ed-8b91-9b5717da2028",
+				Recipient: "tom",
+				Workflow:  "test",
+				Status:    "delivered",
+				Source: &NotificationSource{
+					Key:       "test",
+					VersionID: "4dae021a-ba51-473f-9038-77041da8131c",
+				},
+				ArchivedAt: ParseRFC3339Timestamp("2022-05-27T20:45:27.808275Z"),
+				InsertedAt: ParseRFC3339Timestamp("2022-05-17T00:33:19.199798Z"),
+				UpdatedAt:  ParseRFC3339Timestamp("2022-05-17T00:33:19.209478Z"),
+			},
+			{
+				ID:        "29GmBDexT8qOXks4NcnPqs6CePd",
+				ChannelID: "5da042d7-02ee-46ed-8b91-9b5717da2028",
+				Recipient: "tom3",
+				Workflow:  "test",
+				Status:    "delivered",
+				Source: &NotificationSource{
+					Key:       "test",
+					VersionID: "4dae021a-ba51-473f-9038-77041da8131c",
+				},
+				UpdatedAt:  ParseRFC3339Timestamp("2022-05-17T00:34:18.317618Z"),
+				ArchivedAt: ParseRFC3339Timestamp("2022-05-27T20:45:27.808275Z"),
+				InsertedAt: ParseRFC3339Timestamp("2022-05-17T00:34:18.276054Z"),
+			},
+		},
+	}
 
 	c.Assert(err, qt.IsNil)
 	c.Assert(have, qt.DeepEquals, want)

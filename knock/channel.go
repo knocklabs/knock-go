@@ -70,7 +70,7 @@ func usersChannelDataAPIPath(userID string, channelID string) string {
 }
 
 func objectChannelDataAPIPath(collection string, objectID string, channelID string) string {
-	return fmt.Sprintf("v1/object/%s/%s/channel_data/%s", collection, objectID, channelID)
+	return fmt.Sprintf("v1/objects/%s/%s/channel_data/%s", collection, objectID, channelID)
 }
 
 func (cds *channelDataService) GetForUser(ctx context.Context, getChannelDataReq *GetUserChannelDataRequest) (*GetUserChannelDataResponse, error) {

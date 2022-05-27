@@ -20,6 +20,8 @@ type UsersService interface {
 	Delete(context.Context, *DeleteUserRequest) error
 	Merge(context.Context, *MergeUserRequest) (*MergeUserResponse, error)
 	GetMessages(context.Context, *GetUserMessagesRequest) (*GetUserMessagesResponse, error)
+	BulkIdentify(context.Context, *BulkIdentifyUserRequest) (*BulkIdentifyUserResponse, error)
+	BulkDelete(context.Context, *BulkDeleteUserRequest) (*BulkDeleteUserResponse, error)
 }
 
 type usersService struct {
@@ -38,8 +40,8 @@ type User struct {
 	ID               string    `json:"id"`
 	Name             string    `json:"name"`
 	Email            string    `json:"email"`
-	PhoneNumber      string    `json:"phone_number"`
-	Avatar           string    `json:"avatar"`
+	PhoneNumber      string    `json:"phone_number,omitempty"`
+	Avatar           string    `json:"avatar,omitempty"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 	CustomProperties map[string]interface{}
@@ -56,12 +58,7 @@ type DeleteUserRequest struct {
 }
 
 type IdentifyUserRequest struct {
-	ID               string `json:"id"`
-	Name             string `json:"name"`
-	Email            string `json:"email"`
-	Avatar           string `json:"avatar,omitempty"`
-	PhoneNumber      string `json:"phone_number,omitempty"`
-	CustomProperties map[string]interface{}
+	User *User
 }
 
 type MergeUserRequest struct {
@@ -92,10 +89,26 @@ type GetUserResponse struct {
 type MergeUserResponse = GetUserResponse
 type IdentifyUserResponse = GetUserResponse
 
-func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*IdentifyUserResponse, error) {
-	path := UsersAPIPath(identifyReq.ID)
+type BulkIdentifyUserRequest struct {
+	Users []*User
+}
 
-	identifyBody := identifyReq.toMapWithCustomProperties()
+// Used only as an intermediary to handle arbitrary custom properties
+// for BulkIdentifyUserRequests, never needed directly
+type UserFlatMap map[string]interface{}
+type BulkIdentifyUserResponse struct {
+	BulkOperation *BulkOperation
+}
+
+type BulkDeleteUserRequest struct {
+	UserIDs []string `json:"user_ids"`
+}
+type BulkDeleteUserResponse = BulkIdentifyUserResponse
+
+func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*IdentifyUserResponse, error) {
+	path := UsersAPIPath(identifyReq.User.ID)
+
+	identifyBody := identifyReq.User.toMapWithCustomProperties()
 	req, err := us.client.newRequest(http.MethodPut, path, identifyBody)
 
 	if err != nil {
@@ -201,14 +214,72 @@ func (us *usersService) GetMessages(ctx context.Context, getUserMessagesReq *Get
 	return getUserMessagesResponse, nil
 }
 
+func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkIdentifyUserRequest) (*BulkIdentifyUserResponse, error) {
+	path := UsersAPIPath("bulk/identify")
+
+	var bulkUserFlatMap []UserFlatMap
+
+	for _, s := range bulkIdentifyReq.Users {
+		bulkUserFlatMap = append(bulkUserFlatMap, s.toMapWithCustomProperties())
+	}
+
+	// Define a struct used only to wrap this data in a `users` json key.
+	type BulkUserList struct {
+		BulkUserFlatMap []UserFlatMap `json:"users"`
+	}
+	req, err := us.client.newRequest(http.MethodPost, path, BulkUserList{BulkUserFlatMap: bulkUserFlatMap})
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request for bulk identify user")
+	}
+
+	bulkIdentifyRes := &BulkIdentifyUserResponse{BulkOperation: &BulkOperation{}}
+
+	_, err = us.client.do(ctx, req, bulkIdentifyRes.BulkOperation)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request for bulk identify user")
+	}
+
+	// user, err := parseRawUserResponseCustomProperties(body)
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request for bulk identify user")
+	}
+
+	return bulkIdentifyRes, nil
+}
+
+func (us *usersService) BulkDelete(ctx context.Context, bulkDeleteReq *BulkDeleteUserRequest) (*BulkDeleteUserResponse, error) {
+	path := UsersAPIPath("bulk/delete")
+
+	req, err := us.client.newRequest(http.MethodPost, path, bulkDeleteReq)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request for bulk identify user")
+	}
+
+	bulkDeleteRes := &BulkDeleteUserResponse{BulkOperation: &BulkOperation{}}
+
+	_, err = us.client.do(ctx, req, bulkDeleteRes.BulkOperation)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request for bulk identify user")
+	}
+
+	// user, err := parseRawUserResponseCustomProperties(body)
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request for bulk identify user")
+	}
+
+	return bulkDeleteRes, nil
+}
+
 // IdentifyUserRequests can contain arbitrary customer data that must be stored, and must be mapped
 // appropriately to one big flat list of key value pairs.
-func (identifyReq *IdentifyUserRequest) toMapWithCustomProperties() map[string]interface{} {
+func (user *User) toMapWithCustomProperties() map[string]interface{} {
 	flatMap := make(map[string]interface{})
 
 	// Note that marshalling and then immediately un-marshalling transforms struct keys
 	// into the parameter names accepted by the API (i.e. PhoneNumber -> phone_number)
-	data, _ := json.Marshal(identifyReq)
+	data, _ := json.Marshal(user)
 	json.Unmarshal(data, &flatMap)
 
 	if flatMap["CustomProperties"] != nil {

@@ -18,6 +18,7 @@ type MessagesService interface {
 	GetContent(context.Context, *GetMessageContentRequest) (*GetMessageContentResponse, error)
 	SetStatus(context.Context, *SetStatusRequest) (*SetStatusResponse, error)
 	DeleteStatus(context.Context, *DeleteStatusRequest) (*DeleteStatusResponse, error)
+	BatchSetStatus(context.Context, *BatchSetStatusRequest) (*BatchSetStatusResponse, error)
 }
 
 type messagesService struct {
@@ -146,6 +147,16 @@ type SetStatusResponse = GetMessageResponse
 
 type DeleteStatusRequest = SetStatusRequest
 type DeleteStatusResponse = GetMessageResponse
+
+type BatchSetStatusRequest struct {
+	Status     MessageStatus `json:"-"`
+	MessageIDs []string      `json:"message_ids"`
+}
+type BatchSetStatusResponse struct {
+	Messages []*Message
+}
+
+type MessageList []Message
 
 func (ms *messagesService) List(ctx context.Context, listReq *ListMessagesRequest) (*ListMessagesResponse, error) {
 
@@ -283,4 +294,25 @@ func (ms *messagesService) DeleteStatus(ctx context.Context, deleteStatusReq *De
 	}
 
 	return deleteMessageStatusResponse, nil
+}
+
+func (ms *messagesService) BatchSetStatus(ctx context.Context, batchSetStatus *BatchSetStatusRequest) (*BatchSetStatusResponse, error) {
+
+	path := fmt.Sprintf("%s/%s", messagesAPIPath("batch"), batchSetStatus.Status)
+
+	req, err := ms.client.newRequest(http.MethodPost, path, batchSetStatus)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to set message status")
+	}
+
+	batchSetStatusRes := BatchSetStatusResponse{Messages: []*Message{}}
+
+	_, err = ms.client.do(ctx, req, &batchSetStatusRes.Messages)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to set message status")
+	}
+
+	return &batchSetStatusRes, nil
 }
