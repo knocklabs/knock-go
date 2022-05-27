@@ -10,21 +10,21 @@ import (
 	"github.com/pkg/errors"
 )
 
-type ObjectService interface {
+type ObjectsService interface {
 	Get(context.Context, *GetObjectRequest) (*GetObjectResponse, error)
 	GetMessages(context.Context, *GetObjectMessagesRequest) (*GetObjectMessagesResponse, error)
 	Set(context.Context, *SetObjectRequest) (*SetObjectResponse, error)
 	Delete(context.Context, *DeleteObjectRequest) error
 }
 
-type objectService struct {
+type objectsService struct {
 	client *Client
 }
 
-var _ ObjectService = &objectService{}
+var _ ObjectsService = &objectsService{}
 
-func NewObjectService(client *Client) *objectService {
-	return &objectService{
+func NewObjectService(client *Client) *objectsService {
+	return &objectsService{
 		client: client,
 	}
 }
@@ -92,7 +92,7 @@ func objectAPIPath(collectionID string, objectID string) string {
 	return fmt.Sprintf("v1/objects/%s/%s", collectionID, objectID)
 }
 
-func (os *objectService) Get(ctx context.Context, getObjectRequest *GetObjectRequest) (*GetObjectResponse, error) {
+func (os *objectsService) Get(ctx context.Context, getObjectRequest *GetObjectRequest) (*GetObjectResponse, error) {
 	path := objectAPIPath(getObjectRequest.CollectionID, getObjectRequest.ID)
 
 	req, err := os.client.newRequest(http.MethodGet, path, nil)
@@ -109,7 +109,7 @@ func (os *objectService) Get(ctx context.Context, getObjectRequest *GetObjectReq
 	return getObjectResponse, nil
 }
 
-func (os *objectService) GetMessages(ctx context.Context, getObjectMessagesRequest *GetObjectMessagesRequest) (*GetObjectMessagesResponse, error) {
+func (os *objectsService) GetMessages(ctx context.Context, getObjectMessagesRequest *GetObjectMessagesRequest) (*GetObjectMessagesResponse, error) {
 	queryString, err := query.Values(getObjectMessagesRequest)
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing query parameters to list object messages")
@@ -130,7 +130,7 @@ func (os *objectService) GetMessages(ctx context.Context, getObjectMessagesReque
 	return getObjectMessagesResponse, nil
 }
 
-func (os *objectService) Set(ctx context.Context, setObjectRequest *SetObjectRequest) (*SetObjectResponse, error) {
+func (os *objectsService) Set(ctx context.Context, setObjectRequest *SetObjectRequest) (*SetObjectResponse, error) {
 	path := objectAPIPath(setObjectRequest.CollectionID, setObjectRequest.ID)
 
 	if len(setObjectRequest.Properties) == 0 {
@@ -154,7 +154,7 @@ func (os *objectService) Set(ctx context.Context, setObjectRequest *SetObjectReq
 // TODO object messages
 // TODO
 
-func (os *objectService) Delete(ctx context.Context, deleteObjectRequest *DeleteObjectRequest) error {
+func (os *objectsService) Delete(ctx context.Context, deleteObjectRequest *DeleteObjectRequest) error {
 	path := objectAPIPath(deleteObjectRequest.CollectionID, deleteObjectRequest.ID)
 
 	req, err := os.client.newRequest(http.MethodDelete, path, nil)

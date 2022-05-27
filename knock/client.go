@@ -43,7 +43,7 @@ type Client struct {
 	Messages       MessagesService
 	ChannelData    ChannelDataService
 	Feed           FeedService
-	Object         ObjectService
+	Objects        ObjectsService
 	BulkOperations BulkOperationsService
 }
 
@@ -117,7 +117,7 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 	c.Messages = &messagesService{client: c}
 	c.ChannelData = &channelDataService{client: c}
 	c.Feed = &feedService{client: c}
-	c.Object = &objectService{client: c}
+	c.Objects = &objectsService{client: c}
 	c.BulkOperations = &bulkOperationsService{client: c}
 
 	return c, nil

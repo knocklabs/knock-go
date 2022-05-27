@@ -10,7 +10,7 @@ import (
 	qt "github.com/frankban/quicktest"
 )
 
-func TestObject_Set(t *testing.T) {
+func TestObjects_Set(t *testing.T) {
 	c := qt.New(t)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +27,7 @@ func TestObject_Set(t *testing.T) {
 
 	// ctx, client := RealTestClient() //TODO remove any test client commented code
 
-	have, err := client.Object.Set(ctx, &SetObjectRequest{
+	have, err := client.Objects.Set(ctx, &SetObjectRequest{
 		ID:           "cool-object2",
 		CollectionID: "test-collection",
 		Properties: map[string]interface{}{
@@ -51,7 +51,7 @@ func TestObject_Set(t *testing.T) {
 	c.Assert(have, qt.DeepEquals, want)
 }
 
-func TestObject_Get(t *testing.T) {
+func TestObjects_Get(t *testing.T) {
 	c := qt.New(t)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +68,7 @@ func TestObject_Get(t *testing.T) {
 
 	// ctx, client := RealTestClient() //TODO remove any test client commented code
 
-	have, err := client.Object.Get(ctx, &GetObjectRequest{
+	have, err := client.Objects.Get(ctx, &GetObjectRequest{
 		ID:           "cool-object2",
 		CollectionID: "test-collection",
 	})
@@ -89,7 +89,7 @@ func TestObject_Get(t *testing.T) {
 	c.Assert(have, qt.DeepEquals, want)
 }
 
-func TestObject_GetMessages(t *testing.T) {
+func TestObjects_GetMessages(t *testing.T) {
 	c := qt.New(t)
 
 	// TODO use real api response, this is from docs
@@ -107,7 +107,7 @@ func TestObject_GetMessages(t *testing.T) {
 
 	// ctx, client := RealTestClient() //TODO remove any test client commented code
 
-	have, err := client.Object.GetMessages(ctx, &GetObjectMessagesRequest{
+	have, err := client.Objects.GetMessages(ctx, &GetObjectMessagesRequest{
 		ObjectID:     "cool-object2",
 		CollectionID: "test-collection",
 	})
@@ -145,7 +145,7 @@ func TestObject_GetMessages(t *testing.T) {
 	c.Assert(have, qt.DeepEquals, want)
 }
 
-func TestObject_Delete(t *testing.T) {
+func TestObjects_Delete(t *testing.T) {
 	c := qt.New(t)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -157,7 +157,7 @@ func TestObject_Delete(t *testing.T) {
 
 	ctx := context.Background()
 
-	err = client.Object.Delete(ctx, &GetObjectRequest{
+	err = client.Objects.Delete(ctx, &GetObjectRequest{
 		ID:           "cool-object2",
 		CollectionID: "test-collection",
 	})
