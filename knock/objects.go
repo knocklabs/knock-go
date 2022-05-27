@@ -15,6 +15,12 @@ type ObjectsService interface {
 	GetMessages(context.Context, *GetObjectMessagesRequest) (*GetObjectMessagesResponse, error)
 	Set(context.Context, *SetObjectRequest) (*SetObjectResponse, error)
 	Delete(context.Context, *DeleteObjectRequest) error
+	GetChannelData(context.Context, *GetObjectChannelDataRequest) (*GetObjectChannelDataResponse, error)
+	SetChannelData(context.Context, *SetObjectChannelDataRequest) (*SetObjectChannelDataResponse, error)
+	DeleteChannelData(context.Context, *DeleteObjectChannelDataRequest) error
+}
+
+type ChannelDataService interface {
 }
 
 type objectsService struct {
@@ -87,9 +93,24 @@ type SetObjectRequest struct {
 type SetObjectResponse = GetObjectResponse
 
 type DeleteObjectRequest = GetObjectRequest
+type GetObjectChannelDataRequest struct {
+	Collection string
+	ChannelID  string
+	ObjectID   string
+}
+type GetObjectChannelDataResponse = GetUserChannelDataResponse
+
+type SetObjectChannelDataRequest = GetObjectChannelDataRequest
+type SetObjectChannelDataResponse = GetUserChannelDataResponse
+
+type DeleteObjectChannelDataRequest = GetObjectChannelDataRequest
 
 func objectAPIPath(collectionID string, objectID string) string {
 	return fmt.Sprintf("v1/objects/%s/%s", collectionID, objectID)
+}
+
+func objectChannelDataAPIPath(collection string, objectID string, channelID string) string {
+	return fmt.Sprintf("v1/objects/%s/%s/channel_data/%s", collection, objectID, channelID)
 }
 
 func (os *objectsService) Get(ctx context.Context, getObjectRequest *GetObjectRequest) (*GetObjectResponse, error) {
@@ -165,6 +186,68 @@ func (os *objectsService) Delete(ctx context.Context, deleteObjectRequest *Delet
 	_, err = os.client.do(ctx, req, nil)
 	if err != nil {
 		return errors.Wrap(err, "error making request for delete object")
+	}
+
+	return nil
+}
+
+func (us *objectsService) GetChannelData(ctx context.Context, getChannelDataReq *GetObjectChannelDataRequest) (*GetObjectChannelDataResponse, error) {
+	path := objectChannelDataAPIPath(getChannelDataReq.Collection, getChannelDataReq.ObjectID, getChannelDataReq.ChannelID)
+
+	req, err := us.client.newRequest(http.MethodGet, path, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to get object channel data")
+	}
+
+	channelDataResponse := &GetUserChannelDataResponse{}
+	_, err = us.client.do(ctx, req, channelDataResponse)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to get object channel data")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to get object channel data")
+	}
+
+	return channelDataResponse, nil
+}
+
+func (us *objectsService) SetChannelData(ctx context.Context, getChannelDataReq *SetObjectChannelDataRequest) (*SetObjectChannelDataResponse, error) {
+	path := objectChannelDataAPIPath(getChannelDataReq.Collection, getChannelDataReq.ObjectID, getChannelDataReq.ChannelID)
+
+	req, err := us.client.newRequest(http.MethodPut, path, getChannelDataReq)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to set object channel data")
+	}
+
+	channelDataResponse := &SetObjectChannelDataResponse{}
+	_, err = us.client.do(ctx, req, channelDataResponse)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to set object channel data")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to set object channel data")
+	}
+
+	return channelDataResponse, nil
+}
+
+func (us *objectsService) DeleteChannelData(ctx context.Context, deleteObjectChannelDataReq *DeleteObjectChannelDataRequest) error {
+	path := objectChannelDataAPIPath(deleteObjectChannelDataReq.Collection, deleteObjectChannelDataReq.ObjectID, deleteObjectChannelDataReq.ChannelID)
+
+	req, err := us.client.newRequest(http.MethodDelete, path, nil)
+	if err != nil {
+		errors.Wrap(err, "error creating request to delete object channel data")
+	}
+
+	_, err = us.client.do(ctx, req, nil)
+	if err != nil {
+		return errors.Wrap(err, "error making request to delete object channel data")
+	}
+
+	if err != nil {
+		return errors.Wrap(err, "error parsing request to delete object channel data")
 	}
 
 	return nil

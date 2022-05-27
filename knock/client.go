@@ -114,7 +114,6 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 	c.Users = &usersService{client: c}
 	c.Workflows = &workflowsService{client: c}
 	c.Messages = &messagesService{client: c}
-	c.ChannelData = &channelDataService{client: c}
 	c.Objects = &objectsService{client: c}
 	c.BulkOperations = &bulkOperationsService{client: c}
 

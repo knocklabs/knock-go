@@ -19,10 +19,17 @@ type UsersService interface {
 	Get(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	Delete(context.Context, *DeleteUserRequest) error
 	Merge(context.Context, *MergeUserRequest) (*MergeUserResponse, error)
+
 	GetMessages(context.Context, *GetUserMessagesRequest) (*GetUserMessagesResponse, error)
+
 	BulkIdentify(context.Context, *BulkIdentifyUserRequest) (*BulkIdentifyUserResponse, error)
 	BulkDelete(context.Context, *BulkDeleteUserRequest) (*BulkDeleteUserResponse, error)
+
 	GetFeed(context.Context, *GetFeedRequest) (*GetFeedResponse, error)
+
+	GetChannelData(context.Context, *GetUserChannelDataRequest) (*GetUserChannelDataResponse, error)
+	SetChannelData(context.Context, *SetUserChannelDataRequest) (*SetUserChannelDataResponse, error)
+	DeleteChannelData(context.Context, *DeleteUserChannelDataRequest) error
 }
 
 type usersService struct {
@@ -143,6 +150,32 @@ type GetFeedResponse struct {
 	Feed *Feed
 }
 
+type GetUserChannelDataRequest struct {
+	UserID    string
+	ChannelID string
+}
+type GetUserChannelDataResponse struct {
+	ChannelData map[string]interface{} `json:"data"`
+}
+
+type SetUserChannelDataRequest struct {
+	UserID    string                 `json:"-"`
+	ChannelID string                 `json:"-"`
+	Data      map[string]interface{} `json:"data"`
+}
+
+type SetUserChannelDataResponse = GetUserChannelDataResponse
+
+type DeleteUserChannelDataRequest = GetUserChannelDataRequest
+
+func UsersAPIPath(userId string) string {
+	return fmt.Sprintf("v1/users/%s", userId)
+}
+
+func usersChannelDataAPIPath(userID string, channelID string) string {
+	return fmt.Sprintf("%s/channel_data/%s", UsersAPIPath(userID), channelID)
+}
+
 func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*IdentifyUserResponse, error) {
 	path := UsersAPIPath(identifyReq.User.ID)
 
@@ -201,10 +234,6 @@ func (us *usersService) Delete(ctx context.Context, deleteReq *DeleteUserRequest
 
 	_, err = us.client.do(ctx, req, nil)
 	return err
-}
-
-func UsersAPIPath(userId string) string {
-	return fmt.Sprintf("v1/users/%s", userId)
 }
 
 func (us *usersService) Merge(ctx context.Context, mergeReq *MergeUserRequest) (*MergeUserResponse, error) {
@@ -308,6 +337,68 @@ func (us *usersService) BulkDelete(ctx context.Context, bulkDeleteReq *BulkDelet
 	}
 
 	return bulkDeleteRes, nil
+}
+
+func (cds *usersService) GetChannelData(ctx context.Context, getChannelDataReq *GetUserChannelDataRequest) (*GetUserChannelDataResponse, error) {
+	path := usersChannelDataAPIPath(getChannelDataReq.UserID, getChannelDataReq.ChannelID)
+
+	req, err := cds.client.newRequest(http.MethodGet, path, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request for channel data for user")
+	}
+
+	channelDataResponse := &GetUserChannelDataResponse{}
+	_, err = cds.client.do(ctx, req, channelDataResponse)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request for channel data for user")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request for channel data for user")
+	}
+
+	return channelDataResponse, nil
+}
+
+func (us *usersService) SetChannelData(ctx context.Context, getChannelDataReq *SetUserChannelDataRequest) (*SetUserChannelDataResponse, error) {
+	path := usersChannelDataAPIPath(getChannelDataReq.UserID, getChannelDataReq.ChannelID)
+
+	req, err := us.client.newRequest(http.MethodPut, path, getChannelDataReq)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to set channel data for user")
+	}
+
+	channelDataResponse := &SetUserChannelDataResponse{}
+	_, err = us.client.do(ctx, req, channelDataResponse)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to set channel data for user")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to set channel data for user")
+	}
+
+	return channelDataResponse, nil
+}
+
+func (us *usersService) DeleteChannelData(ctx context.Context, deleteUserChannelDataReq *DeleteUserChannelDataRequest) error {
+	path := usersChannelDataAPIPath(deleteUserChannelDataReq.UserID, deleteUserChannelDataReq.ChannelID)
+
+	req, err := us.client.newRequest(http.MethodDelete, path, nil)
+	if err != nil {
+		errors.Wrap(err, "error creating request to delete channel data for a user")
+	}
+
+	_, err = us.client.do(ctx, req, nil)
+	if err != nil {
+		return errors.Wrap(err, "error making request to delete channel data for a user")
+	}
+
+	if err != nil {
+		return errors.Wrap(err, "error parsing request to delete channel data for a user")
+	}
+
+	return nil
 }
 
 // IdentifyUserRequests can contain arbitrary customer data that must be stored, and must be mapped
