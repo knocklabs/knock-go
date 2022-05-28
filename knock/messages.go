@@ -19,6 +19,7 @@ type MessagesService interface {
 	SetStatus(context.Context, *SetStatusRequest) (*SetStatusResponse, error)
 	DeleteStatus(context.Context, *DeleteStatusRequest) (*DeleteStatusResponse, error)
 	BatchSetStatus(context.Context, *BatchSetStatusRequest) (*BatchSetStatusResponse, error)
+	BulkChangeChannelStatus(context.Context, *BulkChangeChannelStatusRequest) (*BulkChangeChannelStatusResponse, error)
 }
 
 type messagesService struct {
@@ -39,22 +40,24 @@ func messagesAPIPath(messageID string) string {
 	return fmt.Sprintf("%s/%s", messagesAPIBasePath, messageID)
 }
 
-type UserMessageStatus string
+type EngagementStatus string
 
 // User message query statuses
 const (
-	Queued      UserMessageStatus = "queued"
-	Sent        UserMessageStatus = "sent"
-	Delivered   UserMessageStatus = "delivered"
-	Undelivered UserMessageStatus = "undelivered"
+	Queued      EngagementStatus = "queued"
+	Sent        EngagementStatus = "sent"
+	Delivered   EngagementStatus = "delivered"
+	Undelivered EngagementStatus = "undelivered"
 )
 
 type MessageStatus string
 
 const (
-	NotSent  MessageStatus = "seen"
-	Read     MessageStatus = "read"
-	Archived MessageStatus = "archived"
+	NotSent    MessageStatus = "seen"
+	Read       MessageStatus = "read"
+	Archived   MessageStatus = "archived"
+	Unarchived MessageStatus = "unarchived"
+	Unread     MessageStatus = "unread"
 )
 
 type NotificationSource struct {
@@ -69,7 +72,7 @@ type Message struct {
 	Recipient  string                 `json:"recipient"`
 	Workflow   string                 `json:"workflow"`
 	Tenant     string                 `json:"tenant"`
-	Status     UserMessageStatus      `json:"status"`
+	Status     EngagementStatus       `json:"status"`
 	ReadAt     time.Time              `json:"read_at"`
 	SeenAt     time.Time              `json:"seen_at"`
 	ArchivedAt time.Time              `json:"archived_at"`
@@ -102,14 +105,14 @@ type MessageContent struct {
 }
 
 type ListMessagesRequest struct {
-	PageSize  int                 `url:"page_size,omitempty"`
-	Cursor    string              `url:"page_size,omitempty"`
-	Before    string              `url:"before,omitempty"`
-	After     string              `url:"after,omitempty"`
-	Source    string              `url:"source,omitempty"`
-	Tenant    string              `url:"tenant,omitempty"`
-	Status    []UserMessageStatus `url:"status,omitempty"`
-	ChannelID string              `url:"channel_id,omitempty"`
+	PageSize  int                `url:"page_size,omitempty"`
+	Cursor    string             `url:"page_size,omitempty"`
+	Before    string             `url:"before,omitempty"`
+	After     string             `url:"after,omitempty"`
+	Source    string             `url:"source,omitempty"`
+	Tenant    string             `url:"tenant,omitempty"`
+	Status    []EngagementStatus `url:"status,omitempty"`
+	ChannelID string             `url:"channel_id,omitempty"`
 }
 type ListMessagesResponse struct {
 	Items    []*Message `json:"items"`
@@ -156,7 +159,19 @@ type BatchSetStatusResponse struct {
 	Messages []*Message
 }
 
-type MessageList []Message
+type BulkChangeChannelStatusRequest struct {
+	ChannelID string        `json:"-"`
+	Status    MessageStatus `json:"-"`
+
+	UserIDs          []string         `json:"user_ids,omitempty"`
+	OlderThan        *time.Time       `json:"older_than,omitempty"`
+	NewerThan        *time.Time       `json:"newer_than,omitempty"`
+	DeliveryStatus   EngagementStatus `json:"delivery_status,omitempty"`
+	EngagementStatus string           `json:"engagement_status,omitempty"`
+}
+type BulkChangeChannelStatusResponse struct {
+	BulkOperation *BulkOperation
+}
 
 func (ms *messagesService) List(ctx context.Context, listReq *ListMessagesRequest) (*ListMessagesResponse, error) {
 
@@ -309,6 +324,27 @@ func (ms *messagesService) BatchSetStatus(ctx context.Context, batchSetStatus *B
 	batchSetStatusRes := BatchSetStatusResponse{Messages: []*Message{}}
 
 	_, err = ms.client.do(ctx, req, &batchSetStatusRes.Messages)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to set message status")
+	}
+
+	return &batchSetStatusRes, nil
+}
+
+func (ms *messagesService) BulkChangeChannelStatus(ctx context.Context, bulkStatusReq *BulkChangeChannelStatusRequest) (*BulkChangeChannelStatusResponse, error) {
+
+	path := fmt.Sprintf("v1/channels/%s/messages/bulk/%s", bulkStatusReq.ChannelID, bulkStatusReq.Status)
+
+	req, err := ms.client.newRequest(http.MethodPost, path, bulkStatusReq)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to set message status")
+	}
+
+	batchSetStatusRes := BulkChangeChannelStatusResponse{BulkOperation: &BulkOperation{}}
+
+	_, err = ms.client.do(ctx, req, &batchSetStatusRes.BulkOperation)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to set message status")

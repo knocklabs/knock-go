@@ -77,14 +77,14 @@ type MergeUserRequest struct {
 
 type GetUserMessagesRequest struct {
 	// User unique identifier
-	ID        string              `url:"-"`
-	PageSize  int                 `url:"page_size,omitempty"`
-	After     string              `url:"after,omitempty"`
-	Before    string              `url:"before,omitempty"`
-	Source    string              `url:"source,omitempty"`
-	Tenant    string              `url:"tenant,omitempty"`
-	Status    []UserMessageStatus `url:"status,omitempty"`
-	ChannelID string              `url:"channel_id,omitempty"`
+	ID        string             `url:"-"`
+	PageSize  int                `url:"page_size,omitempty"`
+	After     string             `url:"after,omitempty"`
+	Before    string             `url:"before,omitempty"`
+	Source    string             `url:"source,omitempty"`
+	Tenant    string             `url:"tenant,omitempty"`
+	Status    []EngagementStatus `url:"status,omitempty"`
+	ChannelID string             `url:"channel_id,omitempty"`
 }
 
 type GetUserMessagesResponse struct {
@@ -121,19 +121,19 @@ type Feed struct {
 }
 
 type FeedItem struct {
-	Activities      []*MessageActivity `json:"activities"`
-	Actors          []*User            `json:"actors"`
-	TotalActivities int                `json:"total_activities"`
-	TotalActors     int                `json:"total_actors"`
-	// Blocks TODO blocks
-	Data       map[string]interface{} `json:"vars"`
-	InsertedAt time.Time              `json:"inserted_at"`
-	UpdatedAt  time.Time              `json:"updated_at"`
-	ReadAt     time.Time              `json:"read_at"`
-	SeenAt     time.Time              `json:"seen_at"`
-	ArchivedAt time.Time              `json:"archived_at"`
-	Source     NotificationSource     `json:"source"`
-	Tenant     string                 `json:"tenant"`
+	Activities      []*MessageActivity     `json:"activities"`
+	Actors          []*User                `json:"actors"`
+	TotalActivities int                    `json:"total_activities"`
+	TotalActors     int                    `json:"total_actors"`
+	Blocks          []*FeedBlock           `json:"blocks"`
+	Data            map[string]interface{} `json:"vars"`
+	InsertedAt      time.Time              `json:"inserted_at"`
+	UpdatedAt       time.Time              `json:"updated_at"`
+	ReadAt          time.Time              `json:"read_at"`
+	SeenAt          time.Time              `json:"seen_at"`
+	ArchivedAt      time.Time              `json:"archived_at"`
+	Source          NotificationSource     `json:"source"`
+	Tenant          string                 `json:"tenant"`
 }
 
 type FeedMetadata struct {
@@ -146,6 +146,12 @@ type GetFeedRequest struct {
 	FeedID string
 }
 
+type FeedBlock struct {
+	Content  string `json:"content"`
+	Name     string `json:"name"`
+	Rendered string `json:"rendered"`
+	Type     string `json:"type"`
+}
 type GetFeedResponse struct {
 	Feed *Feed
 }

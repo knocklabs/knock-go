@@ -449,3 +449,44 @@ func TestMessages_BatchSetStatus(t *testing.T) { // TODO
 	c.Assert(err, qt.IsNil)
 	c.Assert(have, qt.DeepEquals, want)
 }
+
+func TestMessages_BulkChangeChannelStatus(t *testing.T) { // TODO
+
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":1,"failed_at":null,"id":"fbf36d40-b6f8-4675-a362-ede1b859f757","inserted_at":"2022-05-28T00:51:26.343157Z","name":"messages.unread","processed_rows":0,"progress_path":"/v1/bulk_operations/fbf36d40-b6f8-4675-a362-ede1b859f757","started_at":null,"status":"queued","updated_at":"2022-05-28T00:51:26.349222Z"}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	// ctx, client := RealTestClient() /÷/TODO remove any test client commented code
+
+	have, err := client.Messages.BulkChangeChannelStatus(ctx, &BulkChangeChannelStatusRequest{
+		ChannelID: "5da042d7-02ee-46ed-8b91-9b5717da2028",
+		Status:    Archived,
+	})
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	want := &BulkChangeChannelStatusResponse{
+		BulkOperation: &BulkOperation{
+			ID:                 "fbf36d40-b6f8-4675-a362-ede1b859f757",
+			ProgressPath:       "/v1/bulk_operations/fbf36d40-b6f8-4675-a362-ede1b859f757",
+			Status:             BulkOperationStatus(Queued),
+			InsertedAt:         ParseRFC3339Timestamp("2022-05-28T00:51:26.343157Z"),
+			UpdatedAt:          ParseRFC3339Timestamp("2022-05-28T00:51:26.349222Z"),
+			EstimatedTotalRows: 1,
+		},
+	}
+	c.Assert(err, qt.IsNil)
+	c.Assert(have, qt.DeepEquals, want)
+}
