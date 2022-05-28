@@ -50,7 +50,7 @@ type ObjectMessage struct {
 	Recipient  map[string]interface{} `json:"recipient"`
 	Workflow   string                 `json:"workflow"`
 	Tenant     string                 `json:"tenant"`
-	Status     UserMessageStatus      `json:"status"`
+	Status     EngagementStatus       `json:"status"`
 	ReadAt     time.Time              `json:"read_at"`
 	SeenAt     time.Time              `json:"seen_at"`
 	ArchivedAt time.Time              `json:"archived_at"`
@@ -72,13 +72,13 @@ type GetObjectMessagesRequest struct {
 	ObjectID     string `url:"-"`
 	CollectionID string `url:"-"`
 
-	PageSize  int                 `url:"page_size,omitempty"`
-	Before    string              `url:"before,omitempty"`
-	After     string              `url:"after,omitempty"`
-	Source    string              `url:"source,omitempty"`
-	Tenant    string              `url:"tenant,omitempty"`
-	Status    []UserMessageStatus `url:"status,omitempty"`
-	ChannelID string              `url:"channel_id,omitempty"`
+	PageSize  int                `url:"page_size,omitempty"`
+	Before    string             `url:"before,omitempty"`
+	After     string             `url:"after,omitempty"`
+	Source    string             `url:"source,omitempty"`
+	Tenant    string             `url:"tenant,omitempty"`
+	Status    []EngagementStatus `url:"status,omitempty"`
+	ChannelID string             `url:"channel_id,omitempty"`
 }
 type GetObjectMessagesResponse struct {
 	Items    []*ObjectMessage `json:"entries"`
@@ -100,7 +100,13 @@ type GetObjectChannelDataRequest struct {
 }
 type GetObjectChannelDataResponse = GetUserChannelDataResponse
 
-type SetObjectChannelDataRequest = GetObjectChannelDataRequest
+type SetObjectChannelDataRequest struct {
+	Collection string                 `json:"-"`
+	ChannelID  string                 `json:"-"`
+	ObjectID   string                 `json:"-"`
+	Data       map[string]interface{} `json:"data"`
+}
+
 type SetObjectChannelDataResponse = GetUserChannelDataResponse
 
 type DeleteObjectChannelDataRequest = GetObjectChannelDataRequest
@@ -171,9 +177,6 @@ func (os *objectsService) Set(ctx context.Context, setObjectRequest *SetObjectRe
 
 	return setObjectResponse, nil
 }
-
-// TODO object messages
-// TODO
 
 func (os *objectsService) Delete(ctx context.Context, deleteObjectRequest *DeleteObjectRequest) error {
 	path := objectAPIPath(deleteObjectRequest.CollectionID, deleteObjectRequest.ID)

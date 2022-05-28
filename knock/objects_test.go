@@ -164,3 +164,99 @@ func TestObjects_Delete(t *testing.T) {
 
 	c.Assert(err, qt.IsNil)
 }
+
+func TestObjects_GetChannelData(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"ChannelData","channel_id":"2b70de44-24e8-40fe-9d54-d16d54e22374","data":{"connections":[{"incoming_webhook":{"url":"cool2"}}]}}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	// ctx, client := RealTestClient()
+
+	getObjectChannelDataResponse, err := client.Objects.GetChannelData(ctx, &GetObjectChannelDataRequest{
+		Collection: "test-collection",
+		ObjectID:   "cool-object",
+		ChannelID:  "2b70de44-24e8-40fe-9d54-d16d54e22374",
+	})
+
+	want := &GetObjectChannelDataResponse{
+		ChannelData: map[string]interface{}{
+			"connections": []interface{}{map[string]interface{}{"incoming_webhook": map[string]interface{}{"url": string("cool2")}}},
+		},
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(getObjectChannelDataResponse, qt.DeepEquals, want)
+}
+
+func TestObjects_SetChannelData(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"ChannelData","channel_id":"2b70de44-24e8-40fe-9d54-d16d54e22374","data":{"connections":[{"incoming_webhook":{"url":"cool2"}}]}}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	// ctx, client := RealTestClient()
+
+	setObjectChannelDataResponse, err := client.Objects.SetChannelData(ctx, &SetObjectChannelDataRequest{
+		Collection: "test-collection",
+		ObjectID:   "cool-object",
+		ChannelID:  "2b70de44-24e8-40fe-9d54-d16d54e22374",
+		Data: map[string]interface{}{
+			"connections": []interface{}{map[string]interface{}{"incoming_webhook": map[string]interface{}{"url": string("cool2")}}},
+		},
+	})
+
+	want := &GetObjectChannelDataResponse{
+		ChannelData: map[string]interface{}{
+			"connections": []interface{}{map[string]interface{}{"incoming_webhook": map[string]interface{}{"url": string("cool2")}}},
+		},
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(setObjectChannelDataResponse, qt.DeepEquals, want)
+}
+
+func TestObjects_DeleteChannelData(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	// ctx, client := RealTestClient()
+
+	err = client.Objects.DeleteChannelData(ctx, &DeleteObjectChannelDataRequest{
+		Collection: "test-collection",
+		ObjectID:   "cool-object",
+		ChannelID:  "2b70de44-24e8-40fe-9d54-d16d54e22374",
+	})
+
+	c.Assert(err, qt.IsNil)
+
+}

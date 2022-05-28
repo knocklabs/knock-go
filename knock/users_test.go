@@ -2,7 +2,6 @@ package knock
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -299,7 +298,6 @@ func TestFeed_Get(t *testing.T) {
 		FeedID: "5d2377a0-92fb-4616-8315-eee843556566",
 	})
 
-	fmt.Printf("%+v", have.Feed)
 	want := &GetFeedResponse{
 		Feed: &Feed{
 			FeedItems: []*FeedItem{
@@ -336,11 +334,25 @@ func TestFeed_Get(t *testing.T) {
 					},
 					TotalActivities: 1,
 					TotalActors:     1,
-					Source:          NotificationSource{Key: "merged-changes", VersionID: "7251cd3f-0028-4d1a-9466-ee79522ba3de"},
-					ReadAt:          ParseRFC3339Timestamp("2021-05-13T02:45:28.559124Z"),
-					InsertedAt:      ParseRFC3339Timestamp("2021-05-11T00:50:09.904531Z"),
-					UpdatedAt:       ParseRFC3339Timestamp("2021-05-13T02:45:28.559863Z"),
-					SeenAt:          ParseRFC3339Timestamp("2021-05-11T00:51:43.617550Z"),
+					Blocks: []*FeedBlock{
+						{
+							Content:  "**{{ actor.name }}** merged {{ total_merged }} {% if total_merged == 1 %} change {% else %} changes {% endif %}\nfrom **{{ src_environment_name }}** into **{{ dest_environment_name }}**.",
+							Name:     "body",
+							Rendered: "<p><strong>The person</strong> merged 1  change \nfrom <strong>Development</strong> into <strong>Production</strong>.</p>",
+							Type:     "markdown",
+						},
+						{
+							Content:  "{{ vars.app_url }}/{{ account_slug }}/commits",
+							Name:     "action_url",
+							Rendered: "https://example.com/thing/commits",
+							Type:     "text",
+						},
+					},
+					Source:     NotificationSource{Key: "merged-changes", VersionID: "7251cd3f-0028-4d1a-9466-ee79522ba3de"},
+					ReadAt:     ParseRFC3339Timestamp("2021-05-13T02:45:28.559124Z"),
+					InsertedAt: ParseRFC3339Timestamp("2021-05-11T00:50:09.904531Z"),
+					UpdatedAt:  ParseRFC3339Timestamp("2021-05-13T02:45:28.559863Z"),
+					SeenAt:     ParseRFC3339Timestamp("2021-05-11T00:51:43.617550Z"),
 				},
 			},
 			FeedMetadata: &FeedMetadata{
