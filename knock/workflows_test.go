@@ -33,9 +33,7 @@ func TestWorkflows_Trigger(t *testing.T) {
 		},
 	})
 
-	want := &TriggerWorkflowResponse{
-		WorkflowRunId: "e2898d04-cb0c-5a1b-93e0-6c3f6bad82ef",
-	}
+	want := "e2898d04-cb0c-5a1b-93e0-6c3f6bad82ef"
 
 	c.Assert(err, qt.IsNil)
 	c.Assert(workflow, qt.DeepEquals, want)
