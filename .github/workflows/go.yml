@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -23,3 +23,16 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+  lint:
+    name: lint files
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.18
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2.5.2
+        with:
+          version: latest
