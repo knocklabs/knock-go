@@ -12,9 +12,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// TODO docs on modules
-
-// TODO HERE updating interface to directly return data
 // UsersService is an interface for communicating with the Knock
 // Users API endpoints.
 type UsersService interface {

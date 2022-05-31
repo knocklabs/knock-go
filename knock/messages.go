@@ -125,6 +125,7 @@ type GetMessageRequest struct {
 type GetMessageResponse struct {
 	Message *Message
 }
+
 type GetMessageEventsRequest = GetMessageRequest
 type GetMessageEventsResponse struct {
 	Items    []*MessageEvent `json:"items"`

@@ -10,19 +10,19 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ObjectsService is an interface for communicating with the Knock
+// Objects API endpoints.
 type ObjectsService interface {
 	Get(context.Context, *GetObjectRequest) (*Object, error)
-	GetMessages(context.Context, *GetObjectMessagesRequest) ([]*ObjectMessage, *PageInfo, error)
 	Set(context.Context, *SetObjectRequest) (*Object, error)
 	Delete(context.Context, *DeleteObjectRequest) error
+
+	GetMessages(context.Context, *GetObjectMessagesRequest) ([]*ObjectMessage, *PageInfo, error)
+
 	GetChannelData(context.Context, *GetObjectChannelDataRequest) (map[string]interface{}, error)
 	SetChannelData(context.Context, *SetObjectChannelDataRequest) (map[string]interface{}, error)
 	DeleteChannelData(context.Context, *DeleteObjectChannelDataRequest) error
 }
-
-type ChannelDataService interface {
-}
-
 type objectsService struct {
 	client *Client
 }
@@ -68,6 +68,15 @@ type GetObjectResponse struct {
 	Object *Object
 }
 
+type SetObjectRequest struct {
+	ID           string                 `json:"-"`
+	CollectionID string                 `json:"-"`
+	Properties   map[string]interface{} `json:""`
+}
+type SetObjectResponse = GetObjectResponse
+
+type DeleteObjectRequest = GetObjectRequest
+
 type GetObjectMessagesRequest struct {
 	ObjectID     string `url:"-"`
 	CollectionID string `url:"-"`
@@ -85,14 +94,6 @@ type GetObjectMessagesResponse struct {
 	PageInfo *PageInfo        `json:"page_info"`
 }
 
-type SetObjectRequest struct {
-	ID           string                 `json:"-"`
-	CollectionID string                 `json:"-"`
-	Properties   map[string]interface{} `json:""`
-}
-type SetObjectResponse = GetObjectResponse
-
-type DeleteObjectRequest = GetObjectRequest
 type GetObjectChannelDataRequest struct {
 	Collection string
 	ChannelID  string

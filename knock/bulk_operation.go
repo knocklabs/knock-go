@@ -9,6 +9,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+// BulkOperationsService is an interface for communicating with API endpoints that return BulkOperations,
+// which are used by other services including the UsersService and MessagesService
 type BulkOperationsService interface {
 	Get(context.Context, *GetBulkOperationRequest) (*BulkOperation, error)
 }

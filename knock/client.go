@@ -5,13 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 
 	"github.com/hashicorp/go-cleanhttp"
-	"moul.io/http2curl"
 )
 
 const (
@@ -38,12 +36,11 @@ type Client struct {
 
 	// base URL for the API
 	baseURL        *url.URL
+	BulkOperations BulkOperationsService
+	Messages       MessagesService
+	Objects        ObjectsService
 	Users          UsersService
 	Workflows      WorkflowsService
-	Messages       MessagesService
-	ChannelData    ChannelDataService
-	Objects        ObjectsService
-	BulkOperations BulkOperationsService
 }
 
 // ClientOption provides a variadic option for configuring the client
@@ -111,11 +108,11 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 		}
 	}
 
-	c.Users = &usersService{client: c}
-	c.Workflows = &workflowsService{client: c}
+	c.BulkOperations = &bulkOperationsService{client: c}
 	c.Messages = &messagesService{client: c}
 	c.Objects = &objectsService{client: c}
-	c.BulkOperations = &bulkOperationsService{client: c}
+	c.Users = &usersService{client: c}
+	c.Workflows = &workflowsService{client: c}
 
 	return c, nil
 }
@@ -140,8 +137,6 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 	if err != nil {
 		return nil, err
 	}
-	// TODO remove debug logs
-	fmt.Printf("response body:\n%s\n", out)
 
 	if res.StatusCode >= 400 {
 		// errorResponse represents an error response from the API
@@ -268,9 +263,6 @@ type accessTokenTransport struct {
 
 func (t *accessTokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.Header.Add("Authorization", "Bearer "+t.token)
-	// TODO remove debug log tools when initial development is complete
-	command, _ := http2curl.GetCurlCommand(req)
-	fmt.Printf("request:\n%s\n", command)
 	return t.rt.RoundTrip(req)
 }
 
