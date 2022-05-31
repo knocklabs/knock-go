@@ -15,20 +15,20 @@ import (
 // UsersService is an interface for communicating with the Knock
 // Users API endpoints.
 type UsersService interface {
-	Identify(context.Context, *IdentifyUserRequest) (*IdentifyUserResponse, error)
-	Get(context.Context, *GetUserRequest) (*GetUserResponse, error)
+	Get(context.Context, *GetUserRequest) (*User, error)
+	Identify(context.Context, *IdentifyUserRequest) (*User, error)
+	Merge(context.Context, *MergeUserRequest) (*User, error)
 	Delete(context.Context, *DeleteUserRequest) error
-	Merge(context.Context, *MergeUserRequest) (*MergeUserResponse, error)
 
-	GetMessages(context.Context, *GetUserMessagesRequest) (*GetUserMessagesResponse, error)
+	GetMessages(context.Context, *GetUserMessagesRequest) ([]*Message, error)
 
-	BulkIdentify(context.Context, *BulkIdentifyUserRequest) (*BulkIdentifyUserResponse, error)
-	BulkDelete(context.Context, *BulkDeleteUserRequest) (*BulkDeleteUserResponse, error)
+	BulkIdentify(context.Context, *BulkIdentifyUserRequest) (*BulkOperation, error)
+	BulkDelete(context.Context, *BulkDeleteUserRequest) (*BulkOperation, error)
 
-	GetFeed(context.Context, *GetFeedRequest) (*GetFeedResponse, error)
+	GetFeed(context.Context, *GetFeedRequest) (*Feed, error)
 
-	GetChannelData(context.Context, *GetUserChannelDataRequest) (*GetUserChannelDataResponse, error)
-	SetChannelData(context.Context, *SetUserChannelDataRequest) (*SetUserChannelDataResponse, error)
+	GetChannelData(context.Context, *GetUserChannelDataRequest) (map[string]interface{}, error)
+	SetChannelData(context.Context, *SetUserChannelDataRequest) (map[string]interface{}, error)
 	DeleteChannelData(context.Context, *DeleteUserChannelDataRequest) error
 }
 
@@ -54,64 +54,6 @@ type User struct {
 	UpdatedAt        time.Time `json:"updated_at"`
 	CustomProperties map[string]interface{}
 }
-
-type GetUserRequest struct {
-	// User unique identifier
-	ID string
-}
-
-type DeleteUserRequest struct {
-	// User unique identifier
-	ID string
-}
-
-type IdentifyUserRequest struct {
-	User *User
-}
-
-type MergeUserRequest struct {
-	// User unique identifier
-	ID         string
-	FromUserID string `json:"from_user_id"`
-}
-
-type GetUserMessagesRequest struct {
-	// User unique identifier
-	ID        string             `url:"-"`
-	PageSize  int                `url:"page_size,omitempty"`
-	After     string             `url:"after,omitempty"`
-	Before    string             `url:"before,omitempty"`
-	Source    string             `url:"source,omitempty"`
-	Tenant    string             `url:"tenant,omitempty"`
-	Status    []EngagementStatus `url:"status,omitempty"`
-	ChannelID string             `url:"channel_id,omitempty"`
-}
-
-type GetUserMessagesResponse struct {
-	Messages []*Message `json:"items"`
-}
-
-type GetUserResponse struct {
-	User *User
-}
-type MergeUserResponse = GetUserResponse
-type IdentifyUserResponse = GetUserResponse
-
-type BulkIdentifyUserRequest struct {
-	Users []*User
-}
-
-// Used only as an intermediary to handle arbitrary custom properties
-// for BulkIdentifyUserRequests, never needed directly
-type UserFlatMap map[string]interface{}
-type BulkIdentifyUserResponse struct {
-	BulkOperation *BulkOperation
-}
-
-type BulkDeleteUserRequest struct {
-	UserIDs []string `json:"user_ids"`
-}
-type BulkDeleteUserResponse = BulkIdentifyUserResponse
 
 type Feed struct {
 	FeedItems    []*FeedItem            `json:"entries"`
@@ -141,16 +83,70 @@ type FeedMetadata struct {
 	UnseenCount int `json:"unseen_count"`
 }
 
-type GetFeedRequest struct {
-	UserID string
-	FeedID string
-}
-
 type FeedBlock struct {
 	Content  string `json:"content"`
 	Name     string `json:"name"`
 	Rendered string `json:"rendered"`
 	Type     string `json:"type"`
+}
+
+type GetUserRequest struct {
+	// User unique identifier
+	ID string
+}
+
+type GetUserResponse struct {
+	User *User
+}
+type IdentifyUserRequest struct {
+	User *User
+}
+type IdentifyUserResponse = GetUserResponse
+
+type MergeUserRequest struct {
+	// User unique identifier
+	ID         string
+	FromUserID string `json:"from_user_id"`
+}
+type MergeUserResponse = GetUserResponse
+
+type DeleteUserRequest struct {
+	// User unique identifier
+	ID string
+}
+
+type GetUserMessagesRequest struct {
+	// User unique identifier
+	ID        string             `url:"-"`
+	PageSize  int                `url:"page_size,omitempty"`
+	After     string             `url:"after,omitempty"`
+	Before    string             `url:"before,omitempty"`
+	Source    string             `url:"source,omitempty"`
+	Tenant    string             `url:"tenant,omitempty"`
+	Status    []EngagementStatus `url:"status,omitempty"`
+	ChannelID string             `url:"channel_id,omitempty"`
+}
+
+type GetUserMessagesResponse struct {
+	Messages []*Message `json:"items"`
+}
+
+type BulkIdentifyUserRequest struct {
+	Users []*User
+}
+
+type BulkIdentifyUserResponse struct {
+	BulkOperation *BulkOperation
+}
+
+type BulkDeleteUserRequest struct {
+	UserIDs []string `json:"user_ids"`
+}
+type BulkDeleteUserResponse = BulkIdentifyUserResponse
+
+type GetFeedRequest struct {
+	UserID string
+	FeedID string
 }
 type GetFeedResponse struct {
 	Feed *Feed
@@ -169,7 +165,6 @@ type SetUserChannelDataRequest struct {
 	ChannelID string                 `json:"-"`
 	Data      map[string]interface{} `json:"data"`
 }
-
 type SetUserChannelDataResponse = GetUserChannelDataResponse
 
 type DeleteUserChannelDataRequest = GetUserChannelDataRequest
@@ -182,7 +177,11 @@ func usersChannelDataAPIPath(userID string, channelID string) string {
 	return fmt.Sprintf("%s/channel_data/%s", UsersAPIPath(userID), channelID)
 }
 
-func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*IdentifyUserResponse, error) {
+func feedsAPIPath(userID string, FeedID string) string {
+	return fmt.Sprintf("%s/feeds/%s", UsersAPIPath(userID), FeedID)
+}
+
+func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*User, error) {
 	path := UsersAPIPath(identifyReq.User.ID)
 
 	identifyBody, err := identifyReq.User.toMapWithCustomProperties()
@@ -206,12 +205,10 @@ func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserR
 		return nil, errors.Wrap(err, "error parsing request for identify user")
 	}
 
-	return &IdentifyUserResponse{
-		User: user,
-	}, nil
+	return user, nil
 }
 
-func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*GetUserResponse, error) {
+func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*User, error) {
 	path := UsersAPIPath(getReq.ID)
 
 	req, err := us.client.newRequest(http.MethodGet, path, nil)
@@ -229,9 +226,7 @@ func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*GetUs
 		return nil, errors.Wrap(err, "error parsing request for get user")
 	}
 
-	return &GetUserResponse{
-		User: user,
-	}, nil
+	return user, nil
 }
 
 func (us *usersService) Delete(ctx context.Context, deleteReq *DeleteUserRequest) error {
@@ -246,7 +241,7 @@ func (us *usersService) Delete(ctx context.Context, deleteReq *DeleteUserRequest
 	return err
 }
 
-func (us *usersService) Merge(ctx context.Context, mergeReq *MergeUserRequest) (*MergeUserResponse, error) {
+func (us *usersService) Merge(ctx context.Context, mergeReq *MergeUserRequest) (*User, error) {
 	path := fmt.Sprintf("%s/merge", UsersAPIPath(mergeReq.ID))
 
 	req, err := us.client.newRequest(http.MethodPost, path, mergeReq)
@@ -260,15 +255,13 @@ func (us *usersService) Merge(ctx context.Context, mergeReq *MergeUserRequest) (
 	}
 	user, err := parseRawUserResponseCustomProperties(body)
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request for get user")
+		return nil, errors.Wrap(err, "error parsing request for merge user")
 	}
 
-	return &MergeUserResponse{
-		User: user,
-	}, nil
+	return user, nil
 }
 
-func (us *usersService) GetMessages(ctx context.Context, getUserMessagesReq *GetUserMessagesRequest) (*GetUserMessagesResponse, error) {
+func (us *usersService) GetMessages(ctx context.Context, getUserMessagesReq *GetUserMessagesRequest) ([]*Message, error) {
 
 	queryString, _ := query.Values(getUserMessagesReq)
 	path := fmt.Sprintf("%s/messages?%s", UsersAPIPath(getUserMessagesReq.ID), queryString.Encode())
@@ -288,13 +281,13 @@ func (us *usersService) GetMessages(ctx context.Context, getUserMessagesReq *Get
 		return nil, errors.Wrap(err, "error parsing request for get user messages")
 	}
 
-	return getUserMessagesResponse, nil
+	return getUserMessagesResponse.Messages, nil
 }
 
-func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkIdentifyUserRequest) (*BulkIdentifyUserResponse, error) {
+func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkIdentifyUserRequest) (*BulkOperation, error) {
 	path := UsersAPIPath("bulk/identify")
 
-	var bulkUserFlatMap []UserFlatMap
+	var bulkUserFlatMap []map[string]interface{}
 
 	for _, rawUser := range bulkIdentifyReq.Users {
 		userFlatMap, err := rawUser.toMapWithCustomProperties()
@@ -306,7 +299,7 @@ func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkI
 
 	// Define a struct used only to wrap this data in a `users` json key.
 	type BulkUserList struct {
-		BulkUserFlatMap []UserFlatMap `json:"users"`
+		BulkUserFlatMap []map[string]interface{} `json:"users"`
 	}
 	req, err := us.client.newRequest(http.MethodPost, path, BulkUserList{BulkUserFlatMap: bulkUserFlatMap})
 
@@ -326,34 +319,50 @@ func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkI
 		return nil, errors.Wrap(err, "error parsing request for bulk identify user")
 	}
 
-	return bulkIdentifyRes, nil
+	return bulkIdentifyRes.BulkOperation, nil
 }
 
-func (us *usersService) BulkDelete(ctx context.Context, bulkDeleteReq *BulkDeleteUserRequest) (*BulkDeleteUserResponse, error) {
+func (us *usersService) BulkDelete(ctx context.Context, bulkDeleteReq *BulkDeleteUserRequest) (*BulkOperation, error) {
 	path := UsersAPIPath("bulk/delete")
 
 	req, err := us.client.newRequest(http.MethodPost, path, bulkDeleteReq)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating request for bulk identify user")
+		return nil, errors.Wrap(err, "error creating request for bulk delete user")
 	}
 
 	bulkDeleteRes := &BulkDeleteUserResponse{BulkOperation: &BulkOperation{}}
 
 	_, err = us.client.do(ctx, req, bulkDeleteRes.BulkOperation)
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request for bulk identify user")
+		return nil, errors.Wrap(err, "error making request for bulk delete user")
 	}
 
-	// user, err := parseRawUserResponseCustomProperties(body)
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request for bulk identify user")
+		return nil, errors.Wrap(err, "error parsing request for bulk delete user")
 	}
 
-	return bulkDeleteRes, nil
+	return bulkDeleteRes.BulkOperation, nil
 }
 
-func (cds *usersService) GetChannelData(ctx context.Context, getChannelDataReq *GetUserChannelDataRequest) (*GetUserChannelDataResponse, error) {
+func (us *usersService) GetFeed(ctx context.Context, getFeedReq *GetFeedRequest) (*Feed, error) {
+	path := feedsAPIPath(getFeedReq.UserID, getFeedReq.FeedID)
+
+	req, err := us.client.newRequest(http.MethodGet, path, getFeedReq)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request for get feed")
+	}
+
+	getFeedRes := &GetFeedResponse{Feed: &Feed{}}
+	_, err = us.client.do(ctx, req, getFeedRes.Feed)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request for get feed")
+	}
+
+	return getFeedRes.Feed, nil
+}
+
+func (cds *usersService) GetChannelData(ctx context.Context, getChannelDataReq *GetUserChannelDataRequest) (map[string]interface{}, error) {
 	path := usersChannelDataAPIPath(getChannelDataReq.UserID, getChannelDataReq.ChannelID)
 
 	req, err := cds.client.newRequest(http.MethodGet, path, nil)
@@ -371,10 +380,10 @@ func (cds *usersService) GetChannelData(ctx context.Context, getChannelDataReq *
 		return nil, errors.Wrap(err, "error parsing request for channel data for user")
 	}
 
-	return channelDataResponse, nil
+	return channelDataResponse.ChannelData, nil
 }
 
-func (us *usersService) SetChannelData(ctx context.Context, getChannelDataReq *SetUserChannelDataRequest) (*SetUserChannelDataResponse, error) {
+func (us *usersService) SetChannelData(ctx context.Context, getChannelDataReq *SetUserChannelDataRequest) (map[string]interface{}, error) {
 	path := usersChannelDataAPIPath(getChannelDataReq.UserID, getChannelDataReq.ChannelID)
 
 	req, err := us.client.newRequest(http.MethodPut, path, getChannelDataReq)
@@ -392,7 +401,7 @@ func (us *usersService) SetChannelData(ctx context.Context, getChannelDataReq *S
 		return nil, errors.Wrap(err, "error parsing request to set channel data for user")
 	}
 
-	return channelDataResponse, nil
+	return channelDataResponse.ChannelData, nil
 }
 
 func (us *usersService) DeleteChannelData(ctx context.Context, deleteUserChannelDataReq *DeleteUserChannelDataRequest) error {
@@ -463,25 +472,4 @@ func parseRawUserResponseCustomProperties(rawResponse []byte) (*User, error) {
 	user.CustomProperties = customProperties
 
 	return &user, nil
-}
-
-func feedsAPIPath(userID string, FeedID string) string {
-	return fmt.Sprintf("%s/feeds/%s", UsersAPIPath(userID), FeedID)
-}
-
-func (us *usersService) GetFeed(ctx context.Context, getFeedReq *GetFeedRequest) (*GetFeedResponse, error) {
-	path := feedsAPIPath(getFeedReq.UserID, getFeedReq.FeedID)
-
-	req, err := us.client.newRequest(http.MethodGet, path, getFeedReq)
-	if err != nil {
-		return nil, errors.Wrap(err, "error creating request for get feed")
-	}
-
-	getFeedRes := &GetFeedResponse{Feed: &Feed{}}
-	_, err = us.client.do(ctx, req, getFeedRes.Feed)
-	if err != nil {
-		return nil, errors.Wrap(err, "error making request for get feed")
-	}
-
-	return getFeedRes, nil
 }

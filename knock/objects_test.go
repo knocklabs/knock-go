@@ -25,8 +25,6 @@ func TestObjects_Set(t *testing.T) {
 
 	ctx := context.Background()
 
-	// ctx, client := RealTestClient() //TODO remove any test client commented code
-
 	have, err := client.Objects.Set(ctx, &SetObjectRequest{
 		ID:           "cool-object2",
 		CollectionID: "test-collection",
@@ -36,14 +34,12 @@ func TestObjects_Set(t *testing.T) {
 	})
 
 	fmt.Printf("%+v", have)
-	want := &SetObjectResponse{
-		Object: &Object{
-			ObjectID:     "cool-object2",
-			CollectionID: "test-collection",
-			UpdatedAt:    ParseRFC3339Timestamp("2022-05-26T13:59:20.701Z"),
-			Properties: map[string]interface{}{
-				"nice": "cool",
-			},
+	want := &Object{
+		ObjectID:     "cool-object2",
+		CollectionID: "test-collection",
+		UpdatedAt:    ParseRFC3339Timestamp("2022-05-26T13:59:20.701Z"),
+		Properties: map[string]interface{}{
+			"nice": "cool",
 		},
 	}
 
@@ -66,22 +62,17 @@ func TestObjects_Get(t *testing.T) {
 
 	ctx := context.Background()
 
-	// ctx, client := RealTestClient() //TODO remove any test client commented code
-
 	have, err := client.Objects.Get(ctx, &GetObjectRequest{
 		ID:           "cool-object2",
 		CollectionID: "test-collection",
 	})
 
-	fmt.Printf("%+v", have)
-	want := &GetObjectResponse{
-		Object: &Object{
-			ObjectID:     "cool-object2",
-			CollectionID: "test-collection",
-			UpdatedAt:    ParseRFC3339Timestamp("2022-05-26T13:59:20.701Z"),
-			Properties: map[string]interface{}{
-				"nice": "cool",
-			},
+	want := &Object{
+		ObjectID:     "cool-object2",
+		CollectionID: "test-collection",
+		UpdatedAt:    ParseRFC3339Timestamp("2022-05-26T13:59:20.701Z"),
+		Properties: map[string]interface{}{
+			"nice": "cool",
 		},
 	}
 
@@ -92,7 +83,6 @@ func TestObjects_Get(t *testing.T) {
 func TestObjects_GetMessages(t *testing.T) {
 	c := qt.New(t)
 
-	// TODO use real api response, this is from docs
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		out := `{"entries":[{"__typename":"Message","__cursor":"g3QAAAABZAACaWRtAAAAGzFzTXRJc1J2WnRZZjg2YU9ma00yUENwQzZYYw==","id":"1rjI9XBgWQ6EUA3D3Ul3VjUimOD","channel_id":"0bfd9f86-56b0-41f0-ade3-dc5cc6a69bb8","recipient":{"id":"project_1","collection":"projects"},"workflow":"merged-changes","tenant":null,"status":"delivered","read_at":null,"seen_at":null,"archived_at":null,"inserted_at":"2021-03-05T12:00:00Z","updated_at":"2021-03-05T12:00:00Z","source":{"__typename":"WorkflowSource","key":"merged-changes","version_id":"7251cd3f-0028-4d1a-9466-ee79522ba3de"},"data":{"foo":"bar"}}],"page_info":{"__typename":"PageInfo","after":null,"before":null,"page_size":50}}`
@@ -105,44 +95,36 @@ func TestObjects_GetMessages(t *testing.T) {
 
 	ctx := context.Background()
 
-	// ctx, client := RealTestClient() //TODO remove any test client commented code
-
-	have, err := client.Objects.GetMessages(ctx, &GetObjectMessagesRequest{
+	haveMessages, _, err := client.Objects.GetMessages(ctx, &GetObjectMessagesRequest{
 		ObjectID:     "cool-object2",
 		CollectionID: "test-collection",
 	})
 
-	fmt.Printf("%+v", have)
-	want := &GetObjectMessagesResponse{
-		Items: []*ObjectMessage{
-			{
-				ID:        "1rjI9XBgWQ6EUA3D3Ul3VjUimOD",
-				Cursor:    "g3QAAAABZAACaWRtAAAAGzFzTXRJc1J2WnRZZjg2YU9ma00yUENwQzZYYw==",
-				Workflow:  "merged-changes",
-				ChannelID: "0bfd9f86-56b0-41f0-ade3-dc5cc6a69bb8",
-				Status:    "delivered",
-				Recipient: map[string]interface{}{
-					"collection": "projects",
-					"id":         "project_1",
-				},
-				Data: map[string]interface{}{
-					"foo": "bar",
-				},
-				Source: &NotificationSource{
-					Key:       "merged-changes",
-					VersionID: "7251cd3f-0028-4d1a-9466-ee79522ba3de",
-				},
-				InsertedAt: ParseRFC3339Timestamp("2021-03-05T12:00:00Z"),
-				UpdatedAt:  ParseRFC3339Timestamp("2021-03-05T12:00:00Z"),
+	want := []*ObjectMessage{
+		{
+			ID:        "1rjI9XBgWQ6EUA3D3Ul3VjUimOD",
+			Cursor:    "g3QAAAABZAACaWRtAAAAGzFzTXRJc1J2WnRZZjg2YU9ma00yUENwQzZYYw==",
+			Workflow:  "merged-changes",
+			ChannelID: "0bfd9f86-56b0-41f0-ade3-dc5cc6a69bb8",
+			Status:    "delivered",
+			Recipient: map[string]interface{}{
+				"collection": "projects",
+				"id":         "project_1",
 			},
-		},
-		PageInfo: PageInfo{
-			PageSize: 50,
+			Data: map[string]interface{}{
+				"foo": "bar",
+			},
+			Source: &NotificationSource{
+				Key:       "merged-changes",
+				VersionID: "7251cd3f-0028-4d1a-9466-ee79522ba3de",
+			},
+			InsertedAt: ParseRFC3339Timestamp("2021-03-05T12:00:00Z"),
+			UpdatedAt:  ParseRFC3339Timestamp("2021-03-05T12:00:00Z"),
 		},
 	}
 
 	c.Assert(err, qt.IsNil)
-	c.Assert(have, qt.DeepEquals, want)
+	c.Assert(haveMessages, qt.DeepEquals, want)
 }
 
 func TestObjects_Delete(t *testing.T) {
@@ -180,18 +162,14 @@ func TestObjects_GetChannelData(t *testing.T) {
 
 	ctx := context.Background()
 
-	// ctx, client := RealTestClient()
-
 	getObjectChannelDataResponse, err := client.Objects.GetChannelData(ctx, &GetObjectChannelDataRequest{
 		Collection: "test-collection",
 		ObjectID:   "cool-object",
 		ChannelID:  "2b70de44-24e8-40fe-9d54-d16d54e22374",
 	})
 
-	want := &GetObjectChannelDataResponse{
-		ChannelData: map[string]interface{}{
-			"connections": []interface{}{map[string]interface{}{"incoming_webhook": map[string]interface{}{"url": string("cool2")}}},
-		},
+	want := map[string]interface{}{
+		"connections": []interface{}{map[string]interface{}{"incoming_webhook": map[string]interface{}{"url": string("cool2")}}},
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -224,10 +202,8 @@ func TestObjects_SetChannelData(t *testing.T) {
 		},
 	})
 
-	want := &GetObjectChannelDataResponse{
-		ChannelData: map[string]interface{}{
-			"connections": []interface{}{map[string]interface{}{"incoming_webhook": map[string]interface{}{"url": string("cool2")}}},
-		},
+	want := map[string]interface{}{
+		"connections": []interface{}{map[string]interface{}{"incoming_webhook": map[string]interface{}{"url": string("cool2")}}},
 	}
 
 	c.Assert(err, qt.IsNil)

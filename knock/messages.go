@@ -10,16 +10,21 @@ import (
 	"github.com/pkg/errors"
 )
 
+// MessagesService is an interface for communicating with the Knock
+// Messages API endpoints.
 type MessagesService interface {
-	List(context.Context, *ListMessagesRequest) (*ListMessagesResponse, error)
-	Get(context.Context, *GetMessageRequest) (*GetMessageResponse, error)
-	GetEvents(context.Context, *GetMessageEventsRequest) (*GetMessageEventsResponse, error)
-	GetActivities(context.Context, *GetMessageActivitiesRequest) (*GetMessageActivitiesResponse, error)
-	GetContent(context.Context, *GetMessageContentRequest) (*GetMessageContentResponse, error)
-	SetStatus(context.Context, *SetStatusRequest) (*SetStatusResponse, error)
-	DeleteStatus(context.Context, *DeleteStatusRequest) (*DeleteStatusResponse, error)
-	BatchSetStatus(context.Context, *BatchSetStatusRequest) (*BatchSetStatusResponse, error)
-	BulkChangeChannelStatus(context.Context, *BulkChangeChannelStatusRequest) (*BulkChangeChannelStatusResponse, error)
+	List(context.Context, *ListMessagesRequest) ([]*Message, *PageInfo, error)
+
+	Get(context.Context, *GetMessageRequest) (*Message, error)
+	GetEvents(context.Context, *GetMessageEventsRequest) ([]*MessageEvent, *PageInfo, error)
+	GetActivities(context.Context, *GetMessageActivitiesRequest) ([]*MessageActivity, *PageInfo, error)
+	GetContent(context.Context, *GetMessageContentRequest) (*MessageContent, error)
+
+	SetStatus(context.Context, *SetStatusRequest) (*Message, error)
+	DeleteStatus(context.Context, *DeleteStatusRequest) (*Message, error)
+
+	BatchSetStatus(context.Context, *BatchSetStatusRequest) ([]*Message, error)
+	BulkChangeChannelStatus(context.Context, *BulkChangeChannelStatusRequest) (*BulkOperation, error)
 }
 
 type messagesService struct {
@@ -32,12 +37,6 @@ func NewMessagesService(client *Client) *messagesService {
 	return &messagesService{
 		client: client,
 	}
-}
-
-const messagesAPIBasePath = "/v1/messages"
-
-func messagesAPIPath(messageID string) string {
-	return fmt.Sprintf("%s/%s", messagesAPIBasePath, messageID)
 }
 
 type EngagementStatus string
@@ -60,11 +59,6 @@ const (
 	Unread     MessageStatus = "unread"
 )
 
-type NotificationSource struct {
-	Key       string `json:"key"`
-	VersionID string `json:"version_id"`
-}
-
 type Message struct {
 	Cursor     string                 `json:"__cursor"`
 	ID         string                 `json:"id"`
@@ -80,6 +74,11 @@ type Message struct {
 	UpdatedAt  time.Time              `json:"updated_at"`
 	Source     *NotificationSource    `json:"source"`
 	Data       map[string]interface{} `json:"data"`
+}
+
+type NotificationSource struct {
+	Key       string `json:"key"`
+	VersionID string `json:"version_id"`
 }
 
 type MessageEvent struct {
@@ -104,6 +103,7 @@ type MessageContent struct {
 	InsertedAt time.Time              `json:"inserted_at"`
 }
 
+// requests and responses
 type ListMessagesRequest struct {
 	PageSize  int                `url:"page_size,omitempty"`
 	Cursor    string             `url:"page_size,omitempty"`
@@ -116,7 +116,7 @@ type ListMessagesRequest struct {
 }
 type ListMessagesResponse struct {
 	Items    []*Message `json:"items"`
-	PageInfo PageInfo   `json:"page_info"`
+	PageInfo *PageInfo  `json:"page_info"`
 }
 
 type GetMessageRequest struct {
@@ -125,16 +125,17 @@ type GetMessageRequest struct {
 type GetMessageResponse struct {
 	Message *Message
 }
+
 type GetMessageEventsRequest = GetMessageRequest
 type GetMessageEventsResponse struct {
 	Items    []*MessageEvent `json:"items"`
-	PageInfo PageInfo        `json:"page_info"`
+	PageInfo *PageInfo       `json:"page_info"`
 }
 
 type GetMessageActivitiesRequest = GetMessageRequest
 type GetMessageActivitiesResponse struct {
 	Activities []*MessageActivity `json:"items"`
-	PageInfo   PageInfo           `json:"page_info"`
+	PageInfo   *PageInfo          `json:"page_info"`
 }
 
 type GetMessageContentRequest = GetMessageRequest
@@ -173,31 +174,37 @@ type BulkChangeChannelStatusResponse struct {
 	BulkOperation *BulkOperation
 }
 
-func (ms *messagesService) List(ctx context.Context, listReq *ListMessagesRequest) (*ListMessagesResponse, error) {
+const messagesAPIBasePath = "/v1/messages"
+
+func messagesAPIPath(messageID string) string {
+	return fmt.Sprintf("%s/%s", messagesAPIBasePath, messageID)
+}
+
+func (ms *messagesService) List(ctx context.Context, listReq *ListMessagesRequest) ([]*Message, *PageInfo, error) {
 
 	queryString, err := query.Values(listReq)
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to list messages")
+		return nil, nil, errors.Wrap(err, "error parsing request to list messages")
 	}
 	path := fmt.Sprintf("%s?%s", messagesAPIBasePath, queryString.Encode())
 
 	req, err := ms.client.newRequest(http.MethodGet, path, listReq)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating request to list messages")
+		return nil, nil, errors.Wrap(err, "error creating request to list messages")
 	}
-	listMessagesResponse := &ListMessagesResponse{}
+	listRes := &ListMessagesResponse{}
 
-	_, err = ms.client.do(ctx, req, listMessagesResponse)
+	_, err = ms.client.do(ctx, req, listRes)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request to list messages")
+		return nil, nil, errors.Wrap(err, "error making request to list messages")
 	}
 
-	return listMessagesResponse, nil
+	return listRes.Items, listRes.PageInfo, nil
 }
 
-func (ms *messagesService) Get(ctx context.Context, getReq *GetMessageRequest) (*GetMessageResponse, error) {
+func (ms *messagesService) Get(ctx context.Context, getReq *GetMessageRequest) (*Message, error) {
 
 	path := messagesAPIPath(getReq.ID)
 
@@ -206,55 +213,55 @@ func (ms *messagesService) Get(ctx context.Context, getReq *GetMessageRequest) (
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to list messages")
 	}
-	getMessageResponse := &GetMessageResponse{Message: &Message{}}
-	_, err = ms.client.do(ctx, req, getMessageResponse.Message)
+	getRes := &GetMessageResponse{Message: &Message{}}
+	_, err = ms.client.do(ctx, req, getRes.Message)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to list messages")
 	}
 
-	return getMessageResponse, nil
+	return getRes.Message, nil
 }
 
-func (ms *messagesService) GetEvents(ctx context.Context, getEventsReq *GetMessageEventsRequest) (*GetMessageEventsResponse, error) {
+func (ms *messagesService) GetEvents(ctx context.Context, getEventsReq *GetMessageEventsRequest) ([]*MessageEvent, *PageInfo, error) {
 
 	path := fmt.Sprintf("%s/events", messagesAPIPath(getEventsReq.ID))
 
 	req, err := ms.client.newRequest(http.MethodGet, path, nil)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating request to list message events")
+		return nil, nil, errors.Wrap(err, "error creating request to list message events")
 	}
 	getMessageEventsResponse := &GetMessageEventsResponse{}
 	_, err = ms.client.do(ctx, req, getMessageEventsResponse)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request to list message events")
+		return nil, nil, errors.Wrap(err, "error making request to list message events")
 	}
 
-	return getMessageEventsResponse, nil
+	return getMessageEventsResponse.Items, getMessageEventsResponse.PageInfo, nil
 }
 
-func (ms *messagesService) GetActivities(ctx context.Context, getActivitiesReq *GetMessageActivitiesRequest) (*GetMessageActivitiesResponse, error) {
+func (ms *messagesService) GetActivities(ctx context.Context, getActivitiesReq *GetMessageActivitiesRequest) ([]*MessageActivity, *PageInfo, error) {
 
 	path := fmt.Sprintf("%s/activities", messagesAPIPath(getActivitiesReq.ID))
 
 	req, err := ms.client.newRequest(http.MethodGet, path, nil)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating request to list message activities")
+		return nil, nil, errors.Wrap(err, "error creating request to list message activities")
 	}
 	getMessageActivitiesResponse := &GetMessageActivitiesResponse{}
 	_, err = ms.client.do(ctx, req, getMessageActivitiesResponse)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request to list message activities")
+		return nil, nil, errors.Wrap(err, "error making request to list message activities")
 	}
 
-	return getMessageActivitiesResponse, nil
+	return getMessageActivitiesResponse.Activities, getMessageActivitiesResponse.PageInfo, nil
 }
 
-func (ms *messagesService) GetContent(ctx context.Context, getContentReq *GetMessageContentRequest) (*GetMessageContentResponse, error) {
+func (ms *messagesService) GetContent(ctx context.Context, getContentReq *GetMessageContentRequest) (*MessageContent, error) {
 
 	path := fmt.Sprintf("%s/activities", messagesAPIPath(getContentReq.ID))
 
@@ -270,10 +277,10 @@ func (ms *messagesService) GetContent(ctx context.Context, getContentReq *GetMes
 		return nil, errors.Wrap(err, "error making request to list message activities")
 	}
 
-	return getMessageContentResponse, nil
+	return getMessageContentResponse.Content, nil
 }
 
-func (ms *messagesService) SetStatus(ctx context.Context, setStatusReq *SetStatusRequest) (*SetStatusResponse, error) {
+func (ms *messagesService) SetStatus(ctx context.Context, setStatusReq *SetStatusRequest) (*Message, error) {
 
 	path := fmt.Sprintf("%s/%s", messagesAPIPath(setStatusReq.ID), setStatusReq.Status)
 
@@ -289,10 +296,10 @@ func (ms *messagesService) SetStatus(ctx context.Context, setStatusReq *SetStatu
 		return nil, errors.Wrap(err, "error making request to set message status")
 	}
 
-	return setMessageStatusResponse, nil
+	return setMessageStatusResponse.Message, nil
 }
 
-func (ms *messagesService) DeleteStatus(ctx context.Context, deleteStatusReq *DeleteStatusRequest) (*DeleteStatusResponse, error) {
+func (ms *messagesService) DeleteStatus(ctx context.Context, deleteStatusReq *DeleteStatusRequest) (*Message, error) {
 
 	path := fmt.Sprintf("%s/%s", messagesAPIPath(deleteStatusReq.ID), deleteStatusReq.Status)
 
@@ -308,10 +315,10 @@ func (ms *messagesService) DeleteStatus(ctx context.Context, deleteStatusReq *De
 		return nil, errors.Wrap(err, "error making request to delete message status")
 	}
 
-	return deleteMessageStatusResponse, nil
+	return deleteMessageStatusResponse.Message, nil
 }
 
-func (ms *messagesService) BatchSetStatus(ctx context.Context, batchSetStatus *BatchSetStatusRequest) (*BatchSetStatusResponse, error) {
+func (ms *messagesService) BatchSetStatus(ctx context.Context, batchSetStatus *BatchSetStatusRequest) ([]*Message, error) {
 
 	path := fmt.Sprintf("%s/%s", messagesAPIPath("batch"), batchSetStatus.Status)
 
@@ -329,10 +336,10 @@ func (ms *messagesService) BatchSetStatus(ctx context.Context, batchSetStatus *B
 		return nil, errors.Wrap(err, "error making request to set message status")
 	}
 
-	return &batchSetStatusRes, nil
+	return batchSetStatusRes.Messages, nil
 }
 
-func (ms *messagesService) BulkChangeChannelStatus(ctx context.Context, bulkStatusReq *BulkChangeChannelStatusRequest) (*BulkChangeChannelStatusResponse, error) {
+func (ms *messagesService) BulkChangeChannelStatus(ctx context.Context, bulkStatusReq *BulkChangeChannelStatusRequest) (*BulkOperation, error) {
 
 	path := fmt.Sprintf("v1/channels/%s/messages/bulk/%s", bulkStatusReq.ChannelID, bulkStatusReq.Status)
 
@@ -350,5 +357,5 @@ func (ms *messagesService) BulkChangeChannelStatus(ctx context.Context, bulkStat
 		return nil, errors.Wrap(err, "error making request to set message status")
 	}
 
-	return &batchSetStatusRes, nil
+	return batchSetStatusRes.BulkOperation, nil
 }

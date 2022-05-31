@@ -9,8 +9,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+// BulkOperationsService is an interface for communicating with API endpoints that return BulkOperations,
+// which are used by other services including the UsersService and MessagesService
 type BulkOperationsService interface {
-	Get(context.Context, *GetBulkOperationRequest) (*GetBulkOperationResponse, error)
+	Get(context.Context, *GetBulkOperationRequest) (*BulkOperation, error)
 }
 
 type bulkOperationsService struct {
@@ -59,21 +61,21 @@ func bulkOperationsAPIPath(id string) string {
 	return fmt.Sprintf("/v1/bulk_operations/%s", id)
 }
 
-func (bos *bulkOperationsService) Get(ctx context.Context, getBulkMessagesRequest *GetBulkOperationRequest) (*GetBulkOperationResponse, error) {
+func (bos *bulkOperationsService) Get(ctx context.Context, getBulkOperationReq *GetBulkOperationRequest) (*BulkOperation, error) {
 
-	path := bulkOperationsAPIPath(getBulkMessagesRequest.ID)
+	path := bulkOperationsAPIPath(getBulkOperationReq.ID)
 
 	req, err := bos.client.newRequest(http.MethodGet, path, nil)
-
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to get bulk operation")
 	}
-	getMessageResponse := &GetBulkOperationResponse{BulkOperation: &BulkOperation{}}
-	_, err = bos.client.do(ctx, req, getMessageResponse.BulkOperation)
+
+	GetBulkOperationResponse := &GetBulkOperationResponse{BulkOperation: &BulkOperation{}}
+	_, err = bos.client.do(ctx, req, GetBulkOperationResponse.BulkOperation)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to get bulk operation")
 	}
 
-	return getMessageResponse, nil
+	return GetBulkOperationResponse.BulkOperation, nil
 }

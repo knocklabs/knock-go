@@ -11,7 +11,7 @@ import (
 // WorkflowsService is an interface for communicating with the Knock
 // Workflows API endpoints.
 type WorkflowsService interface {
-	Trigger(context.Context, *TriggerWorkflowRequest) (*TriggerWorkflowResponse, error)
+	Trigger(context.Context, *TriggerWorkflowRequest) (string, error)
 	Cancel(context.Context, *CancelWorkflowRequest) error
 }
 
@@ -52,21 +52,21 @@ func workflowsAPIPath(workflowId string) string {
 	return fmt.Sprintf("v1/workflows/%s", workflowId)
 }
 
-func (ws *workflowsService) Trigger(ctx context.Context, triggerReq *TriggerWorkflowRequest) (*TriggerWorkflowResponse, error) {
+func (ws *workflowsService) Trigger(ctx context.Context, triggerReq *TriggerWorkflowRequest) (string, error) {
 	path := fmt.Sprintf("%s/trigger", workflowsAPIPath(triggerReq.Workflow))
 	req, err := ws.client.newRequest(http.MethodPost, path, triggerReq)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating request for trigger workflow")
+		return "", errors.Wrap(err, "error creating request for trigger workflow")
 	}
 	workflowResponse := &TriggerWorkflowResponse{}
 	_, err = ws.client.do(ctx, req, workflowResponse)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request for trigger workflow")
+		return "", errors.Wrap(err, "error making request for trigger workflow")
 	}
 
-	return workflowResponse, nil
+	return workflowResponse.WorkflowRunId, nil
 }
 
 func (ws *workflowsService) Cancel(ctx context.Context, cancelReq *CancelWorkflowRequest) error {

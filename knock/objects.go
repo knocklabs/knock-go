@@ -10,19 +10,19 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ObjectsService is an interface for communicating with the Knock
+// Objects API endpoints.
 type ObjectsService interface {
-	Get(context.Context, *GetObjectRequest) (*GetObjectResponse, error)
-	GetMessages(context.Context, *GetObjectMessagesRequest) (*GetObjectMessagesResponse, error)
-	Set(context.Context, *SetObjectRequest) (*SetObjectResponse, error)
+	Get(context.Context, *GetObjectRequest) (*Object, error)
+	Set(context.Context, *SetObjectRequest) (*Object, error)
 	Delete(context.Context, *DeleteObjectRequest) error
-	GetChannelData(context.Context, *GetObjectChannelDataRequest) (*GetObjectChannelDataResponse, error)
-	SetChannelData(context.Context, *SetObjectChannelDataRequest) (*SetObjectChannelDataResponse, error)
+
+	GetMessages(context.Context, *GetObjectMessagesRequest) ([]*ObjectMessage, *PageInfo, error)
+
+	GetChannelData(context.Context, *GetObjectChannelDataRequest) (map[string]interface{}, error)
+	SetChannelData(context.Context, *SetObjectChannelDataRequest) (map[string]interface{}, error)
 	DeleteChannelData(context.Context, *DeleteObjectChannelDataRequest) error
 }
-
-type ChannelDataService interface {
-}
-
 type objectsService struct {
 	client *Client
 }
@@ -68,6 +68,15 @@ type GetObjectResponse struct {
 	Object *Object
 }
 
+type SetObjectRequest struct {
+	ID           string                 `json:"-"`
+	CollectionID string                 `json:"-"`
+	Properties   map[string]interface{} `json:""`
+}
+type SetObjectResponse = GetObjectResponse
+
+type DeleteObjectRequest = GetObjectRequest
+
 type GetObjectMessagesRequest struct {
 	ObjectID     string `url:"-"`
 	CollectionID string `url:"-"`
@@ -82,17 +91,9 @@ type GetObjectMessagesRequest struct {
 }
 type GetObjectMessagesResponse struct {
 	Items    []*ObjectMessage `json:"entries"`
-	PageInfo PageInfo         `json:"page_info"`
+	PageInfo *PageInfo        `json:"page_info"`
 }
 
-type SetObjectRequest struct {
-	ID           string                 `json:"-"`
-	CollectionID string                 `json:"-"`
-	Properties   map[string]interface{} `json:""`
-}
-type SetObjectResponse = GetObjectResponse
-
-type DeleteObjectRequest = GetObjectRequest
 type GetObjectChannelDataRequest struct {
 	Collection string
 	ChannelID  string
@@ -119,7 +120,7 @@ func objectChannelDataAPIPath(collection string, objectID string, channelID stri
 	return fmt.Sprintf("v1/objects/%s/%s/channel_data/%s", collection, objectID, channelID)
 }
 
-func (os *objectsService) Get(ctx context.Context, getObjectRequest *GetObjectRequest) (*GetObjectResponse, error) {
+func (os *objectsService) Get(ctx context.Context, getObjectRequest *GetObjectRequest) (*Object, error) {
 	path := objectAPIPath(getObjectRequest.CollectionID, getObjectRequest.ID)
 
 	req, err := os.client.newRequest(http.MethodGet, path, nil)
@@ -133,31 +134,31 @@ func (os *objectsService) Get(ctx context.Context, getObjectRequest *GetObjectRe
 		return nil, errors.Wrap(err, "error making request for get object")
 	}
 
-	return getObjectResponse, nil
+	return getObjectResponse.Object, nil
 }
 
-func (os *objectsService) GetMessages(ctx context.Context, getObjectMessagesRequest *GetObjectMessagesRequest) (*GetObjectMessagesResponse, error) {
+func (os *objectsService) GetMessages(ctx context.Context, getObjectMessagesRequest *GetObjectMessagesRequest) ([]*ObjectMessage, *PageInfo, error) {
 	queryString, err := query.Values(getObjectMessagesRequest)
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing query parameters to list object messages")
+		return nil, nil, errors.Wrap(err, "error parsing query parameters to list object messages")
 	}
 	path := fmt.Sprintf("%s/messages?%s", objectAPIPath(getObjectMessagesRequest.CollectionID, getObjectMessagesRequest.ObjectID), queryString.Encode())
 
 	req, err := os.client.newRequest(http.MethodGet, path, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating request to list object messages")
+		return nil, nil, errors.Wrap(err, "error creating request to list object messages")
 	}
 
 	getObjectMessagesResponse := &GetObjectMessagesResponse{}
 	_, err = os.client.do(ctx, req, getObjectMessagesResponse)
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request to list object messages")
+		return nil, nil, errors.Wrap(err, "error making request to list object messages")
 	}
 
-	return getObjectMessagesResponse, nil
+	return getObjectMessagesResponse.Items, getObjectMessagesResponse.PageInfo, nil
 }
 
-func (os *objectsService) Set(ctx context.Context, setObjectRequest *SetObjectRequest) (*SetObjectResponse, error) {
+func (os *objectsService) Set(ctx context.Context, setObjectRequest *SetObjectRequest) (*Object, error) {
 	path := objectAPIPath(setObjectRequest.CollectionID, setObjectRequest.ID)
 
 	if len(setObjectRequest.Properties) == 0 {
@@ -175,7 +176,7 @@ func (os *objectsService) Set(ctx context.Context, setObjectRequest *SetObjectRe
 		return nil, errors.Wrap(err, "error making request for set object")
 	}
 
-	return setObjectResponse, nil
+	return setObjectResponse.Object, nil
 }
 
 func (os *objectsService) Delete(ctx context.Context, deleteObjectRequest *DeleteObjectRequest) error {
@@ -194,7 +195,7 @@ func (os *objectsService) Delete(ctx context.Context, deleteObjectRequest *Delet
 	return nil
 }
 
-func (us *objectsService) GetChannelData(ctx context.Context, getChannelDataReq *GetObjectChannelDataRequest) (*GetObjectChannelDataResponse, error) {
+func (us *objectsService) GetChannelData(ctx context.Context, getChannelDataReq *GetObjectChannelDataRequest) (map[string]interface{}, error) {
 	path := objectChannelDataAPIPath(getChannelDataReq.Collection, getChannelDataReq.ObjectID, getChannelDataReq.ChannelID)
 
 	req, err := us.client.newRequest(http.MethodGet, path, nil)
@@ -212,10 +213,10 @@ func (us *objectsService) GetChannelData(ctx context.Context, getChannelDataReq 
 		return nil, errors.Wrap(err, "error parsing request to get object channel data")
 	}
 
-	return channelDataResponse, nil
+	return channelDataResponse.ChannelData, nil
 }
 
-func (us *objectsService) SetChannelData(ctx context.Context, getChannelDataReq *SetObjectChannelDataRequest) (*SetObjectChannelDataResponse, error) {
+func (us *objectsService) SetChannelData(ctx context.Context, getChannelDataReq *SetObjectChannelDataRequest) (map[string]interface{}, error) {
 	path := objectChannelDataAPIPath(getChannelDataReq.Collection, getChannelDataReq.ObjectID, getChannelDataReq.ChannelID)
 
 	req, err := us.client.newRequest(http.MethodPut, path, getChannelDataReq)
@@ -233,7 +234,7 @@ func (us *objectsService) SetChannelData(ctx context.Context, getChannelDataReq 
 		return nil, errors.Wrap(err, "error parsing request to set object channel data")
 	}
 
-	return channelDataResponse, nil
+	return channelDataResponse.ChannelData, nil
 }
 
 func (us *objectsService) DeleteChannelData(ctx context.Context, deleteObjectChannelDataReq *DeleteObjectChannelDataRequest) error {

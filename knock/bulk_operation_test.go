@@ -28,15 +28,13 @@ func TestBulkOperation_get(t *testing.T) {
 		ID: "b4f6f61e-3634-4e80-af0d-9c83e9acc6f3",
 	})
 
-	want := &GetBulkOperationResponse{
-		BulkOperation: &BulkOperation{
-			ID:                 "b4f6f61e-3634-4e80-af0d-9c83e9acc6f3",
-			ProgressPath:       "/v1/bulk_operations/b4f6f61e-3634-4e80-af0d-9c83e9acc6f3",
-			Status:             BulkOperationStatus(Queued),
-			InsertedAt:         ParseRFC3339Timestamp("2021-03-05T12:00:00Z"),
-			UpdatedAt:          ParseRFC3339Timestamp("2021-03-05T12:00:00Z"),
-			EstimatedTotalRows: 42,
-		},
+	want := &BulkOperation{
+		ID:                 "b4f6f61e-3634-4e80-af0d-9c83e9acc6f3",
+		ProgressPath:       "/v1/bulk_operations/b4f6f61e-3634-4e80-af0d-9c83e9acc6f3",
+		Status:             BulkOperationStatus(Queued),
+		InsertedAt:         ParseRFC3339Timestamp("2021-03-05T12:00:00Z"),
+		UpdatedAt:          ParseRFC3339Timestamp("2021-03-05T12:00:00Z"),
+		EstimatedTotalRows: 42,
 	}
 
 	c.Assert(err, qt.IsNil)

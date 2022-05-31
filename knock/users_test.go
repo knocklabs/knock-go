@@ -34,18 +34,16 @@ func TestUsers_Get(t *testing.T) {
 		ID: id,
 	})
 
-	want := &GetUserResponse{
-		User: &User{
-			Name:        name,
-			ID:          id,
-			Email:       email,
-			PhoneNumber: phone_number,
-			CreatedAt:   time.Time{},
-			UpdatedAt:   time.Date(2022, time.May, 15, 22, 19, 44, 915000000, time.UTC),
-			CustomProperties: map[string]interface{}{
-				"welcome":     "to jurassic park",
-				"middle-name": "alfred",
-			},
+	want := &User{
+		Name:        name,
+		ID:          id,
+		Email:       email,
+		PhoneNumber: phone_number,
+		CreatedAt:   time.Time{},
+		UpdatedAt:   time.Date(2022, time.May, 15, 22, 19, 44, 915000000, time.UTC),
+		CustomProperties: map[string]interface{}{
+			"welcome":     "to jurassic park",
+			"middle-name": "alfred",
 		},
 	}
 
@@ -81,18 +79,16 @@ func TestUsers_Identify(t *testing.T) {
 			},
 		}})
 
-	want := &IdentifyUserResponse{
-		User: &User{
-			Name:        name,
-			ID:          id,
-			Email:       email,
-			PhoneNumber: phone_number,
-			CreatedAt:   time.Time{},
-			UpdatedAt:   time.Date(2022, time.May, 15, 22, 19, 44, 915000000, time.UTC),
-			CustomProperties: map[string]interface{}{
-				"welcome":     "to jurassic park",
-				"middle-name": "alfred",
-			},
+	want := &User{
+		Name:        name,
+		ID:          id,
+		Email:       email,
+		PhoneNumber: phone_number,
+		CreatedAt:   time.Time{},
+		UpdatedAt:   time.Date(2022, time.May, 15, 22, 19, 44, 915000000, time.UTC),
+		CustomProperties: map[string]interface{}{
+			"welcome":     "to jurassic park",
+			"middle-name": "alfred",
 		},
 	}
 
@@ -120,18 +116,16 @@ func TestUsers_Merge(t *testing.T) {
 		FromUserID: "cool2",
 	})
 
-	want := &MergeUserResponse{
-		User: &User{
-			ID:          "nice2",
-			Name:        "nice2",
-			Email:       "nice2@nice2.nice2",
-			PhoneNumber: "100",
-			CustomProperties: map[string]interface{}{
-				"cool": "cool",
-				"nice": "nice",
-			},
-			UpdatedAt: time.Date(2022, time.May, 18, 12, 03, 36, 128000000, time.UTC),
+	want := &User{
+		ID:          "nice2",
+		Name:        "nice2",
+		Email:       "nice2@nice2.nice2",
+		PhoneNumber: "100",
+		CustomProperties: map[string]interface{}{
+			"cool": "cool",
+			"nice": "nice",
 		},
+		UpdatedAt: time.Date(2022, time.May, 18, 12, 03, 36, 128000000, time.UTC),
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -154,31 +148,28 @@ func TestUsers_GetMessages(t *testing.T) {
 
 	ctx := context.Background()
 
-	// ctx, client := RealTestClient()
 	have, err := client.Users.GetMessages(ctx, &GetUserMessagesRequest{
 		ID:       "tom",
 		PageSize: 1,
 	})
 
-	want := &GetUserMessagesResponse{
-		Messages: []*Message{
-			{
-				Cursor:     "big-cursor",
-				ID:         "29GmBF0R3ZG506vyc3H9mDa",
-				ChannelID:  "5da042d7-02ee-46ed-8b91-9b5717da2028",
-				Recipient:  "tom",
-				Workflow:   "test",
-				Status:     "delivered",
-				InsertedAt: ParseRFC3339Timestamp("2022-05-17T00:34:18.277163Z"),
-				UpdatedAt:  ParseRFC3339Timestamp("2022-05-17T00:34:18.318283Z"),
-				Data: map[string]interface{}{
-					"welcome":     "to jurassic park",
-					"middle-name": "alfred",
-				},
-				Source: &NotificationSource{
-					Key:       "test",
-					VersionID: "4dae021a-ba51-473f-9038-77041da8131c"},
+	want := []*Message{
+		{
+			Cursor:     "big-cursor",
+			ID:         "29GmBF0R3ZG506vyc3H9mDa",
+			ChannelID:  "5da042d7-02ee-46ed-8b91-9b5717da2028",
+			Recipient:  "tom",
+			Workflow:   "test",
+			Status:     "delivered",
+			InsertedAt: ParseRFC3339Timestamp("2022-05-17T00:34:18.277163Z"),
+			UpdatedAt:  ParseRFC3339Timestamp("2022-05-17T00:34:18.318283Z"),
+			Data: map[string]interface{}{
+				"welcome":     "to jurassic park",
+				"middle-name": "alfred",
 			},
+			Source: &NotificationSource{
+				Key:       "test",
+				VersionID: "4dae021a-ba51-473f-9038-77041da8131c"},
 		},
 	}
 
@@ -200,8 +191,6 @@ func TestUsers_BulkIdentify(t *testing.T) {
 	c.Assert(err, qt.IsNil)
 
 	ctx := context.Background()
-
-	// ctx, client := RealTestClient() //TODO remove any test client commented code
 
 	user, err := client.Users.BulkIdentify(ctx, &BulkIdentifyUserRequest{
 		Users: []*User{
@@ -228,15 +217,13 @@ func TestUsers_BulkIdentify(t *testing.T) {
 		},
 	})
 
-	want := &BulkIdentifyUserResponse{
-		BulkOperation: &BulkOperation{
-			ID:                 "b19d032a-fc3b-4a54-9f54-369484527201",
-			EstimatedTotalRows: 2,
-			ProgressPath:       "/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201",
-			Status:             BulkOperationQueued,
-			InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
-			UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
-		},
+	want := &BulkOperation{
+		ID:                 "b19d032a-fc3b-4a54-9f54-369484527201",
+		EstimatedTotalRows: 2,
+		ProgressPath:       "/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201",
+		Status:             BulkOperationQueued,
+		InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
+		UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -263,15 +250,13 @@ func TestUsers_BulkDelete(t *testing.T) {
 		"user-1234",
 	}})
 
-	want := &BulkIdentifyUserResponse{
-		BulkOperation: &BulkOperation{
-			ID:                 "0fb6a596-b579-455e-9a01-32b41fa5613a",
-			EstimatedTotalRows: 2,
-			ProgressPath:       "/v1/bulk_operations/0fb6a596-b579-455e-9a01-32b41fa5613a",
-			Status:             BulkOperationQueued,
-			InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:26:50.869070Z"),
-			UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:26:50.879642Z"),
-		},
+	want := &BulkOperation{
+		ID:                 "0fb6a596-b579-455e-9a01-32b41fa5613a",
+		EstimatedTotalRows: 2,
+		ProgressPath:       "/v1/bulk_operations/0fb6a596-b579-455e-9a01-32b41fa5613a",
+		Status:             BulkOperationQueued,
+		InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:26:50.869070Z"),
+		UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:26:50.879642Z"),
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -298,73 +283,71 @@ func TestFeed_Get(t *testing.T) {
 		FeedID: "5d2377a0-92fb-4616-8315-eee843556566",
 	})
 
-	want := &GetFeedResponse{
-		Feed: &Feed{
-			FeedItems: []*FeedItem{
-				{
-					Activities: []*MessageActivity{
-						{
-							ID: "activity-id",
-							Data: map[string]interface{}{
-								"dest_environment_name": "Production",
-								"src_environment_name":  "Development",
-								"total_merged":          float64(1),
-							},
-							Actor: &User{
-								ID:        "c121a5ea-8f2c-4c60-ab40-9966047d5bea",
-								Name:      "Some User",
-								Email:     "some-user@knock.app",
-								UpdatedAt: ParseRFC3339Timestamp("2021-05-08T20:40:01.340Z"),
-							},
-							Recipient: &User{
-								ID:        "c121a5ea-8f2c-4c60-ab40-9966047d5bea",
-								Name:      "Some User",
-								Email:     "some-user@knock.app",
-								UpdatedAt: ParseRFC3339Timestamp("2021-05-08T20:40:01.34Z"),
-							},
+	want := &Feed{
+		FeedItems: []*FeedItem{
+			{
+				Activities: []*MessageActivity{
+					{
+						ID: "activity-id",
+						Data: map[string]interface{}{
+							"dest_environment_name": "Production",
+							"src_environment_name":  "Development",
+							"total_merged":          float64(1),
 						},
-					},
-					Actors: []*User{
-						{
+						Actor: &User{
 							ID:        "c121a5ea-8f2c-4c60-ab40-9966047d5bea",
 							Name:      "Some User",
 							Email:     "some-user@knock.app",
 							UpdatedAt: ParseRFC3339Timestamp("2021-05-08T20:40:01.340Z"),
 						},
-					},
-					TotalActivities: 1,
-					TotalActors:     1,
-					Blocks: []*FeedBlock{
-						{
-							Content:  "**{{ actor.name }}** merged {{ total_merged }} {% if total_merged == 1 %} change {% else %} changes {% endif %}\nfrom **{{ src_environment_name }}** into **{{ dest_environment_name }}**.",
-							Name:     "body",
-							Rendered: "<p><strong>The person</strong> merged 1  change \nfrom <strong>Development</strong> into <strong>Production</strong>.</p>",
-							Type:     "markdown",
-						},
-						{
-							Content:  "{{ vars.app_url }}/{{ account_slug }}/commits",
-							Name:     "action_url",
-							Rendered: "https://example.com/thing/commits",
-							Type:     "text",
+						Recipient: &User{
+							ID:        "c121a5ea-8f2c-4c60-ab40-9966047d5bea",
+							Name:      "Some User",
+							Email:     "some-user@knock.app",
+							UpdatedAt: ParseRFC3339Timestamp("2021-05-08T20:40:01.34Z"),
 						},
 					},
-					Source:     NotificationSource{Key: "merged-changes", VersionID: "7251cd3f-0028-4d1a-9466-ee79522ba3de"},
-					ReadAt:     ParseRFC3339Timestamp("2021-05-13T02:45:28.559124Z"),
-					InsertedAt: ParseRFC3339Timestamp("2021-05-11T00:50:09.904531Z"),
-					UpdatedAt:  ParseRFC3339Timestamp("2021-05-13T02:45:28.559863Z"),
-					SeenAt:     ParseRFC3339Timestamp("2021-05-11T00:51:43.617550Z"),
 				},
+				Actors: []*User{
+					{
+						ID:        "c121a5ea-8f2c-4c60-ab40-9966047d5bea",
+						Name:      "Some User",
+						Email:     "some-user@knock.app",
+						UpdatedAt: ParseRFC3339Timestamp("2021-05-08T20:40:01.340Z"),
+					},
+				},
+				TotalActivities: 1,
+				TotalActors:     1,
+				Blocks: []*FeedBlock{
+					{
+						Content:  "**{{ actor.name }}** merged {{ total_merged }} {% if total_merged == 1 %} change {% else %} changes {% endif %}\nfrom **{{ src_environment_name }}** into **{{ dest_environment_name }}**.",
+						Name:     "body",
+						Rendered: "<p><strong>The person</strong> merged 1  change \nfrom <strong>Development</strong> into <strong>Production</strong>.</p>",
+						Type:     "markdown",
+					},
+					{
+						Content:  "{{ vars.app_url }}/{{ account_slug }}/commits",
+						Name:     "action_url",
+						Rendered: "https://example.com/thing/commits",
+						Type:     "text",
+					},
+				},
+				Source:     NotificationSource{Key: "merged-changes", VersionID: "7251cd3f-0028-4d1a-9466-ee79522ba3de"},
+				ReadAt:     ParseRFC3339Timestamp("2021-05-13T02:45:28.559124Z"),
+				InsertedAt: ParseRFC3339Timestamp("2021-05-11T00:50:09.904531Z"),
+				UpdatedAt:  ParseRFC3339Timestamp("2021-05-13T02:45:28.559863Z"),
+				SeenAt:     ParseRFC3339Timestamp("2021-05-11T00:51:43.617550Z"),
 			},
-			FeedMetadata: &FeedMetadata{
-				UnreadCount: 10,
-				UnseenCount: 20,
-			},
-			PageInfo: &PageInfo{
-				PageSize: 50,
-			},
-			Vars: map[string]interface{}{
-				"app_name": "The app name",
-			},
+		},
+		FeedMetadata: &FeedMetadata{
+			UnreadCount: 10,
+			UnseenCount: 20,
+		},
+		PageInfo: &PageInfo{
+			PageSize: 50,
+		},
+		Vars: map[string]interface{}{
+			"app_name": "The app name",
 		},
 	}
 
@@ -396,10 +379,8 @@ func TestChannelData_GetForUser(t *testing.T) {
 	responseTokens = append(responseTokens, "a")
 	responseTokens = append(responseTokens, "b")
 
-	want := &GetUserChannelDataResponse{
-		ChannelData: map[string]interface{}{
-			"tokens": responseTokens,
-		},
+	want := map[string]interface{}{
+		"tokens": responseTokens,
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -421,8 +402,6 @@ func TestChannelData_SetForUser(t *testing.T) {
 
 	ctx := context.Background()
 
-	// ctx, client := RealTestClient()
-
 	setUserChannelDataResponse, err := client.Users.SetChannelData(ctx, &SetUserChannelDataRequest{
 		UserID:    "test-123",
 		ChannelID: "5d2377a0-92fb-4616-8315-eee843556566",
@@ -435,10 +414,8 @@ func TestChannelData_SetForUser(t *testing.T) {
 	responseTokens = append(responseTokens, "a")
 	responseTokens = append(responseTokens, "b")
 
-	want := &GetUserChannelDataResponse{
-		ChannelData: map[string]interface{}{
-			"tokens": responseTokens,
-		},
+	want := map[string]interface{}{
+		"tokens": responseTokens,
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -459,8 +436,6 @@ func TestChannelData_DeleteForUser(t *testing.T) {
 	c.Assert(err, qt.IsNil)
 
 	ctx := context.Background()
-
-	// ctx, client := RealTestClient()
 
 	err = client.Users.DeleteChannelData(ctx, &DeleteUserChannelDataRequest{
 		UserID:    "test-123",
