@@ -10,6 +10,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+// MessagesService is an interface for communicating with the Knock
+// Messages API endpoints.
 type MessagesService interface {
 	List(context.Context, *ListMessagesRequest) ([]*Message, *PageInfo, error)
 

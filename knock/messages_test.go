@@ -189,8 +189,6 @@ func TestMessages_GetActivities(t *testing.T) {
 
 	ctx := context.Background()
 
-	// ctx, client := RealTestClient() //TODO remove any test client commented code
-
 	have, _, err := client.Messages.GetActivities(ctx, &GetMessageActivitiesRequest{
 		ID: "29Gm3nVijCsi2GSMsLLTpDDtHAE",
 	})
@@ -220,7 +218,7 @@ func TestMessages_GetActivities(t *testing.T) {
 	c.Assert(have, qt.DeepEquals, want)
 }
 
-func TestMessages_GetContent(t *testing.T) { // TODO replace with real API test
+func TestMessages_GetContent(t *testing.T) {
 
 	c := qt.New(t)
 
@@ -235,8 +233,6 @@ func TestMessages_GetContent(t *testing.T) { // TODO replace with real API test
 	c.Assert(err, qt.IsNil)
 
 	ctx := context.Background()
-
-	// ctx, client := RealTestClient() //TODO remove any test client commented code
 
 	have, err := client.Messages.GetContent(ctx, &GetMessageContentRequest{
 		ID: "message-id",
@@ -280,8 +276,6 @@ func TestMessages_SetStatus(t *testing.T) {
 	c.Assert(err, qt.IsNil)
 
 	ctx := context.Background()
-
-	// ctx, client := RealTestClient() //TODO remove any test client commented code
 
 	have, err := client.Messages.SetStatus(ctx, &SetStatusRequest{
 		ID:     "29GlZCBxKZ79J9UQuf4HXiUZNfH",
@@ -335,8 +329,6 @@ func TestMessages_DeleteStatus(t *testing.T) {
 
 	ctx := context.Background()
 
-	// ctx, client := RealTestClient() //TODO remove any test client commented code
-
 	have, err := client.Messages.DeleteStatus(ctx, &SetStatusRequest{
 		ID:     "29GlZCBxKZ79J9UQuf4HXiUZNfH",
 		Status: Archived,
@@ -373,7 +365,7 @@ func TestMessages_DeleteStatus(t *testing.T) {
 	c.Assert(have, qt.DeepEquals, want)
 }
 
-func TestMessages_BatchSetStatus(t *testing.T) { // TODO
+func TestMessages_BatchSetStatus(t *testing.T) {
 
 	c := qt.New(t)
 
@@ -388,8 +380,6 @@ func TestMessages_BatchSetStatus(t *testing.T) { // TODO
 	c.Assert(err, qt.IsNil)
 
 	ctx := context.Background()
-
-	// ctx, client := RealTestClient() //TODO remove any test client commented code
 
 	have, err := client.Messages.BatchSetStatus(ctx, &BatchSetStatusRequest{
 		MessageIDs: []string{
@@ -438,7 +428,7 @@ func TestMessages_BatchSetStatus(t *testing.T) { // TODO
 	c.Assert(have, qt.DeepEquals, want)
 }
 
-func TestMessages_BulkChangeChannelStatus(t *testing.T) { // TODO
+func TestMessages_BulkChangeChannelStatus(t *testing.T) {
 
 	c := qt.New(t)
 
@@ -453,8 +443,6 @@ func TestMessages_BulkChangeChannelStatus(t *testing.T) { // TODO
 	c.Assert(err, qt.IsNil)
 
 	ctx := context.Background()
-
-	// ctx, client := RealTestClient() /÷/TODO remove any test client commented code
 
 	have, err := client.Messages.BulkChangeChannelStatus(ctx, &BulkChangeChannelStatusRequest{
 		ChannelID: "5da042d7-02ee-46ed-8b91-9b5717da2028",
