@@ -185,7 +185,11 @@ func usersChannelDataAPIPath(userID string, channelID string) string {
 func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*IdentifyUserResponse, error) {
 	path := UsersAPIPath(identifyReq.User.ID)
 
-	identifyBody := identifyReq.User.toMapWithCustomProperties()
+	identifyBody, err := identifyReq.User.toMapWithCustomProperties()
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request for identify user")
+	}
+
 	req, err := us.client.newRequest(http.MethodPut, path, identifyBody)
 
 	if err != nil {
@@ -292,8 +296,12 @@ func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkI
 
 	var bulkUserFlatMap []UserFlatMap
 
-	for _, s := range bulkIdentifyReq.Users {
-		bulkUserFlatMap = append(bulkUserFlatMap, s.toMapWithCustomProperties())
+	for _, rawUser := range bulkIdentifyReq.Users {
+		userFlatMap, err := rawUser.toMapWithCustomProperties()
+		if err != nil {
+			return nil, errors.Wrap(err, "error parsing user custom properties in bulk identify users")
+		}
+		bulkUserFlatMap = append(bulkUserFlatMap, userFlatMap)
 	}
 
 	// Define a struct used only to wrap this data in a `users` json key.
@@ -392,7 +400,7 @@ func (us *usersService) DeleteChannelData(ctx context.Context, deleteUserChannel
 
 	req, err := us.client.newRequest(http.MethodDelete, path, nil)
 	if err != nil {
-		errors.Wrap(err, "error creating request to delete channel data for a user")
+		return errors.Wrap(err, "error creating request to delete channel data for a user")
 	}
 
 	_, err = us.client.do(ctx, req, nil)
@@ -409,13 +417,16 @@ func (us *usersService) DeleteChannelData(ctx context.Context, deleteUserChannel
 
 // IdentifyUserRequests can contain arbitrary customer data that must be stored, and must be mapped
 // appropriately to one big flat list of key value pairs.
-func (user *User) toMapWithCustomProperties() map[string]interface{} {
+func (user *User) toMapWithCustomProperties() (map[string]interface{}, error) {
 	flatMap := make(map[string]interface{})
 
 	// Note that marshalling and then immediately un-marshalling transforms struct keys
 	// into the parameter names accepted by the API (i.e. PhoneNumber -> phone_number)
 	data, _ := json.Marshal(user)
-	json.Unmarshal(data, &flatMap)
+	err := json.Unmarshal(data, &flatMap)
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing user custom properties")
+	}
 
 	if flatMap["CustomProperties"] != nil {
 		// Move all keys from a nested key in the map to the top level of the map
@@ -424,7 +435,7 @@ func (user *User) toMapWithCustomProperties() map[string]interface{} {
 		}
 		delete(flatMap, "CustomProperties")
 	}
-	return flatMap
+	return flatMap, nil
 }
 
 func parseRawUserResponseCustomProperties(rawResponse []byte) (*User, error) {
@@ -437,7 +448,11 @@ func parseRawUserResponseCustomProperties(rawResponse []byte) (*User, error) {
 	// Create a map of the full API response, removing keys explicitly defined in the struct
 	// Any remaining keys are custom properties, which will be added to the struct's CustomProperties field
 	var customProperties map[string]interface{}
-	json.Unmarshal(rawResponse, &customProperties)
+	err = json.Unmarshal(rawResponse, &customProperties)
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing user custom properties")
+	}
+
 	val := reflect.ValueOf(user)
 	for i := 0; i < val.Type().NumField(); i++ {
 		delete(customProperties, val.Type().Field(i).Tag.Get("json"))

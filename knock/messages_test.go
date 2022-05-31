@@ -275,7 +275,7 @@ func TestMessages_GetContent(t *testing.T) { // TODO replace with real API test
 	c.Assert(have, qt.DeepEquals, want)
 }
 
-func TestMessages_SetStatus(t *testing.T) { // TODO
+func TestMessages_SetStatus(t *testing.T) {
 
 	c := qt.New(t)
 
@@ -329,7 +329,7 @@ func TestMessages_SetStatus(t *testing.T) { // TODO
 	c.Assert(have, qt.DeepEquals, want)
 }
 
-func TestMessages_DeleteStatus(t *testing.T) { // TODO
+func TestMessages_DeleteStatus(t *testing.T) {
 
 	c := qt.New(t)
 

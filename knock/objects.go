@@ -241,7 +241,7 @@ func (us *objectsService) DeleteChannelData(ctx context.Context, deleteObjectCha
 
 	req, err := us.client.newRequest(http.MethodDelete, path, nil)
 	if err != nil {
-		errors.Wrap(err, "error creating request to delete object channel data")
+		return errors.Wrap(err, "error creating request to delete object channel data")
 	}
 
 	_, err = us.client.do(ctx, req, nil)
