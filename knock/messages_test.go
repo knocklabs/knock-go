@@ -26,7 +26,7 @@ func TestMessages_List(t *testing.T) {
 
 	ctx := context.Background()
 
-	have, err := client.Messages.List(ctx, &ListMessagesRequest{
+	haveMessages, havePageInfo, err := client.Messages.List(ctx, &ListMessagesRequest{
 		PageSize: 1,
 	})
 
@@ -34,12 +34,8 @@ func TestMessages_List(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	want := &ListMessagesResponse{
-		PageInfo: PageInfo{
-			PageSize: 1,
-			After:    "big-after",
-		},
-		Items: []*Message{
+	wantMessages :=
+		[]*Message{
 			{
 				Cursor:     "big-cursor",
 				ID:         "message-id",
@@ -62,11 +58,16 @@ func TestMessages_List(t *testing.T) {
 					"welcome":     "to jurassic park",
 				},
 			},
-		},
+		}
+
+	wantPageInfo := &PageInfo{
+		PageSize: 1,
+		After:    "big-after",
 	}
 
 	c.Assert(err, qt.IsNil)
-	c.Assert(have, qt.DeepEquals, want)
+	c.Assert(haveMessages, qt.DeepEquals, wantMessages)
+	c.Assert(havePageInfo, qt.DeepEquals, wantPageInfo)
 }
 
 func TestMessages_Get(t *testing.T) {
@@ -84,8 +85,6 @@ func TestMessages_Get(t *testing.T) {
 
 	ctx := context.Background()
 
-	// ctx, client := RealTestClient()
-
 	have, err := client.Messages.Get(ctx, &GetMessageRequest{
 		ID: "long-id",
 	})
@@ -94,28 +93,26 @@ func TestMessages_Get(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	want := &GetMessageResponse{
-		Message: &Message{
-			Cursor:     "",
-			ID:         "long-id",
-			ChannelID:  "5da042d7-02ee-46ed-8b91-9b5717da2028",
-			Recipient:  "tom",
-			Workflow:   "test",
-			Tenant:     "",
-			Status:     "delivered",
-			ReadAt:     time.Time{},
-			SeenAt:     time.Time{},
-			ArchivedAt: time.Time{},
-			InsertedAt: time.Date(2022, time.May, 17, 00, 34, 18, 277163000, time.UTC),
-			UpdatedAt:  time.Date(2022, time.May, 17, 00, 34, 18, 318283000, time.UTC),
-			Source: &NotificationSource{
-				Key:       "test",
-				VersionID: "4dae021a-ba51-473f-9038-77041da8131c",
-			},
-			Data: map[string]interface{}{
-				"middle-name": "alfred",
-				"welcome":     "to jurassic park",
-			},
+	want := &Message{
+		Cursor:     "",
+		ID:         "long-id",
+		ChannelID:  "5da042d7-02ee-46ed-8b91-9b5717da2028",
+		Recipient:  "tom",
+		Workflow:   "test",
+		Tenant:     "",
+		Status:     "delivered",
+		ReadAt:     time.Time{},
+		SeenAt:     time.Time{},
+		ArchivedAt: time.Time{},
+		InsertedAt: time.Date(2022, time.May, 17, 00, 34, 18, 277163000, time.UTC),
+		UpdatedAt:  time.Date(2022, time.May, 17, 00, 34, 18, 318283000, time.UTC),
+		Source: &NotificationSource{
+			Key:       "test",
+			VersionID: "4dae021a-ba51-473f-9038-77041da8131c",
+		},
+		Data: map[string]interface{}{
+			"middle-name": "alfred",
+			"welcome":     "to jurassic park",
 		},
 	}
 
@@ -141,7 +138,7 @@ func TestMessages_GetEvents(t *testing.T) {
 
 	// ctx, client := RealTestClient()
 
-	have, err := client.Messages.GetEvents(ctx, &GetMessageEventsRequest{
+	haveEvents, havePageInfo, err := client.Messages.GetEvents(ctx, &GetMessageEventsRequest{
 		ID: "29GmBF0R3ZG5l34w06vyc3H9mDa",
 	})
 
@@ -150,30 +147,30 @@ func TestMessages_GetEvents(t *testing.T) {
 	}
 
 	testData := make(map[string]interface{})
-	want := &GetMessageEventsResponse{
-		Items: []*MessageEvent{
-			{
-				Cursor:        "big-cursor",
-				ID:            "event-id-1",
-				EnvironmentID: "1e37b486-593e-47fa-8049-16b1bab76084",
-				Recipient:     "tom",
-				Data:          testData,
-			},
-			{
-				Cursor:        "big-cursor-2",
-				ID:            "event-id-2",
-				EnvironmentID: "1e37b486-593e-47fa-8049-16b1bab76084",
-				Recipient:     "tom",
-				Data:          testData,
-			},
+	wantEvents := []*MessageEvent{
+		{
+			Cursor:        "big-cursor",
+			ID:            "event-id-1",
+			EnvironmentID: "1e37b486-593e-47fa-8049-16b1bab76084",
+			Recipient:     "tom",
+			Data:          testData,
 		},
-		PageInfo: PageInfo{
-			PageSize: 50,
+		{
+			Cursor:        "big-cursor-2",
+			ID:            "event-id-2",
+			EnvironmentID: "1e37b486-593e-47fa-8049-16b1bab76084",
+			Recipient:     "tom",
+			Data:          testData,
 		},
 	}
 
+	wantPageInfo := &PageInfo{
+		PageSize: 50,
+	}
+
 	c.Assert(err, qt.IsNil)
-	c.Assert(have, qt.DeepEquals, want)
+	c.Assert(haveEvents, qt.DeepEquals, wantEvents)
+	c.Assert(havePageInfo, qt.DeepEquals, wantPageInfo)
 }
 
 func TestMessages_GetActivities(t *testing.T) {
@@ -194,7 +191,7 @@ func TestMessages_GetActivities(t *testing.T) {
 
 	// ctx, client := RealTestClient() //TODO remove any test client commented code
 
-	have, err := client.Messages.GetActivities(ctx, &GetMessageActivitiesRequest{
+	have, _, err := client.Messages.GetActivities(ctx, &GetMessageActivitiesRequest{
 		ID: "29Gm3nVijCsi2GSMsLLTpDDtHAE",
 	})
 
@@ -202,25 +199,20 @@ func TestMessages_GetActivities(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	want := &GetMessageActivitiesResponse{
-		Activities: []*MessageActivity{
-			{
-				Cursor: "aaaa",
-				ID:     "activity-id",
-				Data: map[string]interface{}{
-					"welcome":     "to jurassic park",
-					"middle-name": "alfred",
-				},
-				Recipient: &User{
-					ID:        "tom3",
-					Name:      "tom3",
-					Email:     "nice@nice.com",
-					UpdatedAt: ParseRFC3339Timestamp("2022-05-15T20:41:55.082Z"),
-				},
+	want := []*MessageActivity{
+		{
+			Cursor: "aaaa",
+			ID:     "activity-id",
+			Data: map[string]interface{}{
+				"welcome":     "to jurassic park",
+				"middle-name": "alfred",
 			},
-		},
-		PageInfo: PageInfo{
-			PageSize: 50,
+			Recipient: &User{
+				ID:        "tom3",
+				Name:      "tom3",
+				Email:     "nice@nice.com",
+				UpdatedAt: ParseRFC3339Timestamp("2022-05-15T20:41:55.082Z"),
+			},
 		},
 	}
 
@@ -254,20 +246,18 @@ func TestMessages_GetContent(t *testing.T) { // TODO replace with real API test
 		fmt.Println(err)
 	}
 
-	want := &GetMessageContentResponse{
-		Content: &MessageContent{
-			ID:         "message-id",
-			InsertedAt: ParseRFC3339Timestamp("2021-04-06T12:00:00Z"),
-			Data: map[string]interface{}{
-				"bcc":       "bcc@example.com",
-				"cc":        "cc@example.com",
-				"html_body": "<p>example</p>",
-				"reply_to":  "reply-to@example.com",
-				"subject":   "Example Notification",
-				"text_body": "example",
-				"to":        "user@example.com",
-				"from":      map[string]interface{}{"email": "info-app@example.com", "name": "Example App"},
-			},
+	want := &MessageContent{
+		ID:         "message-id",
+		InsertedAt: ParseRFC3339Timestamp("2021-04-06T12:00:00Z"),
+		Data: map[string]interface{}{
+			"bcc":       "bcc@example.com",
+			"cc":        "cc@example.com",
+			"html_body": "<p>example</p>",
+			"reply_to":  "reply-to@example.com",
+			"subject":   "Example Notification",
+			"text_body": "example",
+			"to":        "user@example.com",
+			"from":      map[string]interface{}{"email": "info-app@example.com", "name": "Example App"},
 		},
 	}
 
@@ -302,7 +292,7 @@ func TestMessages_SetStatus(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	want := &SetStatusResponse{Message: &Message{
+	want := &Message{
 		Cursor:     "big-cursor",
 		ID:         "message-id",
 		ChannelID:  "5da042d7-02ee-46ed-8b91-9b5717da2028",
@@ -323,7 +313,7 @@ func TestMessages_SetStatus(t *testing.T) {
 			"middle-name": "alfred",
 			"welcome":     "to jurassic park",
 		},
-	}}
+	}
 
 	c.Assert(err, qt.IsNil)
 	c.Assert(have, qt.DeepEquals, want)
@@ -356,7 +346,7 @@ func TestMessages_DeleteStatus(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	want := &SetStatusResponse{Message: &Message{
+	want := &Message{
 		Cursor:     "big-cursor",
 		ID:         "message-id",
 		ChannelID:  "5da042d7-02ee-46ed-8b91-9b5717da2028",
@@ -377,7 +367,7 @@ func TestMessages_DeleteStatus(t *testing.T) {
 			"middle-name": "alfred",
 			"welcome":     "to jurassic park",
 		},
-	}}
+	}
 
 	c.Assert(err, qt.IsNil)
 	c.Assert(have, qt.DeepEquals, want)
@@ -413,36 +403,34 @@ func TestMessages_BatchSetStatus(t *testing.T) { // TODO
 		fmt.Println(err)
 	}
 
-	want := &BatchSetStatusResponse{
-		Messages: []*Message{
-			{
-				ID:        "29Gm3rDIQLyh0Bm8s0q7GrBSfk6",
-				ChannelID: "5da042d7-02ee-46ed-8b91-9b5717da2028",
-				Recipient: "tom",
-				Workflow:  "test",
-				Status:    "delivered",
-				Source: &NotificationSource{
-					Key:       "test",
-					VersionID: "4dae021a-ba51-473f-9038-77041da8131c",
-				},
-				ArchivedAt: ParseRFC3339Timestamp("2022-05-27T20:45:27.808275Z"),
-				InsertedAt: ParseRFC3339Timestamp("2022-05-17T00:33:19.199798Z"),
-				UpdatedAt:  ParseRFC3339Timestamp("2022-05-17T00:33:19.209478Z"),
+	want := []*Message{
+		{
+			ID:        "29Gm3rDIQLyh0Bm8s0q7GrBSfk6",
+			ChannelID: "5da042d7-02ee-46ed-8b91-9b5717da2028",
+			Recipient: "tom",
+			Workflow:  "test",
+			Status:    "delivered",
+			Source: &NotificationSource{
+				Key:       "test",
+				VersionID: "4dae021a-ba51-473f-9038-77041da8131c",
 			},
-			{
-				ID:        "29GmBDexT8qOXks4NcnPqs6CePd",
-				ChannelID: "5da042d7-02ee-46ed-8b91-9b5717da2028",
-				Recipient: "tom3",
-				Workflow:  "test",
-				Status:    "delivered",
-				Source: &NotificationSource{
-					Key:       "test",
-					VersionID: "4dae021a-ba51-473f-9038-77041da8131c",
-				},
-				UpdatedAt:  ParseRFC3339Timestamp("2022-05-17T00:34:18.317618Z"),
-				ArchivedAt: ParseRFC3339Timestamp("2022-05-27T20:45:27.808275Z"),
-				InsertedAt: ParseRFC3339Timestamp("2022-05-17T00:34:18.276054Z"),
+			ArchivedAt: ParseRFC3339Timestamp("2022-05-27T20:45:27.808275Z"),
+			InsertedAt: ParseRFC3339Timestamp("2022-05-17T00:33:19.199798Z"),
+			UpdatedAt:  ParseRFC3339Timestamp("2022-05-17T00:33:19.209478Z"),
+		},
+		{
+			ID:        "29GmBDexT8qOXks4NcnPqs6CePd",
+			ChannelID: "5da042d7-02ee-46ed-8b91-9b5717da2028",
+			Recipient: "tom3",
+			Workflow:  "test",
+			Status:    "delivered",
+			Source: &NotificationSource{
+				Key:       "test",
+				VersionID: "4dae021a-ba51-473f-9038-77041da8131c",
 			},
+			UpdatedAt:  ParseRFC3339Timestamp("2022-05-17T00:34:18.317618Z"),
+			ArchivedAt: ParseRFC3339Timestamp("2022-05-27T20:45:27.808275Z"),
+			InsertedAt: ParseRFC3339Timestamp("2022-05-17T00:34:18.276054Z"),
 		},
 	}
 
@@ -477,16 +465,15 @@ func TestMessages_BulkChangeChannelStatus(t *testing.T) { // TODO
 		fmt.Println(err)
 	}
 
-	want := &BulkChangeChannelStatusResponse{
-		BulkOperation: &BulkOperation{
-			ID:                 "fbf36d40-b6f8-4675-a362-ede1b859f757",
-			ProgressPath:       "/v1/bulk_operations/fbf36d40-b6f8-4675-a362-ede1b859f757",
-			Status:             BulkOperationStatus(Queued),
-			InsertedAt:         ParseRFC3339Timestamp("2022-05-28T00:51:26.343157Z"),
-			UpdatedAt:          ParseRFC3339Timestamp("2022-05-28T00:51:26.349222Z"),
-			EstimatedTotalRows: 1,
-		},
+	want := &BulkOperation{
+		ID:                 "fbf36d40-b6f8-4675-a362-ede1b859f757",
+		ProgressPath:       "/v1/bulk_operations/fbf36d40-b6f8-4675-a362-ede1b859f757",
+		Status:             BulkOperationStatus(Queued),
+		InsertedAt:         ParseRFC3339Timestamp("2022-05-28T00:51:26.343157Z"),
+		UpdatedAt:          ParseRFC3339Timestamp("2022-05-28T00:51:26.349222Z"),
+		EstimatedTotalRows: 1,
 	}
+
 	c.Assert(err, qt.IsNil)
 	c.Assert(have, qt.DeepEquals, want)
 }
