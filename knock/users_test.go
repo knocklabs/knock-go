@@ -74,9 +74,11 @@ func TestUsers_Identify(t *testing.T) {
 	phone_number := "+11234567890"
 
 	user, err := client.Users.Identify(ctx, &IdentifyUserRequest{
-		ID: id,
-		CustomProperties: map[string]interface{}{
-			"middle-name": "alfred",
+		User: &User{
+			ID: id,
+			CustomProperties: map[string]interface{}{
+				"middle-name": "alfred",
+			},
 		}})
 
 	want := &IdentifyUserResponse{
@@ -167,8 +169,8 @@ func TestUsers_GetMessages(t *testing.T) {
 				Recipient:  "tom",
 				Workflow:   "test",
 				Status:     "delivered",
-				InsertedAt: ParseAPITimestamp("2022-05-17T00:34:18.277163Z"),
-				UpdatedAt:  ParseAPITimestamp("2022-05-17T00:34:18.318283Z"),
+				InsertedAt: ParseRFC3339Timestamp("2022-05-17T00:34:18.277163Z"),
+				UpdatedAt:  ParseRFC3339Timestamp("2022-05-17T00:34:18.318283Z"),
 				Data: map[string]interface{}{
 					"welcome":     "to jurassic park",
 					"middle-name": "alfred",
@@ -182,4 +184,289 @@ func TestUsers_GetMessages(t *testing.T) {
 
 	c.Assert(err, qt.IsNil)
 	c.Assert(have, qt.DeepEquals, want)
+}
+
+func TestUsers_BulkIdentify(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"b19d032a-fc3b-4a54-9f54-369484527201","inserted_at":"2022-05-27T11:12:08.281201Z","name":"users.identify","processed_rows":0,"progress_path":"/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201","started_at":null,"status":"queued","updated_at":"2022-05-27T11:12:08.286507Z"}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	// ctx, client := RealTestClient() //TODO remove any test client commented code
+
+	user, err := client.Users.BulkIdentify(ctx, &BulkIdentifyUserRequest{
+		Users: []*User{
+			{
+				Name:        "John Hammond",
+				ID:          "user-123",
+				Email:       "jhammond@ingen.net",
+				PhoneNumber: "+11234567890",
+				CustomProperties: map[string]interface{}{
+					"welcome":     "to jurassic park",
+					"middle-name": "alfred1",
+				},
+			},
+			{
+				Name:        "John Hammond2",
+				ID:          "user-1234",
+				Email:       "jhammond2@ingen.net",
+				PhoneNumber: "+11234567891",
+				CustomProperties: map[string]interface{}{
+					"welcome":     "to jurassic park",
+					"middle-name": "alfred2",
+				},
+			},
+		},
+	})
+
+	want := &BulkIdentifyUserResponse{
+		BulkOperation: &BulkOperation{
+			ID:                 "b19d032a-fc3b-4a54-9f54-369484527201",
+			EstimatedTotalRows: 2,
+			ProgressPath:       "/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201",
+			Status:             BulkOperationQueued,
+			InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
+			UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
+		},
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(user, qt.DeepEquals, want)
+}
+
+func TestUsers_BulkDelete(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"0fb6a596-b579-455e-9a01-32b41fa5613a","inserted_at":"2022-05-27T11:26:50.869070Z","name":"users.delete","processed_rows":0,"progress_path":"/v1/bulk_operations/0fb6a596-b579-455e-9a01-32b41fa5613a","started_at":null,"status":"queued","updated_at":"2022-05-27T11:26:50.879642Z"}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	user, err := client.Users.BulkDelete(ctx, &BulkDeleteUserRequest{UserIDs: []string{
+		"user-123",
+		"user-1234",
+	}})
+
+	want := &BulkIdentifyUserResponse{
+		BulkOperation: &BulkOperation{
+			ID:                 "0fb6a596-b579-455e-9a01-32b41fa5613a",
+			EstimatedTotalRows: 2,
+			ProgressPath:       "/v1/bulk_operations/0fb6a596-b579-455e-9a01-32b41fa5613a",
+			Status:             BulkOperationQueued,
+			InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:26:50.869070Z"),
+			UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:26:50.879642Z"),
+		},
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(user, qt.DeepEquals, want)
+}
+
+func TestFeed_Get(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"entries":[{"__typename":"FeedItem","__cursor":"g3QAAAABZAACaWRtAAAAGzFzTXRJc1J2WnRZZjg2YU9ma00yUENwQzZYYw==","activities":[{"__typename":"Activity","actor":{"__typename":"User","id":"c121a5ea-8f2c-4c60-ab40-9966047d5bea","created_at":null,"updated_at":"2021-05-08T20:40:01.340Z","email":"some-user@knock.app","name":"Some User"},"data":{"dest_environment_name":"Production","src_environment_name":"Development","total_merged":1},"id":"activity-id","inserted_at":"2021-05-11T00:50:09.895759Z","recipient":{"__typename":"User","id":"c121a5ea-8f2c-4c60-ab40-9966047d5bea","created_at":null,"updated_at":"2021-05-08T20:40:01.340Z","email":"some-user@knock.app","name":"Some User"},"updated_at":"2021-05-11T00:50:09.895759Z"}],"actors":[{"__typename":"User","id":"c121a5ea-8f2c-4c60-ab40-9966047d5bea","created_at":null,"updated_at":"2021-05-08T20:40:01.340Z","email":"some-user@knock.app","name":"Some User"}],"archived_at":null,"blocks":[{"content":"**{{ actor.name }}** merged {{ total_merged }} {% if total_merged == 1 %} change {% else %} changes {% endif %}\nfrom **{{ src_environment_name }}** into **{{ dest_environment_name }}**.","name":"body","rendered":"<p><strong>The person</strong> merged 1  change \nfrom <strong>Development</strong> into <strong>Production</strong>.</p>","type":"markdown"},{"content":"{{ vars.app_url }}/{{ account_slug }}/commits","name":"action_url","rendered":"https://example.com/thing/commits","type":"text"}],"data":{"dest_environment_name":"Production","src_environment_name":"Development","total_merged":1},"id":"1sMtIsRvZtYf86aOfkM2PCpC6Xc","inserted_at":"2021-05-11T00:50:09.904531Z","read_at":"2021-05-13T02:45:28.559124Z","seen_at":"2021-05-11T00:51:43.617550Z","source":{"__typename":"WorkflowSource","key":"merged-changes","version_id":"7251cd3f-0028-4d1a-9466-ee79522ba3de"},"tenant":null,"total_activities":1,"total_actors":1,"updated_at":"2021-05-13T02:45:28.559863Z"}],"vars":{"app_name":"The app name"},"meta":{"__typename":"FeedMetadata","unread_count":10,"unseen_count":20},"page_info":{"__typename":"PageInfo","after":null,"before":null,"page_size":50}}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	have, err := client.Users.GetFeed(ctx, &GetFeedRequest{
+		UserID: "test-123",
+		FeedID: "5d2377a0-92fb-4616-8315-eee843556566",
+	})
+
+	want := &GetFeedResponse{
+		Feed: &Feed{
+			FeedItems: []*FeedItem{
+				{
+					Activities: []*MessageActivity{
+						{
+							ID: "activity-id",
+							Data: map[string]interface{}{
+								"dest_environment_name": "Production",
+								"src_environment_name":  "Development",
+								"total_merged":          float64(1),
+							},
+							Actor: &User{
+								ID:        "c121a5ea-8f2c-4c60-ab40-9966047d5bea",
+								Name:      "Some User",
+								Email:     "some-user@knock.app",
+								UpdatedAt: ParseRFC3339Timestamp("2021-05-08T20:40:01.340Z"),
+							},
+							Recipient: &User{
+								ID:        "c121a5ea-8f2c-4c60-ab40-9966047d5bea",
+								Name:      "Some User",
+								Email:     "some-user@knock.app",
+								UpdatedAt: ParseRFC3339Timestamp("2021-05-08T20:40:01.34Z"),
+							},
+						},
+					},
+					Actors: []*User{
+						{
+							ID:        "c121a5ea-8f2c-4c60-ab40-9966047d5bea",
+							Name:      "Some User",
+							Email:     "some-user@knock.app",
+							UpdatedAt: ParseRFC3339Timestamp("2021-05-08T20:40:01.340Z"),
+						},
+					},
+					TotalActivities: 1,
+					TotalActors:     1,
+					Blocks: []*FeedBlock{
+						{
+							Content:  "**{{ actor.name }}** merged {{ total_merged }} {% if total_merged == 1 %} change {% else %} changes {% endif %}\nfrom **{{ src_environment_name }}** into **{{ dest_environment_name }}**.",
+							Name:     "body",
+							Rendered: "<p><strong>The person</strong> merged 1  change \nfrom <strong>Development</strong> into <strong>Production</strong>.</p>",
+							Type:     "markdown",
+						},
+						{
+							Content:  "{{ vars.app_url }}/{{ account_slug }}/commits",
+							Name:     "action_url",
+							Rendered: "https://example.com/thing/commits",
+							Type:     "text",
+						},
+					},
+					Source:     NotificationSource{Key: "merged-changes", VersionID: "7251cd3f-0028-4d1a-9466-ee79522ba3de"},
+					ReadAt:     ParseRFC3339Timestamp("2021-05-13T02:45:28.559124Z"),
+					InsertedAt: ParseRFC3339Timestamp("2021-05-11T00:50:09.904531Z"),
+					UpdatedAt:  ParseRFC3339Timestamp("2021-05-13T02:45:28.559863Z"),
+					SeenAt:     ParseRFC3339Timestamp("2021-05-11T00:51:43.617550Z"),
+				},
+			},
+			FeedMetadata: &FeedMetadata{
+				UnreadCount: 10,
+				UnseenCount: 20,
+			},
+			PageInfo: &PageInfo{
+				PageSize: 50,
+			},
+			Vars: map[string]interface{}{
+				"app_name": "The app name",
+			},
+		},
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(have, qt.DeepEquals, want)
+}
+
+func TestChannelData_GetForUser(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"ChannelData","channel_id":"5d2377a0-92fb-4616-8315-eee843556566","data":{"tokens":["a","b"]}}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	setUserChannelDataResponse, err := client.Users.GetChannelData(ctx, &GetUserChannelDataRequest{
+		UserID:    "test-123",
+		ChannelID: "5d2377a0-92fb-4616-8315-eee843556566",
+	})
+
+	var responseTokens []interface{}
+	responseTokens = append(responseTokens, "a")
+	responseTokens = append(responseTokens, "b")
+
+	want := &GetUserChannelDataResponse{
+		ChannelData: map[string]interface{}{
+			"tokens": responseTokens,
+		},
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(setUserChannelDataResponse, qt.DeepEquals, want)
+}
+
+func TestChannelData_SetForUser(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"ChannelData","channel_id":"5d2377a0-92fb-4616-8315-eee843556566","data":{"tokens":["a","b"]}}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	// ctx, client := RealTestClient()
+
+	setUserChannelDataResponse, err := client.Users.SetChannelData(ctx, &SetUserChannelDataRequest{
+		UserID:    "test-123",
+		ChannelID: "5d2377a0-92fb-4616-8315-eee843556566",
+		Data: map[string]interface{}{
+			"tokens": []string{"a", "b"},
+		},
+	})
+
+	var responseTokens []interface{}
+	responseTokens = append(responseTokens, "a")
+	responseTokens = append(responseTokens, "b")
+
+	want := &GetUserChannelDataResponse{
+		ChannelData: map[string]interface{}{
+			"tokens": responseTokens,
+		},
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(setUserChannelDataResponse, qt.DeepEquals, want)
+}
+
+func TestChannelData_DeleteForUser(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"ChannelData","channel_id":"5d2377a0-92fb-4616-8315-eee843556566","data":{"tokens":["a","b"]}}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	// ctx, client := RealTestClient()
+
+	err = client.Users.DeleteChannelData(ctx, &DeleteUserChannelDataRequest{
+		UserID:    "test-123",
+		ChannelID: "5d2377a0-92fb-4616-8315-eee843556566",
+	})
+
+	c.Assert(err, qt.IsNil)
+
 }

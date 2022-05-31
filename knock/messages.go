@@ -14,6 +14,12 @@ type MessagesService interface {
 	List(context.Context, *ListMessagesRequest) (*ListMessagesResponse, error)
 	Get(context.Context, *GetMessageRequest) (*GetMessageResponse, error)
 	GetEvents(context.Context, *GetMessageEventsRequest) (*GetMessageEventsResponse, error)
+	GetActivities(context.Context, *GetMessageActivitiesRequest) (*GetMessageActivitiesResponse, error)
+	GetContent(context.Context, *GetMessageContentRequest) (*GetMessageContentResponse, error)
+	SetStatus(context.Context, *SetStatusRequest) (*SetStatusResponse, error)
+	DeleteStatus(context.Context, *DeleteStatusRequest) (*DeleteStatusResponse, error)
+	BatchSetStatus(context.Context, *BatchSetStatusRequest) (*BatchSetStatusResponse, error)
+	BulkChangeChannelStatus(context.Context, *BulkChangeChannelStatusRequest) (*BulkChangeChannelStatusResponse, error)
 }
 
 type messagesService struct {
@@ -34,14 +40,24 @@ func messagesAPIPath(messageID string) string {
 	return fmt.Sprintf("%s/%s", messagesAPIBasePath, messageID)
 }
 
+type EngagementStatus string
+
+// User message query statuses
+const (
+	Queued      EngagementStatus = "queued"
+	Sent        EngagementStatus = "sent"
+	Delivered   EngagementStatus = "delivered"
+	Undelivered EngagementStatus = "undelivered"
+)
+
 type MessageStatus string
 
 const (
-	Queued      MessageStatus = "queued"
-	Sent        MessageStatus = "sent"
-	Delivered   MessageStatus = "delivered"
-	Undelivered MessageStatus = "undelivered"
-	NotSent     MessageStatus = "not_sent"
+	NotSent    MessageStatus = "seen"
+	Read       MessageStatus = "read"
+	Archived   MessageStatus = "archived"
+	Unarchived MessageStatus = "unarchived"
+	Unread     MessageStatus = "unread"
 )
 
 type NotificationSource struct {
@@ -56,7 +72,7 @@ type Message struct {
 	Recipient  string                 `json:"recipient"`
 	Workflow   string                 `json:"workflow"`
 	Tenant     string                 `json:"tenant"`
-	Status     MessageStatus          `json:"status"`
+	Status     EngagementStatus       `json:"status"`
 	ReadAt     time.Time              `json:"read_at"`
 	SeenAt     time.Time              `json:"seen_at"`
 	ArchivedAt time.Time              `json:"archived_at"`
@@ -75,22 +91,28 @@ type MessageEvent struct {
 }
 
 type MessageActivity struct {
-	Cursor string                 `json:"__cursor"`
-	ID     string                 `json:"id"`
-	Data   map[string]interface{} `json:"data"`
-	Actor  *User                  `json:"actor"`
-	// Recipient string                 `json:"recipient"` TODO: recipients
+	Cursor    string                 `json:"__cursor"`
+	ID        string                 `json:"id"`
+	Data      map[string]interface{} `json:"data"`
+	Actor     *User                  `json:"actor"`
+	Recipient *User                  `json:"recipient"`
+}
+
+type MessageContent struct {
+	ID         string                 `json:"id"`
+	Data       map[string]interface{} `json:"data"`
+	InsertedAt time.Time              `json:"inserted_at"`
 }
 
 type ListMessagesRequest struct {
-	PageSize  int             `url:"page_size,omitempty"`
-	Cursor    int             `url:"page_size,omitempty"`
-	Before    string          `url:"before,omitempty"`
-	After     string          `url:"after,omitempty"`
-	Source    string          `url:"source,omitempty"`
-	Tenant    string          `url:"tenant,omitempty"`
-	Status    []MessageStatus `url:"status,omitempty"`
-	ChannelID string          `url:"channel_id,omitempty"`
+	PageSize  int                `url:"page_size,omitempty"`
+	Cursor    string             `url:"page_size,omitempty"`
+	Before    string             `url:"before,omitempty"`
+	After     string             `url:"after,omitempty"`
+	Source    string             `url:"source,omitempty"`
+	Tenant    string             `url:"tenant,omitempty"`
+	Status    []EngagementStatus `url:"status,omitempty"`
+	ChannelID string             `url:"channel_id,omitempty"`
 }
 type ListMessagesResponse struct {
 	Items    []*Message `json:"items"`
@@ -111,8 +133,44 @@ type GetMessageEventsResponse struct {
 
 type GetMessageActivitiesRequest = GetMessageRequest
 type GetMessageActivitiesResponse struct {
-	Activities []*MessageActivity `json:"entries"`
+	Activities []*MessageActivity `json:"items"`
 	PageInfo   PageInfo           `json:"page_info"`
+}
+
+type GetMessageContentRequest = GetMessageRequest
+type GetMessageContentResponse struct {
+	Content *MessageContent
+}
+
+type SetStatusRequest struct {
+	ID     string
+	Status MessageStatus
+}
+type SetStatusResponse = GetMessageResponse
+
+type DeleteStatusRequest = SetStatusRequest
+type DeleteStatusResponse = GetMessageResponse
+
+type BatchSetStatusRequest struct {
+	Status     MessageStatus `json:"-"`
+	MessageIDs []string      `json:"message_ids"`
+}
+type BatchSetStatusResponse struct {
+	Messages []*Message
+}
+
+type BulkChangeChannelStatusRequest struct {
+	ChannelID string        `json:"-"`
+	Status    MessageStatus `json:"-"`
+
+	UserIDs          []string         `json:"user_ids,omitempty"`
+	OlderThan        *time.Time       `json:"older_than,omitempty"`
+	NewerThan        *time.Time       `json:"newer_than,omitempty"`
+	DeliveryStatus   EngagementStatus `json:"delivery_status,omitempty"`
+	EngagementStatus string           `json:"engagement_status,omitempty"`
+}
+type BulkChangeChannelStatusResponse struct {
+	BulkOperation *BulkOperation
 }
 
 func (ms *messagesService) List(ctx context.Context, listReq *ListMessagesRequest) (*ListMessagesResponse, error) {
@@ -177,21 +235,120 @@ func (ms *messagesService) GetEvents(ctx context.Context, getEventsReq *GetMessa
 	return getMessageEventsResponse, nil
 }
 
-// func (ms *messagesService) GetActivities(ctx context.Context, getActivitiesReq *GetMessageActivitiesRequest) (*GetMessageActivitiesResponse, error) {
+func (ms *messagesService) GetActivities(ctx context.Context, getActivitiesReq *GetMessageActivitiesRequest) (*GetMessageActivitiesResponse, error) {
 
-// 	path := fmt.Sprintf("%s/activities", messagesAPIPath(getActivitiesReq.ID))
+	path := fmt.Sprintf("%s/activities", messagesAPIPath(getActivitiesReq.ID))
 
-// 	req, err := ms.client.newRequest(http.MethodGet, path, nil)
+	req, err := ms.client.newRequest(http.MethodGet, path, nil)
 
-// 	if err != nil {
-// 		return nil, errors.Wrap(err, "error creating request to list message activities")
-// 	}
-// 	getMessageActivitiesResponse := &GetMessageActivitiesResponse{}
-// 	_, err = ms.client.do(ctx, req, getMessageActivitiesResponse)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to list message activities")
+	}
+	getMessageActivitiesResponse := &GetMessageActivitiesResponse{}
+	_, err = ms.client.do(ctx, req, getMessageActivitiesResponse)
 
-// 	if err != nil {
-// 		return nil, errors.Wrap(err, "error making request to list message activities")
-// 	}
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to list message activities")
+	}
 
-// 	return getMessageActivitiesResponse, nil
-// }
+	return getMessageActivitiesResponse, nil
+}
+
+func (ms *messagesService) GetContent(ctx context.Context, getContentReq *GetMessageContentRequest) (*GetMessageContentResponse, error) {
+
+	path := fmt.Sprintf("%s/activities", messagesAPIPath(getContentReq.ID))
+
+	req, err := ms.client.newRequest(http.MethodGet, path, nil)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to list message activities")
+	}
+	getMessageContentResponse := &GetMessageContentResponse{Content: &MessageContent{}}
+	_, err = ms.client.do(ctx, req, getMessageContentResponse.Content)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to list message activities")
+	}
+
+	return getMessageContentResponse, nil
+}
+
+func (ms *messagesService) SetStatus(ctx context.Context, setStatusReq *SetStatusRequest) (*SetStatusResponse, error) {
+
+	path := fmt.Sprintf("%s/%s", messagesAPIPath(setStatusReq.ID), setStatusReq.Status)
+
+	req, err := ms.client.newRequest(http.MethodPut, path, nil)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to set message status")
+	}
+	setMessageStatusResponse := &SetStatusResponse{Message: &Message{}}
+	_, err = ms.client.do(ctx, req, setMessageStatusResponse.Message)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to set message status")
+	}
+
+	return setMessageStatusResponse, nil
+}
+
+func (ms *messagesService) DeleteStatus(ctx context.Context, deleteStatusReq *DeleteStatusRequest) (*DeleteStatusResponse, error) {
+
+	path := fmt.Sprintf("%s/%s", messagesAPIPath(deleteStatusReq.ID), deleteStatusReq.Status)
+
+	req, err := ms.client.newRequest(http.MethodDelete, path, nil)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to delete message status")
+	}
+	deleteMessageStatusResponse := &SetStatusResponse{Message: &Message{}}
+	_, err = ms.client.do(ctx, req, deleteMessageStatusResponse.Message)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to delete message status")
+	}
+
+	return deleteMessageStatusResponse, nil
+}
+
+func (ms *messagesService) BatchSetStatus(ctx context.Context, batchSetStatus *BatchSetStatusRequest) (*BatchSetStatusResponse, error) {
+
+	path := fmt.Sprintf("%s/%s", messagesAPIPath("batch"), batchSetStatus.Status)
+
+	req, err := ms.client.newRequest(http.MethodPost, path, batchSetStatus)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to set message status")
+	}
+
+	batchSetStatusRes := BatchSetStatusResponse{Messages: []*Message{}}
+
+	_, err = ms.client.do(ctx, req, &batchSetStatusRes.Messages)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to set message status")
+	}
+
+	return &batchSetStatusRes, nil
+}
+
+func (ms *messagesService) BulkChangeChannelStatus(ctx context.Context, bulkStatusReq *BulkChangeChannelStatusRequest) (*BulkChangeChannelStatusResponse, error) {
+
+	path := fmt.Sprintf("v1/channels/%s/messages/bulk/%s", bulkStatusReq.ChannelID, bulkStatusReq.Status)
+
+	req, err := ms.client.newRequest(http.MethodPost, path, bulkStatusReq)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to set message status")
+	}
+
+	batchSetStatusRes := BulkChangeChannelStatusResponse{BulkOperation: &BulkOperation{}}
+
+	_, err = ms.client.do(ctx, req, &batchSetStatusRes.BulkOperation)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to set message status")
+	}
+
+	return &batchSetStatusRes, nil
+}

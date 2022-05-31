@@ -37,12 +37,13 @@ type Client struct {
 	client *http.Client
 
 	// base URL for the API
-	baseURL     *url.URL
-	Users       UsersService
-	Workflows   WorkflowsService
-	Messages    MessagesService
-	ChannelData ChannelDataService
-	Feed        FeedService
+	baseURL        *url.URL
+	Users          UsersService
+	Workflows      WorkflowsService
+	Messages       MessagesService
+	ChannelData    ChannelDataService
+	Objects        ObjectsService
+	BulkOperations BulkOperationsService
 }
 
 // ClientOption provides a variadic option for configuring the client
@@ -113,8 +114,8 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 	c.Users = &usersService{client: c}
 	c.Workflows = &workflowsService{client: c}
 	c.Messages = &messagesService{client: c}
-	c.ChannelData = &channelDataService{client: c}
-	c.Feed = &feedService{client: c}
+	c.Objects = &objectsService{client: c}
+	c.BulkOperations = &bulkOperationsService{client: c}
 
 	return c, nil
 }
