@@ -148,7 +148,6 @@ func TestUsers_GetMessages(t *testing.T) {
 
 	ctx := context.Background()
 
-	// ctx, client := RealTestClient()
 	have, err := client.Users.GetMessages(ctx, &GetUserMessagesRequest{
 		ID:       "tom",
 		PageSize: 1,
@@ -192,8 +191,6 @@ func TestUsers_BulkIdentify(t *testing.T) {
 	c.Assert(err, qt.IsNil)
 
 	ctx := context.Background()
-
-	// ctx, client := RealTestClient() //TODO remove any test client commented code
 
 	user, err := client.Users.BulkIdentify(ctx, &BulkIdentifyUserRequest{
 		Users: []*User{

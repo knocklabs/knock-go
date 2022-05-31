@@ -18,8 +18,8 @@ import (
 // UsersService is an interface for communicating with the Knock
 // Users API endpoints.
 type UsersService interface {
-	Identify(context.Context, *IdentifyUserRequest) (*User, error)
 	Get(context.Context, *GetUserRequest) (*User, error)
+	Identify(context.Context, *IdentifyUserRequest) (*User, error)
 	Merge(context.Context, *MergeUserRequest) (*User, error)
 	Delete(context.Context, *DeleteUserRequest) error
 
@@ -58,64 +58,6 @@ type User struct {
 	CustomProperties map[string]interface{}
 }
 
-type GetUserRequest struct {
-	// User unique identifier
-	ID string
-}
-
-type DeleteUserRequest struct {
-	// User unique identifier
-	ID string
-}
-
-type IdentifyUserRequest struct {
-	User *User
-}
-
-type MergeUserRequest struct {
-	// User unique identifier
-	ID         string
-	FromUserID string `json:"from_user_id"`
-}
-
-type GetUserMessagesRequest struct {
-	// User unique identifier
-	ID        string             `url:"-"`
-	PageSize  int                `url:"page_size,omitempty"`
-	After     string             `url:"after,omitempty"`
-	Before    string             `url:"before,omitempty"`
-	Source    string             `url:"source,omitempty"`
-	Tenant    string             `url:"tenant,omitempty"`
-	Status    []EngagementStatus `url:"status,omitempty"`
-	ChannelID string             `url:"channel_id,omitempty"`
-}
-
-type GetUserMessagesResponse struct {
-	Messages []*Message `json:"items"`
-}
-
-type GetUserResponse struct {
-	User *User
-}
-type MergeUserResponse = GetUserResponse
-type IdentifyUserResponse = GetUserResponse
-
-type BulkIdentifyUserRequest struct {
-	Users []*User
-}
-
-// Used only as an intermediary to handle arbitrary custom properties
-// for BulkIdentifyUserRequests, never needed directly
-type UserFlatMap map[string]interface{}
-type BulkIdentifyUserResponse struct {
-	BulkOperation *BulkOperation
-}
-
-type BulkDeleteUserRequest struct {
-	UserIDs []string `json:"user_ids"`
-}
-type BulkDeleteUserResponse = BulkIdentifyUserResponse
-
 type Feed struct {
 	FeedItems    []*FeedItem            `json:"entries"`
 	PageInfo     *PageInfo              `json:"page_info"`
@@ -151,6 +93,60 @@ type FeedBlock struct {
 	Type     string `json:"type"`
 }
 
+type GetUserRequest struct {
+	// User unique identifier
+	ID string
+}
+
+type GetUserResponse struct {
+	User *User
+}
+type IdentifyUserRequest struct {
+	User *User
+}
+type IdentifyUserResponse = GetUserResponse
+
+type MergeUserRequest struct {
+	// User unique identifier
+	ID         string
+	FromUserID string `json:"from_user_id"`
+}
+type MergeUserResponse = GetUserResponse
+
+type DeleteUserRequest struct {
+	// User unique identifier
+	ID string
+}
+
+type GetUserMessagesRequest struct {
+	// User unique identifier
+	ID        string             `url:"-"`
+	PageSize  int                `url:"page_size,omitempty"`
+	After     string             `url:"after,omitempty"`
+	Before    string             `url:"before,omitempty"`
+	Source    string             `url:"source,omitempty"`
+	Tenant    string             `url:"tenant,omitempty"`
+	Status    []EngagementStatus `url:"status,omitempty"`
+	ChannelID string             `url:"channel_id,omitempty"`
+}
+
+type GetUserMessagesResponse struct {
+	Messages []*Message `json:"items"`
+}
+
+type BulkIdentifyUserRequest struct {
+	Users []*User
+}
+
+type BulkIdentifyUserResponse struct {
+	BulkOperation *BulkOperation
+}
+
+type BulkDeleteUserRequest struct {
+	UserIDs []string `json:"user_ids"`
+}
+type BulkDeleteUserResponse = BulkIdentifyUserResponse
+
 type GetFeedRequest struct {
 	UserID string
 	FeedID string
@@ -172,7 +168,6 @@ type SetUserChannelDataRequest struct {
 	ChannelID string                 `json:"-"`
 	Data      map[string]interface{} `json:"data"`
 }
-
 type SetUserChannelDataResponse = GetUserChannelDataResponse
 
 type DeleteUserChannelDataRequest = GetUserChannelDataRequest
@@ -295,7 +290,7 @@ func (us *usersService) GetMessages(ctx context.Context, getUserMessagesReq *Get
 func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkIdentifyUserRequest) (*BulkOperation, error) {
 	path := UsersAPIPath("bulk/identify")
 
-	var bulkUserFlatMap []UserFlatMap
+	var bulkUserFlatMap []map[string]interface{}
 
 	for _, rawUser := range bulkIdentifyReq.Users {
 		userFlatMap, err := rawUser.toMapWithCustomProperties()
@@ -307,7 +302,7 @@ func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkI
 
 	// Define a struct used only to wrap this data in a `users` json key.
 	type BulkUserList struct {
-		BulkUserFlatMap []UserFlatMap `json:"users"`
+		BulkUserFlatMap []map[string]interface{} `json:"users"`
 	}
 	req, err := us.client.newRequest(http.MethodPost, path, BulkUserList{BulkUserFlatMap: bulkUserFlatMap})
 
@@ -351,6 +346,23 @@ func (us *usersService) BulkDelete(ctx context.Context, bulkDeleteReq *BulkDelet
 	}
 
 	return bulkDeleteRes.BulkOperation, nil
+}
+
+func (us *usersService) GetFeed(ctx context.Context, getFeedReq *GetFeedRequest) (*Feed, error) {
+	path := feedsAPIPath(getFeedReq.UserID, getFeedReq.FeedID)
+
+	req, err := us.client.newRequest(http.MethodGet, path, getFeedReq)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request for get feed")
+	}
+
+	getFeedRes := &GetFeedResponse{Feed: &Feed{}}
+	_, err = us.client.do(ctx, req, getFeedRes.Feed)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request for get feed")
+	}
+
+	return getFeedRes.Feed, nil
 }
 
 func (cds *usersService) GetChannelData(ctx context.Context, getChannelDataReq *GetUserChannelDataRequest) (map[string]interface{}, error) {
@@ -463,21 +475,4 @@ func parseRawUserResponseCustomProperties(rawResponse []byte) (*User, error) {
 	user.CustomProperties = customProperties
 
 	return &user, nil
-}
-
-func (us *usersService) GetFeed(ctx context.Context, getFeedReq *GetFeedRequest) (*Feed, error) {
-	path := feedsAPIPath(getFeedReq.UserID, getFeedReq.FeedID)
-
-	req, err := us.client.newRequest(http.MethodGet, path, getFeedReq)
-	if err != nil {
-		return nil, errors.Wrap(err, "error creating request for get feed")
-	}
-
-	getFeedRes := &GetFeedResponse{Feed: &Feed{}}
-	_, err = us.client.do(ctx, req, getFeedRes.Feed)
-	if err != nil {
-		return nil, errors.Wrap(err, "error making request for get feed")
-	}
-
-	return getFeedRes.Feed, nil
 }
