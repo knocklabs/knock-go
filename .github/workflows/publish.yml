@@ -1,0 +1,26 @@
+on:
+  release:
+    types: [published]
+
+name: Update Go Module Index
+
+# jobs:
+#   bump-index:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout repo
+#         uses: actions/checkout@v3
+#       - name: Ping endpoint
+#         run: curl "https://proxy.golang.org/github.com/knocklabs/knock/@v/${{ github.event.release.tag_name }}.info"
+
+jobs:
+  debug:
+    name: Debug
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump env
+        run: env | sort
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github.event.release) }}
+        run: echo "$GITHUB_CONTEXT"
