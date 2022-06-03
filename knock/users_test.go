@@ -370,7 +370,7 @@ func TestChannelData_GetForUser(t *testing.T) {
 
 	ctx := context.Background()
 
-	setUserChannelDataResponse, err := client.Users.GetChannelData(ctx, &GetUserChannelDataRequest{
+	getUserChannelDataResponse, err := client.Users.GetChannelData(ctx, &GetUserChannelDataRequest{
 		UserID:    "test-123",
 		ChannelID: "5d2377a0-92fb-4616-8315-eee843556566",
 	})
@@ -384,7 +384,7 @@ func TestChannelData_GetForUser(t *testing.T) {
 	}
 
 	c.Assert(err, qt.IsNil)
-	c.Assert(setUserChannelDataResponse, qt.DeepEquals, want)
+	c.Assert(getUserChannelDataResponse, qt.DeepEquals, want)
 }
 
 func TestChannelData_SetForUser(t *testing.T) {
