@@ -55,6 +55,7 @@ type User struct {
 	CustomProperties map[string]interface{}
 }
 
+// Context structs
 type Feed struct {
 	FeedItems    []*FeedItem            `json:"entries"`
 	PageInfo     *PageInfo              `json:"page_info"`
@@ -90,8 +91,8 @@ type FeedBlock struct {
 	Type     string `json:"type"`
 }
 
+// Client structs
 type GetUserRequest struct {
-	// User unique identifier
 	ID string
 }
 
@@ -104,19 +105,16 @@ type IdentifyUserRequest struct {
 type IdentifyUserResponse = GetUserResponse
 
 type MergeUserRequest struct {
-	// User unique identifier
 	ID         string
 	FromUserID string `json:"from_user_id"`
 }
 type MergeUserResponse = GetUserResponse
 
 type DeleteUserRequest struct {
-	// User unique identifier
 	ID string
 }
 
 type GetUserMessagesRequest struct {
-	// User unique identifier
 	ID        string             `url:"-"`
 	PageSize  int                `url:"page_size,omitempty"`
 	After     string             `url:"after,omitempty"`

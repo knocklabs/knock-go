@@ -27,6 +27,8 @@ func NewBulkOperationsService(client *Client) *bulkOperationsService {
 	}
 }
 
+// Context structs
+
 type BulkOperationStatus string
 
 const (
@@ -49,6 +51,7 @@ type BulkOperation struct {
 	Status             BulkOperationStatus `json:"status"`
 }
 
+// Client structs
 type GetBulkOperationRequest struct {
 	ID string
 }

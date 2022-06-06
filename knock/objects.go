@@ -35,6 +35,7 @@ func NewObjectService(client *Client) *objectsService {
 	}
 }
 
+// Context structs
 type Object struct {
 	CollectionID string                 `json:"collection"`
 	ObjectID     string                 `json:"id"`
@@ -60,6 +61,7 @@ type ObjectMessage struct {
 	Data       map[string]interface{} `json:"data"`
 }
 
+// Client structs
 type GetObjectRequest struct {
 	ID           string
 	CollectionID string

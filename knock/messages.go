@@ -41,6 +41,8 @@ func NewMessagesService(client *Client) *messagesService {
 
 type EngagementStatus string
 
+// Context structs
+
 // User message query statuses
 const (
 	Queued      EngagementStatus = "queued"
@@ -103,7 +105,7 @@ type MessageContent struct {
 	InsertedAt time.Time              `json:"inserted_at"`
 }
 
-// requests and responses
+// Client structs
 type ListMessagesRequest struct {
 	PageSize  int                `url:"page_size,omitempty"`
 	Cursor    string             `url:"page_size,omitempty"`

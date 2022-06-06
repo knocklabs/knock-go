@@ -27,7 +27,7 @@ func NewWorkflowsService(client *Client) *workflowsService {
 	}
 }
 
-// TriggerWorkflowRequest encapsulates the request for triggering a workflow.
+// Client structs
 type TriggerWorkflowRequest struct {
 	Workflow        string                 `json:"workflow"`
 	Recipients      []string               `json:"recipients"`
@@ -41,7 +41,6 @@ type TriggerWorkflowResponse struct {
 	WorkflowRunId string `json:"workflow_run_id"`
 }
 
-// CancelWorkflowRequest encapsulates the request for cancelling a workflow.
 type CancelWorkflowRequest struct {
 	Workflow        string   `json:"workflow"`
 	Recipients      []string `json:"recipients,omitempty"`
