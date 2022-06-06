@@ -128,7 +128,7 @@ type GetUserMessagesResponse struct {
 }
 
 type BulkIdentifyUserRequest struct {
-	Users []*User
+	Users []*IdentifyUserRequest
 }
 
 type BulkIdentifyUserResponse struct {
