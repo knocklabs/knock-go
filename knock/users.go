@@ -99,9 +99,7 @@ type GetUserRequest struct {
 type GetUserResponse struct {
 	User *User
 }
-type IdentifyUserRequest struct {
-	User *User
-}
+type IdentifyUserRequest = User
 type IdentifyUserResponse = GetUserResponse
 
 type MergeUserRequest struct {
@@ -180,9 +178,9 @@ func feedsAPIPath(userID string, FeedID string) string {
 }
 
 func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*User, error) {
-	path := UsersAPIPath(identifyReq.User.ID)
+	path := UsersAPIPath(identifyReq.ID)
 
-	identifyBody, err := identifyReq.User.toMapWithCustomProperties()
+	identifyBody, err := identifyReq.toMapWithCustomProperties()
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for identify user")
 	}

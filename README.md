@@ -45,16 +45,15 @@ func main() {
 
 ```go
     user, _ := client.Users.Identify(ctx, &knock.IdentifyUserRequest{
-        User: &knock.User{
-            ID:   "fun-user",
-            Name: "John Hammond",
-            CustomProperties: map[string]interface{}{
-                "welcome":     "to jurassic park",
-                "middle-name": "alfred",
-            },
+        ID:   "fun-user2",
+        Name: "John Hammond",
+        CustomProperties: map[string]interface{}{
+            "welcome":     "to jurassic park",
+            "middle-name": "alfred",
         },
     })
     fmt.Printf("user-name: %+v\n", user)
+
 ```
 
 ### Sending notifies (triggering workflows)

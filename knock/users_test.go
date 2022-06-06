@@ -72,12 +72,11 @@ func TestUsers_Identify(t *testing.T) {
 	phone_number := "+11234567890"
 
 	user, err := client.Users.Identify(ctx, &IdentifyUserRequest{
-		User: &User{
-			ID: id,
-			CustomProperties: map[string]interface{}{
-				"middle-name": "alfred",
-			},
-		}})
+		ID: id,
+		CustomProperties: map[string]interface{}{
+			"middle-name": "alfred",
+		},
+	})
 
 	want := &User{
 		Name:        name,
