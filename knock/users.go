@@ -30,6 +30,11 @@ type UsersService interface {
 	GetChannelData(context.Context, *GetUserChannelDataRequest) (map[string]interface{}, error)
 	SetChannelData(context.Context, *SetUserChannelDataRequest) (map[string]interface{}, error)
 	DeleteChannelData(context.Context, *DeleteUserChannelDataRequest) error
+
+	GetAllPreferences(context.Context, *GetAllPreferencesRequest) ([]*PreferenceSet, error)
+	GetPreferences(context.Context, *GetUserPreferencesRequest) (*PreferenceSet, error)
+	SetPreferences(context.Context, *SetUserPreferencesRequest) (*PreferenceSet, error)
+	BulkSetPreferences(context.Context, *BulkSetUserPreferencesRequest) (*BulkOperation, error)
 }
 
 type usersService struct {
@@ -164,6 +169,37 @@ type SetUserChannelDataRequest struct {
 type SetUserChannelDataResponse = GetUserChannelDataResponse
 
 type DeleteUserChannelDataRequest = GetUserChannelDataRequest
+
+type GetAllPreferencesRequest struct {
+	UserID string `json:"-"`
+}
+
+type GetAllPreferencesResponse struct {
+	Preferences []*PreferenceSet
+}
+
+type GetUserPreferencesRequest struct {
+	UserID       string `json:"-"`
+	PreferenceID string `json:"-"`
+}
+type GetUserPreferencesResponse struct {
+	Preferences *PreferenceSet
+}
+
+type SetUserPreferencesRequest struct {
+	UserId       string
+	PreferenceID string
+	Preferences  map[string]interface{}
+}
+type SetUserPreferencesResponse = GetUserPreferencesResponse
+
+type BulkSetUserPreferencesRequest struct {
+	UserIDs      []string               `json:"user_ids"`
+	PreferenceID string                 `json:"-"`
+	Preferences  map[string]interface{} `json:"preferences"`
+}
+
+type BulkSetUserPreferencesResponse = BulkIdentifyUserResponse
 
 func UsersAPIPath(userId string) string {
 	return fmt.Sprintf("v1/users/%s", userId)
@@ -310,7 +346,6 @@ func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkI
 		return nil, errors.Wrap(err, "error making request for bulk identify user")
 	}
 
-	// user, err := parseRawUserResponseCustomProperties(body)
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing request for bulk identify user")
 	}
@@ -418,6 +453,104 @@ func (us *usersService) DeleteChannelData(ctx context.Context, deleteUserChannel
 	}
 
 	return nil
+}
+
+func (us *usersService) GetAllPreferences(ctx context.Context, allPreferencesReq *GetAllPreferencesRequest) ([]*PreferenceSet, error) {
+
+	path := fmt.Sprintf("%s/preferences", UsersAPIPath(allPreferencesReq.UserID))
+
+	req, err := us.client.newRequest(http.MethodGet, path, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to get all preferences")
+	}
+
+	allPreferencesResponse := GetAllPreferencesResponse{Preferences: []*PreferenceSet{}}
+
+	_, err = us.client.do(ctx, req, &allPreferencesResponse.Preferences)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to get all preferences")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to get all preferences")
+	}
+
+	return allPreferencesResponse.Preferences, nil
+}
+
+func (us *usersService) GetPreferences(ctx context.Context, getPreferencesReq *GetUserPreferencesRequest) (*PreferenceSet, error) {
+	if getPreferencesReq.PreferenceID == "" {
+		getPreferencesReq.PreferenceID = "default"
+	}
+
+	path := fmt.Sprintf("%s/preferences/%s", UsersAPIPath(getPreferencesReq.UserID), getPreferencesReq.PreferenceID)
+
+	req, err := us.client.newRequest(http.MethodGet, path, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to get all preferences")
+	}
+
+	getPreferenceResponse := GetUserPreferencesResponse{Preferences: &PreferenceSet{}}
+
+	_, err = us.client.do(ctx, req, &getPreferenceResponse.Preferences)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to get all preferences")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to get all preferences")
+	}
+
+	return getPreferenceResponse.Preferences, nil
+}
+
+func (us *usersService) SetPreferences(ctx context.Context, setPreferencesReq *SetUserPreferencesRequest) (*PreferenceSet, error) {
+	if setPreferencesReq.PreferenceID == "" {
+		setPreferencesReq.PreferenceID = "default"
+	}
+	path := fmt.Sprintf("%s/preferences/%s", UsersAPIPath(setPreferencesReq.UserId), setPreferencesReq.PreferenceID)
+
+	req, err := us.client.newRequest(http.MethodPut, path, setPreferencesReq.PreferenceID)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to set all preferences")
+	}
+
+	setPreferenceResponse := SetUserPreferencesResponse{Preferences: &PreferenceSet{}}
+
+	_, err = us.client.do(ctx, req, &setPreferenceResponse.Preferences)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to set all preferences")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to set all preferences")
+	}
+
+	return setPreferenceResponse.Preferences, nil
+}
+
+func (us *usersService) BulkSetPreferences(ctx context.Context, setPreferencesReq *BulkSetUserPreferencesRequest) (*BulkOperation, error) {
+
+	// include the PreferenceID nested under the `preferences` key in the body, where the API expects it"
+	setPreferencesReq.Preferences["id"] = setPreferencesReq.PreferenceID
+
+	req, err := us.client.newRequest(http.MethodPost, "v1/users/bulk/preferences", setPreferencesReq)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to bulk set user preferences")
+	}
+
+	bulkSetPreferencesResponse := BulkSetUserPreferencesResponse{}
+
+	_, err = us.client.do(ctx, req, &bulkSetPreferencesResponse.BulkOperation)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to bulk set user preferences")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to bulk set user preferences")
+	}
+
+	return bulkSetPreferencesResponse.BulkOperation, nil
 }
 
 // IdentifyUserRequests can contain arbitrary customer data that must be stored, and must be mapped
