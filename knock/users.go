@@ -194,10 +194,11 @@ type SetUserPreferencesRequest struct {
 type SetUserPreferencesResponse = GetUserPreferencesResponse
 
 type BulkSetUserPreferencesRequest struct {
-	UserIds      []string               `json:"user_ids"`
+	UserIDs      []string               `json:"user_ids"`
+	PreferenceID string                 `json:"-"`
 	Preferences  map[string]interface{} `json:"preferences"`
-	PreferenceID string                 `json:"preferences.id"`
 }
+
 type BulkSetUserPreferencesResponse = BulkIdentifyUserResponse
 
 func UsersAPIPath(userId string) string {
@@ -478,6 +479,9 @@ func (us *usersService) GetAllPreferences(ctx context.Context, allPreferencesReq
 }
 
 func (us *usersService) GetPreferences(ctx context.Context, getPreferencesReq *GetUserPreferencesRequest) (*PreferenceSet, error) {
+	if getPreferencesReq.PreferenceID == "" {
+		getPreferencesReq.PreferenceID = "default"
+	}
 
 	path := fmt.Sprintf("%s/preferences/%s", UsersAPIPath(getPreferencesReq.UserID), getPreferencesReq.PreferenceID)
 
@@ -506,7 +510,7 @@ func (us *usersService) SetPreferences(ctx context.Context, setPreferencesReq *S
 	}
 	path := fmt.Sprintf("%s/preferences/%s", UsersAPIPath(setPreferencesReq.UserId), setPreferencesReq.PreferenceID)
 
-	req, err := us.client.newRequest(http.MethodPut, path, setPreferencesReq.Preferences)
+	req, err := us.client.newRequest(http.MethodPut, path, setPreferencesReq.PreferenceID)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to set all preferences")
 	}
@@ -526,7 +530,11 @@ func (us *usersService) SetPreferences(ctx context.Context, setPreferencesReq *S
 }
 
 func (us *usersService) BulkSetPreferences(ctx context.Context, setPreferencesReq *BulkSetUserPreferencesRequest) (*BulkOperation, error) {
-	req, err := us.client.newRequest(http.MethodPut, "v1/users/bulk/preferences", setPreferencesReq.Preferences)
+
+	// include the PreferenceID nested under the `preferences` key in the body, where the API expects it"
+	setPreferencesReq.Preferences["id"] = setPreferencesReq.PreferenceID
+
+	req, err := us.client.newRequest(http.MethodPost, "v1/users/bulk/preferences", setPreferencesReq)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to bulk set user preferences")
 	}

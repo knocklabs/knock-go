@@ -279,7 +279,9 @@ func (os *objectsService) DeleteChannelData(ctx context.Context, deleteObjectCha
 }
 
 func (os *objectsService) GetPreferences(ctx context.Context, getObjectPreferencesReq *GetObjectPreferencesRequest) (*PreferenceSet, error) {
-
+	if getObjectPreferencesReq.PreferenceID == "" {
+		getObjectPreferencesReq.PreferenceID = "default"
+	}
 	path := fmt.Sprintf("%s/preferences/%s", objectAPIPath(getObjectPreferencesReq.Collection, getObjectPreferencesReq.ObjectID), getObjectPreferencesReq.PreferenceID)
 
 	req, err := os.client.newRequest(http.MethodGet, path, nil)
@@ -304,11 +306,11 @@ func (os *objectsService) GetPreferences(ctx context.Context, getObjectPreferenc
 
 func (os *objectsService) SetPreferences(ctx context.Context, setObjectPreferencesReq *SetObjectPreferencesRequest) (*PreferenceSet, error) {
 
-	path := fmt.Sprintf("%s/preferences/%s", objectAPIPath(setObjectPreferencesReq.Collection, setObjectPreferencesReq.ObjectID), setObjectPreferencesReq.PreferenceID)
-
 	if setObjectPreferencesReq.PreferenceID == "" {
 		setObjectPreferencesReq.PreferenceID = "default"
 	}
+
+	path := fmt.Sprintf("%s/preferences/%s", objectAPIPath(setObjectPreferencesReq.Collection, setObjectPreferencesReq.ObjectID), setObjectPreferencesReq.PreferenceID)
 
 	req, err := os.client.newRequest(http.MethodPut, path, setObjectPreferencesReq.Preferences)
 	if err != nil {

@@ -565,3 +565,52 @@ func TestUsers_SetPreferences(t *testing.T) {
 	c.Assert(err, qt.IsNil)
 	c.Assert(user, qt.DeepEquals, want)
 }
+
+func TestUsers_BulkSetPreferences(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":3,"failed_at":null,"id":"1dcdaee8-9f22-4308-8d58-e6532f1501bd","inserted_at":"2022-06-08T12:37:34.367249Z","name":"users.set_preferences","processed_rows":0,"progress_path":"/v1/bulk_operations/1dcdaee8-9f22-4308-8d58-e6532f1501bd","started_at":null,"status":"queued","updated_at":"2022-06-08T12:37:34.374113Z"}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	// ctx, client := RealTestClient()
+
+	user, err := client.Users.BulkSetPreferences(ctx, &BulkSetUserPreferencesRequest{
+		UserIDs:      []string{"user-124", "user-125", "user-126"},
+		PreferenceID: "cooltest",
+		Preferences: map[string]interface{}{
+			"channel_types": map[string]interface{}{
+				"email":       true,
+				"in_app_feed": false,
+			},
+			"workflows": map[string]interface{}{
+				"new-comment": map[string]interface{}{
+					"channel_types": map[string]interface{}{ // note underscore
+						"email":       true,
+						"in_app_feed": false,
+					},
+				},
+			},
+		},
+	})
+
+	want := &BulkOperation{
+		ID:                 "1dcdaee8-9f22-4308-8d58-e6532f1501bd",
+		EstimatedTotalRows: 3,
+		Status:             BulkOperationQueued,
+		ProgressPath:       "/v1/bulk_operations/1dcdaee8-9f22-4308-8d58-e6532f1501bd",
+		InsertedAt:         ParseRFC3339Timestamp("2022-06-08T12:37:34.367249Z"),
+		UpdatedAt:          ParseRFC3339Timestamp("2022-06-08T12:37:34.374113Z"),
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(user, qt.DeepEquals, want)
+}
