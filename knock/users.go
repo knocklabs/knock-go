@@ -32,8 +32,8 @@ type UsersService interface {
 	DeleteChannelData(context.Context, *DeleteUserChannelDataRequest) error
 
 	GetAllPreferences(context.Context, *GetAllPreferencesRequest) ([]*PreferenceSet, error)
-	GetPreferences(context.Context, *GetPreferencesRequest) (*PreferenceSet, error)
-	SetPreferences(context.Context, *SetPreferencesRequest) (*PreferenceSet, error)
+	GetPreferences(context.Context, *GetUserPreferencesRequest) (*PreferenceSet, error)
+	SetPreferences(context.Context, *SetUserPreferencesRequest) (*PreferenceSet, error)
 }
 
 type usersService struct {
@@ -93,13 +93,6 @@ type FeedBlock struct {
 	Name     string `json:"name"`
 	Rendered string `json:"rendered"`
 	Type     string `json:"type"`
-}
-
-type PreferenceSet struct {
-	ID           string                 `json:"id"`
-	Workflows    map[string]interface{} `json:"workflows"`
-	Categories   map[string]interface{} `json:"categories"`
-	ChannelTypes map[string]interface{} `json:"channel_types"`
 }
 
 // Client structs
@@ -184,20 +177,20 @@ type GetAllPreferencesResponse struct {
 	Preferences []*PreferenceSet
 }
 
-type GetPreferencesRequest struct {
+type GetUserPreferencesRequest struct {
 	UserID       string `json:"-"`
 	PreferenceID string `json:"-"`
 }
-type GetPreferencesResponse struct {
+type GetUserPreferencesResponse struct {
 	Preferences *PreferenceSet
 }
 
-type SetPreferencesRequest struct {
-	UserId      string
-	ID          string
-	Preferences map[string]interface{}
+type SetUserPreferencesRequest struct {
+	UserId       string
+	PreferenceID string
+	Preferences  map[string]interface{}
 }
-type SetPreferencesResponse = GetPreferencesRequest
+type SetUserPreferencesResponse = GetUserPreferencesResponse
 
 func UsersAPIPath(userId string) string {
 	return fmt.Sprintf("v1/users/%s", userId)
@@ -476,7 +469,7 @@ func (us *usersService) GetAllPreferences(ctx context.Context, allPreferencesReq
 	return allPreferencesResponse.Preferences, nil
 }
 
-func (us *usersService) GetPreferences(ctx context.Context, getPreferencesReq *GetPreferencesRequest) (*PreferenceSet, error) {
+func (us *usersService) GetPreferences(ctx context.Context, getPreferencesReq *GetUserPreferencesRequest) (*PreferenceSet, error) {
 
 	path := fmt.Sprintf("%s/preferences/%s", UsersAPIPath(getPreferencesReq.UserID), getPreferencesReq.PreferenceID)
 
@@ -485,7 +478,7 @@ func (us *usersService) GetPreferences(ctx context.Context, getPreferencesReq *G
 		return nil, errors.Wrap(err, "error creating request to get all preferences")
 	}
 
-	getPreferenceResponse := GetPreferencesResponse{Preferences: &PreferenceSet{}}
+	getPreferenceResponse := GetUserPreferencesResponse{Preferences: &PreferenceSet{}}
 
 	_, err = us.client.do(ctx, req, &getPreferenceResponse.Preferences)
 	if err != nil {
@@ -499,20 +492,18 @@ func (us *usersService) GetPreferences(ctx context.Context, getPreferencesReq *G
 	return getPreferenceResponse.Preferences, nil
 }
 
-func (us *usersService) SetPreferences(ctx context.Context, setPreferencesReq *SetPreferencesRequest) (*PreferenceSet, error) {
-
-	path := fmt.Sprintf("%s/preferences/%s", UsersAPIPath(setPreferencesReq.UserId), setPreferencesReq.ID)
-
-	if setPreferencesReq.ID == "" {
-		setPreferencesReq.ID = "default"
+func (us *usersService) SetPreferences(ctx context.Context, setPreferencesReq *SetUserPreferencesRequest) (*PreferenceSet, error) {
+	if setPreferencesReq.PreferenceID == "" {
+		setPreferencesReq.PreferenceID = "default"
 	}
+	path := fmt.Sprintf("%s/preferences/%s", UsersAPIPath(setPreferencesReq.UserId), setPreferencesReq.PreferenceID)
 
 	req, err := us.client.newRequest(http.MethodPut, path, setPreferencesReq.Preferences)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to get all preferences")
 	}
 
-	getPreferenceResponse := GetPreferencesResponse{Preferences: &PreferenceSet{}}
+	getPreferenceResponse := SetUserPreferencesResponse{Preferences: &PreferenceSet{}}
 
 	_, err = us.client.do(ctx, req, &getPreferenceResponse.Preferences)
 	if err != nil {
@@ -524,7 +515,6 @@ func (us *usersService) SetPreferences(ctx context.Context, setPreferencesReq *S
 	}
 
 	return getPreferenceResponse.Preferences, nil
-	return nil, nil
 }
 
 // IdentifyUserRequests can contain arbitrary customer data that must be stored, and must be mapped

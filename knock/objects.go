@@ -22,6 +22,9 @@ type ObjectsService interface {
 	GetChannelData(context.Context, *GetObjectChannelDataRequest) (map[string]interface{}, error)
 	SetChannelData(context.Context, *SetObjectChannelDataRequest) (map[string]interface{}, error)
 	DeleteChannelData(context.Context, *DeleteObjectChannelDataRequest) error
+
+	GetPreferences(context.Context, *GetObjectPreferencesRequest) (*PreferenceSet, error)
+	SetPreferences(context.Context, *SetObjectPreferencesRequest) (*PreferenceSet, error)
 }
 type objectsService struct {
 	client *Client
@@ -114,6 +117,22 @@ type SetObjectChannelDataResponse = GetUserChannelDataResponse
 
 type DeleteObjectChannelDataRequest = GetObjectChannelDataRequest
 
+type GetObjectPreferencesRequest struct {
+	PreferenceID string `json:"-"`
+	ObjectID     string `json:"-"`
+	Collection   string `json:"-"`
+}
+type GetObjectPreferencesResponse struct {
+	Preferences *PreferenceSet
+}
+type SetObjectPreferencesRequest struct {
+	PreferenceID string `json:"-"`
+	ObjectID     string `json:"-"`
+	Collection   string `json:"-"`
+	Preferences  map[string]interface{}
+}
+type SetObjectPreferencesResponse = GetObjectPreferencesResponse
+
 func objectAPIPath(collectionID string, objectID string) string {
 	return fmt.Sprintf("v1/objects/%s/%s", collectionID, objectID)
 }
@@ -197,16 +216,16 @@ func (os *objectsService) Delete(ctx context.Context, deleteObjectRequest *Delet
 	return nil
 }
 
-func (us *objectsService) GetChannelData(ctx context.Context, getChannelDataReq *GetObjectChannelDataRequest) (map[string]interface{}, error) {
+func (os *objectsService) GetChannelData(ctx context.Context, getChannelDataReq *GetObjectChannelDataRequest) (map[string]interface{}, error) {
 	path := objectChannelDataAPIPath(getChannelDataReq.Collection, getChannelDataReq.ObjectID, getChannelDataReq.ChannelID)
 
-	req, err := us.client.newRequest(http.MethodGet, path, nil)
+	req, err := os.client.newRequest(http.MethodGet, path, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to get object channel data")
 	}
 
 	channelDataResponse := &GetUserChannelDataResponse{}
-	_, err = us.client.do(ctx, req, channelDataResponse)
+	_, err = os.client.do(ctx, req, channelDataResponse)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to get object channel data")
 	}
@@ -218,16 +237,16 @@ func (us *objectsService) GetChannelData(ctx context.Context, getChannelDataReq 
 	return channelDataResponse.ChannelData, nil
 }
 
-func (us *objectsService) SetChannelData(ctx context.Context, getChannelDataReq *SetObjectChannelDataRequest) (map[string]interface{}, error) {
+func (os *objectsService) SetChannelData(ctx context.Context, getChannelDataReq *SetObjectChannelDataRequest) (map[string]interface{}, error) {
 	path := objectChannelDataAPIPath(getChannelDataReq.Collection, getChannelDataReq.ObjectID, getChannelDataReq.ChannelID)
 
-	req, err := us.client.newRequest(http.MethodPut, path, getChannelDataReq)
+	req, err := os.client.newRequest(http.MethodPut, path, getChannelDataReq)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to set object channel data")
 	}
 
 	channelDataResponse := &SetObjectChannelDataResponse{}
-	_, err = us.client.do(ctx, req, channelDataResponse)
+	_, err = os.client.do(ctx, req, channelDataResponse)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to set object channel data")
 	}
@@ -239,15 +258,15 @@ func (us *objectsService) SetChannelData(ctx context.Context, getChannelDataReq 
 	return channelDataResponse.ChannelData, nil
 }
 
-func (us *objectsService) DeleteChannelData(ctx context.Context, deleteObjectChannelDataReq *DeleteObjectChannelDataRequest) error {
+func (os *objectsService) DeleteChannelData(ctx context.Context, deleteObjectChannelDataReq *DeleteObjectChannelDataRequest) error {
 	path := objectChannelDataAPIPath(deleteObjectChannelDataReq.Collection, deleteObjectChannelDataReq.ObjectID, deleteObjectChannelDataReq.ChannelID)
 
-	req, err := us.client.newRequest(http.MethodDelete, path, nil)
+	req, err := os.client.newRequest(http.MethodDelete, path, nil)
 	if err != nil {
 		return errors.Wrap(err, "error creating request to delete object channel data")
 	}
 
-	_, err = us.client.do(ctx, req, nil)
+	_, err = os.client.do(ctx, req, nil)
 	if err != nil {
 		return errors.Wrap(err, "error making request to delete object channel data")
 	}
@@ -257,4 +276,55 @@ func (us *objectsService) DeleteChannelData(ctx context.Context, deleteObjectCha
 	}
 
 	return nil
+}
+
+func (os *objectsService) GetPreferences(ctx context.Context, getObjectPreferencesReq *GetObjectPreferencesRequest) (*PreferenceSet, error) {
+
+	path := fmt.Sprintf("%s/preferences/%s", objectAPIPath(getObjectPreferencesReq.Collection, getObjectPreferencesReq.ObjectID), getObjectPreferencesReq.PreferenceID)
+
+	req, err := os.client.newRequest(http.MethodGet, path, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to get object preferences")
+	}
+
+	getPreferenceResponse := GetObjectPreferencesResponse{Preferences: &PreferenceSet{}}
+
+	_, err = os.client.do(ctx, req, &getPreferenceResponse.Preferences)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to get object preferences")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to get object preferences")
+	}
+
+	return getPreferenceResponse.Preferences, nil
+
+}
+
+func (os *objectsService) SetPreferences(ctx context.Context, setObjectPreferencesReq *SetObjectPreferencesRequest) (*PreferenceSet, error) {
+
+	path := fmt.Sprintf("%s/preferences/%s", objectAPIPath(setObjectPreferencesReq.Collection, setObjectPreferencesReq.ObjectID), setObjectPreferencesReq.PreferenceID)
+
+	if setObjectPreferencesReq.PreferenceID == "" {
+		setObjectPreferencesReq.PreferenceID = "default"
+	}
+
+	req, err := os.client.newRequest(http.MethodPut, path, setObjectPreferencesReq.Preferences)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to set object preferences")
+	}
+
+	setPreferenceResponse := SetObjectPreferencesResponse{Preferences: &PreferenceSet{}}
+
+	_, err = os.client.do(ctx, req, &setPreferenceResponse.Preferences)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to set object preferences")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to set object preferences")
+	}
+
+	return setPreferenceResponse.Preferences, nil
 }

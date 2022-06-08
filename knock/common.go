@@ -13,6 +13,13 @@ type ChannelData struct {
 	Data      map[string]interface{} `json:"data"`
 }
 
+type PreferenceSet struct {
+	ID           string                 `json:"id"`
+	Workflows    map[string]interface{} `json:"workflows"`
+	Categories   map[string]interface{} `json:"categories"`
+	ChannelTypes map[string]interface{} `json:"channel_types"`
+}
+
 func ParseRFC3339Timestamp(input string) time.Time {
 	out, _ := time.Parse(time.RFC3339, input)
 	return out

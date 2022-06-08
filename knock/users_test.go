@@ -500,7 +500,7 @@ func TestUsers_GetPreferences(t *testing.T) {
 
 	// ctx, client := RealTestClient()
 
-	user, err := client.Users.GetPreferences(ctx, &GetPreferencesRequest{
+	user, err := client.Users.GetPreferences(ctx, &GetUserPreferencesRequest{
 		UserID:       "user-124",
 		PreferenceID: "default",
 	})
@@ -534,9 +534,9 @@ func TestUsers_SetPreferences(t *testing.T) {
 
 	// ctx, client := RealTestClient()
 
-	user, err := client.Users.SetPreferences(ctx, &SetPreferencesRequest{
-		UserId: "user-125",
-		ID:     "default",
+	user, err := client.Users.SetPreferences(ctx, &SetUserPreferencesRequest{
+		UserId:       "user-125",
+		PreferenceID: "default",
 		Preferences: map[string]interface{}{
 			"channel_types": map[string]interface{}{
 				"email":       true,

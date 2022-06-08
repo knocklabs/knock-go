@@ -236,3 +236,92 @@ func TestObjects_DeleteChannelData(t *testing.T) {
 	c.Assert(err, qt.IsNil)
 
 }
+
+func TestObjects_GetPreferences(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"PreferenceSet","categories":null,"channel_types":{"email":false,"in_app_feed":true},"id":"default","workflows":{"new-comment":{"channel_types":{"email":false,"in_app_feed":true}}}}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	// ctx, client := RealTestClient()
+
+	have, err := client.Objects.GetPreferences(ctx, &GetObjectPreferencesRequest{
+		PreferenceID: "default",
+		ObjectID:     "cool-object",
+		Collection:   "test-collection",
+	})
+
+	want := &PreferenceSet{
+		ID: "default",
+		Workflows: map[string]interface{}{
+			"new-comment": map[string]interface{}{"channel_types": map[string]interface{}{"email": false, "in_app_feed": true}},
+		},
+		ChannelTypes: map[string]interface{}{"email": false, "in_app_feed": true},
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(have, qt.DeepEquals, want)
+}
+
+func TestObjects_SetPreferences(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"PreferenceSet","categories":null,"channel_types":{"email":true,"in_app_feed":false},"id":"default","workflows":{"new-comment":{"channel_types":{"email":true,"in_app_feed":false}}}}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	// ctx, client := RealTestClient()
+
+	have, err := client.Objects.SetPreferences(ctx, &SetObjectPreferencesRequest{
+		PreferenceID: "default",
+		ObjectID:     "cool-object",
+		Collection:   "test-collection",
+		Preferences: map[string]interface{}{
+			"channel_types": map[string]interface{}{
+				"email":       true,
+				"in_app_feed": false,
+			},
+			"workflows": map[string]interface{}{
+				"new-comment": map[string]interface{}{
+					"channel_types": map[string]interface{}{ // note underscore
+						"email":       true,
+						"in_app_feed": false,
+					},
+				},
+			},
+		},
+	})
+
+	want := &PreferenceSet{
+		ID: "default",
+		Workflows: map[string]interface{}{
+			"new-comment": map[string]interface{}{
+				"channel_types": map[string]interface{}{
+					"email":       true,
+					"in_app_feed": false,
+				},
+			},
+		},
+		ChannelTypes: map[string]interface{}{"email": true, "in_app_feed": false},
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(have, qt.DeepEquals, want)
+}
