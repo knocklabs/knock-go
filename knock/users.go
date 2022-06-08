@@ -34,6 +34,7 @@ type UsersService interface {
 	GetAllPreferences(context.Context, *GetAllPreferencesRequest) ([]*PreferenceSet, error)
 	GetPreferences(context.Context, *GetUserPreferencesRequest) (*PreferenceSet, error)
 	SetPreferences(context.Context, *SetUserPreferencesRequest) (*PreferenceSet, error)
+	BulkSetPreferences(context.Context, *BulkSetUserPreferencesRequest) (*BulkOperation, error)
 }
 
 type usersService struct {
@@ -191,6 +192,13 @@ type SetUserPreferencesRequest struct {
 	Preferences  map[string]interface{}
 }
 type SetUserPreferencesResponse = GetUserPreferencesResponse
+
+type BulkSetUserPreferencesRequest struct {
+	UserIds      []string               `json:"user_ids"`
+	Preferences  map[string]interface{} `json:"preferences"`
+	PreferenceID string                 `json:"preferences.id"`
+}
+type BulkSetUserPreferencesResponse = BulkIdentifyUserResponse
 
 func UsersAPIPath(userId string) string {
 	return fmt.Sprintf("v1/users/%s", userId)
@@ -500,21 +508,41 @@ func (us *usersService) SetPreferences(ctx context.Context, setPreferencesReq *S
 
 	req, err := us.client.newRequest(http.MethodPut, path, setPreferencesReq.Preferences)
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating request to get all preferences")
+		return nil, errors.Wrap(err, "error creating request to set all preferences")
 	}
 
-	getPreferenceResponse := SetUserPreferencesResponse{Preferences: &PreferenceSet{}}
+	setPreferenceResponse := SetUserPreferencesResponse{Preferences: &PreferenceSet{}}
 
-	_, err = us.client.do(ctx, req, &getPreferenceResponse.Preferences)
+	_, err = us.client.do(ctx, req, &setPreferenceResponse.Preferences)
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request to get all preferences")
+		return nil, errors.Wrap(err, "error making request to set all preferences")
 	}
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to get all preferences")
+		return nil, errors.Wrap(err, "error parsing request to set all preferences")
 	}
 
-	return getPreferenceResponse.Preferences, nil
+	return setPreferenceResponse.Preferences, nil
+}
+
+func (us *usersService) BulkSetPreferences(ctx context.Context, setPreferencesReq *BulkSetUserPreferencesRequest) (*BulkOperation, error) {
+	req, err := us.client.newRequest(http.MethodPut, "v1/users/bulk/preferences", setPreferencesReq.Preferences)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to bulk set user preferences")
+	}
+
+	bulkSetPreferencesResponse := BulkSetUserPreferencesResponse{}
+
+	_, err = us.client.do(ctx, req, &bulkSetPreferencesResponse.BulkOperation)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to bulk set user preferences")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to bulk set user preferences")
+	}
+
+	return bulkSetPreferencesResponse.BulkOperation, nil
 }
 
 // IdentifyUserRequests can contain arbitrary customer data that must be stored, and must be mapped

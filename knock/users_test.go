@@ -498,8 +498,6 @@ func TestUsers_GetPreferences(t *testing.T) {
 
 	ctx := context.Background()
 
-	// ctx, client := RealTestClient()
-
 	user, err := client.Users.GetPreferences(ctx, &GetUserPreferencesRequest{
 		UserID:       "user-124",
 		PreferenceID: "default",
@@ -531,8 +529,6 @@ func TestUsers_SetPreferences(t *testing.T) {
 	c.Assert(err, qt.IsNil)
 
 	ctx := context.Background()
-
-	// ctx, client := RealTestClient()
 
 	user, err := client.Users.SetPreferences(ctx, &SetUserPreferencesRequest{
 		UserId:       "user-125",
