@@ -40,11 +40,11 @@ func NewObjectService(client *Client) *objectsService {
 
 // Context structs
 type Object struct {
-	CollectionID string                 `json:"collection"`
-	ObjectID     string                 `json:"id"`
-	Properties   map[string]interface{} `json:"properties"`
-	UpdatedAt    time.Time              `json:"updated_at"`
-	CreatedAt    time.Time              `json:"created_at"`
+	Collection string                 `json:"collection"`
+	ID         string                 `json:"id"`
+	Properties map[string]interface{} `json:"properties"`
+	UpdatedAt  time.Time              `json:"updated_at"`
+	CreatedAt  time.Time              `json:"created_at"`
 }
 
 type ObjectMessage struct {
@@ -66,25 +66,25 @@ type ObjectMessage struct {
 
 // Client structs
 type GetObjectRequest struct {
-	ID           string
-	CollectionID string
+	ID         string
+	Collection string
 }
 type GetObjectResponse struct {
 	Object *Object
 }
 
 type SetObjectRequest struct {
-	ID           string                 `json:"-"`
-	CollectionID string                 `json:"-"`
-	Properties   map[string]interface{} `json:""`
+	ID         string                 `json:"-"`
+	Collection string                 `json:"-"`
+	Properties map[string]interface{} `json:""`
 }
 type SetObjectResponse = GetObjectResponse
 
 type DeleteObjectRequest = GetObjectRequest
 
 type GetObjectMessagesRequest struct {
-	ObjectID     string `url:"-"`
-	CollectionID string `url:"-"`
+	ObjectID   string `url:"-"`
+	Collection string `url:"-"`
 
 	PageSize  int                `url:"page_size,omitempty"`
 	Before    string             `url:"before,omitempty"`
@@ -133,8 +133,8 @@ type SetObjectPreferencesRequest struct {
 }
 type SetObjectPreferencesResponse = GetObjectPreferencesResponse
 
-func objectAPIPath(collectionID string, objectID string) string {
-	return fmt.Sprintf("v1/objects/%s/%s", collectionID, objectID)
+func objectAPIPath(collection string, objectID string) string {
+	return fmt.Sprintf("v1/objects/%s/%s", collection, objectID)
 }
 
 func objectChannelDataAPIPath(collection string, objectID string, channelID string) string {
@@ -142,7 +142,7 @@ func objectChannelDataAPIPath(collection string, objectID string, channelID stri
 }
 
 func (os *objectsService) Get(ctx context.Context, getObjectRequest *GetObjectRequest) (*Object, error) {
-	path := objectAPIPath(getObjectRequest.CollectionID, getObjectRequest.ID)
+	path := objectAPIPath(getObjectRequest.Collection, getObjectRequest.ID)
 
 	req, err := os.client.newRequest(http.MethodGet, path, nil)
 	if err != nil {
@@ -163,7 +163,7 @@ func (os *objectsService) GetMessages(ctx context.Context, getObjectMessagesRequ
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "error parsing query parameters to list object messages")
 	}
-	path := fmt.Sprintf("%s/messages?%s", objectAPIPath(getObjectMessagesRequest.CollectionID, getObjectMessagesRequest.ObjectID), queryString.Encode())
+	path := fmt.Sprintf("%s/messages?%s", objectAPIPath(getObjectMessagesRequest.Collection, getObjectMessagesRequest.ObjectID), queryString.Encode())
 
 	req, err := os.client.newRequest(http.MethodGet, path, nil)
 	if err != nil {
@@ -180,7 +180,7 @@ func (os *objectsService) GetMessages(ctx context.Context, getObjectMessagesRequ
 }
 
 func (os *objectsService) Set(ctx context.Context, setObjectRequest *SetObjectRequest) (*Object, error) {
-	path := objectAPIPath(setObjectRequest.CollectionID, setObjectRequest.ID)
+	path := objectAPIPath(setObjectRequest.Collection, setObjectRequest.ID)
 
 	if len(setObjectRequest.Properties) == 0 {
 		return nil, &Error{msg: "Must set at least one property"}
@@ -201,7 +201,7 @@ func (os *objectsService) Set(ctx context.Context, setObjectRequest *SetObjectRe
 }
 
 func (os *objectsService) Delete(ctx context.Context, deleteObjectRequest *DeleteObjectRequest) error {
-	path := objectAPIPath(deleteObjectRequest.CollectionID, deleteObjectRequest.ID)
+	path := objectAPIPath(deleteObjectRequest.Collection, deleteObjectRequest.ID)
 
 	req, err := os.client.newRequest(http.MethodDelete, path, nil)
 	if err != nil {

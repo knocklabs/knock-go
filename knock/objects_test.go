@@ -26,8 +26,8 @@ func TestObjects_Set(t *testing.T) {
 	ctx := context.Background()
 
 	have, err := client.Objects.Set(ctx, &SetObjectRequest{
-		ID:           "cool-object2",
-		CollectionID: "test-collection",
+		ID:         "cool-object2",
+		Collection: "test-collection",
 		Properties: map[string]interface{}{
 			"nice": "cool",
 		},
@@ -35,9 +35,9 @@ func TestObjects_Set(t *testing.T) {
 
 	fmt.Printf("%+v", have)
 	want := &Object{
-		ObjectID:     "cool-object2",
-		CollectionID: "test-collection",
-		UpdatedAt:    ParseRFC3339Timestamp("2022-05-26T13:59:20.701Z"),
+		ID:         "cool-object2",
+		Collection: "test-collection",
+		UpdatedAt:  ParseRFC3339Timestamp("2022-05-26T13:59:20.701Z"),
 		Properties: map[string]interface{}{
 			"nice": "cool",
 		},
@@ -63,14 +63,14 @@ func TestObjects_Get(t *testing.T) {
 	ctx := context.Background()
 
 	have, err := client.Objects.Get(ctx, &GetObjectRequest{
-		ID:           "cool-object2",
-		CollectionID: "test-collection",
+		ID:         "cool-object2",
+		Collection: "test-collection",
 	})
 
 	want := &Object{
-		ObjectID:     "cool-object2",
-		CollectionID: "test-collection",
-		UpdatedAt:    ParseRFC3339Timestamp("2022-05-26T13:59:20.701Z"),
+		ID:         "cool-object2",
+		Collection: "test-collection",
+		UpdatedAt:  ParseRFC3339Timestamp("2022-05-26T13:59:20.701Z"),
 		Properties: map[string]interface{}{
 			"nice": "cool",
 		},
@@ -96,8 +96,8 @@ func TestObjects_GetMessages(t *testing.T) {
 	ctx := context.Background()
 
 	haveMessages, _, err := client.Objects.GetMessages(ctx, &GetObjectMessagesRequest{
-		ObjectID:     "cool-object2",
-		CollectionID: "test-collection",
+		ObjectID:   "cool-object2",
+		Collection: "test-collection",
 	})
 
 	want := []*ObjectMessage{
@@ -140,8 +140,8 @@ func TestObjects_Delete(t *testing.T) {
 	ctx := context.Background()
 
 	err = client.Objects.Delete(ctx, &GetObjectRequest{
-		ID:           "cool-object2",
-		CollectionID: "test-collection",
+		ID:         "cool-object2",
+		Collection: "test-collection",
 	})
 
 	c.Assert(err, qt.IsNil)
