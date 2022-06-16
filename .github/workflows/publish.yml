@@ -11,4 +11,4 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
       - name: Ping endpoint
-        run: curl "https://proxy.golang.org/github.com/knocklabs/knock/@v/${{ github.event.release.name }}.info"
+        run: curl "https://proxy.golang.org/github.com/knocklabs/knock-go/@v/${{ github.event.release.name }}.info"
