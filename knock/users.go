@@ -506,7 +506,7 @@ func (us *usersService) GetPreferences(ctx context.Context, getPreferencesReq *G
 	return getPreferenceResponse.Preferences, nil
 }
 
-func (sr *SetUserPreferencesRequest) AddChannelTypePreference(channelType map[string]interface{}) SetUserPreferencesRequest {
+func (sr *SetUserPreferencesRequest) AddChannelTypesPreference(channelType map[string]interface{}) SetUserPreferencesRequest {
 	sr.ChannelTypes = PreferencesMapAppend(sr.ChannelTypes, channelType)
 	return *sr
 }
@@ -516,7 +516,7 @@ func (sr *SetUserPreferencesRequest) AddWorkflowsPreference(workflows map[string
 	return *sr
 }
 
-func (sr *SetUserPreferencesRequest) AddCategoryPreference(categories map[string]interface{}) SetUserPreferencesRequest {
+func (sr *SetUserPreferencesRequest) AddCategoriesPreference(categories map[string]interface{}) SetUserPreferencesRequest {
 	sr.Categories = PreferencesMapAppend(sr.Categories, categories)
 	return *sr
 }
@@ -546,7 +546,7 @@ func (us *usersService) SetPreferences(ctx context.Context, setPreferencesReq *S
 	return setPreferenceResponse.Preferences, nil
 }
 
-func (br *BulkSetUserPreferencesRequest) AddChannelTypePreference(channelType map[string]interface{}) BulkSetUserPreferencesRequest {
+func (br *BulkSetUserPreferencesRequest) AddChannelTypesPreference(channelType map[string]interface{}) BulkSetUserPreferencesRequest {
 	br.Preferences.ChannelTypes = PreferencesMapAppend(br.Preferences.ChannelTypes, channelType)
 	return *br
 }
@@ -556,7 +556,7 @@ func (br *BulkSetUserPreferencesRequest) AddWorkflowsPreference(workflow map[str
 	return *br
 }
 
-func (br *BulkSetUserPreferencesRequest) AddCategoryPreference(category map[string]interface{}) BulkSetUserPreferencesRequest {
+func (br *BulkSetUserPreferencesRequest) AddCategoriesPreference(category map[string]interface{}) BulkSetUserPreferencesRequest {
 	br.Preferences.Categories = PreferencesMapAppend(br.Preferences.Categories, category)
 	return *br
 }

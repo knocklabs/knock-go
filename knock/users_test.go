@@ -535,11 +535,11 @@ func TestUsers_SetPreferences(t *testing.T) {
 		PreferenceID: "default",
 	}
 
-	request.AddChannelTypePreference(map[string]interface{}{
+	request.AddChannelTypesPreference(map[string]interface{}{
 		"email": true,
 	})
 
-	request.AddChannelTypePreference(map[string]interface{}{
+	request.AddChannelTypesPreference(map[string]interface{}{
 		"in_app_feed": false,
 		"sms":         true,
 	})
@@ -591,7 +591,7 @@ func TestUsers_BulkSetPreferences(t *testing.T) {
 		UserIDs:     []string{"user-124", "user-125", "user-126"},
 		Preferences: PreferenceSet{ID: "cool"},
 	}
-	request.AddChannelTypePreference(map[string]interface{}{
+	request.AddChannelTypesPreference(map[string]interface{}{
 		"email":       true,
 		"in_app_feed": false,
 	})

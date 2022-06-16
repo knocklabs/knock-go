@@ -307,7 +307,7 @@ func (os *objectsService) GetPreferences(ctx context.Context, getObjectPreferenc
 
 }
 
-func (sr *SetObjectPreferencesRequest) AddChannelTypePreference(channelType map[string]interface{}) SetObjectPreferencesRequest {
+func (sr *SetObjectPreferencesRequest) AddChannelTypesPreference(channelType map[string]interface{}) SetObjectPreferencesRequest {
 	sr.ChannelTypes = PreferencesMapAppend(sr.ChannelTypes, channelType)
 	return *sr
 }
@@ -317,7 +317,7 @@ func (sr *SetObjectPreferencesRequest) AddWorkflowsPreference(workflows map[stri
 	return *sr
 }
 
-func (sr *SetObjectPreferencesRequest) AddCategoryPreference(categories map[string]interface{}) SetObjectPreferencesRequest {
+func (sr *SetObjectPreferencesRequest) AddCategoriesPreference(categories map[string]interface{}) SetObjectPreferencesRequest {
 	sr.Categories = PreferencesMapAppend(sr.Categories, categories)
 	return *sr
 }
