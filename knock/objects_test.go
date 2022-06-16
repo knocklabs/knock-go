@@ -293,7 +293,7 @@ func TestObjects_SetPreferences(t *testing.T) {
 		Collection:   "test-collection",
 	}
 
-	request.AddChannelTypePreference(map[string]interface{}{
+	request.AddChannelTypesPreference(map[string]interface{}{
 		"email":       true,
 		"in_app_feed": false,
 	})
