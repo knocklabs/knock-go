@@ -129,7 +129,10 @@ type SetObjectPreferencesRequest struct {
 	PreferenceID string `json:"-"`
 	ObjectID     string `json:"-"`
 	Collection   string `json:"-"`
-	Preferences  map[string]interface{}
+
+	Workflows    map[string]interface{} `json:"workflows,omitempty"`
+	ChannelTypes map[string]interface{} `json:"channel_types,omitempty"`
+	Categories   map[string]interface{} `json:"categories,omitempty"`
 }
 type SetObjectPreferencesResponse = GetObjectPreferencesResponse
 
@@ -304,6 +307,21 @@ func (os *objectsService) GetPreferences(ctx context.Context, getObjectPreferenc
 
 }
 
+func (sr *SetObjectPreferencesRequest) AddChannelTypesPreference(channelType map[string]interface{}) SetObjectPreferencesRequest {
+	sr.ChannelTypes = PreferencesMapAppend(sr.ChannelTypes, channelType)
+	return *sr
+}
+
+func (sr *SetObjectPreferencesRequest) AddWorkflowsPreference(workflows map[string]interface{}) SetObjectPreferencesRequest {
+	sr.Workflows = PreferencesMapAppend(sr.Workflows, workflows)
+	return *sr
+}
+
+func (sr *SetObjectPreferencesRequest) AddCategoriesPreference(categories map[string]interface{}) SetObjectPreferencesRequest {
+	sr.Categories = PreferencesMapAppend(sr.Categories, categories)
+	return *sr
+}
+
 func (os *objectsService) SetPreferences(ctx context.Context, setObjectPreferencesReq *SetObjectPreferencesRequest) (*PreferenceSet, error) {
 
 	if setObjectPreferencesReq.PreferenceID == "" {
@@ -312,7 +330,7 @@ func (os *objectsService) SetPreferences(ctx context.Context, setObjectPreferenc
 
 	path := fmt.Sprintf("%s/preferences/%s", objectAPIPath(setObjectPreferencesReq.Collection, setObjectPreferencesReq.ObjectID), setObjectPreferencesReq.PreferenceID)
 
-	req, err := os.client.newRequest(http.MethodPut, path, setObjectPreferencesReq.Preferences)
+	req, err := os.client.newRequest(http.MethodPut, path, setObjectPreferencesReq)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to set object preferences")
 	}

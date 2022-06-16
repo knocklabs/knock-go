@@ -183,7 +183,6 @@ func messagesAPIPath(messageID string) string {
 }
 
 func (ms *messagesService) List(ctx context.Context, listReq *ListMessagesRequest) ([]*Message, *PageInfo, error) {
-
 	queryString, err := query.Values(listReq)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "error parsing request to list messages")

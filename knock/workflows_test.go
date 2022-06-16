@@ -2,6 +2,7 @@ package knock
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -20,23 +21,38 @@ func TestWorkflows_Trigger(t *testing.T) {
 	}))
 
 	client, err := NewClient(WithBaseURL(ts.URL))
+
 	c.Assert(err, qt.IsNil)
 
 	ctx := context.Background()
 
-	workflow, err := client.Workflows.Trigger(ctx, &TriggerWorkflowRequest{
-		Workflow:   "test",
-		Recipients: []string{"tim", "lex"},
+	request := &TriggerWorkflowRequest{
+		Workflow: "test",
 		Data: map[string]interface{}{
 			"life":      "uh, finds a way",
 			"dinosaurs": "loose",
 		},
+	}
+	request.AddRecipientByID("tim")
+	request.AddRecipientByID("lex")
+	request.AddRecipientByEntity(map[string]interface{}{
+		"id":         "projects-2",
+		"collection": "projects",
 	})
+
+	request.AddActorByEntity(map[string]interface{}{
+		"id":         "projects-1",
+		"collection": "projects",
+	})
+
+	fmt.Printf("%v\n", request)
+
+	workflowRunId, err := client.Workflows.Trigger(ctx, request)
 
 	want := "e2898d04-cb0c-5a1b-93e0-6c3f6bad82ef"
 
 	c.Assert(err, qt.IsNil)
-	c.Assert(workflow, qt.DeepEquals, want)
+	c.Assert(workflowRunId, qt.DeepEquals, want)
 }
 
 func TestWorkflows_Cancel(t *testing.T) {
@@ -51,10 +67,18 @@ func TestWorkflows_Cancel(t *testing.T) {
 
 	ctx := context.Background()
 
-	err = client.Workflows.Cancel(ctx, &CancelWorkflowRequest{
+	request := &CancelWorkflowRequest{
 		Workflow:        "test",
-		CancellationKey: "user-123",
+		CancellationKey: "cancellation-key-123",
+	}
+
+	request.AddRecipientByID("tom")
+	request.AddRecipientByEntity(map[string]interface{}{
+		"id":         "projects-2",
+		"collection": "projects",
 	})
+
+	err = client.Workflows.Cancel(ctx, request)
 
 	c.Assert(err, qt.IsNil)
 }

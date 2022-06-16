@@ -520,7 +520,7 @@ func TestUsers_SetPreferences(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		out := `{"__typename":"PreferenceSet","categories":null,"channel_types":{"email":true,"in_app_feed":false},"id":"default","workflows":{"new-comment":{"channel_types":{"email":true,"in_app_feed":false}}}}`
+		out := `{"__typename":"PreferenceSet","categories":null,"channel_types":{"email":true,"in_app_feed":false,"sms":true},"id":"default","workflows":{"new-comment":{"channel_types":{"email":true,"in_app_feed":false}}}}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
@@ -530,24 +530,30 @@ func TestUsers_SetPreferences(t *testing.T) {
 
 	ctx := context.Background()
 
-	user, err := client.Users.SetPreferences(ctx, &SetUserPreferencesRequest{
+	request := &SetUserPreferencesRequest{
 		UserId:       "user-125",
 		PreferenceID: "default",
-		Preferences: map[string]interface{}{
-			"channel_types": map[string]interface{}{
+	}
+
+	request.AddChannelTypesPreference(map[string]interface{}{
+		"email": true,
+	})
+
+	request.AddChannelTypesPreference(map[string]interface{}{
+		"in_app_feed": false,
+		"sms":         true,
+	})
+
+	request.AddWorkflowsPreference(map[string]interface{}{
+		"new-comment": map[string]interface{}{
+			"channel_types": map[string]interface{}{ // note underscore
 				"email":       true,
 				"in_app_feed": false,
 			},
-			"workflows": map[string]interface{}{
-				"new-comment": map[string]interface{}{
-					"channel_types": map[string]interface{}{ // note underscore
-						"email":       true,
-						"in_app_feed": false,
-					},
-				},
-			},
 		},
 	})
+
+	user, err := client.Users.SetPreferences(ctx, request)
 
 	want := &PreferenceSet{
 		ID: "default",
@@ -559,7 +565,7 @@ func TestUsers_SetPreferences(t *testing.T) {
 				},
 			},
 		},
-		ChannelTypes: map[string]interface{}{"email": true, "in_app_feed": false},
+		ChannelTypes: map[string]interface{}{"email": true, "in_app_feed": false, "sms": true},
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -581,26 +587,25 @@ func TestUsers_BulkSetPreferences(t *testing.T) {
 
 	ctx := context.Background()
 
-	// ctx, client := RealTestClient()
+	request := &BulkSetUserPreferencesRequest{
+		UserIDs:     []string{"user-124", "user-125", "user-126"},
+		Preferences: PreferenceSet{ID: "cool"},
+	}
+	request.AddChannelTypesPreference(map[string]interface{}{
+		"email":       true,
+		"in_app_feed": false,
+	})
 
-	user, err := client.Users.BulkSetPreferences(ctx, &BulkSetUserPreferencesRequest{
-		UserIDs:      []string{"user-124", "user-125", "user-126"},
-		PreferenceID: "cooltest",
-		Preferences: map[string]interface{}{
-			"channel_types": map[string]interface{}{
+	request.AddWorkflowsPreference(map[string]interface{}{
+		"new_comment": map[string]interface{}{
+			"channel_types": map[string]interface{}{ // note underscore
 				"email":       true,
 				"in_app_feed": false,
 			},
-			"workflows": map[string]interface{}{
-				"new-comment": map[string]interface{}{
-					"channel_types": map[string]interface{}{ // note underscore
-						"email":       true,
-						"in_app_feed": false,
-					},
-				},
-			},
 		},
 	})
+
+	user, err := client.Users.BulkSetPreferences(ctx, request)
 
 	want := &BulkOperation{
 		ID:                 "1dcdaee8-9f22-4308-8d58-e6532f1501bd",

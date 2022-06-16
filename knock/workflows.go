@@ -30,8 +30,8 @@ func NewWorkflowsService(client *Client) *workflowsService {
 // Client structs
 type TriggerWorkflowRequest struct {
 	Workflow        string                 `json:"workflow"`
-	Recipients      []string               `json:"recipients"`
-	Actor           string                 `json:"actor,omitempty"`
+	Recipients      []interface{}          `json:"recipients"`
+	Actor           interface{}            `json:"actor,omitempty"`
 	CancellationKey string                 `json:"cancellation_key,omitempty"`
 	Tenant          string                 `json:"tenant,omitempty"`
 	Data            map[string]interface{} `json:"data,omitempty"`
@@ -42,13 +42,33 @@ type TriggerWorkflowResponse struct {
 }
 
 type CancelWorkflowRequest struct {
-	Workflow        string   `json:"workflow"`
-	Recipients      []string `json:"recipients,omitempty"`
-	CancellationKey string   `json:"cancellation_key"`
+	Workflow        string        `json:"workflow"`
+	Recipients      []interface{} `json:"recipients"`
+	CancellationKey string        `json:"cancellation_key"`
 }
 
 func workflowsAPIPath(workflowId string) string {
 	return fmt.Sprintf("v1/workflows/%s", workflowId)
+}
+
+func (tr *TriggerWorkflowRequest) AddRecipientByID(recipientID string) TriggerWorkflowRequest {
+	tr.Recipients = append(tr.Recipients, recipientID)
+	return *tr
+}
+
+func (tr *TriggerWorkflowRequest) AddRecipientByEntity(entity map[string]interface{}) TriggerWorkflowRequest {
+	tr.Recipients = append(tr.Recipients, entity)
+	return *tr
+}
+
+func (tr *TriggerWorkflowRequest) AddActorByID(actorID string) TriggerWorkflowRequest {
+	tr.Actor = actorID
+	return *tr
+}
+
+func (tr *TriggerWorkflowRequest) AddActorByEntity(entity map[string]interface{}) TriggerWorkflowRequest {
+	tr.Actor = entity
+	return *tr
 }
 
 func (ws *workflowsService) Trigger(ctx context.Context, triggerReq *TriggerWorkflowRequest) (string, error) {
@@ -66,6 +86,16 @@ func (ws *workflowsService) Trigger(ctx context.Context, triggerReq *TriggerWork
 	}
 
 	return workflowResponse.WorkflowRunId, nil
+}
+
+func (tr *CancelWorkflowRequest) AddRecipientByID(recipientID string) CancelWorkflowRequest {
+	tr.Recipients = append(tr.Recipients, recipientID)
+	return *tr
+}
+
+func (tr *CancelWorkflowRequest) AddRecipientByEntity(entity map[string]interface{}) CancelWorkflowRequest {
+	tr.Recipients = append(tr.Recipients, entity)
+	return *tr
 }
 
 func (ws *workflowsService) Cancel(ctx context.Context, cancelReq *CancelWorkflowRequest) error {
