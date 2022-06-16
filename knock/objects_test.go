@@ -287,27 +287,27 @@ func TestObjects_SetPreferences(t *testing.T) {
 
 	ctx := context.Background()
 
-	// ctx, client := RealTestClient()
-
-	have, err := client.Objects.SetPreferences(ctx, &SetObjectPreferencesRequest{
+	request := &SetObjectPreferencesRequest{
 		PreferenceID: "default",
 		ObjectID:     "cool-object",
 		Collection:   "test-collection",
-		Preferences: map[string]interface{}{
+	}
+
+	request.AddChannelTypePreference(map[string]interface{}{
+		"email":       true,
+		"in_app_feed": false,
+	})
+
+	request.AddWorkflowsPreference(map[string]interface{}{
+		"new-comment": map[string]interface{}{
 			"channel_types": map[string]interface{}{
 				"email":       true,
 				"in_app_feed": false,
 			},
-			"workflows": map[string]interface{}{
-				"new-comment": map[string]interface{}{
-					"channel_types": map[string]interface{}{ // note underscore
-						"email":       true,
-						"in_app_feed": false,
-					},
-				},
-			},
 		},
 	})
+
+	have, err := client.Objects.SetPreferences(ctx, request)
 
 	want := &PreferenceSet{
 		ID: "default",

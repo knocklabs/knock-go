@@ -187,16 +187,18 @@ type GetUserPreferencesResponse struct {
 }
 
 type SetUserPreferencesRequest struct {
-	UserId       string
-	PreferenceID string
-	Preferences  map[string]interface{}
+	UserId       string `json:"-"`
+	PreferenceID string `json:"-"`
+
+	Workflows    map[string]interface{} `json:"workflows,omitempty"`
+	ChannelTypes map[string]interface{} `json:"channel_types,omitempty"`
+	Categories   map[string]interface{} `json:"categories,omitempty"`
 }
 type SetUserPreferencesResponse = GetUserPreferencesResponse
 
 type BulkSetUserPreferencesRequest struct {
-	UserIDs      []string               `json:"user_ids"`
-	PreferenceID string                 `json:"-"`
-	Preferences  map[string]interface{} `json:"preferences"`
+	UserIDs     []string      `json:"user_ids"`
+	Preferences PreferenceSet `json:"preferences"`
 }
 
 type BulkSetUserPreferencesResponse = BulkIdentifyUserResponse
@@ -504,13 +506,28 @@ func (us *usersService) GetPreferences(ctx context.Context, getPreferencesReq *G
 	return getPreferenceResponse.Preferences, nil
 }
 
+func (sr *SetUserPreferencesRequest) AddChannelTypePreference(channelType map[string]interface{}) SetUserPreferencesRequest {
+	sr.ChannelTypes = PreferencesMapAppend(sr.ChannelTypes, channelType)
+	return *sr
+}
+
+func (sr *SetUserPreferencesRequest) AddWorkflowsPreference(workflows map[string]interface{}) SetUserPreferencesRequest {
+	sr.Workflows = PreferencesMapAppend(sr.Workflows, workflows)
+	return *sr
+}
+
+func (sr *SetUserPreferencesRequest) AddCategoryPreference(categories map[string]interface{}) SetUserPreferencesRequest {
+	sr.Categories = PreferencesMapAppend(sr.Categories, categories)
+	return *sr
+}
+
 func (us *usersService) SetPreferences(ctx context.Context, setPreferencesReq *SetUserPreferencesRequest) (*PreferenceSet, error) {
 	if setPreferencesReq.PreferenceID == "" {
 		setPreferencesReq.PreferenceID = "default"
 	}
 	path := fmt.Sprintf("%s/preferences/%s", UsersAPIPath(setPreferencesReq.UserId), setPreferencesReq.PreferenceID)
 
-	req, err := us.client.newRequest(http.MethodPut, path, setPreferencesReq.PreferenceID)
+	req, err := us.client.newRequest(http.MethodPut, path, setPreferencesReq)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to set all preferences")
 	}
@@ -529,10 +546,22 @@ func (us *usersService) SetPreferences(ctx context.Context, setPreferencesReq *S
 	return setPreferenceResponse.Preferences, nil
 }
 
-func (us *usersService) BulkSetPreferences(ctx context.Context, setPreferencesReq *BulkSetUserPreferencesRequest) (*BulkOperation, error) {
+func (br *BulkSetUserPreferencesRequest) AddChannelTypePreference(channelType map[string]interface{}) BulkSetUserPreferencesRequest {
+	br.Preferences.ChannelTypes = PreferencesMapAppend(br.Preferences.ChannelTypes, channelType)
+	return *br
+}
 
-	// include the PreferenceID nested under the `preferences` key in the body, where the API expects it"
-	setPreferencesReq.Preferences["id"] = setPreferencesReq.PreferenceID
+func (br *BulkSetUserPreferencesRequest) AddWorkflowsPreference(workflow map[string]interface{}) BulkSetUserPreferencesRequest {
+	br.Preferences.Workflows = PreferencesMapAppend(br.Preferences.Workflows, workflow)
+	return *br
+}
+
+func (br *BulkSetUserPreferencesRequest) AddCategoryPreference(category map[string]interface{}) BulkSetUserPreferencesRequest {
+	br.Preferences.Categories = PreferencesMapAppend(br.Preferences.Categories, category)
+	return *br
+}
+
+func (us *usersService) BulkSetPreferences(ctx context.Context, setPreferencesReq *BulkSetUserPreferencesRequest) (*BulkOperation, error) {
 
 	req, err := us.client.newRequest(http.MethodPost, "v1/users/bulk/preferences", setPreferencesReq)
 	if err != nil {

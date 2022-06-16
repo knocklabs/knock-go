@@ -15,12 +15,23 @@ type ChannelData struct {
 
 type PreferenceSet struct {
 	ID           string                 `json:"id"`
-	Workflows    map[string]interface{} `json:"workflows"`
-	Categories   map[string]interface{} `json:"categories"`
-	ChannelTypes map[string]interface{} `json:"channel_types"`
+	Workflows    map[string]interface{} `json:"workflows,omitempty"`
+	Categories   map[string]interface{} `json:"categories,omitempty"`
+	ChannelTypes map[string]interface{} `json:"channel_types,omitempty"`
 }
 
 func ParseRFC3339Timestamp(input string) time.Time {
 	out, _ := time.Parse(time.RFC3339, input)
 	return out
+}
+
+func PreferencesMapAppend(m map[string]interface{}, new map[string]interface{}) map[string]interface{} {
+	if m == nil {
+		m = new
+	} else {
+		for k, v := range new {
+			m[k] = v
+		}
+	}
+	return m
 }
