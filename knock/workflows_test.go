@@ -47,12 +47,12 @@ func TestWorkflows_Trigger(t *testing.T) {
 
 	fmt.Printf("%v\n", request)
 
-	workflow, err := client.Workflows.Trigger(ctx, request)
+	workflowRunId, err := client.Workflows.Trigger(ctx, request)
 
-	want := "e2898d04-cb0c-5a1b-93e0-6c3f6bad82efs"
+	want := "e2898d04-cb0c-5a1b-93e0-6c3f6bad82ef"
 
 	c.Assert(err, qt.IsNil)
-	c.Assert(workflow, qt.DeepEquals, want)
+	c.Assert(workflowRunId, qt.DeepEquals, want)
 }
 
 func TestWorkflows_Cancel(t *testing.T) {
