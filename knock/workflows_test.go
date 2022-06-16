@@ -67,10 +67,18 @@ func TestWorkflows_Cancel(t *testing.T) {
 
 	ctx := context.Background()
 
-	err = client.Workflows.Cancel(ctx, &CancelWorkflowRequest{
+	request := &CancelWorkflowRequest{
 		Workflow:        "test",
-		CancellationKey: "user-123",
+		CancellationKey: "cancellation-key-123",
+	}
+
+	request.AddRecipientByID("tom")
+	request.AddRecipientByEntity(map[string]interface{}{
+		"id":         "projects-2",
+		"collection": "projects",
 	})
+
+	err = client.Workflows.Cancel(ctx, request)
 
 	c.Assert(err, qt.IsNil)
 }

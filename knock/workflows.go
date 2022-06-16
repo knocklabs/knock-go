@@ -42,9 +42,9 @@ type TriggerWorkflowResponse struct {
 }
 
 type CancelWorkflowRequest struct {
-	Workflow        string   `json:"workflow"`
-	Recipients      []string `json:"-"`
-	CancellationKey string   `json:"cancellation_key"`
+	Workflow        string        `json:"workflow"`
+	Recipients      []interface{} `json:"recipients"`
+	CancellationKey string        `json:"cancellation_key"`
 }
 
 func workflowsAPIPath(workflowId string) string {
@@ -86,6 +86,16 @@ func (ws *workflowsService) Trigger(ctx context.Context, triggerReq *TriggerWork
 	}
 
 	return workflowResponse.WorkflowRunId, nil
+}
+
+func (tr *CancelWorkflowRequest) AddRecipientByID(recipientID string) CancelWorkflowRequest {
+	tr.Recipients = append(tr.Recipients, recipientID)
+	return *tr
+}
+
+func (tr *CancelWorkflowRequest) AddRecipientByEntity(entity map[string]interface{}) CancelWorkflowRequest {
+	tr.Recipients = append(tr.Recipients, entity)
+	return *tr
 }
 
 func (ws *workflowsService) Cancel(ctx context.Context, cancelReq *CancelWorkflowRequest) error {
