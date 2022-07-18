@@ -39,6 +39,7 @@ type Client struct {
 	BulkOperations BulkOperationsService
 	Messages       MessagesService
 	Objects        ObjectsService
+	Tenants        TenantsService
 	Users          UsersService
 	Workflows      WorkflowsService
 }
@@ -111,6 +112,7 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 	c.BulkOperations = &bulkOperationsService{client: c}
 	c.Messages = &messagesService{client: c}
 	c.Objects = &objectsService{client: c}
+	c.Tenants = &tenantsService{client: c}
 	c.Users = &usersService{client: c}
 	c.Workflows = &workflowsService{client: c}
 
