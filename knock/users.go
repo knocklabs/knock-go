@@ -118,14 +118,15 @@ type DeleteUserRequest struct {
 }
 
 type GetUserMessagesRequest struct {
-	ID        string             `url:"-"`
-	PageSize  int                `url:"page_size,omitempty"`
-	After     string             `url:"after,omitempty"`
-	Before    string             `url:"before,omitempty"`
-	Source    string             `url:"source,omitempty"`
-	Tenant    string             `url:"tenant,omitempty"`
-	Status    []EngagementStatus `url:"status,omitempty"`
-	ChannelID string             `url:"channel_id,omitempty"`
+	ID          string                 `url:"-"`
+	PageSize    int                    `url:"page_size,omitempty"`
+	After       string                 `url:"after,omitempty"`
+	Before      string                 `url:"before,omitempty"`
+	Source      string                 `url:"source,omitempty"`
+	Tenant      string                 `url:"tenant,omitempty"`
+	Status      []EngagementStatus     `url:"status,omitempty"`
+	ChannelID   string                 `url:"channel_id,omitempty"`
+	TriggerData map[string]interface{} `url:"-"`
 }
 
 type GetUserMessagesResponse struct {
@@ -146,8 +147,17 @@ type BulkDeleteUserRequest struct {
 type BulkDeleteUserResponse = BulkIdentifyUserResponse
 
 type GetFeedRequest struct {
-	UserID string
-	FeedID string
+	UserID      string                 `url:"-"`
+	FeedID      string                 `url:"-"`
+	PageSize    int                    `url:"page_size,omitempty"`
+	After       string                 `url:"after,omitempty"`
+	Before      string                 `url:"before,omitempty"`
+	Status      []string               `url:"status,omitempty"`
+	Source      string                 `url:"source,omitempty"`
+	Tenant      string                 `url:"tenant,omitempty"`
+	HasTenant   bool                   `url:"has_tenant,omitempty"`
+	Archived    string                 `url:"archived,omitempty"`
+	TriggerData map[string]interface{} `url:"-"`
 }
 type GetFeedResponse struct {
 	Feed *Feed
@@ -296,8 +306,18 @@ func (us *usersService) Merge(ctx context.Context, mergeReq *MergeUserRequest) (
 }
 
 func (us *usersService) GetMessages(ctx context.Context, getUserMessagesReq *GetUserMessagesRequest) ([]*Message, error) {
-
 	queryString, _ := query.Values(getUserMessagesReq)
+
+	if getUserMessagesReq.TriggerData != nil {
+		triggerDataJson, err := json.Marshal(getUserMessagesReq.TriggerData)
+
+		if err != nil {
+			return nil, errors.Wrap(err, "error converting TriggerData into JSON")
+		}
+
+		queryString.Add("trigger_data", string(triggerDataJson))
+	}
+
 	path := fmt.Sprintf("%s/messages?%s", UsersAPIPath(getUserMessagesReq.ID), queryString.Encode())
 
 	req, err := us.client.newRequest(http.MethodGet, path, nil)
@@ -379,7 +399,19 @@ func (us *usersService) BulkDelete(ctx context.Context, bulkDeleteReq *BulkDelet
 }
 
 func (us *usersService) GetFeed(ctx context.Context, getFeedReq *GetFeedRequest) (*Feed, error) {
-	path := feedsAPIPath(getFeedReq.UserID, getFeedReq.FeedID)
+	queryString, _ := query.Values(getFeedReq)
+
+	if getFeedReq.TriggerData != nil {
+		triggerDataJson, err := json.Marshal(getFeedReq.TriggerData)
+
+		if err != nil {
+			return nil, errors.Wrap(err, "error converting TriggerData into JSON")
+		}
+
+		queryString.Add("trigger_data", string(triggerDataJson))
+	}
+
+	path := fmt.Sprintf("%s?%s", feedsAPIPath(getFeedReq.UserID, getFeedReq.FeedID), queryString.Encode())
 
 	req, err := us.client.newRequest(http.MethodGet, path, getFeedReq)
 	if err != nil {

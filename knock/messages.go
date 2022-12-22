@@ -2,6 +2,7 @@ package knock
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -107,15 +108,17 @@ type MessageContent struct {
 
 // Client structs
 type ListMessagesRequest struct {
-	PageSize  int                `url:"page_size,omitempty"`
-	Cursor    string             `url:"page_size,omitempty"`
-	Before    string             `url:"before,omitempty"`
-	After     string             `url:"after,omitempty"`
-	Source    string             `url:"source,omitempty"`
-	Tenant    string             `url:"tenant,omitempty"`
-	Status    []EngagementStatus `url:"status,omitempty"`
-	ChannelID string             `url:"channel_id,omitempty"`
+	PageSize    int                    `url:"page_size,omitempty"`
+	Cursor      string                 `url:"page_size,omitempty"`
+	Before      string                 `url:"before,omitempty"`
+	After       string                 `url:"after,omitempty"`
+	Source      string                 `url:"source,omitempty"`
+	Tenant      string                 `url:"tenant,omitempty"`
+	Status      []EngagementStatus     `url:"status,omitempty"`
+	ChannelID   string                 `url:"channel_id,omitempty"`
+	TriggerData map[string]interface{} `url:"-"`
 }
+
 type ListMessagesResponse struct {
 	Items    []*Message `json:"items"`
 	PageInfo *PageInfo  `json:"page_info"`
@@ -134,7 +137,14 @@ type GetMessageEventsResponse struct {
 	PageInfo *PageInfo       `json:"page_info"`
 }
 
-type GetMessageActivitiesRequest = GetMessageRequest
+type GetMessageActivitiesRequest = struct {
+	ID          string
+	PageSize    int                    `url:"page_size,omitempty"`
+	Cursor      string                 `url:"page_size,omitempty"`
+	Before      string                 `url:"before,omitempty"`
+	After       string                 `url:"after,omitempty"`
+	TriggerData map[string]interface{} `url:"-"`
+}
 type GetMessageActivitiesResponse struct {
 	Activities []*MessageActivity `json:"items"`
 	PageInfo   *PageInfo          `json:"page_info"`
@@ -184,9 +194,21 @@ func messagesAPIPath(messageID string) string {
 
 func (ms *messagesService) List(ctx context.Context, listReq *ListMessagesRequest) ([]*Message, *PageInfo, error) {
 	queryString, err := query.Values(listReq)
+
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "error parsing request to list messages")
 	}
+
+	if listReq.TriggerData != nil {
+		triggerDataJson, err := json.Marshal(listReq.TriggerData)
+
+		if err != nil {
+			return nil, nil, errors.Wrap(err, "error converting TriggerData into JSON")
+		}
+
+		queryString.Add("trigger_data", string(triggerDataJson))
+	}
+
 	path := fmt.Sprintf("%s?%s", messagesAPIBasePath, queryString.Encode())
 
 	req, err := ms.client.newRequest(http.MethodGet, path, listReq)
@@ -244,14 +266,26 @@ func (ms *messagesService) GetEvents(ctx context.Context, getEventsReq *GetMessa
 }
 
 func (ms *messagesService) GetActivities(ctx context.Context, getActivitiesReq *GetMessageActivitiesRequest) ([]*MessageActivity, *PageInfo, error) {
+	queryString, _ := query.Values(getActivitiesReq)
 
-	path := fmt.Sprintf("%s/activities", messagesAPIPath(getActivitiesReq.ID))
+	if getActivitiesReq.TriggerData != nil {
+		triggerDataJson, err := json.Marshal(getActivitiesReq.TriggerData)
+
+		if err != nil {
+			return nil, nil, errors.Wrap(err, "error converting TriggerData into JSON")
+		}
+
+		queryString.Add("trigger_data", string(triggerDataJson))
+	}
+
+	path := fmt.Sprintf("%s/activities?%s", messagesAPIPath(getActivitiesReq.ID), queryString.Encode())
 
 	req, err := ms.client.newRequest(http.MethodGet, path, nil)
 
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "error creating request to list message activities")
 	}
+
 	getMessageActivitiesResponse := &GetMessageActivitiesResponse{}
 	_, err = ms.client.do(ctx, req, getMessageActivitiesResponse)
 
@@ -264,18 +298,18 @@ func (ms *messagesService) GetActivities(ctx context.Context, getActivitiesReq *
 
 func (ms *messagesService) GetContent(ctx context.Context, getContentReq *GetMessageContentRequest) (*MessageContent, error) {
 
-	path := fmt.Sprintf("%s/activities", messagesAPIPath(getContentReq.ID))
+	path := fmt.Sprintf("%s/content", messagesAPIPath(getContentReq.ID))
 
 	req, err := ms.client.newRequest(http.MethodGet, path, nil)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating request to list message activities")
+		return nil, errors.Wrap(err, "error creating request to get message content")
 	}
 	getMessageContentResponse := &GetMessageContentResponse{Content: &MessageContent{}}
 	_, err = ms.client.do(ctx, req, getMessageContentResponse.Content)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request to list message activities")
+		return nil, errors.Wrap(err, "error making request to get message content")
 	}
 
 	return getMessageContentResponse.Content, nil

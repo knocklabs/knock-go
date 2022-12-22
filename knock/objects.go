@@ -2,6 +2,7 @@ package knock
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -86,13 +87,14 @@ type GetObjectMessagesRequest struct {
 	ObjectID   string `url:"-"`
 	Collection string `url:"-"`
 
-	PageSize  int                `url:"page_size,omitempty"`
-	Before    string             `url:"before,omitempty"`
-	After     string             `url:"after,omitempty"`
-	Source    string             `url:"source,omitempty"`
-	Tenant    string             `url:"tenant,omitempty"`
-	Status    []EngagementStatus `url:"status,omitempty"`
-	ChannelID string             `url:"channel_id,omitempty"`
+	PageSize    int                    `url:"page_size,omitempty"`
+	Before      string                 `url:"before,omitempty"`
+	After       string                 `url:"after,omitempty"`
+	Source      string                 `url:"source,omitempty"`
+	Tenant      string                 `url:"tenant,omitempty"`
+	Status      []EngagementStatus     `url:"status,omitempty"`
+	ChannelID   string                 `url:"channel_id,omitempty"`
+	TriggerData map[string]interface{} `url:"-"`
 }
 type GetObjectMessagesResponse struct {
 	Items    []*ObjectMessage `json:"entries"`
@@ -166,6 +168,17 @@ func (os *objectsService) GetMessages(ctx context.Context, getObjectMessagesRequ
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "error parsing query parameters to list object messages")
 	}
+
+	if getObjectMessagesRequest.TriggerData != nil {
+		triggerDataJson, err := json.Marshal(getObjectMessagesRequest.TriggerData)
+
+		if err != nil {
+			return nil, nil, errors.Wrap(err, "error converting TriggerData into JSON")
+		}
+
+		queryString.Add("trigger_data", string(triggerDataJson))
+	}
+
 	path := fmt.Sprintf("%s/messages?%s", objectAPIPath(getObjectMessagesRequest.Collection, getObjectMessagesRequest.ObjectID), queryString.Encode())
 
 	req, err := os.client.newRequest(http.MethodGet, path, nil)
