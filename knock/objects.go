@@ -416,18 +416,18 @@ func (os *objectsService) AddSubscriptions(ctx context.Context, addSubscriptions
 
 	req, err := os.client.newRequest(http.MethodPost, path, addSubscriptionsReq)
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating request to set object preferences")
+		return nil, errors.Wrap(err, "error creating request to add subscriptions")
 	}
 
 	addSubscriptionsResponse := AddSubscriptionsResponse{Subscriptions: []*ObjectSubscription{}}
 
 	_, err = os.client.do(ctx, req, &addSubscriptionsResponse.Subscriptions)
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request to set object preferences")
+		return nil, errors.Wrap(err, "error making request to add subscriptions")
 	}
 
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to set object preferences")
+		return nil, errors.Wrap(err, "error parsing request to add subscriptions")
 	}
 
 	return addSubscriptionsResponse.Subscriptions, nil
