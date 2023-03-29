@@ -26,6 +26,10 @@ type ObjectsService interface {
 
 	GetPreferences(context.Context, *GetObjectPreferencesRequest) (*PreferenceSet, error)
 	SetPreferences(context.Context, *SetObjectPreferencesRequest) (*PreferenceSet, error)
+
+	AddSubscriptions(context.Context, *AddSubscriptionsRequest) ([]*ObjectSubscription, error)
+	DeleteSubscriptions(context.Context, *DeleteSubscriptionsRequest) ([]*ObjectSubscription, error)
+	ListSubscriptions(context.Context, *ListSubscriptionsRequest) (*ListSubscriptionsResponse, error)
 }
 type objectsService struct {
 	client *Client
@@ -79,6 +83,7 @@ type SetObjectRequest struct {
 	Collection string                 `json:"-"`
 	Properties map[string]interface{} `json:""`
 }
+
 type SetObjectResponse = GetObjectResponse
 
 type DeleteObjectRequest = GetObjectRequest
@@ -124,9 +129,11 @@ type GetObjectPreferencesRequest struct {
 	ObjectID     string `json:"-"`
 	Collection   string `json:"-"`
 }
+
 type GetObjectPreferencesResponse struct {
 	Preferences *PreferenceSet
 }
+
 type SetObjectPreferencesRequest struct {
 	PreferenceID string `json:"-"`
 	ObjectID     string `json:"-"`
@@ -136,7 +143,49 @@ type SetObjectPreferencesRequest struct {
 	ChannelTypes map[string]interface{} `json:"channel_types,omitempty"`
 	Categories   map[string]interface{} `json:"categories,omitempty"`
 }
+
 type SetObjectPreferencesResponse = GetObjectPreferencesResponse
+
+type ObjectSubscription struct {
+	Recipient  interface{}            `json:"recipient"`
+	Properties map[string]interface{} `json:"properties"`
+	InsertedAt time.Time              `json:"inserted_at"`
+	UpdatedAt  time.Time              `json:"updated_at"`
+}
+
+type AddSubscriptionsRequest struct {
+	ObjectID   string                 `json:"-"`
+	Collection string                 `json:"-"`
+	Recipients []interface{}          `json:"recipients"`
+	Properties map[string]interface{} `json:"properties,omitempty"`
+}
+
+type AddSubscriptionsResponse struct {
+	Subscriptions []*ObjectSubscription
+}
+
+type DeleteSubscriptionsRequest struct {
+	ObjectID   string        `json:"-"`
+	Collection string        `json:"-"`
+	Recipients []interface{} `json:"recipients"`
+}
+
+type DeleteSubscriptionsResponse struct {
+	Subscriptions []*ObjectSubscription
+}
+
+type ListSubscriptionsRequest struct {
+	ObjectID   string `url:"-"`
+	Collection string `url:"-"`
+	PageSize   int    `url:"page_size,omitempty"`
+	Before     string `url:"before,omitempty"`
+	After      string `url:"after,omitempty"`
+}
+
+type ListSubscriptionsResponse struct {
+	Entries  []*ObjectSubscription `json:"entries"`
+	PageInfo *PageInfo             `json:"page_info"`
+}
 
 func objectAPIPath(collection string, objectID string) string {
 	return fmt.Sprintf("v1/objects/%s/%s", collection, objectID)
@@ -360,4 +409,72 @@ func (os *objectsService) SetPreferences(ctx context.Context, setObjectPreferenc
 	}
 
 	return setPreferenceResponse.Preferences, nil
+}
+
+func (os *objectsService) AddSubscriptions(ctx context.Context, addSubscriptionsReq *AddSubscriptionsRequest) ([]*ObjectSubscription, error) {
+	path := fmt.Sprintf("%s/subscriptions", objectAPIPath(addSubscriptionsReq.Collection, addSubscriptionsReq.ObjectID))
+
+	req, err := os.client.newRequest(http.MethodPost, path, addSubscriptionsReq)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to add subscriptions")
+	}
+
+	addSubscriptionsResponse := AddSubscriptionsResponse{Subscriptions: []*ObjectSubscription{}}
+
+	_, err = os.client.do(ctx, req, &addSubscriptionsResponse.Subscriptions)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to add subscriptions")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to add subscriptions")
+	}
+
+	return addSubscriptionsResponse.Subscriptions, nil
+}
+
+func (os *objectsService) DeleteSubscriptions(ctx context.Context, deleteSubscriptionsReq *DeleteSubscriptionsRequest) ([]*ObjectSubscription, error) {
+	path := fmt.Sprintf("%s/subscriptions", objectAPIPath(deleteSubscriptionsReq.Collection, deleteSubscriptionsReq.ObjectID))
+
+	req, err := os.client.newRequest(http.MethodDelete, path, deleteSubscriptionsReq)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to delete subscriptions")
+	}
+
+	deleteSubscriptionsResponse := DeleteSubscriptionsResponse{Subscriptions: []*ObjectSubscription{}}
+
+	_, err = os.client.do(ctx, req, &deleteSubscriptionsResponse.Subscriptions)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to delete subscriptions")
+	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to delete subscriptions")
+	}
+
+	return deleteSubscriptionsResponse.Subscriptions, nil
+}
+
+func (os *objectsService) ListSubscriptions(ctx context.Context, listSubscriptionsReq *ListSubscriptionsRequest) (*ListSubscriptionsResponse, error) {
+	queryString, err := query.Values(listSubscriptionsReq)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing request to list subscriptions")
+	}
+
+	path := fmt.Sprintf("%s/subscriptions?%s", objectAPIPath(listSubscriptionsReq.Collection, listSubscriptionsReq.ObjectID), queryString.Encode())
+	req, err := os.client.newRequest(http.MethodGet, path, listSubscriptionsReq)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to list subscriptions")
+	}
+
+	listRes := &ListSubscriptionsResponse{}
+	_, err = os.client.do(ctx, req, listRes)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to list subscriptions")
+	}
+
+	return listRes, nil
 }
