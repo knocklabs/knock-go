@@ -211,7 +211,7 @@ func (ms *messagesService) List(ctx context.Context, listReq *ListMessagesReques
 
 	path := fmt.Sprintf("%s?%s", messagesAPIBasePath, queryString.Encode())
 
-	req, err := ms.client.newRequest(http.MethodGet, path, listReq)
+	req, err := ms.client.newRequest(http.MethodGet, path, listReq, nil)
 
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "error creating request to list messages")
@@ -231,7 +231,7 @@ func (ms *messagesService) Get(ctx context.Context, getReq *GetMessageRequest) (
 
 	path := messagesAPIPath(getReq.ID)
 
-	req, err := ms.client.newRequest(http.MethodGet, path, nil)
+	req, err := ms.client.newRequest(http.MethodGet, path, nil, nil)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to list messages")
@@ -250,7 +250,7 @@ func (ms *messagesService) GetEvents(ctx context.Context, getEventsReq *GetMessa
 
 	path := fmt.Sprintf("%s/events", messagesAPIPath(getEventsReq.ID))
 
-	req, err := ms.client.newRequest(http.MethodGet, path, nil)
+	req, err := ms.client.newRequest(http.MethodGet, path, nil, nil)
 
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "error creating request to list message events")
@@ -280,7 +280,7 @@ func (ms *messagesService) GetActivities(ctx context.Context, getActivitiesReq *
 
 	path := fmt.Sprintf("%s/activities?%s", messagesAPIPath(getActivitiesReq.ID), queryString.Encode())
 
-	req, err := ms.client.newRequest(http.MethodGet, path, nil)
+	req, err := ms.client.newRequest(http.MethodGet, path, nil, nil)
 
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "error creating request to list message activities")
@@ -300,7 +300,7 @@ func (ms *messagesService) GetContent(ctx context.Context, getContentReq *GetMes
 
 	path := fmt.Sprintf("%s/content", messagesAPIPath(getContentReq.ID))
 
-	req, err := ms.client.newRequest(http.MethodGet, path, nil)
+	req, err := ms.client.newRequest(http.MethodGet, path, nil, nil)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to get message content")
@@ -319,7 +319,7 @@ func (ms *messagesService) SetStatus(ctx context.Context, setStatusReq *SetStatu
 
 	path := fmt.Sprintf("%s/%s", messagesAPIPath(setStatusReq.ID), setStatusReq.Status)
 
-	req, err := ms.client.newRequest(http.MethodPut, path, nil)
+	req, err := ms.client.newRequest(http.MethodPut, path, nil, nil)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to set message status")
@@ -338,7 +338,7 @@ func (ms *messagesService) DeleteStatus(ctx context.Context, deleteStatusReq *De
 
 	path := fmt.Sprintf("%s/%s", messagesAPIPath(deleteStatusReq.ID), deleteStatusReq.Status)
 
-	req, err := ms.client.newRequest(http.MethodDelete, path, nil)
+	req, err := ms.client.newRequest(http.MethodDelete, path, nil, nil)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to delete message status")
@@ -357,7 +357,7 @@ func (ms *messagesService) BatchSetStatus(ctx context.Context, batchSetStatus *B
 
 	path := fmt.Sprintf("%s/%s", messagesAPIPath("batch"), batchSetStatus.Status)
 
-	req, err := ms.client.newRequest(http.MethodPost, path, batchSetStatus)
+	req, err := ms.client.newRequest(http.MethodPost, path, batchSetStatus, nil)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to set message status")
@@ -378,7 +378,7 @@ func (ms *messagesService) BulkChangeChannelStatus(ctx context.Context, bulkStat
 
 	path := fmt.Sprintf("v1/channels/%s/messages/bulk/%s", bulkStatusReq.ChannelID, bulkStatusReq.Status)
 
-	req, err := ms.client.newRequest(http.MethodPost, path, bulkStatusReq)
+	req, err := ms.client.newRequest(http.MethodPost, path, bulkStatusReq, nil)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to set message status")

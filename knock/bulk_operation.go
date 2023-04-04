@@ -68,7 +68,7 @@ func (bos *bulkOperationsService) Get(ctx context.Context, getBulkOperationReq *
 
 	path := bulkOperationsAPIPath(getBulkOperationReq.ID)
 
-	req, err := bos.client.newRequest(http.MethodGet, path, nil)
+	req, err := bos.client.newRequest(http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to get bulk operation")
 	}
