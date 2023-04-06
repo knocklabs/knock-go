@@ -11,7 +11,7 @@ import (
 // WorkflowsService is an interface for communicating with the Knock
 // Workflows API endpoints.
 type WorkflowsService interface {
-	Trigger(context.Context, *TriggerWorkflowRequest) (string, error)
+	Trigger(context.Context, *TriggerWorkflowRequest, *MethodOptions) (string, error)
 	Cancel(context.Context, *CancelWorkflowRequest) error
 }
 
@@ -71,9 +71,9 @@ func (tr *TriggerWorkflowRequest) AddActorByEntity(entity map[string]interface{}
 	return *tr
 }
 
-func (ws *workflowsService) Trigger(ctx context.Context, triggerReq *TriggerWorkflowRequest) (string, error) {
+func (ws *workflowsService) Trigger(ctx context.Context, triggerReq *TriggerWorkflowRequest, methodOptions *MethodOptions) (string, error) {
 	path := fmt.Sprintf("%s/trigger", workflowsAPIPath(triggerReq.Workflow))
-	req, err := ws.client.newRequest(http.MethodPost, path, triggerReq)
+	req, err := ws.client.newRequest(http.MethodPost, path, triggerReq, methodOptions)
 
 	if err != nil {
 		return "", errors.Wrap(err, "error creating request for trigger workflow")
@@ -100,7 +100,7 @@ func (tr *CancelWorkflowRequest) AddRecipientByEntity(entity map[string]interfac
 
 func (ws *workflowsService) Cancel(ctx context.Context, cancelReq *CancelWorkflowRequest) error {
 	path := fmt.Sprintf("%s/cancel", workflowsAPIPath(cancelReq.Workflow))
-	req, err := ws.client.newRequest(http.MethodPost, path, cancelReq)
+	req, err := ws.client.newRequest(http.MethodPost, path, cancelReq, nil)
 	if err != nil {
 		return errors.Wrap(err, "error creating request to cancel workflow")
 	}

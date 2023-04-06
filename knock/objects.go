@@ -198,7 +198,7 @@ func objectChannelDataAPIPath(collection string, objectID string, channelID stri
 func (os *objectsService) Get(ctx context.Context, getObjectRequest *GetObjectRequest) (*Object, error) {
 	path := objectAPIPath(getObjectRequest.Collection, getObjectRequest.ID)
 
-	req, err := os.client.newRequest(http.MethodGet, path, nil)
+	req, err := os.client.newRequest(http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for get object")
 	}
@@ -230,7 +230,7 @@ func (os *objectsService) GetMessages(ctx context.Context, getObjectMessagesRequ
 
 	path := fmt.Sprintf("%s/messages?%s", objectAPIPath(getObjectMessagesRequest.Collection, getObjectMessagesRequest.ObjectID), queryString.Encode())
 
-	req, err := os.client.newRequest(http.MethodGet, path, nil)
+	req, err := os.client.newRequest(http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "error creating request to list object messages")
 	}
@@ -251,7 +251,7 @@ func (os *objectsService) Set(ctx context.Context, setObjectRequest *SetObjectRe
 		return nil, &Error{msg: "Must set at least one property"}
 	}
 
-	req, err := os.client.newRequest(http.MethodPut, path, setObjectRequest.Properties)
+	req, err := os.client.newRequest(http.MethodPut, path, setObjectRequest.Properties, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for set object")
 	}
@@ -268,7 +268,7 @@ func (os *objectsService) Set(ctx context.Context, setObjectRequest *SetObjectRe
 func (os *objectsService) Delete(ctx context.Context, deleteObjectRequest *DeleteObjectRequest) error {
 	path := objectAPIPath(deleteObjectRequest.Collection, deleteObjectRequest.ID)
 
-	req, err := os.client.newRequest(http.MethodDelete, path, nil)
+	req, err := os.client.newRequest(http.MethodDelete, path, nil, nil)
 	if err != nil {
 		return errors.Wrap(err, "error creating request for delete object")
 	}
@@ -284,7 +284,7 @@ func (os *objectsService) Delete(ctx context.Context, deleteObjectRequest *Delet
 func (os *objectsService) GetChannelData(ctx context.Context, getChannelDataReq *GetObjectChannelDataRequest) (map[string]interface{}, error) {
 	path := objectChannelDataAPIPath(getChannelDataReq.Collection, getChannelDataReq.ObjectID, getChannelDataReq.ChannelID)
 
-	req, err := os.client.newRequest(http.MethodGet, path, nil)
+	req, err := os.client.newRequest(http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to get object channel data")
 	}
@@ -305,7 +305,7 @@ func (os *objectsService) GetChannelData(ctx context.Context, getChannelDataReq 
 func (os *objectsService) SetChannelData(ctx context.Context, getChannelDataReq *SetObjectChannelDataRequest) (map[string]interface{}, error) {
 	path := objectChannelDataAPIPath(getChannelDataReq.Collection, getChannelDataReq.ObjectID, getChannelDataReq.ChannelID)
 
-	req, err := os.client.newRequest(http.MethodPut, path, getChannelDataReq)
+	req, err := os.client.newRequest(http.MethodPut, path, getChannelDataReq, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to set object channel data")
 	}
@@ -326,7 +326,7 @@ func (os *objectsService) SetChannelData(ctx context.Context, getChannelDataReq 
 func (os *objectsService) DeleteChannelData(ctx context.Context, deleteObjectChannelDataReq *DeleteObjectChannelDataRequest) error {
 	path := objectChannelDataAPIPath(deleteObjectChannelDataReq.Collection, deleteObjectChannelDataReq.ObjectID, deleteObjectChannelDataReq.ChannelID)
 
-	req, err := os.client.newRequest(http.MethodDelete, path, nil)
+	req, err := os.client.newRequest(http.MethodDelete, path, nil, nil)
 	if err != nil {
 		return errors.Wrap(err, "error creating request to delete object channel data")
 	}
@@ -349,7 +349,7 @@ func (os *objectsService) GetPreferences(ctx context.Context, getObjectPreferenc
 	}
 	path := fmt.Sprintf("%s/preferences/%s", objectAPIPath(getObjectPreferencesReq.Collection, getObjectPreferencesReq.ObjectID), getObjectPreferencesReq.PreferenceID)
 
-	req, err := os.client.newRequest(http.MethodGet, path, nil)
+	req, err := os.client.newRequest(http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to get object preferences")
 	}
@@ -392,7 +392,7 @@ func (os *objectsService) SetPreferences(ctx context.Context, setObjectPreferenc
 
 	path := fmt.Sprintf("%s/preferences/%s", objectAPIPath(setObjectPreferencesReq.Collection, setObjectPreferencesReq.ObjectID), setObjectPreferencesReq.PreferenceID)
 
-	req, err := os.client.newRequest(http.MethodPut, path, setObjectPreferencesReq)
+	req, err := os.client.newRequest(http.MethodPut, path, setObjectPreferencesReq, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to set object preferences")
 	}
@@ -414,7 +414,7 @@ func (os *objectsService) SetPreferences(ctx context.Context, setObjectPreferenc
 func (os *objectsService) AddSubscriptions(ctx context.Context, addSubscriptionsReq *AddSubscriptionsRequest) ([]*ObjectSubscription, error) {
 	path := fmt.Sprintf("%s/subscriptions", objectAPIPath(addSubscriptionsReq.Collection, addSubscriptionsReq.ObjectID))
 
-	req, err := os.client.newRequest(http.MethodPost, path, addSubscriptionsReq)
+	req, err := os.client.newRequest(http.MethodPost, path, addSubscriptionsReq, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to add subscriptions")
 	}
@@ -436,7 +436,7 @@ func (os *objectsService) AddSubscriptions(ctx context.Context, addSubscriptions
 func (os *objectsService) DeleteSubscriptions(ctx context.Context, deleteSubscriptionsReq *DeleteSubscriptionsRequest) ([]*ObjectSubscription, error) {
 	path := fmt.Sprintf("%s/subscriptions", objectAPIPath(deleteSubscriptionsReq.Collection, deleteSubscriptionsReq.ObjectID))
 
-	req, err := os.client.newRequest(http.MethodDelete, path, deleteSubscriptionsReq)
+	req, err := os.client.newRequest(http.MethodDelete, path, deleteSubscriptionsReq, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to delete subscriptions")
 	}
@@ -463,7 +463,7 @@ func (os *objectsService) ListSubscriptions(ctx context.Context, listSubscriptio
 	}
 
 	path := fmt.Sprintf("%s/subscriptions?%s", objectAPIPath(listSubscriptionsReq.Collection, listSubscriptionsReq.ObjectID), queryString.Encode())
-	req, err := os.client.newRequest(http.MethodGet, path, listSubscriptionsReq)
+	req, err := os.client.newRequest(http.MethodGet, path, listSubscriptionsReq, nil)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to list subscriptions")

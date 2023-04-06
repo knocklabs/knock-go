@@ -233,7 +233,7 @@ func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserR
 		return nil, errors.Wrap(err, "error creating request for identify user")
 	}
 
-	req, err := us.client.newRequest(http.MethodPut, path, identifyBody)
+	req, err := us.client.newRequest(http.MethodPut, path, identifyBody, nil)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for identify user")
@@ -255,7 +255,7 @@ func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserR
 func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*User, error) {
 	path := UsersAPIPath(getReq.ID)
 
-	req, err := us.client.newRequest(http.MethodGet, path, nil)
+	req, err := us.client.newRequest(http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for get user")
 	}
@@ -275,7 +275,7 @@ func (us *usersService) Get(ctx context.Context, getReq *GetUserRequest) (*User,
 
 func (us *usersService) Delete(ctx context.Context, deleteReq *DeleteUserRequest) error {
 	path := UsersAPIPath(deleteReq.ID)
-	req, err := us.client.newRequest(http.MethodDelete, path, nil)
+	req, err := us.client.newRequest(http.MethodDelete, path, nil, nil)
 
 	if err != nil {
 		return errors.Wrap(err, "error creating request for delete user")
@@ -288,7 +288,7 @@ func (us *usersService) Delete(ctx context.Context, deleteReq *DeleteUserRequest
 func (us *usersService) Merge(ctx context.Context, mergeReq *MergeUserRequest) (*User, error) {
 	path := fmt.Sprintf("%s/merge", UsersAPIPath(mergeReq.ID))
 
-	req, err := us.client.newRequest(http.MethodPost, path, mergeReq)
+	req, err := us.client.newRequest(http.MethodPost, path, mergeReq, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for merge user")
 	}
@@ -320,7 +320,7 @@ func (us *usersService) GetMessages(ctx context.Context, getUserMessagesReq *Get
 
 	path := fmt.Sprintf("%s/messages?%s", UsersAPIPath(getUserMessagesReq.ID), queryString.Encode())
 
-	req, err := us.client.newRequest(http.MethodGet, path, nil)
+	req, err := us.client.newRequest(http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for get user messages")
 	}
@@ -355,7 +355,7 @@ func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkI
 	type BulkUserList struct {
 		BulkUserFlatMap []map[string]interface{} `json:"users"`
 	}
-	req, err := us.client.newRequest(http.MethodPost, path, BulkUserList{BulkUserFlatMap: bulkUserFlatMap})
+	req, err := us.client.newRequest(http.MethodPost, path, BulkUserList{BulkUserFlatMap: bulkUserFlatMap}, nil)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for bulk identify user")
@@ -378,7 +378,7 @@ func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkI
 func (us *usersService) BulkDelete(ctx context.Context, bulkDeleteReq *BulkDeleteUserRequest) (*BulkOperation, error) {
 	path := UsersAPIPath("bulk/delete")
 
-	req, err := us.client.newRequest(http.MethodPost, path, bulkDeleteReq)
+	req, err := us.client.newRequest(http.MethodPost, path, bulkDeleteReq, nil)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for bulk delete user")
@@ -413,7 +413,7 @@ func (us *usersService) GetFeed(ctx context.Context, getFeedReq *GetFeedRequest)
 
 	path := fmt.Sprintf("%s?%s", feedsAPIPath(getFeedReq.UserID, getFeedReq.FeedID), queryString.Encode())
 
-	req, err := us.client.newRequest(http.MethodGet, path, getFeedReq)
+	req, err := us.client.newRequest(http.MethodGet, path, getFeedReq, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for get feed")
 	}
@@ -427,16 +427,16 @@ func (us *usersService) GetFeed(ctx context.Context, getFeedReq *GetFeedRequest)
 	return getFeedRes.Feed, nil
 }
 
-func (cds *usersService) GetChannelData(ctx context.Context, getChannelDataReq *GetUserChannelDataRequest) (map[string]interface{}, error) {
+func (us *usersService) GetChannelData(ctx context.Context, getChannelDataReq *GetUserChannelDataRequest) (map[string]interface{}, error) {
 	path := usersChannelDataAPIPath(getChannelDataReq.UserID, getChannelDataReq.ChannelID)
 
-	req, err := cds.client.newRequest(http.MethodGet, path, nil)
+	req, err := us.client.newRequest(http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for channel data for user")
 	}
 
 	channelDataResponse := &GetUserChannelDataResponse{}
-	_, err = cds.client.do(ctx, req, channelDataResponse)
+	_, err = us.client.do(ctx, req, channelDataResponse)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request for channel data for user")
 	}
@@ -451,7 +451,7 @@ func (cds *usersService) GetChannelData(ctx context.Context, getChannelDataReq *
 func (us *usersService) SetChannelData(ctx context.Context, getChannelDataReq *SetUserChannelDataRequest) (map[string]interface{}, error) {
 	path := usersChannelDataAPIPath(getChannelDataReq.UserID, getChannelDataReq.ChannelID)
 
-	req, err := us.client.newRequest(http.MethodPut, path, getChannelDataReq)
+	req, err := us.client.newRequest(http.MethodPut, path, getChannelDataReq, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to set channel data for user")
 	}
@@ -472,7 +472,7 @@ func (us *usersService) SetChannelData(ctx context.Context, getChannelDataReq *S
 func (us *usersService) DeleteChannelData(ctx context.Context, deleteUserChannelDataReq *DeleteUserChannelDataRequest) error {
 	path := usersChannelDataAPIPath(deleteUserChannelDataReq.UserID, deleteUserChannelDataReq.ChannelID)
 
-	req, err := us.client.newRequest(http.MethodDelete, path, nil)
+	req, err := us.client.newRequest(http.MethodDelete, path, nil, nil)
 	if err != nil {
 		return errors.Wrap(err, "error creating request to delete channel data for a user")
 	}
@@ -493,7 +493,7 @@ func (us *usersService) GetAllPreferences(ctx context.Context, allPreferencesReq
 
 	path := fmt.Sprintf("%s/preferences", UsersAPIPath(allPreferencesReq.UserID))
 
-	req, err := us.client.newRequest(http.MethodGet, path, nil)
+	req, err := us.client.newRequest(http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to get all preferences")
 	}
@@ -519,7 +519,7 @@ func (us *usersService) GetPreferences(ctx context.Context, getPreferencesReq *G
 
 	path := fmt.Sprintf("%s/preferences/%s", UsersAPIPath(getPreferencesReq.UserID), getPreferencesReq.PreferenceID)
 
-	req, err := us.client.newRequest(http.MethodGet, path, nil)
+	req, err := us.client.newRequest(http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to get all preferences")
 	}
@@ -559,7 +559,7 @@ func (us *usersService) SetPreferences(ctx context.Context, setPreferencesReq *S
 	}
 	path := fmt.Sprintf("%s/preferences/%s", UsersAPIPath(setPreferencesReq.UserId), setPreferencesReq.PreferenceID)
 
-	req, err := us.client.newRequest(http.MethodPut, path, setPreferencesReq)
+	req, err := us.client.newRequest(http.MethodPut, path, setPreferencesReq, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to set all preferences")
 	}
@@ -595,7 +595,7 @@ func (br *BulkSetUserPreferencesRequest) AddCategoriesPreference(category map[st
 
 func (us *usersService) BulkSetPreferences(ctx context.Context, setPreferencesReq *BulkSetUserPreferencesRequest) (*BulkOperation, error) {
 
-	req, err := us.client.newRequest(http.MethodPost, "v1/users/bulk/preferences", setPreferencesReq)
+	req, err := us.client.newRequest(http.MethodPost, "v1/users/bulk/preferences", setPreferencesReq, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request to bulk set user preferences")
 	}

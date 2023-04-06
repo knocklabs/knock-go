@@ -47,7 +47,58 @@ func TestWorkflows_Trigger(t *testing.T) {
 
 	fmt.Printf("%v\n", request)
 
-	workflowRunId, err := client.Workflows.Trigger(ctx, request)
+	workflowRunId, err := client.Workflows.Trigger(ctx, request, nil)
+
+	want := "e2898d04-cb0c-5a1b-93e0-6c3f6bad82ef"
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(workflowRunId, qt.DeepEquals, want)
+}
+
+func TestWorkflows_Trigger_Idempotence(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"workflow_run_id":"e2898d04-cb0c-5a1b-93e0-6c3f6bad82ef"}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+		
+		// Verify the idempotency key was set
+		c.Assert(r.Header.Get("Idempotency-Key"), qt.Not(qt.Equals), "")
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	request := &TriggerWorkflowRequest{
+		Workflow: "test",
+		Data: map[string]interface{}{
+			"life":      "uh, finds a way",
+			"dinosaurs": "loose",
+		},
+	}
+	request.AddRecipientByID("tim")
+	request.AddRecipientByID("lex")
+	request.AddRecipientByEntity(map[string]interface{}{
+		"id":         "projects-2",
+		"collection": "projects",
+	})
+
+	request.AddActorByEntity(map[string]interface{}{
+		"id":         "projects-1",
+		"collection": "projects",
+	})
+
+	fmt.Printf("%v\n", request)
+
+	options := &MethodOptions{
+		IdempotencyKey: "idempotency-key-123",
+	}
+	workflowRunId, err := client.Workflows.Trigger(ctx, request, options)
 
 	want := "e2898d04-cb0c-5a1b-93e0-6c3f6bad82ef"
 

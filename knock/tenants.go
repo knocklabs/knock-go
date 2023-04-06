@@ -74,21 +74,21 @@ func tenantAPIPath(tenantID string) string {
 
 const tenantsAPIBasePath = "/v1/tenants"
 
-func (ms *tenantsService) List(ctx context.Context, listReq *ListTenantsRequest) ([]*Tenant, *PageInfo, error) {
+func (ts *tenantsService) List(ctx context.Context, listReq *ListTenantsRequest) ([]*Tenant, *PageInfo, error) {
 	queryString, err := query.Values(listReq)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "error parsing request to list tenants")
 	}
 	path := fmt.Sprintf("%s/%s", tenantsAPIBasePath, queryString.Encode())
 
-	req, err := ms.client.newRequest(http.MethodGet, path, listReq)
+	req, err := ts.client.newRequest(http.MethodGet, path, listReq, nil)
 
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "error creating request to list tenants")
 	}
 	listRes := &ListTenantsResponse{}
 
-	_, err = ms.client.do(ctx, req, listRes)
+	_, err = ts.client.do(ctx, req, listRes)
 
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "error making request to list tenants")
@@ -96,16 +96,16 @@ func (ms *tenantsService) List(ctx context.Context, listReq *ListTenantsRequest)
 
 	return listRes.Items, listRes.PageInfo, nil
 }
-func (os *tenantsService) Get(ctx context.Context, getTenantRequest *GetTenantRequest) (*Tenant, error) {
+func (ts *tenantsService) Get(ctx context.Context, getTenantRequest *GetTenantRequest) (*Tenant, error) {
 	path := tenantAPIPath(getTenantRequest.ID)
 
-	req, err := os.client.newRequest(http.MethodGet, path, nil)
+	req, err := ts.client.newRequest(http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for get tenant")
 	}
 
 	getTenantResponse := &GetTenantResponse{Tenant: &Tenant{}}
-	_, err = os.client.do(ctx, req, getTenantResponse.Tenant)
+	_, err = ts.client.do(ctx, req, getTenantResponse.Tenant)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request for get tenant")
 	}
@@ -113,20 +113,20 @@ func (os *tenantsService) Get(ctx context.Context, getTenantRequest *GetTenantRe
 	return getTenantResponse.Tenant, nil
 }
 
-func (os *tenantsService) Set(ctx context.Context, setTenantRequest *SetTenantRequest) (*Tenant, error) {
+func (ts *tenantsService) Set(ctx context.Context, setTenantRequest *SetTenantRequest) (*Tenant, error) {
 	path := tenantAPIPath(setTenantRequest.ID)
 
 	if len(setTenantRequest.Properties) == 0 {
 		return nil, &Error{msg: "Must set at least one property"}
 	}
 
-	req, err := os.client.newRequest(http.MethodPut, path, setTenantRequest.Properties)
+	req, err := ts.client.newRequest(http.MethodPut, path, setTenantRequest.Properties, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for set tenant")
 	}
 
 	setTenantResponse := &SetTenantResponse{Tenant: &Tenant{}}
-	_, err = os.client.do(ctx, req, setTenantResponse.Tenant)
+	_, err = ts.client.do(ctx, req, setTenantResponse.Tenant)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request for set tenant")
 	}
@@ -134,15 +134,15 @@ func (os *tenantsService) Set(ctx context.Context, setTenantRequest *SetTenantRe
 	return setTenantResponse.Tenant, nil
 }
 
-func (os *tenantsService) Delete(ctx context.Context, deleteTenantRequest *DeleteTenantRequest) error {
+func (ts *tenantsService) Delete(ctx context.Context, deleteTenantRequest *DeleteTenantRequest) error {
 	path := tenantAPIPath(deleteTenantRequest.ID)
 
-	req, err := os.client.newRequest(http.MethodDelete, path, nil)
+	req, err := ts.client.newRequest(http.MethodDelete, path, nil, nil)
 	if err != nil {
 		return errors.Wrap(err, "error creating request for delete tenant")
 	}
 
-	_, err = os.client.do(ctx, req, nil)
+	_, err = ts.client.do(ctx, req, nil)
 	if err != nil {
 		return errors.Wrap(err, "error making request for delete tenant")
 	}

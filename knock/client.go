@@ -223,7 +223,7 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 	return out, nil
 }
 
-func (c *Client) newRequest(method string, path string, body interface{}) (*http.Request, error) {
+func (c *Client) newRequest(method string, path string, body interface{}, methodOptions *MethodOptions) (*http.Request, error) {
 	u, err := c.baseURL.Parse(path)
 	if err != nil {
 		return nil, err
@@ -255,6 +255,12 @@ func (c *Client) newRequest(method string, path string, body interface{}) (*http
 
 	req.Header.Set("Accept", jsonMediaType)
 
+	if methodOptions != nil {
+		if methodOptions.IdempotencyKey != "" {
+			req.Header.Set("Idempotency-Key", methodOptions.IdempotencyKey)
+		}
+	}
+
 	return req, nil
 }
 
@@ -284,3 +290,7 @@ type Error struct {
 
 // Error returns the string representation of the error.
 func (e *Error) Error() string { return e.msg }
+
+type MethodOptions struct {
+	IdempotencyKey string
+}
