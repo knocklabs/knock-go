@@ -63,7 +63,7 @@ func TestWorkflows_Trigger_Idempotence(t *testing.T) {
 		out := `{"workflow_run_id":"e2898d04-cb0c-5a1b-93e0-6c3f6bad82ef"}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
-		
+
 		// Verify the idempotency key was set
 		c.Assert(r.Header.Get("Idempotency-Key"), qt.Not(qt.Equals), "")
 	}))
