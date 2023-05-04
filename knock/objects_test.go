@@ -2,7 +2,6 @@ package knock
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -33,7 +32,6 @@ func TestObjects_Set(t *testing.T) {
 		},
 	})
 
-	fmt.Printf("%+v", have)
 	want := &Object{
 		ID:         "cool-object2",
 		Collection: "test-collection",
@@ -85,7 +83,7 @@ func TestObjects_GetMessages(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		out := `{"entries":[{"__typename":"Message","__cursor":"g3QAAAABZAACaWRtAAAAGzFzTXRJc1J2WnRZZjg2YU9ma00yUENwQzZYYw==","id":"1rjI9XBgWQ6EUA3D3Ul3VjUimOD","channel_id":"0bfd9f86-56b0-41f0-ade3-dc5cc6a69bb8","recipient":{"id":"project_1","collection":"projects"},"workflow":"merged-changes","tenant":null,"status":"delivered","read_at":null,"seen_at":null,"archived_at":null,"inserted_at":"2021-03-05T12:00:00Z","updated_at":"2021-03-05T12:00:00Z","source":{"__typename":"WorkflowSource","key":"merged-changes","version_id":"7251cd3f-0028-4d1a-9466-ee79522ba3de"},"data":{"foo":"bar"}}],"page_info":{"__typename":"PageInfo","after":null,"before":null,"page_size":50}}`
+		out := `{"items":[{"__typename":"Message","__cursor":"g3QAAAABZAACaWRtAAAAGzFzTXRJc1J2WnRZZjg2YU9ma00yUENwQzZYYw==","id":"1rjI9XBgWQ6EUA3D3Ul3VjUimOD","channel_id":"0bfd9f86-56b0-41f0-ade3-dc5cc6a69bb8","recipient":{"id":"project_1","collection":"projects"},"workflow":"merged-changes","tenant":null,"status":"delivered","read_at":null,"seen_at":null,"archived_at":null,"inserted_at":"2021-03-05T12:00:00Z","updated_at":"2021-03-05T12:00:00Z","source":{"__typename":"WorkflowSource","key":"merged-changes","version_id":"7251cd3f-0028-4d1a-9466-ee79522ba3de"},"data":{"foo":"bar"}}],"page_info":{"__typename":"PageInfo","after":null,"before":null,"page_size":50}}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))

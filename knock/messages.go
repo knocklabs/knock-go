@@ -109,7 +109,6 @@ type MessageContent struct {
 // Client structs
 type ListMessagesRequest struct {
 	PageSize    int                    `url:"page_size,omitempty"`
-	Cursor      string                 `url:"page_size,omitempty"`
 	Before      string                 `url:"before,omitempty"`
 	After       string                 `url:"after,omitempty"`
 	Source      string                 `url:"source,omitempty"`
@@ -196,7 +195,7 @@ func (ms *messagesService) List(ctx context.Context, listReq *ListMessagesReques
 	queryString, err := query.Values(listReq)
 
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "error parsing request to list messages")
+		return nil, nil, errors.Wrap(err, "error parsing query params to list messages")
 	}
 
 	if listReq.TriggerData != nil {

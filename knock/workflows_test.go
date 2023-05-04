@@ -2,7 +2,6 @@ package knock
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -44,8 +43,6 @@ func TestWorkflows_Trigger(t *testing.T) {
 		"id":         "projects-1",
 		"collection": "projects",
 	})
-
-	fmt.Printf("%v\n", request)
 
 	workflowRunId, err := client.Workflows.Trigger(ctx, request, nil)
 
@@ -92,8 +89,6 @@ func TestWorkflows_Trigger_Idempotence(t *testing.T) {
 		"id":         "projects-1",
 		"collection": "projects",
 	})
-
-	fmt.Printf("%v\n", request)
 
 	options := &MethodOptions{
 		IdempotencyKey: "idempotency-key-123",
