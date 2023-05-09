@@ -21,6 +21,7 @@ type UsersService interface {
 	Delete(context.Context, *DeleteUserRequest) error
 
 	GetMessages(context.Context, *GetUserMessagesRequest) ([]*Message, error)
+	GetSchedules(context.Context, *GetUserSchedulesRequest) ([]*Schedule, *PageInfo, error)
 
 	BulkIdentify(context.Context, *BulkIdentifyUserRequest) (*BulkOperation, error)
 	BulkDelete(context.Context, *BulkDeleteUserRequest) (*BulkOperation, error)
@@ -131,6 +132,20 @@ type GetUserMessagesRequest struct {
 
 type GetUserMessagesResponse struct {
 	Messages []*Message `json:"items"`
+}
+
+type GetUserSchedulesRequest struct {
+	ID string `url:"-"`
+
+	PageSize int    `url:"page_size,omitempty"`
+	Before   string `url:"before,omitempty"`
+	After    string `url:"after,omitempty"`
+	Workflow string `url:"workflow,omitempty"`
+	Tenant   string `url:"tenant,omitempty"`
+}
+type GetUserSchedulesResponse struct {
+	Items    []*Schedule `json:"entries"`
+	PageInfo *PageInfo   `json:"page_info"`
 }
 
 type BulkIdentifyUserRequest struct {
@@ -328,14 +343,28 @@ func (us *usersService) GetMessages(ctx context.Context, getUserMessagesReq *Get
 
 	_, err = us.client.do(ctx, req, getUserMessagesResponse)
 	if err != nil {
-		return nil, errors.Wrap(err, "error making request for get user messages")
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request for get user messages")
+		return nil, errors.Wrap(err, "error making request to list user messages")
 	}
 
 	return getUserMessagesResponse.Messages, nil
+}
+
+func (us *usersService) GetSchedules(ctx context.Context, getUserSchedulesReq *GetUserSchedulesRequest) ([]*Schedule, *PageInfo, error) {
+	queryString, _ := query.Values(getUserSchedulesReq)
+	path := fmt.Sprintf("%s/schedules?%s", UsersAPIPath(getUserSchedulesReq.ID), queryString.Encode())
+
+	req, err := us.client.newRequest(http.MethodGet, path, nil, nil)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error creating request for get user schedules")
+	}
+	getUserSchedulesResponse := &GetUserSchedulesResponse{}
+
+	_, err = us.client.do(ctx, req, getUserSchedulesResponse)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error making request for get user schedules")
+	}
+
+	return getUserSchedulesResponse.Items, getUserSchedulesResponse.PageInfo, nil
 }
 
 func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkIdentifyUserRequest) (*BulkOperation, error) {

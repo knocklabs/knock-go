@@ -2,7 +2,6 @@ package knock
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -37,7 +36,6 @@ func TestTenants_Set(t *testing.T) {
 		},
 	})
 
-	fmt.Printf("%+v", have)
 	want := &Tenant{
 		ID:        "cool-tenant2",
 		UpdatedAt: ParseRFC3339Timestamp("2022-05-26T13:59:20.701Z"),

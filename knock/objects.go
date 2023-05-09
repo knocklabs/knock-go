@@ -19,6 +19,7 @@ type ObjectsService interface {
 	Delete(context.Context, *DeleteObjectRequest) error
 
 	GetMessages(context.Context, *GetObjectMessagesRequest) ([]*ObjectMessage, *PageInfo, error)
+	GetSchedules(context.Context, *GetObjectSchedulesRequest) ([]*Schedule, *PageInfo, error)
 
 	GetChannelData(context.Context, *GetObjectChannelDataRequest) (map[string]interface{}, error)
 	SetChannelData(context.Context, *SetObjectChannelDataRequest) (map[string]interface{}, error)
@@ -102,8 +103,23 @@ type GetObjectMessagesRequest struct {
 	TriggerData map[string]interface{} `url:"-"`
 }
 type GetObjectMessagesResponse struct {
-	Items    []*ObjectMessage `json:"entries"`
+	Items    []*ObjectMessage `json:"items"`
 	PageInfo *PageInfo        `json:"page_info"`
+}
+
+type GetObjectSchedulesRequest struct {
+	ObjectID   string `url:"-"`
+	Collection string `url:"-"`
+
+	PageSize int    `url:"page_size,omitempty"`
+	Before   string `url:"before,omitempty"`
+	After    string `url:"after,omitempty"`
+	Workflow string `url:"workflow,omitempty"`
+	Tenant   string `url:"tenant,omitempty"`
+}
+type GetObjectSchedulesResponse struct {
+	Items    []*Schedule `json:"entries"`
+	PageInfo *PageInfo   `json:"page_info"`
 }
 
 type GetObjectChannelDataRequest struct {
@@ -242,6 +258,28 @@ func (os *objectsService) GetMessages(ctx context.Context, getObjectMessagesRequ
 	}
 
 	return getObjectMessagesResponse.Items, getObjectMessagesResponse.PageInfo, nil
+}
+
+func (os *objectsService) GetSchedules(ctx context.Context, getObjectSchedulesRequest *GetObjectSchedulesRequest) ([]*Schedule, *PageInfo, error) {
+	queryString, err := query.Values(getObjectSchedulesRequest)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error parsing query parameters to list object schedules")
+	}
+
+	path := fmt.Sprintf("%s/schedules?%s", objectAPIPath(getObjectSchedulesRequest.Collection, getObjectSchedulesRequest.ObjectID), queryString.Encode())
+
+	req, err := os.client.newRequest(http.MethodGet, path, nil, nil)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error creating request to list object schedules")
+	}
+
+	getObjectSchedulesResponse := &GetObjectSchedulesResponse{}
+	_, err = os.client.do(ctx, req, getObjectSchedulesResponse)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error making request to list object schedules")
+	}
+
+	return getObjectSchedulesResponse.Items, getObjectSchedulesResponse.PageInfo, nil
 }
 
 func (os *objectsService) Set(ctx context.Context, setObjectRequest *SetObjectRequest) (*Object, error) {
