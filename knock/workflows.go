@@ -69,6 +69,7 @@ type Schedule struct {
 	Repeats          []*ScheduleRepeat      `json:"repeats"`
 	Workflow         string                 `json:"workflow"`
 	Tenant           string                 `json:"tenant"`
+	LastOccurrenceAt time.Time              `json:"last_occurrence_at"`
 	NextOccurrenceAt time.Time              `json:"next_occurrence_at"`
 	InsertedAt       time.Time              `json:"inserted_at"`
 	UpdatedAt        time.Time              `json:"updated_at"`
