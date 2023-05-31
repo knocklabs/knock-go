@@ -17,6 +17,7 @@ type ObjectsService interface {
 	Get(context.Context, *GetObjectRequest) (*Object, error)
 	Set(context.Context, *SetObjectRequest) (*Object, error)
 	Delete(context.Context, *DeleteObjectRequest) error
+	List(context.Context, *ListObjectsRequest) ([]*Object, *PageInfo, error)
 
 	GetMessages(context.Context, *GetObjectMessagesRequest) ([]*ObjectMessage, *PageInfo, error)
 	GetSchedules(context.Context, *GetObjectSchedulesRequest) ([]*Schedule, *PageInfo, error)
@@ -84,10 +85,23 @@ type SetObjectRequest struct {
 	Collection string                 `json:"-"`
 	Properties map[string]interface{} `json:""`
 }
+type ListObjectsRequest struct {
+	Collection string `url:"-"`
+	ObjectId   string `url:"object_id,omitempty"`
+	Name       string `url:"name,omitempty"`
+	PageSize   int    `url:"page_size,omitempty"`
+	Before     string `url:"before,omitempty"`
+	After      string `url:"after,omitempty"`
+}
 
 type SetObjectResponse = GetObjectResponse
 
 type DeleteObjectRequest = GetObjectRequest
+
+type ListObjectsResponse struct {
+	Entries  []*Object `json:"entries"`
+	PageInfo *PageInfo `json:"page_info"`
+}
 
 type GetObjectMessagesRequest struct {
 	ObjectID   string `url:"-"`
@@ -201,6 +215,10 @@ type ListSubscriptionsRequest struct {
 type ListSubscriptionsResponse struct {
 	Entries  []*ObjectSubscription `json:"entries"`
 	PageInfo *PageInfo             `json:"page_info"`
+}
+
+func collectionAPIPath(collection string) string {
+	return fmt.Sprintf("v1/objects/%s", collection)
 }
 
 func objectAPIPath(collection string, objectID string) string {
@@ -317,6 +335,30 @@ func (os *objectsService) Delete(ctx context.Context, deleteObjectRequest *Delet
 	}
 
 	return nil
+}
+
+func (os *objectsService) List(ctx context.Context, listObjectsRequest *ListObjectsRequest) ([]*Object, *PageInfo, error) {
+	queryString, err := query.Values(listObjectsRequest)
+
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error parsing query params to list objects")
+	}
+
+	collectionPath := collectionAPIPath(listObjectsRequest.Collection)
+	path := fmt.Sprintf("%s?%s", collectionPath, queryString.Encode())
+
+	req, err := os.client.newRequest(http.MethodGet, path, listObjectsRequest, nil)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error creating request for listing objects")
+	}
+
+	listObjectsResponse := &ListObjectsResponse{}
+	_, err = os.client.do(ctx, req, listObjectsResponse)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error making request for listing objects")
+	}
+
+	return listObjectsResponse.Entries, listObjectsResponse.PageInfo, nil
 }
 
 func (os *objectsService) GetChannelData(ctx context.Context, getChannelDataReq *GetObjectChannelDataRequest) (map[string]interface{}, error) {
