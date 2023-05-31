@@ -21,6 +21,7 @@ type ObjectsService interface {
 
 	GetMessages(context.Context, *GetObjectMessagesRequest) ([]*ObjectMessage, *PageInfo, error)
 	GetSchedules(context.Context, *GetObjectSchedulesRequest) ([]*Schedule, *PageInfo, error)
+	GetSubscriptions(context.Context, *GetObjectSubscriptionsRequest) ([]*ObjectSubscription, *PageInfo, error)
 
 	GetChannelData(context.Context, *GetObjectChannelDataRequest) (map[string]interface{}, error)
 	SetChannelData(context.Context, *SetObjectChannelDataRequest) (map[string]interface{}, error)
@@ -116,6 +117,7 @@ type GetObjectMessagesRequest struct {
 	ChannelID   string                 `url:"channel_id,omitempty"`
 	TriggerData map[string]interface{} `url:"-"`
 }
+
 type GetObjectMessagesResponse struct {
 	Items    []*ObjectMessage `json:"items"`
 	PageInfo *PageInfo        `json:"page_info"`
@@ -131,9 +133,23 @@ type GetObjectSchedulesRequest struct {
 	Workflow string `url:"workflow,omitempty"`
 	Tenant   string `url:"tenant,omitempty"`
 }
+
 type GetObjectSchedulesResponse struct {
 	Items    []*Schedule `json:"entries"`
 	PageInfo *PageInfo   `json:"page_info"`
+}
+
+type GetObjectSubscriptionsRequest struct {
+	Collection string `url:"-"`
+	ObjectID   string `url:"-"`
+	PageSize   int    `url:"page_size,omitempty"`
+	Before     string `url:"before,omitempty"`
+	After      string `url:"after,omitempty"`
+}
+
+type GetObjectSubscriptionsResponse struct {
+	Entries  []*ObjectSubscription `json:"entries"`
+	PageInfo *PageInfo             `json:"page_info"`
 }
 
 type GetObjectChannelDataRequest struct {
@@ -178,6 +194,7 @@ type SetObjectPreferencesResponse = GetObjectPreferencesResponse
 
 type ObjectSubscription struct {
 	Recipient  interface{}            `json:"recipient"`
+	Object     Object                 `json:"object"`
 	Properties map[string]interface{} `json:"properties"`
 	InsertedAt time.Time              `json:"inserted_at"`
 	UpdatedAt  time.Time              `json:"updated_at"`
@@ -298,6 +315,24 @@ func (os *objectsService) GetSchedules(ctx context.Context, getObjectSchedulesRe
 	}
 
 	return getObjectSchedulesResponse.Items, getObjectSchedulesResponse.PageInfo, nil
+}
+
+func (us *objectsService) GetSubscriptions(ctx context.Context, getObjectSubscriptionsReq *GetObjectSubscriptionsRequest) ([]*ObjectSubscription, *PageInfo, error) {
+	queryString, _ := query.Values(getObjectSubscriptionsReq)
+	path := fmt.Sprintf("%s/subscriptions?mode=recipient&%s", objectAPIPath(getObjectSubscriptionsReq.Collection, getObjectSubscriptionsReq.ObjectID), queryString.Encode())
+
+	req, err := us.client.newRequest(http.MethodGet, path, nil, nil)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error creating request to get object subscriptions")
+	}
+	getObjectSubscriptionsResponse := &GetObjectSubscriptionsResponse{}
+
+	_, err = us.client.do(ctx, req, getObjectSubscriptionsResponse)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error making request to get object subscriptions")
+	}
+
+	return getObjectSubscriptionsResponse.Entries, getObjectSubscriptionsResponse.PageInfo, nil
 }
 
 func (os *objectsService) Set(ctx context.Context, setObjectRequest *SetObjectRequest) (*Object, error) {

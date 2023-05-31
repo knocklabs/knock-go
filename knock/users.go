@@ -22,6 +22,7 @@ type UsersService interface {
 
 	GetMessages(context.Context, *GetUserMessagesRequest) ([]*Message, error)
 	GetSchedules(context.Context, *GetUserSchedulesRequest) ([]*Schedule, *PageInfo, error)
+	GetSubscriptions(context.Context, *GetUserSubscriptionsRequest) ([]*ObjectSubscription, *PageInfo, error)
 
 	BulkIdentify(context.Context, *BulkIdentifyUserRequest) (*BulkOperation, error)
 	BulkDelete(context.Context, *BulkDeleteUserRequest) (*BulkOperation, error)
@@ -143,9 +144,22 @@ type GetUserSchedulesRequest struct {
 	Workflow string `url:"workflow,omitempty"`
 	Tenant   string `url:"tenant,omitempty"`
 }
+
 type GetUserSchedulesResponse struct {
 	Items    []*Schedule `json:"entries"`
 	PageInfo *PageInfo   `json:"page_info"`
+}
+
+type GetUserSubscriptionsRequest struct {
+	ID       string
+	PageSize int    `url:"page_size,omitempty"`
+	Before   string `url:"before,omitempty"`
+	After    string `url:"after,omitempty"`
+}
+
+type GetUserSubscriptionsResponse struct {
+	Entries  []*ObjectSubscription `json:"entries"`
+	PageInfo *PageInfo             `json:"page_info"`
 }
 
 type BulkIdentifyUserRequest struct {
@@ -365,6 +379,24 @@ func (us *usersService) GetSchedules(ctx context.Context, getUserSchedulesReq *G
 	}
 
 	return getUserSchedulesResponse.Items, getUserSchedulesResponse.PageInfo, nil
+}
+
+func (us *usersService) GetSubscriptions(ctx context.Context, getUserSubscriptionsReq *GetUserSubscriptionsRequest) ([]*ObjectSubscription, *PageInfo, error) {
+	queryString, _ := query.Values(getUserSubscriptionsReq)
+	path := fmt.Sprintf("%s/subscriptions?%s", UsersAPIPath(getUserSubscriptionsReq.ID), queryString.Encode())
+
+	req, err := us.client.newRequest(http.MethodGet, path, nil, nil)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error creating request to get user subscriptions")
+	}
+	getUserSubscriptionsResponse := &GetUserSubscriptionsResponse{}
+
+	_, err = us.client.do(ctx, req, getUserSubscriptionsResponse)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error making request to get user subscriptions")
+	}
+
+	return getUserSubscriptionsResponse.Entries, getUserSubscriptionsResponse.PageInfo, nil
 }
 
 func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkIdentifyUserRequest) (*BulkOperation, error) {
