@@ -45,6 +45,52 @@ func TestObjects_Set(t *testing.T) {
 	c.Assert(have, qt.DeepEquals, want)
 }
 
+func TestObjects_BulkSet(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"b19d032a-fc3b-4a54-9f54-369484527201","inserted_at":"2022-05-27T11:12:08.281201Z","name":"users.identify","processed_rows":0,"progress_path":"/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201","started_at":null,"status":"queued","updated_at":"2022-05-27T11:12:08.286507Z"}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	bulkSet, err := client.Objects.BulkSet(ctx, &BulkSetObjectsRequest{
+		Collection: "test-collection",
+		Objects: []*BulkSetObject{
+			{
+				ID: "cool-object-1",
+				Properties: map[string]interface{}{
+					"nice": "cool",
+				},
+			},
+			{
+				ID: "cool-object-2",
+				Properties: map[string]interface{}{
+					"nice": "cool",
+				},
+			},
+		},
+	})
+
+	want := &BulkOperation{
+		ID:                 "b19d032a-fc3b-4a54-9f54-369484527201",
+		EstimatedTotalRows: 2,
+		ProgressPath:       "/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201",
+		Status:             BulkOperationQueued,
+		InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
+		UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(bulkSet, qt.DeepEquals, want)
+}
+
 func TestObjects_Get(t *testing.T) {
 	c := qt.New(t)
 
@@ -143,6 +189,39 @@ func TestObjects_Delete(t *testing.T) {
 	})
 
 	c.Assert(err, qt.IsNil)
+}
+
+func TestObjects_BulkDelete(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"b19d032a-fc3b-4a54-9f54-369484527201","inserted_at":"2022-05-27T11:12:08.281201Z","name":"users.identify","processed_rows":0,"progress_path":"/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201","started_at":null,"status":"queued","updated_at":"2022-05-27T11:12:08.286507Z"}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	bulkDelete, err := client.Objects.BulkDelete(ctx, &BulkDeleteObjectsRequest{
+		Collection: "test-collection",
+		ObjectIDs:  []string{"cool-object-1", "cool-object-2"},
+	})
+
+	want := &BulkOperation{
+		ID:                 "b19d032a-fc3b-4a54-9f54-369484527201",
+		EstimatedTotalRows: 2,
+		ProgressPath:       "/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201",
+		Status:             BulkOperationQueued,
+		InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
+		UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(bulkDelete, qt.DeepEquals, want)
 }
 
 func TestObjects_GetChannelData(t *testing.T) {
@@ -322,4 +401,52 @@ func TestObjects_SetPreferences(t *testing.T) {
 
 	c.Assert(err, qt.IsNil)
 	c.Assert(have, qt.DeepEquals, want)
+}
+
+func TestObjects_BulkAddSubscriptions(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"b19d032a-fc3b-4a54-9f54-369484527201","inserted_at":"2022-05-27T11:12:08.281201Z","name":"users.identify","processed_rows":0,"progress_path":"/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201","started_at":null,"status":"queued","updated_at":"2022-05-27T11:12:08.286507Z"}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	bulkAdd, err := client.Objects.BulkAddSubscriptions(ctx, &BulkAddSubscriptionsRequest{
+		Collection: "test-collection",
+		Subscriptions: []*BulkAddObjectSubscription{
+			{
+				ID: "cool-object-1",
+				Properties: map[string]interface{}{
+					"nice": "cool",
+				},
+				Recipients: []interface{}{"user-1", "user-2"},
+			},
+			{
+				ID: "cool-object-2",
+				Properties: map[string]interface{}{
+					"nice": "cool",
+				},
+				Recipients: []interface{}{"user-1", "user-2"},
+			},
+		},
+	})
+
+	want := &BulkOperation{
+		ID:                 "b19d032a-fc3b-4a54-9f54-369484527201",
+		EstimatedTotalRows: 2,
+		ProgressPath:       "/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201",
+		Status:             BulkOperationQueued,
+		InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
+		UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(bulkAdd, qt.DeepEquals, want)
 }
