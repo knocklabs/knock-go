@@ -15,6 +15,7 @@ import (
 // UsersService is an interface for communicating with the Knock
 // Users API endpoints.
 type UsersService interface {
+	List(context.Context, *ListUsersRequest) ([]*User, *PageInfo, error)
 	Get(context.Context, *GetUserRequest) (*User, error)
 	Identify(context.Context, *IdentifyUserRequest) (*User, error)
 	Merge(context.Context, *MergeUserRequest) (*User, error)
@@ -99,6 +100,17 @@ type FeedBlock struct {
 }
 
 // Client structs
+type ListUsersRequest struct {
+	PageSize int    `url:"page_size,omitempty"`
+	Before   string `url:"before,omitempty"`
+	After    string `url:"after,omitempty"`
+}
+
+type ListUsersResponse struct {
+	Entries  []*User   `json:"entries"`
+	PageInfo *PageInfo `json:"page_info"`
+}
+
 type GetUserRequest struct {
 	ID string
 }
@@ -242,8 +254,10 @@ type BulkSetUserPreferencesRequest struct {
 
 type BulkSetUserPreferencesResponse = BulkIdentifyUserResponse
 
+const usersAPIBasePath = "v1/users"
+
 func UsersAPIPath(userId string) string {
-	return fmt.Sprintf("v1/users/%s", userId)
+	return fmt.Sprintf("%s/%s", usersAPIBasePath, userId)
 }
 
 func usersChannelDataAPIPath(userID string, channelID string) string {
@@ -252,6 +266,29 @@ func usersChannelDataAPIPath(userID string, channelID string) string {
 
 func feedsAPIPath(userID string, FeedID string) string {
 	return fmt.Sprintf("%s/feeds/%s", UsersAPIPath(userID), FeedID)
+}
+
+func (us *usersService) List(ctx context.Context, listReq *ListUsersRequest) ([]*User, *PageInfo, error) {
+	queryString, err := query.Values(listReq)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error parsing request to list users")
+	}
+	path := fmt.Sprintf("%s/?%s", usersAPIBasePath, queryString.Encode())
+
+	req, err := us.client.newRequest(http.MethodGet, path, listReq, nil)
+
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error creating request to list users")
+	}
+	listRes := &ListUsersResponse{}
+
+	_, err = us.client.do(ctx, req, listRes)
+
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error making request to list users")
+	}
+
+	return listRes.Entries, listRes.PageInfo, nil
 }
 
 func (us *usersService) Identify(ctx context.Context, identifyReq *IdentifyUserRequest) (*User, error) {
