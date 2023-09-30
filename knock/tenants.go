@@ -41,7 +41,6 @@ type Tenant struct {
 // Client structs
 type ListTenantsRequest struct {
 	PageSize int    `url:"page_size,omitempty"`
-	Cursor   string `url:"page_size,omitempty"`
 	Before   string `url:"before,omitempty"`
 	After    string `url:"after,omitempty"`
 	TenantID string `url:"tenant_id,omitempty"`
@@ -49,7 +48,7 @@ type ListTenantsRequest struct {
 }
 
 type ListTenantsResponse struct {
-	Items    []*Tenant `json:"items"`
+	Entries  []*Tenant `json:"entries"`
 	PageInfo *PageInfo `json:"page_info"`
 }
 
@@ -79,7 +78,7 @@ func (ts *tenantsService) List(ctx context.Context, listReq *ListTenantsRequest)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "error parsing request to list tenants")
 	}
-	path := fmt.Sprintf("%s/%s", tenantsAPIBasePath, queryString.Encode())
+	path := fmt.Sprintf("%s/?%s", tenantsAPIBasePath, queryString.Encode())
 
 	req, err := ts.client.newRequest(http.MethodGet, path, listReq, nil)
 
@@ -94,7 +93,7 @@ func (ts *tenantsService) List(ctx context.Context, listReq *ListTenantsRequest)
 		return nil, nil, errors.Wrap(err, "error making request to list tenants")
 	}
 
-	return listRes.Items, listRes.PageInfo, nil
+	return listRes.Entries, listRes.PageInfo, nil
 }
 func (ts *tenantsService) Get(ctx context.Context, getTenantRequest *GetTenantRequest) (*Tenant, error) {
 	path := tenantAPIPath(getTenantRequest.ID)
