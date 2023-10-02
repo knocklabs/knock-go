@@ -405,10 +405,6 @@ func (os *objectsService) BulkSet(ctx context.Context, bulkSetObjectsRequest *Bu
 		return nil, errors.Wrap(err, "error making request to bulk set objects")
 	}
 
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to bulk set objects")
-	}
-
 	return bulkSetObjectsRes.BulkOperation, nil
 }
 
@@ -441,10 +437,6 @@ func (os *objectsService) BulkDelete(ctx context.Context, bulkDeleteObjectsReque
 	_, err = os.client.do(ctx, req, bulkDeleteObjectsRes.BulkOperation)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to bulk delete objects")
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to bulk delete objects")
 	}
 
 	return bulkDeleteObjectsRes.BulkOperation, nil
@@ -488,10 +480,6 @@ func (os *objectsService) GetChannelData(ctx context.Context, getChannelDataReq 
 		return nil, errors.Wrap(err, "error making request to get object channel data")
 	}
 
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to get object channel data")
-	}
-
 	return channelDataResponse.ChannelData, nil
 }
 
@@ -509,10 +497,6 @@ func (os *objectsService) SetChannelData(ctx context.Context, getChannelDataReq 
 		return nil, errors.Wrap(err, "error making request to set object channel data")
 	}
 
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to set object channel data")
-	}
-
 	return channelDataResponse.ChannelData, nil
 }
 
@@ -527,10 +511,6 @@ func (os *objectsService) DeleteChannelData(ctx context.Context, deleteObjectCha
 	_, err = os.client.do(ctx, req, nil)
 	if err != nil {
 		return errors.Wrap(err, "error making request to delete object channel data")
-	}
-
-	if err != nil {
-		return errors.Wrap(err, "error parsing request to delete object channel data")
 	}
 
 	return nil
@@ -552,10 +532,6 @@ func (os *objectsService) GetPreferences(ctx context.Context, getObjectPreferenc
 	_, err = os.client.do(ctx, req, &getPreferenceResponse.Preferences)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to get object preferences")
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to get object preferences")
 	}
 
 	return getPreferenceResponse.Preferences, nil
@@ -597,10 +573,6 @@ func (os *objectsService) SetPreferences(ctx context.Context, setObjectPreferenc
 		return nil, errors.Wrap(err, "error making request to set object preferences")
 	}
 
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to set object preferences")
-	}
-
 	return setPreferenceResponse.Preferences, nil
 }
 
@@ -617,10 +589,6 @@ func (os *objectsService) AddSubscriptions(ctx context.Context, addSubscriptions
 	_, err = os.client.do(ctx, req, &addSubscriptionsResponse.Subscriptions)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to add subscriptions")
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to add subscriptions")
 	}
 
 	return addSubscriptionsResponse.Subscriptions, nil
@@ -641,10 +609,6 @@ func (os *objectsService) BulkAddSubscriptions(ctx context.Context, bulkAddSubsc
 		return nil, errors.Wrap(err, "error making request to bulk add subscriptions")
 	}
 
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to bulk add subscriptions")
-	}
-
 	return bulkAddSubscriptionsRes.BulkOperation, nil
 }
 
@@ -661,10 +625,6 @@ func (os *objectsService) DeleteSubscriptions(ctx context.Context, deleteSubscri
 	_, err = os.client.do(ctx, req, &deleteSubscriptionsResponse.Subscriptions)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to delete subscriptions")
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to delete subscriptions")
 	}
 
 	return deleteSubscriptionsResponse.Subscriptions, nil
