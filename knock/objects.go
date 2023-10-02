@@ -16,7 +16,9 @@ import (
 type ObjectsService interface {
 	Get(context.Context, *GetObjectRequest) (*Object, error)
 	Set(context.Context, *SetObjectRequest) (*Object, error)
+	BulkSet(context.Context, *BulkSetObjectsRequest) (*BulkOperation, error)
 	Delete(context.Context, *DeleteObjectRequest) error
+	BulkDelete(context.Context, *BulkDeleteObjectsRequest) (*BulkOperation, error)
 	List(context.Context, *ListObjectsRequest) ([]*Object, *PageInfo, error)
 
 	GetMessages(context.Context, *GetObjectMessagesRequest) ([]*ObjectMessage, *PageInfo, error)
@@ -31,6 +33,7 @@ type ObjectsService interface {
 	SetPreferences(context.Context, *SetObjectPreferencesRequest) (*PreferenceSet, error)
 
 	AddSubscriptions(context.Context, *AddSubscriptionsRequest) ([]*ObjectSubscription, error)
+	BulkAddSubscriptions(context.Context, *BulkAddSubscriptionsRequest) (*BulkOperation, error)
 	DeleteSubscriptions(context.Context, *DeleteSubscriptionsRequest) ([]*ObjectSubscription, error)
 	ListSubscriptions(context.Context, *ListSubscriptionsRequest) (*ListSubscriptionsResponse, error)
 }
@@ -86,6 +89,17 @@ type SetObjectRequest struct {
 	Collection string                 `json:"-"`
 	Properties map[string]interface{} `json:""`
 }
+
+type BulkSetObject struct {
+	ID         string `json:"id"`
+	Properties map[string]interface{}
+}
+
+type BulkSetObjectsRequest struct {
+	Collection string           `json:"-"`
+	Objects    []*BulkSetObject `json:"objects"`
+}
+
 type ListObjectsRequest struct {
 	Collection string `url:"-"`
 	ObjectId   string `url:"object_id,omitempty"`
@@ -98,6 +112,11 @@ type ListObjectsRequest struct {
 type SetObjectResponse = GetObjectResponse
 
 type DeleteObjectRequest = GetObjectRequest
+
+type BulkDeleteObjectsRequest struct {
+	Collection string   `json:"-"`
+	ObjectIDs  []string `json:"object_ids"`
+}
 
 type ListObjectsResponse struct {
 	Entries  []*Object `json:"entries"`
@@ -211,6 +230,17 @@ type AddSubscriptionsResponse struct {
 	Subscriptions []*ObjectSubscription
 }
 
+type BulkAddObjectSubscription struct {
+	ID         string                 `json:"id"`
+	Properties map[string]interface{} `json:"properties,omitempty"`
+	Recipients []interface{}          `json:"recipients"`
+}
+
+type BulkAddSubscriptionsRequest struct {
+	Collection    string                       `json:"-"`
+	Subscriptions []*BulkAddObjectSubscription `json:"subscriptions"`
+}
+
 type DeleteSubscriptionsRequest struct {
 	ObjectID   string        `json:"-"`
 	Collection string        `json:"-"`
@@ -232,6 +262,10 @@ type ListSubscriptionsRequest struct {
 type ListSubscriptionsResponse struct {
 	Entries  []*ObjectSubscription `json:"entries"`
 	PageInfo *PageInfo             `json:"page_info"`
+}
+
+type BulkRequestResponse struct {
+	BulkOperation *BulkOperation
 }
 
 func collectionAPIPath(collection string) string {
@@ -356,6 +390,24 @@ func (os *objectsService) Set(ctx context.Context, setObjectRequest *SetObjectRe
 	return setObjectResponse.Object, nil
 }
 
+func (os *objectsService) BulkSet(ctx context.Context, bulkSetObjectsRequest *BulkSetObjectsRequest) (*BulkOperation, error) {
+	path := fmt.Sprintf("%s/bulk/set", collectionAPIPath(bulkSetObjectsRequest.Collection))
+
+	req, err := os.client.newRequest(http.MethodPost, path, bulkSetObjectsRequest, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to bulk set objects")
+	}
+
+	bulkSetObjectsRes := BulkRequestResponse{BulkOperation: &BulkOperation{}}
+
+	_, err = os.client.do(ctx, req, bulkSetObjectsRes.BulkOperation)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to bulk set objects")
+	}
+
+	return bulkSetObjectsRes.BulkOperation, nil
+}
+
 func (os *objectsService) Delete(ctx context.Context, deleteObjectRequest *DeleteObjectRequest) error {
 	path := objectAPIPath(deleteObjectRequest.Collection, deleteObjectRequest.ID)
 
@@ -370,6 +422,24 @@ func (os *objectsService) Delete(ctx context.Context, deleteObjectRequest *Delet
 	}
 
 	return nil
+}
+
+func (os *objectsService) BulkDelete(ctx context.Context, bulkDeleteObjectsRequest *BulkDeleteObjectsRequest) (*BulkOperation, error) {
+	path := fmt.Sprintf("%s/bulk/delete", collectionAPIPath(bulkDeleteObjectsRequest.Collection))
+
+	req, err := os.client.newRequest(http.MethodPost, path, bulkDeleteObjectsRequest, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request to bulk delete objects")
+	}
+
+	bulkDeleteObjectsRes := BulkRequestResponse{BulkOperation: &BulkOperation{}}
+
+	_, err = os.client.do(ctx, req, bulkDeleteObjectsRes.BulkOperation)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to bulk delete objects")
+	}
+
+	return bulkDeleteObjectsRes.BulkOperation, nil
 }
 
 func (os *objectsService) List(ctx context.Context, listObjectsRequest *ListObjectsRequest) ([]*Object, *PageInfo, error) {
@@ -410,10 +480,6 @@ func (os *objectsService) GetChannelData(ctx context.Context, getChannelDataReq 
 		return nil, errors.Wrap(err, "error making request to get object channel data")
 	}
 
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to get object channel data")
-	}
-
 	return channelDataResponse.ChannelData, nil
 }
 
@@ -431,10 +497,6 @@ func (os *objectsService) SetChannelData(ctx context.Context, getChannelDataReq 
 		return nil, errors.Wrap(err, "error making request to set object channel data")
 	}
 
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to set object channel data")
-	}
-
 	return channelDataResponse.ChannelData, nil
 }
 
@@ -449,10 +511,6 @@ func (os *objectsService) DeleteChannelData(ctx context.Context, deleteObjectCha
 	_, err = os.client.do(ctx, req, nil)
 	if err != nil {
 		return errors.Wrap(err, "error making request to delete object channel data")
-	}
-
-	if err != nil {
-		return errors.Wrap(err, "error parsing request to delete object channel data")
 	}
 
 	return nil
@@ -474,10 +532,6 @@ func (os *objectsService) GetPreferences(ctx context.Context, getObjectPreferenc
 	_, err = os.client.do(ctx, req, &getPreferenceResponse.Preferences)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to get object preferences")
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to get object preferences")
 	}
 
 	return getPreferenceResponse.Preferences, nil
@@ -519,10 +573,6 @@ func (os *objectsService) SetPreferences(ctx context.Context, setObjectPreferenc
 		return nil, errors.Wrap(err, "error making request to set object preferences")
 	}
 
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to set object preferences")
-	}
-
 	return setPreferenceResponse.Preferences, nil
 }
 
@@ -541,11 +591,25 @@ func (os *objectsService) AddSubscriptions(ctx context.Context, addSubscriptions
 		return nil, errors.Wrap(err, "error making request to add subscriptions")
 	}
 
+	return addSubscriptionsResponse.Subscriptions, nil
+}
+
+func (os *objectsService) BulkAddSubscriptions(ctx context.Context, bulkAddSubscriptionsRequest *BulkAddSubscriptionsRequest) (*BulkOperation, error) {
+	path := fmt.Sprintf("%s/bulk/subscriptions/add", collectionAPIPath(bulkAddSubscriptionsRequest.Collection))
+
+	req, err := os.client.newRequest(http.MethodPost, path, bulkAddSubscriptionsRequest, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to add subscriptions")
+		return nil, errors.Wrap(err, "error creating request to bulk add subscriptions")
 	}
 
-	return addSubscriptionsResponse.Subscriptions, nil
+	bulkAddSubscriptionsRes := BulkRequestResponse{BulkOperation: &BulkOperation{}}
+
+	_, err = os.client.do(ctx, req, bulkAddSubscriptionsRes.BulkOperation)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request to bulk add subscriptions")
+	}
+
+	return bulkAddSubscriptionsRes.BulkOperation, nil
 }
 
 func (os *objectsService) DeleteSubscriptions(ctx context.Context, deleteSubscriptionsReq *DeleteSubscriptionsRequest) ([]*ObjectSubscription, error) {
@@ -561,10 +625,6 @@ func (os *objectsService) DeleteSubscriptions(ctx context.Context, deleteSubscri
 	_, err = os.client.do(ctx, req, &deleteSubscriptionsResponse.Subscriptions)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to delete subscriptions")
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to delete subscriptions")
 	}
 
 	return deleteSubscriptionsResponse.Subscriptions, nil
