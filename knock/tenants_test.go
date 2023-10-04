@@ -94,7 +94,7 @@ func TestTenants_List(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		out := `{"items":[{"__typename":"Tenant","properties":{"name":"cool-tenant-1","settings":{"branding":{"primary_color":"#FFFFFF"}}},"id":"tenant-id","updated_at":"2022-05-17T00:34:18.277163Z"}],"page_info":{"__typename":"PageInfo","after":"big-after","before":null,"page_size":1}}`
+		out := `{"entries":[{"__typename":"Tenant","properties":{"name":"cool-tenant-1","settings":{"branding":{"primary_color":"#FFFFFF"}}},"id":"tenant-id","updated_at":"2022-05-17T00:34:18.277163Z"}],"page_info":{"__typename":"PageInfo","after":"big-after","before":null,"page_size":1}}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
