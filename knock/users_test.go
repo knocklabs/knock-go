@@ -95,6 +95,57 @@ func TestUsers_Identify(t *testing.T) {
 	c.Assert(user, qt.DeepEquals, want)
 }
 
+func TestUsers_List(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"entries":[{"__typename":"User","created_at":null,"id":"user-123","updated_at":"2022-05-15T22:19:44.915Z","email":"jhammond@ingen.net","middle-name":"alfred","name":"John Hammond","phone_number":"+11234567890","welcome":"to jurassic park"}],"page_info":{"__typename":"PageInfo","after":"big-after","before":null,"page_size":1}}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	id := "user-123"
+	email := "jhammond@ingen.net"
+	name := "John Hammond"
+	phone_number := "+11234567890"
+
+	haveUsers, havePageInfo, err := client.Users.List(ctx, &ListUsersRequest{
+		PageSize: 1,
+	})
+
+	wantUsers := []*User{
+		{
+			Name:             name,
+			ID:               id,
+			Email:            email,
+			PhoneNumber:      phone_number,
+			CreatedAt:        time.Time{},
+			UpdatedAt:        time.Date(2022, time.May, 15, 22, 19, 44, 915000000, time.UTC),
+			CustomProperties: nil,
+			// TODO: Add support to parse custom properties.
+			// CustomProperties: map[string]interface{}{
+			// 	"welcome":     "to jurassic park",
+			// 	"middle-name": "alfred",
+			// },
+		},
+	}
+
+	wantPageInfo := &PageInfo{
+		PageSize: 1,
+		After:    "big-after",
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(haveUsers, qt.DeepEquals, wantUsers)
+	c.Assert(havePageInfo, qt.DeepEquals, wantPageInfo)
+}
+
 func TestUsers_Merge(t *testing.T) {
 	c := qt.New(t)
 
