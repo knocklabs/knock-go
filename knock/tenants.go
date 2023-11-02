@@ -34,6 +34,7 @@ func NewTenantService(client *Client) *tenantsService {
 type Tenant struct {
 	ID         string                 `json:"id"`
 	Properties map[string]interface{} `json:"properties"`
+	Settings   map[string]interface{} `json:"settings"`
 	UpdatedAt  time.Time              `json:"updated_at"`
 	CreatedAt  time.Time              `json:"created_at"`
 }
@@ -62,7 +63,9 @@ type GetTenantResponse struct {
 type SetTenantRequest struct {
 	ID         string                 `json:"-"`
 	Properties map[string]interface{} `json:""`
+	Settings   map[string]interface{} `json:""`
 }
+
 type SetTenantResponse = GetTenantResponse
 
 type DeleteTenantRequest = GetTenantRequest
