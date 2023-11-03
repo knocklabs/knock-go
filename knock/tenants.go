@@ -118,11 +118,24 @@ func (ts *tenantsService) Get(ctx context.Context, getTenantRequest *GetTenantRe
 func (ts *tenantsService) Set(ctx context.Context, setTenantRequest *SetTenantRequest) (*Tenant, error) {
 	path := tenantAPIPath(setTenantRequest.ID)
 
-	if len(setTenantRequest.Properties) == 0 {
-		return nil, &Error{msg: "Must set at least one property"}
+	if len(setTenantRequest.Properties) == 0 || len(setTenantRequest.Settings) == 0 {
+		return nil, &Error{msg: "Must set at least one property or settings"}
 	}
 
-	req, err := ts.client.newRequest(http.MethodPut, path, setTenantRequest.Properties, nil)
+	// Copy the properties ready to be sent to the API
+	properties := make(map[string]interface{})
+
+	for k, v := range setTenantRequest.Properties {
+		properties[k] = v
+	}
+
+	if len(setTenantRequest.Settings) > 0 {
+		// For simplicity we add "settings" under a key in properties, because that's what
+		// we want to send to the API anyway.
+		properties["settings"] = setTenantRequest.Settings
+	}
+
+	req, err := ts.client.newRequest(http.MethodPut, path, properties, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for set tenant")
 	}
