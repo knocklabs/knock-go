@@ -118,7 +118,7 @@ func (ts *tenantsService) Get(ctx context.Context, getTenantRequest *GetTenantRe
 func (ts *tenantsService) Set(ctx context.Context, setTenantRequest *SetTenantRequest) (*Tenant, error) {
 	path := tenantAPIPath(setTenantRequest.ID)
 
-	if len(setTenantRequest.Properties) == 0 || len(setTenantRequest.Settings) == 0 {
+	if len(setTenantRequest.Properties) == 0 && len(setTenantRequest.Settings) == 0 {
 		return nil, &Error{msg: "Must set at least one property or settings"}
 	}
 
