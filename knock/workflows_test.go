@@ -44,6 +44,11 @@ func TestWorkflows_Trigger(t *testing.T) {
 		"collection": "projects",
 	})
 
+	request.AddTenantByEntity(map[string]interface{}{
+		"id":   "tenant-1",
+		"name": "my_tenant",
+	})
+
 	workflowRunId, err := client.Workflows.Trigger(ctx, request, nil)
 
 	want := "e2898d04-cb0c-5a1b-93e0-6c3f6bad82ef"
@@ -88,6 +93,11 @@ func TestWorkflows_Trigger_Idempotence(t *testing.T) {
 	request.AddActorByEntity(map[string]interface{}{
 		"id":         "projects-1",
 		"collection": "projects",
+	})
+
+	request.AddTenantByEntity(map[string]interface{}{
+		"id":   "tenant-1",
+		"name": "my_tenant",
 	})
 
 	options := &MethodOptions{

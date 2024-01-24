@@ -39,7 +39,7 @@ type TriggerWorkflowRequest struct {
 	Recipients      []interface{}          `json:"recipients"`
 	Actor           interface{}            `json:"actor,omitempty"`
 	CancellationKey string                 `json:"cancellation_key,omitempty"`
-	Tenant          string                 `json:"tenant,omitempty"`
+	Tenant          interface{}            `json:"tenant,omitempty"`
 	Data            map[string]interface{} `json:"data,omitempty"`
 }
 
@@ -81,7 +81,7 @@ type CreateSchedulesRequest struct {
 	Recipients  []interface{}          `json:"recipients"`
 	Repeats     []*ScheduleRepeat      `json:"repeats"`
 	Actor       interface{}            `json:"actor,omitempty"`
-	Tenant      string                 `json:"tenant,omitempty"`
+	Tenant      interface{}            `json:"tenant,omitempty"`
 	ScheduledAt time.Time              `json:"scheduled_at,omitempty"`
 	Data        map[string]interface{} `json:"data,omitempty"`
 }
@@ -90,7 +90,7 @@ type UpdateSchedulesRequest struct {
 	ScheduleIDs []string               `json:"schedule_ids"`
 	Repeats     []*ScheduleRepeat      `json:"repeats"`
 	Actor       interface{}            `json:"actor,omitempty"`
-	Tenant      string                 `json:"tenant,omitempty"`
+	Tenant      interface{}            `json:"tenant,omitempty"`
 	ScheduledAt time.Time              `json:"scheduled_at,omitempty"`
 	Data        map[string]interface{} `json:"data,omitempty"`
 }
@@ -141,6 +141,17 @@ func (tr *TriggerWorkflowRequest) AddActorByEntity(entity map[string]interface{}
 	tr.Actor = entity
 	return *tr
 }
+
+func (tr *TriggerWorkflowRequest) AddTenantByID(tenantID string) TriggerWorkflowRequest {
+	tr.Tenant = tenantID
+	return *tr
+}
+
+func (tr *TriggerWorkflowRequest) AddTenantByEntity(entity map[string]interface{}) TriggerWorkflowRequest {
+	tr.Tenant = entity
+	return *tr
+}
+
 
 func (ws *workflowsService) Trigger(ctx context.Context, triggerReq *TriggerWorkflowRequest, methodOptions *MethodOptions) (string, error) {
 	path := fmt.Sprintf("%s/trigger", workflowsAPIPath(triggerReq.Workflow))
@@ -204,6 +215,16 @@ func (csr *CreateSchedulesRequest) AddActorByEntity(entity map[string]interface{
 	return *csr
 }
 
+func (csr *CreateSchedulesRequest) AddTenantByID(tenantID string) CreateSchedulesRequest {
+	csr.Tenant = tenantID
+	return *csr
+}
+
+func (csr *CreateSchedulesRequest) AddTenantByEntity(entity map[string]interface{}) CreateSchedulesRequest {
+	csr.Tenant = entity
+	return *csr
+}
+
 func (csr *CreateSchedulesRequest) AddRepeat(repeat *ScheduleRepeat) CreateSchedulesRequest {
 	csr.Repeats = append(csr.Repeats, repeat)
 	return *csr
@@ -233,6 +254,16 @@ func (usr *UpdateSchedulesRequest) AddActorByID(actorID string) UpdateSchedulesR
 
 func (usr *UpdateSchedulesRequest) AddActorByEntity(entity map[string]interface{}) UpdateSchedulesRequest {
 	usr.Actor = entity
+	return *usr
+}
+
+func (usr *UpdateSchedulesRequest) AddTenantByID(tenantID string) UpdateSchedulesRequest {
+	usr.Tenant = tenantID
+	return *usr
+}
+
+func (usr *UpdateSchedulesRequest) AddTenantByEntity(entity map[string]interface{}) UpdateSchedulesRequest {
+	usr.Tenant = entity
 	return *usr
 }
 
