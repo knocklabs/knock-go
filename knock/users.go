@@ -466,10 +466,6 @@ func (us *usersService) BulkIdentify(ctx context.Context, bulkIdentifyReq *BulkI
 		return nil, errors.Wrap(err, "error making request for bulk identify user")
 	}
 
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request for bulk identify user")
-	}
-
 	return bulkIdentifyRes.BulkOperation, nil
 }
 
@@ -487,10 +483,6 @@ func (us *usersService) BulkDelete(ctx context.Context, bulkDeleteReq *BulkDelet
 	_, err = us.client.do(ctx, req, bulkDeleteRes.BulkOperation)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request for bulk delete user")
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request for bulk delete user")
 	}
 
 	return bulkDeleteRes.BulkOperation, nil
@@ -539,10 +531,6 @@ func (us *usersService) GetChannelData(ctx context.Context, getChannelDataReq *G
 		return nil, errors.Wrap(err, "error making request for channel data for user")
 	}
 
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request for channel data for user")
-	}
-
 	return channelDataResponse.ChannelData, nil
 }
 
@@ -560,10 +548,6 @@ func (us *usersService) SetChannelData(ctx context.Context, getChannelDataReq *S
 		return nil, errors.Wrap(err, "error making request to set channel data for user")
 	}
 
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to set channel data for user")
-	}
-
 	return channelDataResponse.ChannelData, nil
 }
 
@@ -578,10 +562,6 @@ func (us *usersService) DeleteChannelData(ctx context.Context, deleteUserChannel
 	_, err = us.client.do(ctx, req, nil)
 	if err != nil {
 		return errors.Wrap(err, "error making request to delete channel data for a user")
-	}
-
-	if err != nil {
-		return errors.Wrap(err, "error parsing request to delete channel data for a user")
 	}
 
 	return nil
@@ -601,10 +581,6 @@ func (us *usersService) GetAllPreferences(ctx context.Context, allPreferencesReq
 	_, err = us.client.do(ctx, req, &allPreferencesResponse.Preferences)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to get all preferences")
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to get all preferences")
 	}
 
 	return allPreferencesResponse.Preferences, nil
@@ -627,10 +603,6 @@ func (us *usersService) GetPreferences(ctx context.Context, getPreferencesReq *G
 	_, err = us.client.do(ctx, req, &getPreferenceResponse.Preferences)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to get all preferences")
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to get all preferences")
 	}
 
 	return getPreferenceResponse.Preferences, nil
@@ -669,10 +641,6 @@ func (us *usersService) SetPreferences(ctx context.Context, setPreferencesReq *S
 		return nil, errors.Wrap(err, "error making request to set all preferences")
 	}
 
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to set all preferences")
-	}
-
 	return setPreferenceResponse.Preferences, nil
 }
 
@@ -703,10 +671,6 @@ func (us *usersService) BulkSetPreferences(ctx context.Context, setPreferencesRe
 	_, err = us.client.do(ctx, req, &bulkSetPreferencesResponse.BulkOperation)
 	if err != nil {
 		return nil, errors.Wrap(err, "error making request to bulk set user preferences")
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing request to bulk set user preferences")
 	}
 
 	return bulkSetPreferencesResponse.BulkOperation, nil
