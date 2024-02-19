@@ -183,7 +183,7 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 
 		var errCode ErrorCode
 		switch errorRes.Code {
-		case "not_found":
+		case "not_found", "resource_missing":
 			errCode = ErrNotFound
 		case "unauthorized":
 			errCode = ErrPermission
