@@ -159,11 +159,12 @@ type GetObjectSchedulesResponse struct {
 }
 
 type GetObjectSubscriptionsRequest struct {
-	Collection string `url:"-"`
-	ObjectID   string `url:"-"`
-	PageSize   int    `url:"page_size,omitempty"`
-	Before     string `url:"before,omitempty"`
-	After      string `url:"after,omitempty"`
+	Collection string        `url:"-"`
+	ObjectID   string        `url:"-"`
+	PageSize   int           `url:"page_size,omitempty"`
+	Before     string        `url:"before,omitempty"`
+	After      string        `url:"after,omitempty"`
+	Recipients []interface{} `url:"recipients,omitempty"`
 }
 
 type GetObjectSubscriptionsResponse struct {
