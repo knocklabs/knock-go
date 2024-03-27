@@ -159,12 +159,11 @@ type GetObjectSchedulesResponse struct {
 }
 
 type GetObjectSubscriptionsRequest struct {
-	Collection string        `url:"-"`
-	ObjectID   string        `url:"-"`
-	PageSize   int           `url:"page_size,omitempty"`
-	Before     string        `url:"before,omitempty"`
-	After      string        `url:"after,omitempty"`
-	Recipients []interface{} `url:"recipients,omitempty"`
+	Collection string `url:"-"`
+	ObjectID   string `url:"-"`
+	PageSize   int    `url:"page_size,omitempty"`
+	Before     string `url:"before,omitempty"`
+	After      string `url:"after,omitempty"`
 }
 
 type GetObjectSubscriptionsResponse struct {
@@ -253,11 +252,12 @@ type DeleteSubscriptionsResponse struct {
 }
 
 type ListSubscriptionsRequest struct {
-	ObjectID   string `url:"-"`
-	Collection string `url:"-"`
-	PageSize   int    `url:"page_size,omitempty"`
-	Before     string `url:"before,omitempty"`
-	After      string `url:"after,omitempty"`
+	ObjectID   string        `url:"-"`
+	Collection string        `url:"-"`
+	PageSize   int           `url:"page_size,omitempty"`
+	Before     string        `url:"before,omitempty"`
+	After      string        `url:"after,omitempty"`
+	Recipients []interface{} `url:"recipients,omitempty"`
 }
 
 type ListSubscriptionsResponse struct {
