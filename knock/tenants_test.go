@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	qt "github.com/frankban/quicktest"
-	"github.com/pkg/errors"
 )
 
 func TestTenants_Set(t *testing.T) {
@@ -20,10 +19,8 @@ func TestTenants_Set(t *testing.T) {
 
 		bodyBytes, _ := io.ReadAll(r.Body)
 		requestData := make(map[string]interface{})
-		jsonErr := json.Unmarshal([]byte(bodyBytes), &requestData)
-		if jsonErr != nil {
-			return nil, errors.Wrap(jsonErr, "error parsing user request data")
-		}
+		err := json.Unmarshal([]byte(bodyBytes), &requestData)
+		c.Assert(err, qt.IsNil)
 
 		expected := map[string]interface{}{
 			"name": "cool-tenant-1",
@@ -39,7 +36,7 @@ func TestTenants_Set(t *testing.T) {
 
 		out := `{"__typename":"Tenant","created_at":null,"id":"cool-tenant2","properties":{"name":"cool-tenant-1"},"settings":{"branding":{"primary_color":"#FFFFFF"}},"updated_at":"2022-05-26T13:59:20.701Z"}`
 
-		_, err := w.Write([]byte(out))
+		_, err = w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
 
