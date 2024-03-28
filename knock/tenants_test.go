@@ -20,9 +20,9 @@ func TestTenants_Set(t *testing.T) {
 
 		bodyBytes, _ := io.ReadAll(r.Body)
 		requestData := make(map[string]interface{})
-		err := json.Unmarshal([]byte(bodyBytes), &requestData)
-		if err != nil {
-			return nil, errors.Wrap(err, "error parsing user request data")
+		jsonErr := json.Unmarshal([]byte(bodyBytes), &requestData)
+		if jsonErr != nil {
+			return nil, errors.Wrap(jsonErr, "error parsing user request data")
 		}
 
 		expected := map[string]interface{}{
