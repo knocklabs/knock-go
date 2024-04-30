@@ -387,6 +387,7 @@ func TestFeed_Get(t *testing.T) {
 				InsertedAt: ParseRFC3339Timestamp("2021-05-11T00:50:09.904531Z"),
 				UpdatedAt:  ParseRFC3339Timestamp("2021-05-13T02:45:28.559863Z"),
 				SeenAt:     ParseRFC3339Timestamp("2021-05-11T00:51:43.617550Z"),
+				ID:         "1sMtIsRvZtYf86aOfkM2PCpC6Xc",
 			},
 		},
 		FeedMetadata: &FeedMetadata{

@@ -72,6 +72,7 @@ type Feed struct {
 }
 
 type FeedItem struct {
+	ID              string                 `json:"id"`
 	Activities      []*MessageActivity     `json:"activities"`
 	Actors          []*User                `json:"actors"`
 	TotalActivities int                    `json:"total_activities"`
