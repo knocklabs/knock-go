@@ -3,10 +3,10 @@ package knock
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"io"
 
 	qt "github.com/frankban/quicktest"
 )
@@ -19,7 +19,8 @@ func TestTenants_Set(t *testing.T) {
 
 		bodyBytes, _ := io.ReadAll(r.Body)
 		requestData := make(map[string]interface{})
-		json.Unmarshal([]byte(bodyBytes), &requestData)
+		err := json.Unmarshal([]byte(bodyBytes), &requestData)
+		c.Assert(err, qt.IsNil)
 		expected := map[string]interface{}{
 			"name": "cool-tenant-1",
 			"settings": map[string]interface{}{
@@ -34,7 +35,7 @@ func TestTenants_Set(t *testing.T) {
 
 		out := `{"__typename":"Tenant","created_at":null,"id":"cool-tenant2","properties":{"name":"cool-tenant-1"},"settings":{"branding":{"primary_color":"#FFFFFF"}},"updated_at":"2022-05-26T13:59:20.701Z"}`
 
-		_, err := w.Write([]byte(out))
+		_, err = w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
 
