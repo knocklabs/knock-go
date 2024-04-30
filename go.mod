@@ -1,4 +1,4 @@
-module github.com/whoAbhishekSah/knock-go
+module github.com/knocklabs/knock-go
 
 go 1.18
 
