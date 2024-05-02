@@ -336,6 +336,7 @@ func TestFeed_Get(t *testing.T) {
 	want := &Feed{
 		FeedItems: []*FeedItem{
 			{
+				ID: "1sMtIsRvZtYf86aOfkM2PCpC6Xc",
 				Activities: []*MessageActivity{
 					{
 						ID: "activity-id",
