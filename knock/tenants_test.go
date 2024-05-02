@@ -36,8 +36,8 @@ func TestTenants_Set(t *testing.T) {
 
 		out := `{"__typename":"Tenant","created_at":null,"id":"cool-tenant2","properties":{"name":"cool-tenant-1"},"settings":{"branding":{"primary_color":"#FFFFFF"}},"updated_at":"2022-05-26T13:59:20.701Z"}`
 
-		_, err := w.Write([]byte(out))
-		c.Assert(err, qt.IsNil)
+		_, err_w := w.Write([]byte(out))
+		c.Assert(err_w, qt.IsNil)
 	}))
 
 	client, err := NewClient(WithBaseURL(ts.URL))
