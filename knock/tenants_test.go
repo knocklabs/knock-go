@@ -19,7 +19,9 @@ func TestTenants_Set(t *testing.T) {
 
 		bodyBytes, _ := io.ReadAll(r.Body)
 		requestData := make(map[string]interface{})
-		json.Unmarshal([]byte(bodyBytes), &requestData)
+		err := json.Unmarshal([]byte(bodyBytes), &requestData)
+		c.Assert(err, qt.IsNil)
+
 		expected := map[string]interface{}{
 			"name": "cool-tenant-1",
 			"settings": map[string]interface{}{
