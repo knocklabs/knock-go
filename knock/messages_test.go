@@ -37,10 +37,74 @@ func TestMessages_List(t *testing.T) {
 	wantMessages :=
 		[]*Message{
 			{
-				Cursor:     "big-cursor",
-				ID:         "message-id",
-				ChannelID:  "5da042d7-02ee-46ed-8b91-9b5717da2028",
-				Recipient:  "tom",
+				Cursor:          "big-cursor",
+				ID:              "message-id",
+				ChannelID:       "5da042d7-02ee-46ed-8b91-9b5717da2028",
+				Recipient:       "tom",
+				ObjectRecipient: nil,
+				Workflow:        "test",
+				Tenant:          "",
+				Status:          "delivered",
+				ReadAt:          time.Time{},
+				SeenAt:          time.Time{},
+				ArchivedAt:      time.Time{},
+				InsertedAt:      time.Date(2022, time.May, 17, 00, 34, 18, 277163000, time.UTC),
+				UpdatedAt:       time.Date(2022, time.May, 17, 00, 34, 18, 318283000, time.UTC),
+				Source: &NotificationSource{
+					Key:       "test",
+					VersionID: "4dae021a-ba51-473f-9038-77041da8131c",
+				},
+				Data: map[string]interface{}{
+					"middle-name": "alfred",
+					"welcome":     "to jurassic park",
+				},
+			},
+		}
+
+	wantPageInfo := &PageInfo{
+		PageSize: 1,
+		After:    "big-after",
+	}
+
+	c.Assert(err, qt.IsNil)
+	c.Assert(haveMessages, qt.DeepEquals, wantMessages)
+	c.Assert(havePageInfo, qt.DeepEquals, wantPageInfo)
+}
+
+func TestMessages_List_object_recipients(t *testing.T) {
+	c := qt.New(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		out := `{"items":[{"__cursor":"big-cursor","__typename":"Message","archived_at":null,"channel_id":"5da042d7-02ee-46ed-8b91-9b5717da2028","data":{"middle-name":"alfred","welcome":"to jurassic park"},"id":"message-id","inserted_at":"2022-05-17T00:34:18.277163Z","read_at":null,"recipient":{"collection": "communities", "id": "community1"},"seen_at":null,"source":{"__typename":"NotificationSource","key":"test","version_id":"4dae021a-ba51-473f-9038-77041da8131c"},"status":"delivered","tenant":null,"updated_at":"2022-05-17T00:34:18.318283Z","workflow":"test"}],"page_info":{"__typename":"PageInfo","after":"big-after","before":null,"page_size":1}}`
+		_, err := w.Write([]byte(out))
+		c.Assert(err, qt.IsNil)
+	}))
+
+	client, err := NewClient(WithBaseURL(ts.URL))
+	c.Assert(err, qt.IsNil)
+
+	ctx := context.Background()
+
+	haveMessages, havePageInfo, err := client.Messages.List(ctx, &ListMessagesRequest{
+		PageSize: 1,
+	})
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	wantMessages :=
+		[]*Message{
+			{
+				Cursor:    "big-cursor",
+				ID:        "message-id",
+				ChannelID: "5da042d7-02ee-46ed-8b91-9b5717da2028",
+				Recipient: "",
+				ObjectRecipient: &ObjectRecipient{
+					Collection: "communities",
+					Id:         "community1",
+				},
 				Workflow:   "test",
 				Tenant:     "",
 				Status:     "delivered",
