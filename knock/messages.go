@@ -89,20 +89,21 @@ type Message struct {
 // type for Message.Recipient we use a custom unmarshaller.
 func (m *Message) UnmarshalJSON(b []byte) error {
 	var msg struct {
-		Cursor       string                 `json:"__cursor"`
-		ID           string                 `json:"id"`
-		ChannelID    string                 `json:"channel_id"`
-		RawRecipient json.RawMessage        `json:"recipient"`
-		Workflow     string                 `json:"workflow"`
-		Tenant       string                 `json:"tenant"`
-		Status       EngagementStatus       `json:"status"`
-		ReadAt       time.Time              `json:"read_at"`
-		SeenAt       time.Time              `json:"seen_at"`
-		ArchivedAt   time.Time              `json:"archived_at"`
-		InsertedAt   time.Time              `json:"inserted_at"`
-		UpdatedAt    time.Time              `json:"updated_at"`
-		Source       *NotificationSource    `json:"source"`
-		Data         map[string]interface{} `json:"data"`
+		RawRecipient json.RawMessage `json:"recipient"`
+
+		Cursor     string                 `json:"__cursor"`
+		ID         string                 `json:"id"`
+		ChannelID  string                 `json:"channel_id"`
+		Workflow   string                 `json:"workflow"`
+		Tenant     string                 `json:"tenant"`
+		Status     EngagementStatus       `json:"status"`
+		ReadAt     time.Time              `json:"read_at"`
+		SeenAt     time.Time              `json:"seen_at"`
+		ArchivedAt time.Time              `json:"archived_at"`
+		InsertedAt time.Time              `json:"inserted_at"`
+		UpdatedAt  time.Time              `json:"updated_at"`
+		Source     *NotificationSource    `json:"source"`
+		Data       map[string]interface{} `json:"data"`
 	}
 
 	err := json.Unmarshal(b, &msg)
@@ -125,7 +126,7 @@ func (m *Message) UnmarshalJSON(b []byte) error {
 	m.Source = msg.Source
 	m.Data = msg.Data
 
-	// first attempt to parse the `recipient` field value into a string
+	// first, attempt to parse the `recipient` field value into a string
 	var stringRecip string
 	err = json.Unmarshal(msg.RawRecipient, &stringRecip)
 	if err != nil {
@@ -134,7 +135,6 @@ func (m *Message) UnmarshalJSON(b []byte) error {
 			var objectRecip ObjectRecipient
 			err = json.Unmarshal(msg.RawRecipient, &objectRecip)
 			if err != nil {
-				fmt.Println("not an objectRecip either")
 				return err
 			}
 
