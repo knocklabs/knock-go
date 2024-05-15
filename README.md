@@ -72,7 +72,7 @@ workflow, _ := client.Workflows.Trigger(ctx, req, nil)
 fmt.Printf("workflow: %+v\n", workflow)
 ```
 
-Trigger for multiple recipients and and object
+Trigger for multiple recipients and an object
 
 ```go
 req := &knock.TriggerWorkflowRequest{
