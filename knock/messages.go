@@ -63,20 +63,96 @@ const (
 )
 
 type Message struct {
-	Cursor     string                 `json:"__cursor"`
-	ID         string                 `json:"id"`
-	ChannelID  string                 `json:"channel_id"`
-	Recipient  string                 `json:"recipient"`
-	Workflow   string                 `json:"workflow"`
-	Tenant     string                 `json:"tenant"`
-	Status     EngagementStatus       `json:"status"`
-	ReadAt     time.Time              `json:"read_at"`
-	SeenAt     time.Time              `json:"seen_at"`
-	ArchivedAt time.Time              `json:"archived_at"`
-	InsertedAt time.Time              `json:"inserted_at"`
-	UpdatedAt  time.Time              `json:"updated_at"`
-	Source     *NotificationSource    `json:"source"`
-	Data       map[string]interface{} `json:"data"`
+	Cursor     string
+	ID         string
+	ChannelID  string
+	Workflow   string
+	Tenant     string
+	Status     EngagementStatus
+	ReadAt     time.Time
+	SeenAt     time.Time
+	ArchivedAt time.Time
+	InsertedAt time.Time
+	UpdatedAt  time.Time
+	Source     *NotificationSource
+	Data       map[string]interface{}
+
+	// If the message recipient is an object, ObjectRecipient will be non-nil
+	// and Recipient will be an empty string. Otherwise, ObjectRecipient will be nil
+	// and the Recipient string will be non-empty.
+	ObjectRecipient *ObjectRecipient
+	Recipient       string
+}
+
+// The Knock Message json schema has a polymorphic type for the `recipient` field.
+// It can hold either a string value or a json object. In order to avoid an `interface{}`
+// type for Message.Recipient we use a custom unmarshaller.
+func (m *Message) UnmarshalJSON(b []byte) error {
+	var msg struct {
+		RawRecipient json.RawMessage `json:"recipient"`
+
+		Cursor     string                 `json:"__cursor"`
+		ID         string                 `json:"id"`
+		ChannelID  string                 `json:"channel_id"`
+		Workflow   string                 `json:"workflow"`
+		Tenant     string                 `json:"tenant"`
+		Status     EngagementStatus       `json:"status"`
+		ReadAt     time.Time              `json:"read_at"`
+		SeenAt     time.Time              `json:"seen_at"`
+		ArchivedAt time.Time              `json:"archived_at"`
+		InsertedAt time.Time              `json:"inserted_at"`
+		UpdatedAt  time.Time              `json:"updated_at"`
+		Source     *NotificationSource    `json:"source"`
+		Data       map[string]interface{} `json:"data"`
+	}
+
+	err := json.Unmarshal(b, &msg)
+	if err != nil {
+		return err
+	}
+
+	// these fields have known types
+	m.Cursor = msg.Cursor
+	m.ID = msg.ID
+	m.ChannelID = msg.ChannelID
+	m.Workflow = msg.Workflow
+	m.Tenant = msg.Tenant
+	m.Status = msg.Status
+	m.ReadAt = msg.ReadAt
+	m.SeenAt = msg.SeenAt
+	m.ArchivedAt = msg.ArchivedAt
+	m.InsertedAt = msg.InsertedAt
+	m.UpdatedAt = msg.UpdatedAt
+	m.Source = msg.Source
+	m.Data = msg.Data
+
+	// first, attempt to parse the `recipient` field value into a string
+	var stringRecip string
+	err = json.Unmarshal(msg.RawRecipient, &stringRecip)
+	if err != nil {
+		if _, ok := err.(*json.UnmarshalTypeError); ok {
+			// if we can't parse into a string, attempt to parse into an object
+			var objectRecip ObjectRecipient
+			err = json.Unmarshal(msg.RawRecipient, &objectRecip)
+			if err != nil {
+				return err
+			}
+
+			// if we succesfully parse `recipient` into an object, set Message.ObjectRecipient
+			m.ObjectRecipient = &objectRecip
+			return nil
+		}
+		return err
+	}
+
+	// if we succesfully parse `recipient` into a string, set Message.Recipient
+	m.Recipient = stringRecip
+	return nil
+}
+
+type ObjectRecipient struct {
+	Id         string `json:"id"`
+	Collection string `json:"collection"`
 }
 
 type NotificationSource struct {
