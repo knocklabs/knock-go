@@ -57,14 +57,75 @@ fmt.Printf("user-name: %+v\n", user)
 
 ### Sending notifies (triggering workflows)
 
+Simple trigger for one recipient by id:
+
 ```go
-workflow, _ := client.Workflows.Trigger(ctx, &knock.TriggerWorkflowRequest{
+req := &knock.TriggerWorkflowRequest{
     Workflow:   "test",
-    Recipients: []string{"tim", "lex"},
     Data: map[string]interface{}{
         "life":      "found a way",
         "dinosaurs": "loose",
     },
+}
+req.AddRecipientByID("tim")
+workflow, _ := client.Workflows.Trigger(ctx, req, nil)
+fmt.Printf("workflow: %+v\n", workflow)
+```
+
+Trigger with inline-identified recipient:
+
+```go
+req := &knock.TriggerWorkflowRequest{
+    Workflow:   "test",
+    Data: map[string]interface{}{
+        "life":      "found a way",
+        "dinosaurs": "loose",
+    },
+}
+req.AddRecipientByEntity(map[string]interface{}{
+    "id":    "dnedry",
+    "name":  "Dennis",
+    "email": "nedry@ingen.io",
+})
+workflow, _ := client.Workflows.Trigger(ctx, req, nil)
+fmt.Printf("workflow: %+v\n", workflow)
+```
+
+Trigger for multiple recipients and an object
+
+```go
+req := &knock.TriggerWorkflowRequest{
+    Workflow:   "test",
+    Data: map[string]interface{}{
+        "life":      "found a way",
+        "dinosaurs": "loose",
+    },
+}
+
+for _, r := range []string{"tim", "hammond"} {
+    req.AddRecipientByID(r)
+}
+
+req.AddRecipientByEntity(map[string]interface{}{
+    "id": "group-a",
+    "collection": "groups",
+})
+workflow, _ := client.Workflows.Trigger(ctx, req, nil)
+fmt.Printf("workflow: %+v\n", workflow)
+```
+
+Trigger with idempotency key
+```go
+req := &knock.TriggerWorkflowRequest{
+    Workflow:   "test",
+    Data: map[string]interface{}{
+        "life":      "found a way",
+        "dinosaurs": "loose",
+    },
+}
+req.AddRecipientByID("tim")
+workflow, _ := client.Workflows.Trigger(ctx, req, &knock.MethodOptions{
+    IdempotencyKey: "an-idempotency-key",
 })
 fmt.Printf("workflow: %+v\n", workflow)
 ```
