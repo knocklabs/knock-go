@@ -5,11 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 
 	"github.com/hashicorp/go-cleanhttp"
+	"github.com/knocklabs/knock-go/knock/internal"
 )
 
 const (
@@ -122,6 +124,8 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 // do makes an HTTP request and populates the given struct v from the response.
 func (c *Client) do(ctx context.Context, req *http.Request, v interface{}) ([]byte, error) {
 	req = req.WithContext(ctx)
+	req.Header.Set("User-Agent", fmt.Sprintf("knocklabs/go@%s", internal.SDKVersion))
+
 	res, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
