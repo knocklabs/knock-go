@@ -47,7 +47,10 @@ func TestClientDo(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]string{"message": "success"})
+			err := json.NewEncoder(w).Encode(map[string]string{"message": "success"})
+			if err != nil {
+				t.Fatalf("Error encoding httptest response: %v", err)
+			}
 		}))
 		defer server.Close()
 
@@ -69,7 +72,10 @@ func TestClientDo(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(map[string]string{"code": "not_found", "message": "Resource not found"})
+			err := json.NewEncoder(w).Encode(map[string]string{"code": "not_found", "message": "Resource not found"})
+			if err != nil {
+				t.Fatalf("Error encoding httptest response: %v", err)
+			}
 		}))
 		defer server.Close()
 
@@ -96,7 +102,10 @@ func TestClientDo(t *testing.T) {
 	t.Run("unexpected non-json response", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadGateway)
-			w.Write([]byte("502 Bad Gateway"))
+			_, err := w.Write([]byte("502 Bad Gateway"))
+			if err != nil {
+				t.Fatalf("Error writing httptest response: %v", err)
+			}
 		}))
 		defer server.Close()
 
