@@ -151,9 +151,10 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 			Message string `json:"message"`
 		}
 
-		if res.Header.Get("Content-Type") != "" && res.Header.Get("Content-Type") != jsonMediaType {
+		// in some scenarios we don't fully control the response, e.g. an ELB 502.
+		if res.Header.Get("Content-Type") != jsonMediaType {
 			return nil, &Error{
-				msg:  "malformed non-json error response body received with status code " + http.StatusText(res.StatusCode),
+				msg:  "malformed non-json error response body received with status code: " + http.StatusText(res.StatusCode),
 				Code: ErrResponseMalformed,
 				Meta: map[string]string{
 					"body":        string(out),
@@ -168,7 +169,7 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 			var jsonErr *json.SyntaxError
 			if errors.As(err, &jsonErr) {
 				return nil, &Error{
-					msg:  "malformed error response body received with status code " + http.StatusText(res.StatusCode),
+					msg:  "malformed error response body received",
 					Code: ErrResponseMalformed,
 					Meta: map[string]string{
 						"body":        string(out),
