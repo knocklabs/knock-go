@@ -151,6 +151,18 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 			Message string `json:"message"`
 		}
 
+		// in some scenarios we don't fully control the response, e.g. an ELB 502.
+		if res.Header.Get("Content-Type") != jsonMediaType {
+			return nil, &Error{
+				msg:  "malformed non-json error response body received with status code: " + http.StatusText(res.StatusCode),
+				Code: ErrResponseMalformed,
+				Meta: map[string]string{
+					"body":        string(out),
+					"http_status": http.StatusText(res.StatusCode),
+				},
+			}
+		}
+
 		errorRes := &errorResponse{}
 		err = json.Unmarshal(out, errorRes)
 		if err != nil {
