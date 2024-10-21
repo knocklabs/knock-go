@@ -44,6 +44,7 @@ type Client struct {
 	Tenants        TenantsService
 	Users          UsersService
 	Workflows      WorkflowsService
+	Providers      ProvidersService
 }
 
 // ClientOption provides a variadic option for configuring the client
@@ -117,6 +118,7 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 	c.Tenants = &tenantsService{client: c}
 	c.Users = &usersService{client: c}
 	c.Workflows = &workflowsService{client: c}
+	c.Providers = &providersService{client: c}
 
 	return c, nil
 }
