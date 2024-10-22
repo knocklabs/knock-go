@@ -96,7 +96,7 @@ func (r *UserService) Merge(ctx context.Context, userID string, body UserMergePa
 type User struct {
 	ID          string            `json:"id,required"`
 	UpdatedAt   time.Time         `json:"updated_at,required" format:"date-time"`
-	Typename    UserTypename      `json:"__typename"`
+	Typename    User_Typename     `json:"__typename"`
 	CreatedAt   time.Time         `json:"created_at" format:"date-time"`
 	ExtraFields map[string]string `json:"-,extras"`
 	JSON        userJSON          `json:"-"`
@@ -120,15 +120,15 @@ func (r userJSON) RawJSON() string {
 	return r.raw
 }
 
-type UserTypename string
+type User_Typename string
 
 const (
-	UserTypenameUser UserTypename = "User"
+	User_TypenameUser User_Typename = "User"
 )
 
-func (r UserTypename) IsKnown() bool {
+func (r User_Typename) IsKnown() bool {
 	switch r {
-	case UserTypenameUser:
+	case User_TypenameUser:
 		return true
 	}
 	return false
@@ -238,20 +238,7 @@ func (r UserUpdateParamsPreferences) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesCategories struct {
-	ChannelTypes param.Field[interface{}] `json:"channel_types,required"`
-	Conditions   param.Field[interface{}] `json:"conditions,required"`
-}
-
-func (r UserUpdateParamsPreferencesCategories) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesCategories) ImplementsUserUpdateParamsPreferencesCategoriesUnion() {
-}
-
-// Satisfied by [shared.UnionBool], [UserUpdateParamsPreferencesCategoriesObject],
-// [UserUpdateParamsPreferencesCategories].
+// Satisfied by [shared.UnionBool], [UserUpdateParamsPreferencesCategoriesObject].
 type UserUpdateParamsPreferencesCategoriesUnion interface {
 	ImplementsUserUpdateParamsPreferencesCategoriesUnion()
 }
@@ -281,379 +268,307 @@ func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypes) MarshalJSON() (
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesChat struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesChat) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesChat) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesChatUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObject],
-// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesChat].
+// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditions].
 type UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatUnion interface {
 	ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesChatUnion()
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObject) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesChatUnion() {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditions) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesChatUnion() {
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectCondition struct {
-	Argument param.Field[string]                                                                              `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                              `json:"variable,required"`
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsCondition struct {
+	Argument param.Field[string]                                                                                  `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                  `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator string
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorContains             UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorContains             UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmail struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmail) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmail) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObject],
-// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmail].
+// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditions].
 type UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailUnion interface {
 	ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailUnion()
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObject) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailUnion() {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditions) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailUnion() {
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectCondition struct {
-	Argument param.Field[string]                                                                               `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                               `json:"variable,required"`
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsCondition struct {
+	Argument param.Field[string]                                                                                   `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                   `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator string
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorContains             UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContains             UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTP struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTP) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTP) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObject],
-// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTP].
+// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditions].
 type UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPUnion interface {
 	ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPUnion()
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObject) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPUnion() {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditions) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPUnion() {
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectCondition struct {
-	Argument param.Field[string]                                                                              `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                              `json:"variable,required"`
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsCondition struct {
+	Argument param.Field[string]                                                                                  `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                  `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator string
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorContains             UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContains             UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeed struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeed) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeed) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObject],
-// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeed].
+// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditions].
 type UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion interface {
 	ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion()
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObject) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion() {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditions) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion() {
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectCondition struct {
-	Argument param.Field[string]                                                                                   `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                   `json:"variable,required"`
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsCondition struct {
+	Argument param.Field[string]                                                                                       `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                       `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator string
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorContains             UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContains             UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesPush struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesPush) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesPush) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesPushUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObject],
-// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesPush].
+// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditions].
 type UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushUnion interface {
 	ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesPushUnion()
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObject) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesPushUnion() {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditions) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesPushUnion() {
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectCondition struct {
-	Argument param.Field[string]                                                                              `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                              `json:"variable,required"`
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsCondition struct {
+	Argument param.Field[string]                                                                                  `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                  `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator string
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorContains             UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorContains             UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMS struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMS) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMS) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObject],
-// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMS].
+// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditions].
 type UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSUnion interface {
 	ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSUnion()
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObject) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSUnion() {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditions) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSUnion() {
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectCondition struct {
-	Argument param.Field[string]                                                                             `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                             `json:"variable,required"`
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsCondition struct {
+	Argument param.Field[string]                                                                                 `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                 `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator string
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorContains             UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContains             UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
@@ -706,397 +621,313 @@ func (r UserUpdateParamsPreferencesChannelTypes) MarshalJSON() (data []byte, err
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesChannelTypesChat struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesChannelTypesChat) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesChannelTypesChat) ImplementsUserUpdateParamsPreferencesChannelTypesChatUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesChannelTypesChatObject],
-// [UserUpdateParamsPreferencesChannelTypesChat].
+// [UserUpdateParamsPreferencesChannelTypesChatConditions].
 type UserUpdateParamsPreferencesChannelTypesChatUnion interface {
 	ImplementsUserUpdateParamsPreferencesChannelTypesChatUnion()
 }
 
-type UserUpdateParamsPreferencesChannelTypesChatObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesChannelTypesChatObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesChannelTypesChatConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesChannelTypesChatConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesChatObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesChannelTypesChatConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesChatObject) ImplementsUserUpdateParamsPreferencesChannelTypesChatUnion() {
+func (r UserUpdateParamsPreferencesChannelTypesChatConditions) ImplementsUserUpdateParamsPreferencesChannelTypesChatUnion() {
 }
 
-type UserUpdateParamsPreferencesChannelTypesChatObjectCondition struct {
-	Argument param.Field[string]                                                              `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                              `json:"variable,required"`
+type UserUpdateParamsPreferencesChannelTypesChatConditionsCondition struct {
+	Argument param.Field[string]                                                                  `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                  `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesChatObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesChannelTypesChatConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator string
+type UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorContains             UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorContains             UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesChatObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesChannelTypesEmail struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesChannelTypesEmail) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesChannelTypesEmail) ImplementsUserUpdateParamsPreferencesChannelTypesEmailUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesChannelTypesEmailObject],
-// [UserUpdateParamsPreferencesChannelTypesEmail].
+// [UserUpdateParamsPreferencesChannelTypesEmailConditions].
 type UserUpdateParamsPreferencesChannelTypesEmailUnion interface {
 	ImplementsUserUpdateParamsPreferencesChannelTypesEmailUnion()
 }
 
-type UserUpdateParamsPreferencesChannelTypesEmailObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesChannelTypesEmailObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesChannelTypesEmailConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesChannelTypesEmailConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesEmailObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesChannelTypesEmailConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesEmailObject) ImplementsUserUpdateParamsPreferencesChannelTypesEmailUnion() {
+func (r UserUpdateParamsPreferencesChannelTypesEmailConditions) ImplementsUserUpdateParamsPreferencesChannelTypesEmailUnion() {
 }
 
-type UserUpdateParamsPreferencesChannelTypesEmailObjectCondition struct {
-	Argument param.Field[string]                                                               `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                               `json:"variable,required"`
+type UserUpdateParamsPreferencesChannelTypesEmailConditionsCondition struct {
+	Argument param.Field[string]                                                                   `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                   `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesEmailObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesChannelTypesEmailConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator string
+type UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorContains             UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorContains             UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesEmailObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesChannelTypesHTTP struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesChannelTypesHTTP) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesChannelTypesHTTP) ImplementsUserUpdateParamsPreferencesChannelTypesHTTPUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesChannelTypesHTTPObject],
-// [UserUpdateParamsPreferencesChannelTypesHTTP].
+// [UserUpdateParamsPreferencesChannelTypesHTTPConditions].
 type UserUpdateParamsPreferencesChannelTypesHTTPUnion interface {
 	ImplementsUserUpdateParamsPreferencesChannelTypesHTTPUnion()
 }
 
-type UserUpdateParamsPreferencesChannelTypesHTTPObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesChannelTypesHTTPObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesChannelTypesHTTPConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesChannelTypesHTTPConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesHTTPObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesChannelTypesHTTPConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesHTTPObject) ImplementsUserUpdateParamsPreferencesChannelTypesHTTPUnion() {
+func (r UserUpdateParamsPreferencesChannelTypesHTTPConditions) ImplementsUserUpdateParamsPreferencesChannelTypesHTTPUnion() {
 }
 
-type UserUpdateParamsPreferencesChannelTypesHTTPObjectCondition struct {
-	Argument param.Field[string]                                                              `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                              `json:"variable,required"`
+type UserUpdateParamsPreferencesChannelTypesHTTPConditionsCondition struct {
+	Argument param.Field[string]                                                                  `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                  `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesHTTPObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesChannelTypesHTTPConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator string
+type UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorContains             UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorContains             UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesHTTPObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesChannelTypesInAppFeed struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesChannelTypesInAppFeed) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesChannelTypesInAppFeed) ImplementsUserUpdateParamsPreferencesChannelTypesInAppFeedUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesChannelTypesInAppFeedObject],
-// [UserUpdateParamsPreferencesChannelTypesInAppFeed].
+// [UserUpdateParamsPreferencesChannelTypesInAppFeedConditions].
 type UserUpdateParamsPreferencesChannelTypesInAppFeedUnion interface {
 	ImplementsUserUpdateParamsPreferencesChannelTypesInAppFeedUnion()
 }
 
-type UserUpdateParamsPreferencesChannelTypesInAppFeedObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesChannelTypesInAppFeedObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesChannelTypesInAppFeedConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesInAppFeedObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesChannelTypesInAppFeedConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesInAppFeedObject) ImplementsUserUpdateParamsPreferencesChannelTypesInAppFeedUnion() {
+func (r UserUpdateParamsPreferencesChannelTypesInAppFeedConditions) ImplementsUserUpdateParamsPreferencesChannelTypesInAppFeedUnion() {
 }
 
-type UserUpdateParamsPreferencesChannelTypesInAppFeedObjectCondition struct {
-	Argument param.Field[string]                                                                   `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                   `json:"variable,required"`
+type UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsCondition struct {
+	Argument param.Field[string]                                                                       `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                       `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesInAppFeedObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator string
+type UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorContains             UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorContains             UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesInAppFeedObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesChannelTypesPush struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesChannelTypesPush) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesChannelTypesPush) ImplementsUserUpdateParamsPreferencesChannelTypesPushUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesChannelTypesPushObject],
-// [UserUpdateParamsPreferencesChannelTypesPush].
+// [UserUpdateParamsPreferencesChannelTypesPushConditions].
 type UserUpdateParamsPreferencesChannelTypesPushUnion interface {
 	ImplementsUserUpdateParamsPreferencesChannelTypesPushUnion()
 }
 
-type UserUpdateParamsPreferencesChannelTypesPushObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesChannelTypesPushObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesChannelTypesPushConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesChannelTypesPushConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesPushObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesChannelTypesPushConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesPushObject) ImplementsUserUpdateParamsPreferencesChannelTypesPushUnion() {
+func (r UserUpdateParamsPreferencesChannelTypesPushConditions) ImplementsUserUpdateParamsPreferencesChannelTypesPushUnion() {
 }
 
-type UserUpdateParamsPreferencesChannelTypesPushObjectCondition struct {
-	Argument param.Field[string]                                                              `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                              `json:"variable,required"`
+type UserUpdateParamsPreferencesChannelTypesPushConditionsCondition struct {
+	Argument param.Field[string]                                                                  `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                  `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesPushObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesChannelTypesPushConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator string
+type UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorContains             UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorContains             UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesPushObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesChannelTypesSMS struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesChannelTypesSMS) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesChannelTypesSMS) ImplementsUserUpdateParamsPreferencesChannelTypesSMSUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesChannelTypesSMSObject],
-// [UserUpdateParamsPreferencesChannelTypesSMS].
+// [UserUpdateParamsPreferencesChannelTypesSMSConditions].
 type UserUpdateParamsPreferencesChannelTypesSMSUnion interface {
 	ImplementsUserUpdateParamsPreferencesChannelTypesSMSUnion()
 }
 
-type UserUpdateParamsPreferencesChannelTypesSMSObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesChannelTypesSMSObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesChannelTypesSMSConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesChannelTypesSMSConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesSMSObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesChannelTypesSMSConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesSMSObject) ImplementsUserUpdateParamsPreferencesChannelTypesSMSUnion() {
+func (r UserUpdateParamsPreferencesChannelTypesSMSConditions) ImplementsUserUpdateParamsPreferencesChannelTypesSMSUnion() {
 }
 
-type UserUpdateParamsPreferencesChannelTypesSMSObjectCondition struct {
-	Argument param.Field[string]                                                             `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                             `json:"variable,required"`
+type UserUpdateParamsPreferencesChannelTypesSMSConditionsCondition struct {
+	Argument param.Field[string]                                                                 `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                 `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesChannelTypesSMSObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesChannelTypesSMSConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator string
+type UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorContains             UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorContains             UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesSMSObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesWorkflows struct {
-	ChannelTypes param.Field[interface{}] `json:"channel_types,required"`
-	Conditions   param.Field[interface{}] `json:"conditions,required"`
-}
-
-func (r UserUpdateParamsPreferencesWorkflows) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesWorkflows) ImplementsUserUpdateParamsPreferencesWorkflowsUnion() {}
-
-// Satisfied by [shared.UnionBool], [UserUpdateParamsPreferencesWorkflowsObject],
-// [UserUpdateParamsPreferencesWorkflows].
+// Satisfied by [shared.UnionBool], [UserUpdateParamsPreferencesWorkflowsObject].
 type UserUpdateParamsPreferencesWorkflowsUnion interface {
 	ImplementsUserUpdateParamsPreferencesWorkflowsUnion()
 }
@@ -1126,379 +957,307 @@ func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypes) MarshalJSON() (d
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChat struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChat) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChat) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObject],
-// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChat].
+// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditions].
 type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatUnion interface {
 	ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatUnion()
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObject) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatUnion() {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditions) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatUnion() {
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectCondition struct {
-	Argument param.Field[string]                                                                             `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                             `json:"variable,required"`
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsCondition struct {
+	Argument param.Field[string]                                                                                 `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                 `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator string
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorContains             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContains             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmail struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmail) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmail) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObject],
-// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmail].
+// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditions].
 type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailUnion interface {
 	ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailUnion()
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObject) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailUnion() {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditions) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailUnion() {
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectCondition struct {
-	Argument param.Field[string]                                                                              `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                              `json:"variable,required"`
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsCondition struct {
+	Argument param.Field[string]                                                                                  `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                  `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator string
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorContains             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContains             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTP struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTP) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTP) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObject],
-// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTP].
+// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditions].
 type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion interface {
 	ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion()
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObject) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion() {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditions) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion() {
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectCondition struct {
-	Argument param.Field[string]                                                                             `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                             `json:"variable,required"`
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsCondition struct {
+	Argument param.Field[string]                                                                                 `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                 `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator string
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorContains             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContains             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeed struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeed) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeed) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObject],
-// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeed].
+// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditions].
 type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion interface {
 	ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion()
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObject) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion() {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditions) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion() {
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectCondition struct {
-	Argument param.Field[string]                                                                                  `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                  `json:"variable,required"`
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsCondition struct {
+	Argument param.Field[string]                                                                                      `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                      `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator string
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorContains             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContains             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPush struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPush) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPush) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObject],
-// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPush].
+// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditions].
 type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushUnion interface {
 	ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushUnion()
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObject) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushUnion() {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditions) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushUnion() {
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectCondition struct {
-	Argument param.Field[string]                                                                             `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                             `json:"variable,required"`
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsCondition struct {
+	Argument param.Field[string]                                                                                 `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                 `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator string
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorContains             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContains             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMS struct {
-	Conditions param.Field[interface{}] `json:"conditions"`
-}
-
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMS) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMS) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSUnion() {
-}
-
 // Satisfied by [shared.UnionBool],
-// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObject],
-// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMS].
+// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditions].
 type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSUnion interface {
 	ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSUnion()
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObject struct {
-	Conditions param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectCondition] `json:"conditions,required"`
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsCondition] `json:"conditions,required"`
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObject) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditions) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObject) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSUnion() {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditions) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSUnion() {
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectCondition struct {
-	Argument param.Field[string]                                                                            `json:"argument,required"`
-	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                            `json:"variable,required"`
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsCondition struct {
+	Argument param.Field[string]                                                                                `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                `json:"variable,required"`
 }
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator string
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator string
 
 const (
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorEqualTo              UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator = "equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator = "not_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorGreaterThan          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator = "greater_than"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorLessThan             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator = "less_than"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator = "greater_than_or_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator = "less_than_or_equal_to"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorContains             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator = "contains"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorNotContains          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator = "not_contains"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator = "empty"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator = "not_empty"
-	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContains             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "contains_all"
 )
 
-func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperator) IsKnown() bool {
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContainsAll:
 		return true
 	}
 	return false

@@ -30,7 +30,7 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 	)
 	_, err := client.Users.Update(
 		context.TODO(),
-		"string",
+		"user_id",
 		knock.UserUpdateParams{
 			ChannelData: knock.F(map[string]knock.UserUpdateParamsChannelData{
 				"97c5837d-c65c-4d54-aa39-080eeb81c69d": {
@@ -101,8 +101,8 @@ func TestUserListWithOptionalParams(t *testing.T) {
 		option.WithToken("My Token"),
 	)
 	_, err := client.Users.List(context.TODO(), knock.UserListParams{
-		After:    knock.F("string"),
-		Before:   knock.F("string"),
+		After:    knock.F("after"),
+		Before:   knock.F("before"),
 		PageSize: knock.F(int64(0)),
 	})
 	if err != nil {
@@ -127,7 +127,7 @@ func TestUserDelete(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithToken("My Token"),
 	)
-	_, err := client.Users.Delete(context.TODO(), "string")
+	_, err := client.Users.Delete(context.TODO(), "user_id")
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {
@@ -150,7 +150,7 @@ func TestUserGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithToken("My Token"),
 	)
-	_, err := client.Users.Get(context.TODO(), "string")
+	_, err := client.Users.Get(context.TODO(), "user_id")
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {
@@ -175,9 +175,9 @@ func TestUserMergeWithOptionalParams(t *testing.T) {
 	)
 	_, err := client.Users.Merge(
 		context.TODO(),
-		"string",
+		"user_id",
 		knock.UserMergeParams{
-			FromUserID: knock.F("string"),
+			FromUserID: knock.F("from_user_id"),
 		},
 	)
 	if err != nil {
