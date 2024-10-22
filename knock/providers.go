@@ -1,7 +1,9 @@
 package knock
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
 	"net/http"
@@ -58,11 +60,28 @@ type ProviderAuthCheckResponse struct {
 type ProviderListChannelsRequest struct {
 	ProviderContext   `json:"-"`
 	AccessTokenObject ProviderAccessTokenObject `json:"access_token_object"`
-	// TODO: query_options
+	SlackQueryOptions *SlackQueryOptions        `json:"query_options,omitempty"`
 }
 
 type ProviderListChannelsResponse struct {
-	// TODO:
+	SlackChannels []SlackChannel `json:"slack_channels"`
+	NextCursor    string         `json:"next_cursor"`
+}
+
+type SlackQueryOptions struct {
+	Cursor          string `json:"cursor,omitempty"`
+	ExcludeArchived bool   `json:"exclude_archived,omitempty"`
+	Limit           int    `json:"limit,omitempty"`
+	TeamId          string `json:"team_id,omitempty"`
+	Types           string `json:"types,omitempty"`
+}
+
+type SlackChannel struct {
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	IsPrivate     bool   `json:"is_private"`
+	IsIM          bool   `json:"is_im"`
+	ContextTeamId string `json:"context_team_id"`
 }
 
 type ProviderRevokeAccessRequest struct {
@@ -78,7 +97,12 @@ func (ps providersService) AuthCheck(ctx context.Context, request *ProviderAuthC
 	path := providersAPIPath(request.ProviderName, request.ChannelId)
 	path = fmt.Sprintf("%s/auth_check", path)
 
-	req, err := ps.client.newRequest(http.MethodGet, path, nil, nil)
+	raw, err := json.Marshal(request)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating body for provider auth check")
+	}
+
+	req, err := ps.client.newRequest(http.MethodGet, path, bytes.NewBuffer(raw), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for provider auth check")
 	}
@@ -96,11 +120,46 @@ func (ps providersService) ListChannels(ctx context.Context, request *ProviderLi
 	path := providersAPIPath(request.ProviderName, request.ChannelId)
 	path = fmt.Sprintf("%s/channels", path)
 
-	//TODO implement me
-	panic("implement me")
+	raw, err := json.Marshal(request)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating body for provider list channels")
+	}
+
+	req, err := ps.client.newRequest(http.MethodGet, path, bytes.NewBuffer(raw), nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating request for provider list channels")
+	}
+
+	listChannelsResponse := &ProviderListChannelsResponse{}
+	_, err = ps.client.do(ctx, req, listChannelsResponse)
+	if err != nil {
+		return nil, errors.Wrap(err, "error making request for provider list channels")
+	}
+
+	return listChannelsResponse, nil
 }
 
 func (ps providersService) RevokeAccess(ctx context.Context, request *ProviderRevokeAccessRequest) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+	path := providersAPIPath(request.ProviderName, request.ChannelId)
+	path = fmt.Sprintf("%s/revoke_access", path)
+
+	raw, err := json.Marshal(request)
+	if err != nil {
+		return false, errors.Wrap(err, "error creating body for provider revoke access")
+	}
+
+	req, err := ps.client.newRequest(http.MethodGet, path, bytes.NewBuffer(raw), nil)
+	if err != nil {
+		return false, errors.Wrap(err, "error creating request for provider revoke access")
+	}
+
+	revokeAccessResponse := struct {
+		Ok bool `json:"ok"`
+	}{}
+	_, err = ps.client.do(ctx, req, revokeAccessResponse)
+	if err != nil {
+		return false, errors.Wrap(err, "error making request for provider revoke access")
+	}
+
+	return revokeAccessResponse.Ok, nil
 }
