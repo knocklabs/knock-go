@@ -1,12 +1,13 @@
 package knock
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
+	"github.com/google/go-querystring/query"
 	"github.com/pkg/errors"
+	"log"
 	"net/http"
+	"net/http/httputil"
 )
 
 // ProvidersService is an interface for communicating with the Knock
@@ -30,37 +31,38 @@ func NewProvidersService(client *Client) *providersService {
 }
 
 // Client structs
-type ProviderContext struct {
-	// ProviderName is included as a path parameter
-	ProviderName string `json:"-"`
-	// ChannelId is included as a path parameter
-	ChannelId string `json:"-"`
-}
-
 type ProviderAccessTokenObject struct {
-	ObjectId   string `json:"object_id"`
-	Collection string `json:"collection"`
+	ObjectId   string `json:"object_id" url:"object_id"`
+	Collection string `json:"collection" url:"collection"`
 }
 
 type ProviderAuthCheckRequest struct {
-	ProviderContext   `json:"-"`
-	AccessTokenObject ProviderAccessTokenObject `json:"access_token_object"`
+	ProviderName      string                    `json:"-" url:"-"`
+	ChannelId         string                    `json:"channel_id" url:"channel_id"`
+	AccessTokenObject ProviderAccessTokenObject `json:"access_token_object" url:"access_token_object"`
 }
 
 type ProviderAuthCheckResponse struct {
-	Ok     bool   `json:"ok"`
-	Url    string `json:"url"`
-	Team   string `json:"team"`
-	User   string `json:"user"`
-	TeamId string `json:"team_id"`
-	UserId string `json:"user_id"`
-	Error  string `json:"error,omitempty"`
+	Connection ProviderAuthCheckResponseConnection `json:"connection"`
+	Error      string                              `json:"error,omitempty"`
+}
+
+type ProviderAuthCheckResponseConnection struct {
+	BotId               string `json:"bot_id"`
+	IsEnterpriseInstall bool   `json:"is_enterprise_install"`
+	Ok                  bool   `json:"ok"`
+	Team                string `json:"team"`
+	TeamId              string `json:"team_id"`
+	Url                 string `json:"url"`
+	User                string `json:"user"`
+	UserId              string `json:"user_id"`
 }
 
 type ProviderListChannelsRequest struct {
-	ProviderContext   `json:"-"`
-	AccessTokenObject ProviderAccessTokenObject `json:"access_token_object"`
-	SlackQueryOptions *SlackQueryOptions        `json:"query_options,omitempty"`
+	ProviderName      string                    `json:"-" url:"-"`
+	ChannelId         string                    `json:"channel_id" url:"channel_id"`
+	AccessTokenObject ProviderAccessTokenObject `json:"access_token_object" url:"access_token_object"`
+	SlackQueryOptions *SlackQueryOptions        `json:"query_options,omitempty" url:"query_options,omitempty"`
 }
 
 type ProviderListChannelsResponse struct {
@@ -85,8 +87,9 @@ type SlackChannel struct {
 }
 
 type ProviderRevokeAccessRequest struct {
-	ProviderContext   `json:"-"`
-	AccessTokenObject ProviderAccessTokenObject `json:"access_token_object"`
+	ProviderName      string                    `json:"-" url:"-"`
+	AccessTokenObject ProviderAccessTokenObject `json:"access_token_object" url:"access_token_object"`
+	ChannelId         string                    `json:"channel_id" url:"channel_id"`
 }
 
 func providersAPIPath(providerName, channelId string) string {
@@ -94,15 +97,13 @@ func providersAPIPath(providerName, channelId string) string {
 }
 
 func (ps providersService) AuthCheck(ctx context.Context, request *ProviderAuthCheckRequest) (*ProviderAuthCheckResponse, error) {
-	path := providersAPIPath(request.ProviderName, request.ChannelId)
-	path = fmt.Sprintf("%s/auth_check", path)
-
-	raw, err := json.Marshal(request)
+	queryString, err := query.Values(request)
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating body for provider auth check")
+		return nil, errors.Wrap(err, "error parsing query params to provider auth check")
 	}
+	path := fmt.Sprintf("%s/auth_check?%s", providersAPIPath(request.ProviderName, request.ChannelId), queryString.Encode())
 
-	req, err := ps.client.newRequest(http.MethodGet, path, bytes.NewBuffer(raw), nil)
+	req, err := ps.client.newRequest(http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for provider auth check")
 	}
@@ -117,15 +118,13 @@ func (ps providersService) AuthCheck(ctx context.Context, request *ProviderAuthC
 }
 
 func (ps providersService) ListChannels(ctx context.Context, request *ProviderListChannelsRequest) (*ProviderListChannelsResponse, error) {
-	path := providersAPIPath(request.ProviderName, request.ChannelId)
-	path = fmt.Sprintf("%s/channels", path)
-
-	raw, err := json.Marshal(request)
+	queryString, err := query.Values(request)
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating body for provider list channels")
+		return nil, errors.Wrap(err, "error parsing query params to provider auth check")
 	}
+	path := fmt.Sprintf("%s/channels?%s", providersAPIPath(request.ProviderName, request.ChannelId), queryString.Encode())
 
-	req, err := ps.client.newRequest(http.MethodGet, path, bytes.NewBuffer(raw), nil)
+	req, err := ps.client.newRequest(http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request for provider list channels")
 	}
@@ -140,18 +139,19 @@ func (ps providersService) ListChannels(ctx context.Context, request *ProviderLi
 }
 
 func (ps providersService) RevokeAccess(ctx context.Context, request *ProviderRevokeAccessRequest) (bool, error) {
-	path := providersAPIPath(request.ProviderName, request.ChannelId)
-	path = fmt.Sprintf("%s/revoke_access", path)
-
-	raw, err := json.Marshal(request)
+	queryString, err := query.Values(request)
 	if err != nil {
-		return false, errors.Wrap(err, "error creating body for provider revoke access")
+		return false, errors.Wrap(err, "error parsing query params to revoke access")
 	}
+	path := fmt.Sprintf("%s/revoke_access?%s", providersAPIPath(request.ProviderName, request.ChannelId), queryString.Encode())
 
-	req, err := ps.client.newRequest(http.MethodGet, path, bytes.NewBuffer(raw), nil)
+	req, err := ps.client.newRequest(http.MethodPut, path, nil, nil)
 	if err != nil {
 		return false, errors.Wrap(err, "error creating request for provider revoke access")
 	}
+
+	raw, _ := httputil.DumpRequest(req, true)
+	log.Println(string(raw))
 
 	revokeAccessResponse := struct {
 		Ok bool `json:"ok"`
