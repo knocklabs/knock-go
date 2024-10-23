@@ -60,9 +60,9 @@ type ProviderAuthCheckResponseConnection struct {
 
 type ProviderListChannelsRequest struct {
 	ProviderName      string                    `json:"-" url:"-"`
-	ChannelId         string                    `json:"channel_id" url:"channel_id"`
-	AccessTokenObject ProviderAccessTokenObject `json:"access_token_object" url:"access_token_object"`
-	SlackQueryOptions *SlackQueryOptions        `json:"query_options,omitempty" url:"query_options,omitempty"`
+	ChannelId         string                    `url:"channel_id"`
+	AccessTokenObject ProviderAccessTokenObject `url:"access_token_object"`
+	SlackQueryOptions *SlackQueryOptions        `url:"query_options,omitempty"`
 }
 
 type ProviderListChannelsResponse struct {
@@ -71,11 +71,11 @@ type ProviderListChannelsResponse struct {
 }
 
 type SlackQueryOptions struct {
-	Cursor          string `json:"cursor,omitempty"`
-	ExcludeArchived bool   `json:"exclude_archived,omitempty"`
-	Limit           int    `json:"limit,omitempty"`
-	TeamId          string `json:"team_id,omitempty"`
-	Types           string `json:"types,omitempty"`
+	Cursor          string `url:"cursor,omitempty"`
+	ExcludeArchived bool   `url:"exclude_archived,omitempty"`
+	Limit           int    `url:"limit,omitempty"`
+	TeamId          string `url:"team_id,omitempty"`
+	Types           string `url:"types,omitempty"`
 }
 
 type SlackChannel struct {
@@ -118,24 +118,31 @@ func (ps providersService) AuthCheck(ctx context.Context, request *ProviderAuthC
 }
 
 func (ps providersService) ListChannels(ctx context.Context, request *ProviderListChannelsRequest) (*ProviderListChannelsResponse, error) {
-	queryString, err := query.Values(request)
-	if err != nil {
-		return nil, errors.Wrap(err, "error parsing query params to provider auth check")
-	}
-	path := fmt.Sprintf("%s/channels?%s", providersAPIPath(request.ProviderName, request.ChannelId), queryString.Encode())
+	baseUrl := fmt.Sprintf("%s/channels", providersAPIPath(request.ProviderName, request.ChannelId))
 
-	req, err := ps.client.newRequest(http.MethodGet, path, nil, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "error creating request for provider list channels")
-	}
+	result := &ProviderListChannelsResponse{}
+	for {
+		queryString, err := query.Values(request)
+		if err != nil {
+			return nil, errors.Wrap(err, "error parsing query params to provider list channels")
+		}
+		path := fmt.Sprintf("%s?%s", baseUrl, queryString.Encode())
 
-	listChannelsResponse := &ProviderListChannelsResponse{}
-	_, err = ps.client.do(ctx, req, listChannelsResponse)
-	if err != nil {
-		return nil, errors.Wrap(err, "error making request for provider list channels")
-	}
+		req, err := ps.client.newRequest(http.MethodGet, path, nil, nil)
+		if err != nil {
+			return nil, errors.Wrap(err, "error creating request for provider list channels")
+		}
 
-	return listChannelsResponse, nil
+		pageResponse := &ProviderListChannelsResponse{}
+		if _, err = ps.client.do(ctx, req, pageResponse); err != nil {
+			return nil, errors.Wrap(err, "error making request for provider list channels")
+		}
+
+		result.SlackChannels = append(result.SlackChannels, pageResponse.SlackChannels...)
+		if pageResponse.NextCursor == "" {
+			return result, nil
+		}
+	}
 }
 
 func (ps providersService) RevokeAccess(ctx context.Context, request *ProviderRevokeAccessRequest) (bool, error) {
