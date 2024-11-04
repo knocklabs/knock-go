@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"github.com/google/go-querystring/query"
 	"github.com/pkg/errors"
-	"log"
 	"net/http"
-	"net/http/httputil"
 )
 
 // ProvidersService is an interface for communicating with the Knock
@@ -156,9 +154,6 @@ func (ps providersService) RevokeAccess(ctx context.Context, request *ProviderRe
 	if err != nil {
 		return false, errors.Wrap(err, "error creating request for provider revoke access")
 	}
-
-	raw, _ := httputil.DumpRequest(req, true)
-	log.Println(string(raw))
 
 	revokeAccessResponse := struct {
 		Ok bool `json:"ok"`
