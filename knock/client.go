@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/knocklabs/knock-go/knock/internal"
@@ -154,7 +155,9 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 		}
 
 		// in some scenarios we don't fully control the response, e.g. an ELB 502.
-		if res.Header.Get("Content-Type") != jsonMediaType {
+		// Content-Type could be `application/json` or `application/json; charset=utf-8`
+		// If we match `application/json` at the beginning, that's good enough to be considered good json
+		if !strings.HasPrefix(res.Header.Get("Content-Type"), jsonMediaType) {
 			return nil, &Error{
 				msg:  "malformed non-json error response body received with status code: " + http.StatusText(res.StatusCode),
 				Code: ErrResponseMalformed,
