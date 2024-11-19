@@ -55,14 +55,6 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 							Argument: knock.F("some_property"),
 							Operator: knock.F(knock.UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorEqualTo),
 							Variable: knock.F("recipient.property"),
-						}, {
-							Argument: knock.F("some_property"),
-							Operator: knock.F(knock.UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorEqualTo),
-							Variable: knock.F("recipient.property"),
-						}, {
-							Argument: knock.F("some_property"),
-							Operator: knock.F(knock.UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorEqualTo),
-							Variable: knock.F("recipient.property"),
 						}}),
 					}),
 					ChannelTypes: knock.F(knock.UserUpdateParamsPreferencesChannelTypes{
