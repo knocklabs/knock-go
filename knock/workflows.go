@@ -74,6 +74,7 @@ type Schedule struct {
 	InsertedAt       time.Time              `json:"inserted_at"`
 	UpdatedAt        time.Time              `json:"updated_at"`
 	Data             map[string]interface{} `json:"data"`
+	EndingAt         time.Time              `json:"ending_at,omitempty"`
 }
 
 type CreateSchedulesRequest struct {
@@ -84,6 +85,7 @@ type CreateSchedulesRequest struct {
 	Tenant      interface{}            `json:"tenant,omitempty"`
 	ScheduledAt time.Time              `json:"scheduled_at,omitempty"`
 	Data        map[string]interface{} `json:"data,omitempty"`
+	EndingAt    time.Time              `json:"ending_at,omitempty"`
 }
 
 type UpdateSchedulesRequest struct {
@@ -93,6 +95,7 @@ type UpdateSchedulesRequest struct {
 	Tenant      interface{}            `json:"tenant,omitempty"`
 	ScheduledAt time.Time              `json:"scheduled_at,omitempty"`
 	Data        map[string]interface{} `json:"data,omitempty"`
+	EndingAt    time.Time              `json:"ending_at,omitempty"`
 }
 
 type DeleteSchedulesRequest struct {
