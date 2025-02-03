@@ -54,8 +54,14 @@ func TestClientDo(t *testing.T) {
 		}))
 		defer server.Close()
 
-		client, _ := NewClient(WithBaseURL(server.URL))
-		req, _ := client.newRequest("GET", "/test", nil, nil)
+		client, err := NewClient(WithBaseURL(server.URL))
+		if err != nil {
+			t.Fatalf("Expected no error creating client, got %v", err)
+		}
+		req, err := client.newRequest("GET", "/test", nil, nil)
+		if err != nil {
+			t.Fatalf("Expected no error creating request, got %v", err)
+		}
 
 		var response map[string]string
 		_, err := client.do(context.Background(), req, &response)
@@ -79,8 +85,14 @@ func TestClientDo(t *testing.T) {
 		}))
 		defer server.Close()
 
-		client, _ := NewClient(WithBaseURL(server.URL))
-		req, _ := client.newRequest("GET", "/test", nil, nil)
+		client, err := NewClient(WithBaseURL(server.URL))
+		if err != nil {
+			t.Fatalf("Expected no error creating client, got %v", err)
+		}
+		req, err := client.newRequest("GET", "/test", nil, nil)
+		if err != nil {
+			t.Fatalf("Expected no error creating request, got %v", err)
+		}
 
 		_, err := client.do(context.Background(), req, nil)
 
@@ -109,8 +121,14 @@ func TestClientDo(t *testing.T) {
 		}))
 		defer server.Close()
 
-		client, _ := NewClient(WithBaseURL(server.URL))
-		req, _ := client.newRequest("GET", "/test", nil, nil)
+		client, err := NewClient(WithBaseURL(server.URL))
+		if err != nil {
+			t.Fatalf("Expected no error creating client, got %v", err)
+		}
+		req, err := client.newRequest("GET", "/test", nil, nil)
+		if err != nil {
+			t.Fatalf("Expected no error creating request, got %v", err)
+		}
 
 		_, err := client.do(context.Background(), req, nil)
 
