@@ -120,13 +120,15 @@ func TestClientDo(t *testing.T) {
 	t.Run("unexpected non-json response", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadGateway)
-			_, err = w.Write([]byte("502 Bad Gateway"))
-			if err != nil {
-				t.Fatalf("Error writing httptest response: %v", err)
+			var writeErr error
+			_, writeErr = w.Write([]byte("502 Bad Gateway"))
+			if writeErr != nil {
+				t.Fatalf("Error writing httptest response: %v", writeErr)
 			}
 		}))
 		defer server.Close()
 
+		var err error
 		client, err := NewClient(WithBaseURL(server.URL))
 		if err != nil {
 			t.Fatalf("Expected no error creating client, got %v", err)
