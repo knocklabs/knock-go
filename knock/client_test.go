@@ -18,6 +18,9 @@ func TestNewClient(t *testing.T) {
 		if client == nil {
 			t.Fatal("Expected non-nil client")
 		}
+		if client.baseURL == nil {
+			t.Fatal("Expected non-nil baseURL")
+		}
 		if client.baseURL.String() != DefaultBaseUrl {
 			t.Errorf("Expected base URL %s, got %s", DefaultBaseUrl, client.baseURL.String())
 		}
@@ -31,6 +34,9 @@ func TestNewClient(t *testing.T) {
 		}
 		if client == nil {
 			t.Fatal("Expected non-nil client")
+		}
+		if client.baseURL == nil {
+			t.Fatal("Expected non-nil baseURL")
 		}
 		if client.baseURL.String() != customURL {
 			t.Errorf("Expected base URL %s, got %s", customURL, client.baseURL.String())
