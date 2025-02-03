@@ -85,6 +85,10 @@ func TestObjects_BulkSet(t *testing.T) {
 		Status:             BulkOperationQueued,
 		InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
 		UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
+		Name:               "users.identify",
+		ErrorCount:         0,
+		SuccessCount:       0,
+		ErrorItems:         []map[string]interface{}{},
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -218,6 +222,10 @@ func TestObjects_BulkDelete(t *testing.T) {
 		Status:             BulkOperationQueued,
 		InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
 		UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
+		Name:               "users.identify",
+		ErrorCount:         0,
+		SuccessCount:       0,
+		ErrorItems:         []map[string]interface{}{},
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -445,6 +453,10 @@ func TestObjects_BulkAddSubscriptions(t *testing.T) {
 		Status:             BulkOperationQueued,
 		InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
 		UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
+		Name:               "users.identify",
+		ErrorCount:         0,
+		SuccessCount:       0,
+		ErrorItems:         []map[string]interface{}{},
 	}
 
 	c.Assert(err, qt.IsNil)
