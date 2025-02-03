@@ -232,7 +232,7 @@ func TestUsers_BulkIdentify(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"b19d032a-fc3b-4a54-9f54-369484527201","inserted_at":"2022-05-27T11:12:08.281201Z","name":"users.identify","processed_rows":0,"progress_path":"/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201","started_at":null,"status":"queued","updated_at":"2022-05-27T11:12:08.286507Z"}`
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"b19d032a-fc3b-4a54-9f54-369484527201","inserted_at":"2022-05-27T11:12:08.281201Z","name":"users.identify","processed_rows":0,"progress_path":"/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201","started_at":null,"status":"queued","updated_at":"2022-05-27T11:12:08.286507Z","error_count":0,"success_count":0,"error_items":[]}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
@@ -267,13 +267,17 @@ func TestUsers_BulkIdentify(t *testing.T) {
 		},
 	})
 
-	want := &BulkOperation{
+		want := &BulkOperation{
 		ID:                 "b19d032a-fc3b-4a54-9f54-369484527201",
 		EstimatedTotalRows: 2,
 		ProgressPath:       "/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201",
 		Status:             BulkOperationQueued,
 		InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
 		UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
+		Name:               "users.identify",
+		ErrorCount:         0,
+		SuccessCount:       0,
+		ErrorItems:         []map[string]interface{}{},
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -285,7 +289,7 @@ func TestUsers_BulkDelete(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"0fb6a596-b579-455e-9a01-32b41fa5613a","inserted_at":"2022-05-27T11:26:50.869070Z","name":"users.delete","processed_rows":0,"progress_path":"/v1/bulk_operations/0fb6a596-b579-455e-9a01-32b41fa5613a","started_at":null,"status":"queued","updated_at":"2022-05-27T11:26:50.879642Z"}`
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"0fb6a596-b579-455e-9a01-32b41fa5613a","inserted_at":"2022-05-27T11:26:50.869070Z","name":"users.delete","processed_rows":0,"progress_path":"/v1/bulk_operations/0fb6a596-b579-455e-9a01-32b41fa5613a","started_at":null,"status":"queued","updated_at":"2022-05-27T11:26:50.879642Z","error_count":0,"success_count":0,"error_items":[]}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
@@ -300,13 +304,17 @@ func TestUsers_BulkDelete(t *testing.T) {
 		"user-1234",
 	}})
 
-	want := &BulkOperation{
+		want := &BulkOperation{
 		ID:                 "0fb6a596-b579-455e-9a01-32b41fa5613a",
 		EstimatedTotalRows: 2,
 		ProgressPath:       "/v1/bulk_operations/0fb6a596-b579-455e-9a01-32b41fa5613a",
 		Status:             BulkOperationQueued,
 		InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:26:50.869070Z"),
 		UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:26:50.879642Z"),
+		Name:               "users.delete",
+		ErrorCount:         0,
+		SuccessCount:       0,
+		ErrorItems:         []map[string]interface{}{},
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -629,7 +637,7 @@ func TestUsers_BulkSetPreferences(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":3,"failed_at":null,"id":"1dcdaee8-9f22-4308-8d58-e6532f1501bd","inserted_at":"2022-06-08T12:37:34.367249Z","name":"users.set_preferences","processed_rows":0,"progress_path":"/v1/bulk_operations/1dcdaee8-9f22-4308-8d58-e6532f1501bd","started_at":null,"status":"queued","updated_at":"2022-06-08T12:37:34.374113Z"}`
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":3,"failed_at":null,"id":"1dcdaee8-9f22-4308-8d58-e6532f1501bd","inserted_at":"2022-06-08T12:37:34.367249Z","name":"users.set_preferences","processed_rows":0,"progress_path":"/v1/bulk_operations/1dcdaee8-9f22-4308-8d58-e6532f1501bd","started_at":null,"status":"queued","updated_at":"2022-06-08T12:37:34.374113Z","error_count":0,"success_count":0,"error_items":[]}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
@@ -666,6 +674,10 @@ func TestUsers_BulkSetPreferences(t *testing.T) {
 		ProgressPath:       "/v1/bulk_operations/1dcdaee8-9f22-4308-8d58-e6532f1501bd",
 		InsertedAt:         ParseRFC3339Timestamp("2022-06-08T12:37:34.367249Z"),
 		UpdatedAt:          ParseRFC3339Timestamp("2022-06-08T12:37:34.374113Z"),
+		Name:               "users.set_preferences",
+		ErrorCount:         0,
+		SuccessCount:       0,
+		ErrorItems:         []map[string]interface{}{},
 	}
 
 	c.Assert(err, qt.IsNil)
