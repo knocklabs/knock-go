@@ -81,10 +81,11 @@ func TestClientDo(t *testing.T) {
 	})
 
 	t.Run("error response", func(t *testing.T) {
+		var err error
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
-			err := json.NewEncoder(w).Encode(map[string]string{"code": "not_found", "message": "Resource not found"})
+			err = json.NewEncoder(w).Encode(map[string]string{"code": "not_found", "message": "Resource not found"})
 			if err != nil {
 				t.Fatalf("Error encoding httptest response: %v", err)
 			}
@@ -108,6 +109,9 @@ func TestClientDo(t *testing.T) {
 		knockErr, ok := err.(*Error)
 		if !ok {
 			t.Fatalf("Expected error of type *Error, got %T", err)
+		}
+		if knockErr == nil {
+			t.Fatal("Expected non-nil *Error")
 		}
 		if knockErr.Code != ErrNotFound {
 			t.Errorf("Expected error code %v, got %v", ErrNotFound, knockErr.Code)
@@ -147,11 +151,14 @@ func TestClientDo(t *testing.T) {
 		if !ok {
 			t.Fatalf("Expected error of type *Error, got %T", err)
 		}
+		if knockErr == nil {
+			t.Fatal("Expected non-nil *Error")
+		}
 		if knockErr.Code != ErrResponseMalformed {
-			t.Errorf("Expected error code %v, got %v", ErrNotFound, knockErr.Code)
+			t.Errorf("Expected error code %v, got %v", ErrResponseMalformed, knockErr.Code)
 		}
 		if knockErr.Error() != "malformed non-json error response body received with status code: Bad Gateway" {
-			t.Errorf("Expected error message 'Resource not found', got %s", knockErr.Error())
+			t.Errorf("Expected error message 'malformed non-json error response body received with status code: Bad Gateway', got %s", knockErr.Error())
 		}
 	})
 }
