@@ -110,12 +110,18 @@ func TestClientDo(t *testing.T) {
 		if err == nil {
 			t.Fatal("Expected error, got nil")
 		}
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+			return
+		}
 		knockErr, ok := err.(*Error)
 		if !ok {
 			t.Fatalf("Expected error of type *Error, got %T", err)
+			return
 		}
 		if knockErr == nil {
 			t.Fatal("Expected non-nil *Error")
+			return
 		}
 		if knockErr.Code != ErrNotFound {
 			t.Errorf("Expected error code %v, got %v", ErrNotFound, knockErr.Code)
@@ -151,12 +157,18 @@ func TestClientDo(t *testing.T) {
 		if err == nil {
 			t.Fatal("Expected error, got nil")
 		}
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+			return
+		}
 		knockErr, ok := err.(*Error)
 		if !ok {
 			t.Fatalf("Expected error of type *Error, got %T", err)
+			return
 		}
 		if knockErr == nil {
 			t.Fatal("Expected non-nil *Error")
+			return
 		}
 		if knockErr.Code != ErrResponseMalformed {
 			t.Errorf("Expected error code %v, got %v", ErrResponseMalformed, knockErr.Code)
