@@ -100,7 +100,7 @@ func TestClientDo(t *testing.T) {
 			t.Fatalf("Expected no error creating request, got %v", err)
 		}
 
-		_, err := client.do(context.Background(), req, nil)
+		_, err = client.do(context.Background(), req, nil)
 
 		if err == nil {
 			t.Fatal("Expected error, got nil")
@@ -136,7 +136,7 @@ func TestClientDo(t *testing.T) {
 			t.Fatalf("Expected no error creating request, got %v", err)
 		}
 
-		_, err := client.do(context.Background(), req, nil)
+		_, err = client.do(context.Background(), req, nil)
 
 		if err == nil {
 			t.Fatal("Expected error, got nil")
