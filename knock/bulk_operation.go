@@ -39,16 +39,20 @@ const (
 )
 
 type BulkOperation struct {
-	ID                 string              `json:"id"`
-	CompletedAt        time.Time           `json:"completed_at"`
-	FailedAt           time.Time           `json:"failed_at"`
-	StartedAt          time.Time           `json:"started_at"`
-	InsertedAt         time.Time           `json:"inserted_at"`
-	UpdatedAt          time.Time           `json:"updated_at"`
-	EstimatedTotalRows int                 `json:"estimated_total_rows"`
-	ProcessedRows      int                 `json:"processed_rows"`
-	ProgressPath       string              `json:"progress_path"`
-	Status             BulkOperationStatus `json:"status"`
+	ID                 string                   `json:"id"`
+	CompletedAt        time.Time               `json:"completed_at"`
+	FailedAt           time.Time               `json:"failed_at"`
+	StartedAt          time.Time               `json:"started_at"`
+	InsertedAt         time.Time               `json:"inserted_at"`
+	UpdatedAt          time.Time               `json:"updated_at"`
+	EstimatedTotalRows int                     `json:"estimated_total_rows"`
+	ProcessedRows      int                     `json:"processed_rows"`
+	ProgressPath       string                  `json:"progress_path"`
+	Status             BulkOperationStatus     `json:"status"`
+	ErrorCount         int                     `json:"error_count"`
+	SuccessCount       int                     `json:"success_count"`
+	ErrorItems         []map[string]interface{} `json:"error_items"`
+	Name               string                  `json:"name"`
 }
 
 // Client structs
