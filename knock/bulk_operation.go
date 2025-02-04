@@ -34,15 +34,20 @@ type BulkOperationStatus string
 const (
 	BulkOperationQueued BulkOperationStatus = "queued"
 	Processing          BulkOperationStatus = "processing"
-	Completed           BulkOperationStatus = "completed"
-	Failed              BulkOperationStatus = "failed"
+	Completed          BulkOperationStatus = "completed"
+	Failed             BulkOperationStatus = "failed"
 )
+
+// ErrorItem represents an error that occurred during a bulk operation.
+// Since error items have a dynamic schema that varies based on the operation type,
+// we use a map to store the fields flexibly.
+type ErrorItem map[string]interface{}
 
 type BulkOperation struct {
 	ID                 string                   `json:"id"`
-	CompletedAt        *time.Time              `json:"completed_at,omitempty"`
-	FailedAt           *time.Time              `json:"failed_at,omitempty"`
-	StartedAt          *time.Time              `json:"started_at,omitempty"`
+	CompletedAt        time.Time           `json:"completed_at"`
+	FailedAt           time.Time           `json:"failed_at"`
+	StartedAt          time.Time           `json:"started_at"`
 	InsertedAt         time.Time               `json:"inserted_at"`
 	UpdatedAt          time.Time               `json:"updated_at"`
 	EstimatedTotalRows int                     `json:"estimated_total_rows"`
@@ -51,7 +56,7 @@ type BulkOperation struct {
 	Status             BulkOperationStatus     `json:"status"`
 	ErrorCount         int                     `json:"error_count"`
 	SuccessCount       int                     `json:"success_count"`
-	ErrorItems         []map[string]interface{} `json:"error_items,omitempty"`
+	ErrorItems         []ErrorItem              `json:"error_items"`
 	Name               string                  `json:"name"`
 }
 
@@ -78,7 +83,7 @@ func (bos *bulkOperationsService) Get(ctx context.Context, getBulkOperationReq *
 	}
 
 	GetBulkOperationResponse := &GetBulkOperationResponse{BulkOperation: &BulkOperation{
-		ErrorItems: []map[string]interface{}{},
+		ErrorItems: []ErrorItem{},
 	}}
 	_, err = bos.client.do(ctx, req, GetBulkOperationResponse.BulkOperation)
 
