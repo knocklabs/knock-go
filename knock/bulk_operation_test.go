@@ -38,7 +38,7 @@ func TestBulkOperation_get(t *testing.T) {
 		Name:              "bulk_op",
 		ErrorCount:        0,
 		SuccessCount:      0,
-		ErrorItems:        []map[string]interface{}{},
+		ErrorItems:        []ErrorItem{},
 	}
 
 	c.Assert(err, qt.IsNil)

@@ -527,7 +527,7 @@ func TestMessages_BulkChangeChannelStatus(t *testing.T) {
 		Name:               "messages.unread",
 		ErrorCount:         0,
 		SuccessCount:       0,
-		ErrorItems:         []map[string]interface{}{},
+		ErrorItems:         []ErrorItem{},
 	}
 
 	c.Assert(err, qt.IsNil)

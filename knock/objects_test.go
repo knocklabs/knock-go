@@ -88,7 +88,7 @@ func TestObjects_BulkSet(t *testing.T) {
 		Name:               "users.identify",
 		ErrorCount:         0,
 		SuccessCount:       0,
-		ErrorItems:         []map[string]interface{}{},
+		ErrorItems:         []ErrorItem{},
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -225,7 +225,7 @@ func TestObjects_BulkDelete(t *testing.T) {
 		Name:               "users.identify",
 		ErrorCount:         0,
 		SuccessCount:       0,
-		ErrorItems:         []map[string]interface{}{},
+		ErrorItems:         []ErrorItem{},
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -456,7 +456,7 @@ func TestObjects_BulkAddSubscriptions(t *testing.T) {
 		Name:               "users.identify",
 		ErrorCount:         0,
 		SuccessCount:       0,
-		ErrorItems:         []map[string]interface{}{},
+		ErrorItems:         []ErrorItem{},
 	}
 
 	c.Assert(err, qt.IsNil)

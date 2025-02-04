@@ -277,7 +277,7 @@ func TestUsers_BulkIdentify(t *testing.T) {
 		Name:               "users.identify",
 		ErrorCount:         0,
 		SuccessCount:       0,
-		ErrorItems:         []map[string]interface{}{},
+		ErrorItems:         []ErrorItem{},
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -314,7 +314,7 @@ func TestUsers_BulkDelete(t *testing.T) {
 		Name:               "users.delete",
 		ErrorCount:         0,
 		SuccessCount:       0,
-		ErrorItems:         []map[string]interface{}{},
+		ErrorItems:         []ErrorItem{},
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -677,7 +677,7 @@ func TestUsers_BulkSetPreferences(t *testing.T) {
 		Name:               "users.set_preferences",
 		ErrorCount:         0,
 		SuccessCount:       0,
-		ErrorItems:         []map[string]interface{}{},
+		ErrorItems:         []ErrorItem{},
 	}
 
 	c.Assert(err, qt.IsNil)
