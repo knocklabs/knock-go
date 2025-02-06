@@ -50,7 +50,7 @@ func TestObjects_BulkSet(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"b19d032a-fc3b-4a54-9f54-369484527201","inserted_at":"2022-05-27T11:12:08.281201Z","name":"users.identify","processed_rows":0,"progress_path":"/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201","started_at":null,"status":"queued","updated_at":"2022-05-27T11:12:08.286507Z"}`
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"b19d032a-fc3b-4a54-9f54-369484527201","inserted_at":"2022-05-27T11:12:08.281201Z","name":"users.identify","processed_rows":0,"progress_path":"/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201","started_at":null,"status":"queued","updated_at":"2022-05-27T11:12:08.286507Z","error_count":0,"success_count":0,"error_items":[]}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
@@ -85,6 +85,10 @@ func TestObjects_BulkSet(t *testing.T) {
 		Status:             BulkOperationQueued,
 		InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
 		UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
+		Name:               "users.identify",
+		SuccessCount:       0,
+		ErrorCount:         0,
+		ErrorItems:         []ErrorItem{},
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -196,7 +200,7 @@ func TestObjects_BulkDelete(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"b19d032a-fc3b-4a54-9f54-369484527201","inserted_at":"2022-05-27T11:12:08.281201Z","name":"users.identify","processed_rows":0,"progress_path":"/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201","started_at":null,"status":"queued","updated_at":"2022-05-27T11:12:08.286507Z"}`
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"b19d032a-fc3b-4a54-9f54-369484527201","inserted_at":"2022-05-27T11:12:08.281201Z","name":"users.delete","processed_rows":0,"progress_path":"/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201","started_at":null,"status":"queued","updated_at":"2022-05-27T11:12:08.286507Z","error_count":0,"success_count":0,"error_items":[]}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
@@ -218,6 +222,10 @@ func TestObjects_BulkDelete(t *testing.T) {
 		Status:             BulkOperationQueued,
 		InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
 		UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
+		Name:               "users.delete",
+		SuccessCount:       0,
+		ErrorCount:         0,
+		ErrorItems:         []ErrorItem{},
 	}
 
 	c.Assert(err, qt.IsNil)
@@ -408,7 +416,7 @@ func TestObjects_BulkAddSubscriptions(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"b19d032a-fc3b-4a54-9f54-369484527201","inserted_at":"2022-05-27T11:12:08.281201Z","name":"users.identify","processed_rows":0,"progress_path":"/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201","started_at":null,"status":"queued","updated_at":"2022-05-27T11:12:08.286507Z"}`
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":2,"failed_at":null,"id":"b19d032a-fc3b-4a54-9f54-369484527201","inserted_at":"2022-05-27T11:12:08.281201Z","name":"objects.test-collection.upsert_subscriptions","processed_rows":0,"progress_path":"/v1/bulk_operations/b19d032a-fc3b-4a54-9f54-369484527201","started_at":null,"status":"queued","updated_at":"2022-05-27T11:12:08.286507Z","error_count":0,"success_count":0,"error_items":[]}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
@@ -445,6 +453,10 @@ func TestObjects_BulkAddSubscriptions(t *testing.T) {
 		Status:             BulkOperationQueued,
 		InsertedAt:         ParseRFC3339Timestamp("2022-05-27T11:12:08.281201Z"),
 		UpdatedAt:          ParseRFC3339Timestamp("2022-05-27T11:12:08.286507Z"),
+		Name:               "objects.test-collection.upsert_subscriptions",
+		SuccessCount:       0,
+		ErrorCount:         0,
+		ErrorItems:         []ErrorItem{},
 	}
 
 	c.Assert(err, qt.IsNil)

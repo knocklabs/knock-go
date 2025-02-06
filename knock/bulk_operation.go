@@ -38,6 +38,10 @@ const (
 	Failed              BulkOperationStatus = "failed"
 )
 
+// ErrorItem represents an error that occurred during a bulk operation.
+// Error items have a dynamic schema that varies based on the operation type,
+type ErrorItem map[string]interface{}
+
 type BulkOperation struct {
 	ID                 string              `json:"id"`
 	CompletedAt        time.Time           `json:"completed_at"`
@@ -49,6 +53,10 @@ type BulkOperation struct {
 	ProcessedRows      int                 `json:"processed_rows"`
 	ProgressPath       string              `json:"progress_path"`
 	Status             BulkOperationStatus `json:"status"`
+	Name               string              `json:"name"`
+	SuccessCount       int                 `json:"success_count"`
+	ErrorCount         int                 `json:"error_count"`
+	ErrorItems         []ErrorItem         `json:"error_items"`
 }
 
 // Client structs
