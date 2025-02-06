@@ -43,6 +43,24 @@ const (
 // we use a map to store the fields flexibly.
 type ErrorItem map[string]interface{}
 
+func (e ErrorItem) GetMessage() string {
+	if msg, ok := e["message"].(string); ok {
+		return msg
+	}
+	return ""
+}
+
+func (e ErrorItem) GetCode() string {
+	if code, ok := e["code"].(string); ok {
+		return code
+	}
+	return ""
+}
+
+func (e ErrorItem) GetField(field string) interface{} {
+	return e[field]
+}
+
 type BulkOperation struct {
 	ID                 string              `json:"id"`
 	CompletedAt        time.Time           `json:"completed_at"`
