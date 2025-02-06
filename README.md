@@ -167,6 +167,31 @@ getUserChannelDataResponse, _ := client.Users.GetChannelData(ctx, &knock.GetUser
 fmt.Printf("channel-data-found: %+v\n", getUserChannelDataResponse)
 ```
 
+### Handling Bulk Operations
+
+```go
+// Get a bulk operation by ID
+bulkOp, err := client.BulkOperations.Get(ctx, "bulk-op-id")
+if err != nil {
+    // handle error
+}
+
+// Access error items safely using helper methods
+for _, errorItem := range bulkOp.ErrorItems {
+    if msg := errorItem.GetMessage(); msg != "" {
+        fmt.Printf("Error message: %s\n", msg)
+    }
+    if code := errorItem.GetCode(); code != "" {
+        fmt.Printf("Error code: %s\n", code)
+    }
+    
+    // Access any operation-specific fields
+    if data := errorItem.GetField("data"); data != nil {
+        fmt.Printf("Error data: %+v\n", data)
+    }
+}
+```
+
 ### Canceling workflows
 
 ```go
