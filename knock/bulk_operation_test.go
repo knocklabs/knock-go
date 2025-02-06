@@ -35,10 +35,10 @@ func TestBulkOperation_get(t *testing.T) {
 		InsertedAt:         ParseRFC3339Timestamp("2021-03-05T12:00:00Z"),
 		UpdatedAt:          ParseRFC3339Timestamp("2021-03-05T12:00:00Z"),
 		EstimatedTotalRows: 42,
-		Name:              "bulk_op",
-		ErrorCount:        0,
-		SuccessCount:      0,
-		ErrorItems:        []ErrorItem{},
+		Name:               "bulk_op",
+		ErrorCount:         0,
+		SuccessCount:       0,
+		ErrorItems:         []ErrorItem{},
 	}
 
 	c.Assert(err, qt.IsNil)
