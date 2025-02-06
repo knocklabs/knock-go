@@ -44,3 +44,33 @@ func TestBulkOperation_get(t *testing.T) {
 	c.Assert(err, qt.IsNil)
 	c.Assert(have, qt.DeepEquals, want)
 }
+
+func TestErrorItem_Methods(t *testing.T) {
+	c := qt.New(t)
+
+	item := ErrorItem{
+		"message": "test error",
+		"code":    "TEST_ERROR",
+		"data": map[string]interface{}{
+			"field": "value",
+		},
+	}
+
+	c.Assert(item.GetMessage(), qt.Equals, "test error")
+	c.Assert(item.GetCode(), qt.Equals, "TEST_ERROR")
+	c.Assert(item.GetField("data"), qt.DeepEquals, map[string]interface{}{
+		"field": "value",
+	})
+
+	emptyItem := ErrorItem{}
+	c.Assert(emptyItem.GetMessage(), qt.Equals, "")
+	c.Assert(emptyItem.GetCode(), qt.Equals, "")
+	c.Assert(emptyItem.GetField("nonexistent"), qt.IsNil)
+
+	invalidItem := ErrorItem{
+		"message": 123,  // wrong type
+		"code":    true, // wrong type
+	}
+	c.Assert(invalidItem.GetMessage(), qt.Equals, "")
+	c.Assert(invalidItem.GetCode(), qt.Equals, "")
+}
