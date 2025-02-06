@@ -498,7 +498,7 @@ func TestMessages_BulkChangeChannelStatus(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":1,"failed_at":null,"id":"fbf36d40-b6f8-4675-a362-ede1b859f757","inserted_at":"2022-05-28T00:51:26.343157Z","name":"messages.unread","processed_rows":0,"progress_path":"/v1/bulk_operations/fbf36d40-b6f8-4675-a362-ede1b859f757","started_at":null,"status":"queued","updated_at":"2022-05-28T00:51:26.349222Z","error_count":0,"success_count":0,"error_items":[]}`
+		out := `{"__typename":"BulkOperation","completed_at":null,"estimated_total_rows":1,"failed_at":null,"id":"fbf36d40-b6f8-4675-a362-ede1b859f757","inserted_at":"2022-05-28T00:51:26.343157Z","name":"messages.unread","processed_rows":0,"progress_path":"/v1/bulk_operations/fbf36d40-b6f8-4675-a362-ede1b859f757","started_at":null,"status":"queued","updated_at":"2022-05-28T00:51:26.349222Z","error_count":0,"success_count":0,"error_items":[{"id": "123"}]}`
 		_, err := w.Write([]byte(out))
 		c.Assert(err, qt.IsNil)
 	}))
@@ -527,7 +527,11 @@ func TestMessages_BulkChangeChannelStatus(t *testing.T) {
 		Name:               "messages.unread",
 		ErrorCount:         0,
 		SuccessCount:       0,
-		ErrorItems:         []ErrorItem{},
+		ErrorItems: []ErrorItem{
+			map[string]interface{}{
+				"id": "123",
+			},
+		},
 	}
 
 	c.Assert(err, qt.IsNil)
