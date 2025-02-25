@@ -155,7 +155,6 @@ func (tr *TriggerWorkflowRequest) AddTenantByEntity(entity map[string]interface{
 	return *tr
 }
 
-
 func (ws *workflowsService) Trigger(ctx context.Context, triggerReq *TriggerWorkflowRequest, methodOptions *MethodOptions) (string, error) {
 	path := fmt.Sprintf("%s/trigger", workflowsAPIPath(triggerReq.Workflow))
 	req, err := ws.client.newRequest(http.MethodPost, path, triggerReq, methodOptions)
