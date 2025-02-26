@@ -127,14 +127,16 @@ type GetObjectMessagesRequest struct {
 	ObjectID   string `url:"-"`
 	Collection string `url:"-"`
 
-	PageSize    int                    `url:"page_size,omitempty"`
-	Before      string                 `url:"before,omitempty"`
-	After       string                 `url:"after,omitempty"`
-	Source      string                 `url:"source,omitempty"`
-	Tenant      string                 `url:"tenant,omitempty"`
-	Status      []EngagementStatus     `url:"status,omitempty"`
-	ChannelID   string                 `url:"channel_id,omitempty"`
-	TriggerData map[string]interface{} `url:"-"`
+	PageSize               int                    `url:"page_size,omitempty"`
+	Before                 string                 `url:"before,omitempty"`
+	After                  string                 `url:"after,omitempty"`
+	Source                 string                 `url:"source,omitempty"`
+	Tenant                 string                 `url:"tenant,omitempty"`
+	Status                 []EngagementStatus     `url:"status,omitempty"`
+	ChannelID              string                 `url:"channel_id,omitempty"`
+	TriggerData            map[string]interface{} `url:"-"`
+	WorkflowRunID          string                 `url:"workflow_run_id,omitempty"`
+	WorkflowRecipientRunID string                 `url:"workflow_recipient_run_id,omitempty"`
 }
 
 type GetObjectMessagesResponse struct {

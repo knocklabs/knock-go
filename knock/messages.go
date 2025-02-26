@@ -184,14 +184,19 @@ type MessageContent struct {
 
 // Client structs
 type ListMessagesRequest struct {
-	PageSize    int                    `url:"page_size,omitempty"`
-	Before      string                 `url:"before,omitempty"`
-	After       string                 `url:"after,omitempty"`
-	Source      string                 `url:"source,omitempty"`
-	Tenant      string                 `url:"tenant,omitempty"`
-	Status      []EngagementStatus     `url:"status,omitempty"`
-	ChannelID   string                 `url:"channel_id,omitempty"`
-	TriggerData map[string]interface{} `url:"-"`
+	PageSize               int                    `url:"page_size,omitempty"`
+	Before                 string                 `url:"before,omitempty"`
+	After                  string                 `url:"after,omitempty"`
+	Source                 string                 `url:"source,omitempty"`
+	Tenant                 string                 `url:"tenant,omitempty"`
+	Status                 []EngagementStatus     `url:"status,omitempty"`
+	EngagementStatus       []string               `url:"engagement_status,omitempty"`
+	ChannelID              string                 `url:"channel_id,omitempty"`
+	MessageIDs             []string               `url:"message_ids,omitempty"`
+	TriggerData            map[string]interface{} `url:"-"`
+	WorkflowCategories     []string               `url:"workflow_categories,omitempty"`
+	WorkflowRunID          string                 `url:"workflow_run_id,omitempty"`
+	WorkflowRecipientRunID string                 `url:"workflow_recipient_run_id,omitempty"`
 }
 
 type ListMessagesResponse struct {

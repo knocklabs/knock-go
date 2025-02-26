@@ -3,10 +3,10 @@ package knock
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"io"
 
 	qt "github.com/frankban/quicktest"
 )
