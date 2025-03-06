@@ -315,6 +315,7 @@ func TestUserListSubscriptionsWithOptionalParams(t *testing.T) {
 		knock.UserListSubscriptionsParams{
 			After:    knock.F("after"),
 			Before:   knock.F("before"),
+			Objects:  knock.F([]knock.UserListSubscriptionsParamsObjectUnion{shared.UnionString("user_123")}),
 			PageSize: knock.F(int64(0)),
 		},
 	)
@@ -327,7 +328,7 @@ func TestUserListSubscriptionsWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestUserMerge(t *testing.T) {
+func TestUserMergeWithOptionalParams(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -344,7 +345,7 @@ func TestUserMerge(t *testing.T) {
 		context.TODO(),
 		"user_id",
 		knock.UserMergeParams{
-			FromUserID: knock.F("user_1"),
+			FromUserID: knock.F("from_user_id"),
 		},
 	)
 	if err != nil {
@@ -356,7 +357,7 @@ func TestUserMerge(t *testing.T) {
 	}
 }
 
-func TestUserSetChannelDataWithOptionalParams(t *testing.T) {
+func TestUserSetChannelData(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -373,11 +374,6 @@ func TestUserSetChannelDataWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"user_id",
 		"182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
-		knock.UserSetChannelDataParams{
-			Data: knock.F[knock.UserSetChannelDataParamsDataUnion](knock.UserSetChannelDataParamsDataPushChannelData{
-				Tokens: knock.F([]string{"string"}),
-			}),
-		},
 	)
 	if err != nil {
 		var apierr *knock.Error

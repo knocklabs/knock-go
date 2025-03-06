@@ -54,7 +54,7 @@ func (r *UserFeedService) Get(ctx context.Context, userID string, id string, que
 	return
 }
 
-// Get a user's in-app feed settings
+// Get a user's feed settings
 func (r *UserFeedService) GetSettings(ctx context.Context, userID string, id string, opts ...option.RequestOption) (res *UserFeedGetSettingsResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
@@ -161,8 +161,8 @@ type UserFeedGetResponseEntriesActivity struct {
 	// A recipient, which is either a user or an object
 	Actor UserFeedGetResponseEntriesActivitiesActor `json:"actor,nullable"`
 	// The data associated with the activity
-	Data       map[string]interface{} `json:"data,nullable"`
-	InsertedAt time.Time              `json:"inserted_at" format:"date-time"`
+	Data       interface{} `json:"data,nullable"`
+	InsertedAt time.Time   `json:"inserted_at" format:"date-time"`
 	// A recipient, which is either a user or an object
 	Recipient UserFeedGetResponseEntriesActivitiesRecipient `json:"recipient"`
 	UpdatedAt time.Time                                     `json:"updated_at" format:"date-time"`
@@ -199,9 +199,9 @@ type UserFeedGetResponseEntriesActivitiesActor struct {
 	Avatar      string                                        `json:"avatar,nullable"`
 	Collection  string                                        `json:"collection"`
 	CreatedAt   time.Time                                     `json:"created_at,nullable" format:"date-time"`
-	Email       string                                        `json:"email,nullable"`
+	Email       string                                        `json:"email,nullable" format:"email"`
 	Name        string                                        `json:"name,nullable"`
-	PhoneNumber string                                        `json:"phone_number,nullable"`
+	PhoneNumber string                                        `json:"phone_number,nullable" format:"phone-number"`
 	Timezone    string                                        `json:"timezone,nullable"`
 	JSON        userFeedGetResponseEntriesActivitiesActorJSON `json:"-"`
 	union       UserFeedGetResponseEntriesActivitiesActorUnion
@@ -310,9 +310,9 @@ type UserFeedGetResponseEntriesActivitiesRecipient struct {
 	Avatar      string                                            `json:"avatar,nullable"`
 	Collection  string                                            `json:"collection"`
 	CreatedAt   time.Time                                         `json:"created_at,nullable" format:"date-time"`
-	Email       string                                            `json:"email,nullable"`
+	Email       string                                            `json:"email,nullable" format:"email"`
 	Name        string                                            `json:"name,nullable"`
-	PhoneNumber string                                            `json:"phone_number,nullable"`
+	PhoneNumber string                                            `json:"phone_number,nullable" format:"phone-number"`
 	Timezone    string                                            `json:"timezone,nullable"`
 	JSON        userFeedGetResponseEntriesActivitiesRecipientJSON `json:"-"`
 	union       UserFeedGetResponseEntriesActivitiesRecipientUnion
@@ -422,9 +422,9 @@ type UserFeedGetResponseEntriesActor struct {
 	Avatar      string                              `json:"avatar,nullable"`
 	Collection  string                              `json:"collection"`
 	CreatedAt   time.Time                           `json:"created_at,nullable" format:"date-time"`
-	Email       string                              `json:"email,nullable"`
+	Email       string                              `json:"email,nullable" format:"email"`
 	Name        string                              `json:"name,nullable"`
-	PhoneNumber string                              `json:"phone_number,nullable"`
+	PhoneNumber string                              `json:"phone_number,nullable" format:"phone-number"`
 	Timezone    string                              `json:"timezone,nullable"`
 	JSON        userFeedGetResponseEntriesActorJSON `json:"-"`
 	union       UserFeedGetResponseEntriesActorsUnion
@@ -529,7 +529,7 @@ type UserFeedGetResponseEntriesBlock struct {
 	Name string                               `json:"name,required"`
 	Type UserFeedGetResponseEntriesBlocksType `json:"type,required"`
 	// This field can have the runtime type of
-	// [[]UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockButton].
+	// [[]UserFeedGetResponseEntriesBlocksButtonSetBlockButton].
 	Buttons  interface{}                         `json:"buttons"`
 	Content  string                              `json:"content"`
 	Rendered string                              `json:"rendered"`
@@ -566,17 +566,16 @@ func (r *UserFeedGetResponseEntriesBlock) UnmarshalJSON(data []byte) (err error)
 // can cast to the specific types for more type safety.
 //
 // Possible runtime types of the union are
-// [UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlock],
-// [UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlock].
+// [UserFeedGetResponseEntriesBlocksContentBlock],
+// [UserFeedGetResponseEntriesBlocksButtonSetBlock].
 func (r UserFeedGetResponseEntriesBlock) AsUnion() UserFeedGetResponseEntriesBlocksUnion {
 	return r.union
 }
 
 // A content (text or markdown) block in a message in an app feed
 //
-// Union satisfied by
-// [UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlock] or
-// [UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlock].
+// Union satisfied by [UserFeedGetResponseEntriesBlocksContentBlock] or
+// [UserFeedGetResponseEntriesBlocksButtonSetBlock].
 type UserFeedGetResponseEntriesBlocksUnion interface {
 	implementsUserFeedGetResponseEntriesBlock()
 }
@@ -587,28 +586,27 @@ func init() {
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlock{}),
+			Type:       reflect.TypeOf(UserFeedGetResponseEntriesBlocksContentBlock{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlock{}),
+			Type:       reflect.TypeOf(UserFeedGetResponseEntriesBlocksButtonSetBlock{}),
 		},
 	)
 }
 
 // A content (text or markdown) block in a message in an app feed
-type UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlock struct {
-	Content  string                                                           `json:"content,required"`
-	Name     string                                                           `json:"name,required"`
-	Rendered string                                                           `json:"rendered,required"`
-	Type     UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockType `json:"type,required"`
-	JSON     userFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockJSON `json:"-"`
+type UserFeedGetResponseEntriesBlocksContentBlock struct {
+	Content  string                                           `json:"content,required"`
+	Name     string                                           `json:"name,required"`
+	Rendered string                                           `json:"rendered,required"`
+	Type     UserFeedGetResponseEntriesBlocksContentBlockType `json:"type,required"`
+	JSON     userFeedGetResponseEntriesBlocksContentBlockJSON `json:"-"`
 }
 
-// userFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockJSON contains the
-// JSON metadata for the struct
-// [UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlock]
-type userFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockJSON struct {
+// userFeedGetResponseEntriesBlocksContentBlockJSON contains the JSON metadata for
+// the struct [UserFeedGetResponseEntriesBlocksContentBlock]
+type userFeedGetResponseEntriesBlocksContentBlockJSON struct {
 	Content     apijson.Field
 	Name        apijson.Field
 	Rendered    apijson.Field
@@ -617,44 +615,42 @@ type userFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlock) UnmarshalJSON(data []byte) (err error) {
+func (r *UserFeedGetResponseEntriesBlocksContentBlock) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r userFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockJSON) RawJSON() string {
+func (r userFeedGetResponseEntriesBlocksContentBlockJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlock) implementsUserFeedGetResponseEntriesBlock() {
-}
+func (r UserFeedGetResponseEntriesBlocksContentBlock) implementsUserFeedGetResponseEntriesBlock() {}
 
-type UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockType string
+type UserFeedGetResponseEntriesBlocksContentBlockType string
 
 const (
-	UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockTypeMarkdown UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockType = "markdown"
-	UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockTypeText     UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockType = "text"
+	UserFeedGetResponseEntriesBlocksContentBlockTypeMarkdown UserFeedGetResponseEntriesBlocksContentBlockType = "markdown"
+	UserFeedGetResponseEntriesBlocksContentBlockTypeText     UserFeedGetResponseEntriesBlocksContentBlockType = "text"
 )
 
-func (r UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockType) IsKnown() bool {
+func (r UserFeedGetResponseEntriesBlocksContentBlockType) IsKnown() bool {
 	switch r {
-	case UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockTypeMarkdown, UserFeedGetResponseEntriesBlocksMessageInAppFeedContentBlockTypeText:
+	case UserFeedGetResponseEntriesBlocksContentBlockTypeMarkdown, UserFeedGetResponseEntriesBlocksContentBlockTypeText:
 		return true
 	}
 	return false
 }
 
 // A set of buttons in a message in an app feed
-type UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlock struct {
-	Buttons []UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockButton `json:"buttons,required"`
-	Name    string                                                                 `json:"name,required"`
-	Type    UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockType     `json:"type,required"`
-	JSON    userFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockJSON     `json:"-"`
+type UserFeedGetResponseEntriesBlocksButtonSetBlock struct {
+	Buttons []UserFeedGetResponseEntriesBlocksButtonSetBlockButton `json:"buttons,required"`
+	Name    string                                                 `json:"name,required"`
+	Type    UserFeedGetResponseEntriesBlocksButtonSetBlockType     `json:"type,required"`
+	JSON    userFeedGetResponseEntriesBlocksButtonSetBlockJSON     `json:"-"`
 }
 
-// userFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockJSON contains the
-// JSON metadata for the struct
-// [UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlock]
-type userFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockJSON struct {
+// userFeedGetResponseEntriesBlocksButtonSetBlockJSON contains the JSON metadata
+// for the struct [UserFeedGetResponseEntriesBlocksButtonSetBlock]
+type userFeedGetResponseEntriesBlocksButtonSetBlockJSON struct {
 	Buttons     apijson.Field
 	Name        apijson.Field
 	Type        apijson.Field
@@ -662,29 +658,27 @@ type userFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlock) UnmarshalJSON(data []byte) (err error) {
+func (r *UserFeedGetResponseEntriesBlocksButtonSetBlock) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r userFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockJSON) RawJSON() string {
+func (r userFeedGetResponseEntriesBlocksButtonSetBlockJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlock) implementsUserFeedGetResponseEntriesBlock() {
-}
+func (r UserFeedGetResponseEntriesBlocksButtonSetBlock) implementsUserFeedGetResponseEntriesBlock() {}
 
 // A button in a set of buttons
-type UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockButton struct {
-	Action string                                                                   `json:"action,required"`
-	Label  string                                                                   `json:"label,required"`
-	Name   string                                                                   `json:"name,required"`
-	JSON   userFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockButtonJSON `json:"-"`
+type UserFeedGetResponseEntriesBlocksButtonSetBlockButton struct {
+	Action string                                                   `json:"action,required"`
+	Label  string                                                   `json:"label,required"`
+	Name   string                                                   `json:"name,required"`
+	JSON   userFeedGetResponseEntriesBlocksButtonSetBlockButtonJSON `json:"-"`
 }
 
-// userFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockButtonJSON
-// contains the JSON metadata for the struct
-// [UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockButton]
-type userFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockButtonJSON struct {
+// userFeedGetResponseEntriesBlocksButtonSetBlockButtonJSON contains the JSON
+// metadata for the struct [UserFeedGetResponseEntriesBlocksButtonSetBlockButton]
+type userFeedGetResponseEntriesBlocksButtonSetBlockButtonJSON struct {
 	Action      apijson.Field
 	Label       apijson.Field
 	Name        apijson.Field
@@ -692,23 +686,23 @@ type userFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockButtonJSON st
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockButton) UnmarshalJSON(data []byte) (err error) {
+func (r *UserFeedGetResponseEntriesBlocksButtonSetBlockButton) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r userFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockButtonJSON) RawJSON() string {
+func (r userFeedGetResponseEntriesBlocksButtonSetBlockButtonJSON) RawJSON() string {
 	return r.raw
 }
 
-type UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockType string
+type UserFeedGetResponseEntriesBlocksButtonSetBlockType string
 
 const (
-	UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockTypeButtonSet UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockType = "button_set"
+	UserFeedGetResponseEntriesBlocksButtonSetBlockTypeButtonSet UserFeedGetResponseEntriesBlocksButtonSetBlockType = "button_set"
 )
 
-func (r UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockType) IsKnown() bool {
+func (r UserFeedGetResponseEntriesBlocksButtonSetBlockType) IsKnown() bool {
 	switch r {
-	case UserFeedGetResponseEntriesBlocksMessageInAppFeedButtonSetBlockTypeButtonSet:
+	case UserFeedGetResponseEntriesBlocksButtonSetBlockTypeButtonSet:
 		return true
 	}
 	return false

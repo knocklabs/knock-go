@@ -47,7 +47,7 @@ func (r *ProviderSlackService) CheckAuth(ctx context.Context, channelID string, 
 	return
 }
 
-// Get Slack channels for a Slack workspace
+// Get Slack channels from a Slack workspace
 func (r *ProviderSlackService) ListChannels(ctx context.Context, channelID string, query ProviderSlackListChannelsParams, opts ...option.RequestOption) (res *ProviderSlackListChannelsResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if channelID == "" {

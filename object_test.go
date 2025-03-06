@@ -342,10 +342,12 @@ func TestObjectListSubscriptionsWithOptionalParams(t *testing.T) {
 		"collection",
 		"object_id",
 		knock.ObjectListSubscriptionsParams{
-			After:    knock.F("after"),
-			Before:   knock.F("before"),
-			Mode:     knock.F(knock.ObjectListSubscriptionsParamsModeRecipient),
-			PageSize: knock.F(int64(0)),
+			After:      knock.F("after"),
+			Before:     knock.F("before"),
+			Mode:       knock.F(knock.ObjectListSubscriptionsParamsModeRecipient),
+			Objects:    knock.F([]knock.ObjectListSubscriptionsParamsObjectUnion{shared.UnionString("user_123")}),
+			PageSize:   knock.F(int64(0)),
+			Recipients: knock.F([]knock.ObjectListSubscriptionsParamsRecipientUnion{shared.UnionString("user_123")}),
 		},
 	)
 	if err != nil {
@@ -411,7 +413,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestObjectSetChannelDataWithOptionalParams(t *testing.T) {
+func TestObjectSetChannelData(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -429,11 +431,6 @@ func TestObjectSetChannelDataWithOptionalParams(t *testing.T) {
 		"collection",
 		"object_id",
 		"182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
-		knock.ObjectSetChannelDataParams{
-			Data: knock.F[knock.ObjectSetChannelDataParamsDataUnion](knock.ObjectSetChannelDataParamsDataPushChannelData{
-				Tokens: knock.F([]string{"string"}),
-			}),
-		},
 	)
 	if err != nil {
 		var apierr *knock.Error
