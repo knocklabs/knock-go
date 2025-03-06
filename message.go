@@ -1071,7 +1071,7 @@ type MessageGetContentResponseData struct {
 	Cc     string      `json:"cc,nullable"`
 	// This field can have the runtime type of [map[string]interface{}].
 	Connection interface{} `json:"connection"`
-	// This field can have the runtime type of [interface{}].
+	// This field can have the runtime type of [map[string]interface{}].
 	Data     interface{} `json:"data"`
 	From     string      `json:"from"`
 	HTMLBody string      `json:"html_body"`
@@ -1251,7 +1251,7 @@ type MessageGetContentResponseDataMessagePushContent struct {
 	Typename string                                              `json:"__typename,required"`
 	Body     string                                              `json:"body,required"`
 	Title    string                                              `json:"title,required"`
-	Data     interface{}                                         `json:"data,nullable"`
+	Data     map[string]interface{}                              `json:"data,nullable"`
 	JSON     messageGetContentResponseDataMessagePushContentJSON `json:"-"`
 }
 

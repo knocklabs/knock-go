@@ -6,13 +6,10 @@ type UnionString string
 
 func (UnionString) ImplementsUserListMessagesResponseEntriesActorsUnion()                  {}
 func (UnionString) ImplementsUserListMessagesResponseEntriesRecipientUnion()               {}
-func (UnionString) ImplementsUserListSubscriptionsParamsObjectUnion()                      {}
 func (UnionString) ImplementsObjectListMessagesResponseEntriesActorsUnion()                {}
 func (UnionString) ImplementsObjectListMessagesResponseEntriesRecipientUnion()             {}
 func (UnionString) ImplementsObjectAddSubscriptionsParamsRecipientUnion()                  {}
 func (UnionString) ImplementsObjectDeleteSubscriptionsParamsRecipientUnion()               {}
-func (UnionString) ImplementsObjectListSubscriptionsParamsObjectUnion()                    {}
-func (UnionString) ImplementsObjectListSubscriptionsParamsRecipientUnion()                 {}
 func (UnionString) ImplementsObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion() {}
 func (UnionString) ImplementsTenantBulkSetParamsTenantUnion()                              {}
 func (UnionString) ImplementsMessageListResponseEntriesActorsUnion()                       {}
