@@ -8,14 +8,12 @@ func (UnionBool) ImplementsUserUpdateParamsPreferencesCategoriesUnion()         
 func (UnionBool) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesChatUnion()      {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailUnion()     {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPUnion()      {}
-func (UnionBool) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppUnion()     {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion() {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesPushUnion()      {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSUnion()       {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesChannelTypesChatUnion()                      {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesChannelTypesEmailUnion()                     {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesChannelTypesHTTPUnion()                      {}
-func (UnionBool) ImplementsUserUpdateParamsPreferencesChannelTypesInAppUnion()                     {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesChannelTypesInAppFeedUnion()                 {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesChannelTypesPushUnion()                      {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesChannelTypesSMSUnion()                       {}
@@ -23,7 +21,6 @@ func (UnionBool) ImplementsUserUpdateParamsPreferencesWorkflowsUnion()          
 func (UnionBool) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatUnion()       {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailUnion()      {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion()       {}
-func (UnionBool) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppUnion()      {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion()  {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushUnion()       {}
 func (UnionBool) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSUnion()        {}
