@@ -94,20 +94,30 @@ func (r *UserService) Merge(ctx context.Context, userID string, body UserMergePa
 
 // A user object
 type User struct {
-	ID          string            `json:"id,required"`
-	UpdatedAt   time.Time         `json:"updated_at,required" format:"date-time"`
-	Typename    User_Typename     `json:"__typename"`
-	CreatedAt   time.Time         `json:"created_at" format:"date-time"`
-	ExtraFields map[string]string `json:"-,extras"`
-	JSON        userJSON          `json:"-"`
+	ID          string                 `json:"id,required"`
+	Typename    string                 `json:"__typename,required"`
+	UpdatedAt   time.Time              `json:"updated_at,required" format:"date-time"`
+	Avatar      string                 `json:"avatar,nullable"`
+	CreatedAt   time.Time              `json:"created_at,nullable" format:"date-time"`
+	Email       string                 `json:"email,nullable" format:"email"`
+	Name        string                 `json:"name,nullable"`
+	PhoneNumber string                 `json:"phone_number,nullable" format:"phone-number"`
+	Timezone    string                 `json:"timezone,nullable"`
+	ExtraFields map[string]interface{} `json:"-,extras"`
+	JSON        userJSON               `json:"-"`
 }
 
 // userJSON contains the JSON metadata for the struct [User]
 type userJSON struct {
 	ID          apijson.Field
-	UpdatedAt   apijson.Field
 	Typename    apijson.Field
+	UpdatedAt   apijson.Field
+	Avatar      apijson.Field
 	CreatedAt   apijson.Field
+	Email       apijson.Field
+	Name        apijson.Field
+	PhoneNumber apijson.Field
+	Timezone    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -118,20 +128,6 @@ func (r *User) UnmarshalJSON(data []byte) (err error) {
 
 func (r userJSON) RawJSON() string {
 	return r.raw
-}
-
-type User_Typename string
-
-const (
-	User_TypenameUser User_Typename = "User"
-)
-
-func (r User_Typename) IsKnown() bool {
-	switch r {
-	case User_TypenameUser:
-		return true
-	}
-	return false
 }
 
 // A paginated list of users.
@@ -162,20 +158,20 @@ func (r userListResponseJSON) RawJSON() string {
 
 // The information about a paginated result
 type UserListResponsePageInfo struct {
-	Typename UserListResponsePageInfoTypename `json:"__typename"`
-	After    string                           `json:"after"`
-	Before   string                           `json:"before"`
-	PageSize int64                            `json:"page_size"`
-	JSON     userListResponsePageInfoJSON     `json:"-"`
+	Typename string                       `json:"__typename,required"`
+	PageSize int64                        `json:"page_size,required"`
+	After    string                       `json:"after,nullable"`
+	Before   string                       `json:"before,nullable"`
+	JSON     userListResponsePageInfoJSON `json:"-"`
 }
 
 // userListResponsePageInfoJSON contains the JSON metadata for the struct
 // [UserListResponsePageInfo]
 type userListResponsePageInfoJSON struct {
 	Typename    apijson.Field
+	PageSize    apijson.Field
 	After       apijson.Field
 	Before      apijson.Field
-	PageSize    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -188,23 +184,11 @@ func (r userListResponsePageInfoJSON) RawJSON() string {
 	return r.raw
 }
 
-type UserListResponsePageInfoTypename string
-
-const (
-	UserListResponsePageInfoTypenamePageInfo UserListResponsePageInfoTypename = "PageInfo"
-)
-
-func (r UserListResponsePageInfoTypename) IsKnown() bool {
-	switch r {
-	case UserListResponsePageInfoTypenamePageInfo:
-		return true
-	}
-	return false
-}
-
 type UserUpdateParams struct {
+	// Allows inline setting channel data for a recipient
 	ChannelData param.Field[map[string]UserUpdateParamsChannelData] `json:"channel_data"`
 	CreatedAt   param.Field[time.Time]                              `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
 	Preferences param.Field[map[string]UserUpdateParamsPreferences] `json:"preferences"`
 }
 
@@ -212,38 +196,288 @@ func (r UserUpdateParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// Set channel data for a type of channel
 type UserUpdateParamsChannelData struct {
-	Data param.Field[UserUpdateParamsChannelDataData] `json:"data"`
+	// Channel data for push providers
+	Data param.Field[UserUpdateParamsChannelDataDataUnion] `json:"data,required"`
 }
 
 func (r UserUpdateParamsChannelData) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// Channel data for push providers
 type UserUpdateParamsChannelDataData struct {
-	Tokens param.Field[[]string] `json:"tokens,required"`
+	Token       param.Field[interface{}] `json:"token"`
+	Connections param.Field[interface{}] `json:"connections"`
+	// The Microsoft Teams tenant ID
+	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
+	PlayerIDs       param.Field[interface{}] `json:"player_ids"`
+	Tokens          param.Field[interface{}] `json:"tokens"`
 }
 
 func (r UserUpdateParamsChannelDataData) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+func (r UserUpdateParamsChannelDataData) implementsUserUpdateParamsChannelDataDataUnion() {}
+
+// Channel data for push providers
+//
+// Satisfied by [UserUpdateParamsChannelDataDataPushChannelData],
+// [UserUpdateParamsChannelDataDataOneSignalChannelData],
+// [UserUpdateParamsChannelDataDataSlackChannelData],
+// [UserUpdateParamsChannelDataDataMsTeamsChannelData],
+// [UserUpdateParamsChannelDataDataDiscordChannelData],
+// [UserUpdateParamsChannelDataData].
+type UserUpdateParamsChannelDataDataUnion interface {
+	implementsUserUpdateParamsChannelDataDataUnion()
+}
+
+// Channel data for push providers
+type UserUpdateParamsChannelDataDataPushChannelData struct {
+	Tokens param.Field[[]string] `json:"tokens,required"`
+}
+
+func (r UserUpdateParamsChannelDataDataPushChannelData) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataPushChannelData) implementsUserUpdateParamsChannelDataDataUnion() {
+}
+
+// OneSignal channel data
+type UserUpdateParamsChannelDataDataOneSignalChannelData struct {
+	// The OneSignal player IDs
+	PlayerIDs param.Field[[]string] `json:"player_ids,required" format:"uuid"`
+}
+
+func (r UserUpdateParamsChannelDataDataOneSignalChannelData) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataOneSignalChannelData) implementsUserUpdateParamsChannelDataDataUnion() {
+}
+
+// Slack channel data
+type UserUpdateParamsChannelDataDataSlackChannelData struct {
+	Connections param.Field[[]UserUpdateParamsChannelDataDataSlackChannelDataConnectionUnion] `json:"connections,required"`
+	Token       param.Field[UserUpdateParamsChannelDataDataSlackChannelDataToken]             `json:"token"`
+}
+
+func (r UserUpdateParamsChannelDataDataSlackChannelData) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataSlackChannelData) implementsUserUpdateParamsChannelDataDataUnion() {
+}
+
+// A Slack connection, which either includes a channel_id or a user_id
+type UserUpdateParamsChannelDataDataSlackChannelDataConnection struct {
+	AccessToken param.Field[string] `json:"access_token"`
+	ChannelID   param.Field[string] `json:"channel_id"`
+	URL         param.Field[string] `json:"url"`
+	UserID      param.Field[string] `json:"user_id"`
+}
+
+func (r UserUpdateParamsChannelDataDataSlackChannelDataConnection) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataSlackChannelDataConnection) implementsUserUpdateParamsChannelDataDataSlackChannelDataConnectionUnion() {
+}
+
+// A Slack connection, which either includes a channel_id or a user_id
+//
+// Satisfied by
+// [UserUpdateParamsChannelDataDataSlackChannelDataConnectionsTokenConnection],
+// [UserUpdateParamsChannelDataDataSlackChannelDataConnectionsIncomingWebhookConnection],
+// [UserUpdateParamsChannelDataDataSlackChannelDataConnection].
+type UserUpdateParamsChannelDataDataSlackChannelDataConnectionUnion interface {
+	implementsUserUpdateParamsChannelDataDataSlackChannelDataConnectionUnion()
+}
+
+// A Slack connection, which either includes a channel_id or a user_id
+type UserUpdateParamsChannelDataDataSlackChannelDataConnectionsTokenConnection struct {
+	AccessToken param.Field[string] `json:"access_token"`
+	ChannelID   param.Field[string] `json:"channel_id"`
+	UserID      param.Field[string] `json:"user_id"`
+}
+
+func (r UserUpdateParamsChannelDataDataSlackChannelDataConnectionsTokenConnection) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataSlackChannelDataConnectionsTokenConnection) implementsUserUpdateParamsChannelDataDataSlackChannelDataConnectionUnion() {
+}
+
+// An incoming webhook Slack connection
+type UserUpdateParamsChannelDataDataSlackChannelDataConnectionsIncomingWebhookConnection struct {
+	URL param.Field[string] `json:"url,required"`
+}
+
+func (r UserUpdateParamsChannelDataDataSlackChannelDataConnectionsIncomingWebhookConnection) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataSlackChannelDataConnectionsIncomingWebhookConnection) implementsUserUpdateParamsChannelDataDataSlackChannelDataConnectionUnion() {
+}
+
+type UserUpdateParamsChannelDataDataSlackChannelDataToken struct {
+	AccessToken param.Field[string] `json:"access_token,required"`
+}
+
+func (r UserUpdateParamsChannelDataDataSlackChannelDataToken) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Microsoft Teams channel data
+type UserUpdateParamsChannelDataDataMsTeamsChannelData struct {
+	Connections param.Field[[]UserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionUnion] `json:"connections,required"`
+	// The Microsoft Teams tenant ID
+	MsTeamsTenantID param.Field[string] `json:"ms_teams_tenant_id" format:"uuid"`
+}
+
+func (r UserUpdateParamsChannelDataDataMsTeamsChannelData) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataMsTeamsChannelData) implementsUserUpdateParamsChannelDataDataUnion() {
+}
+
+// A Slack connection, which either includes a channel_id or a user_id
+type UserUpdateParamsChannelDataDataMsTeamsChannelDataConnection struct {
+	AccessToken param.Field[string] `json:"access_token"`
+	ChannelID   param.Field[string] `json:"channel_id"`
+	URL         param.Field[string] `json:"url"`
+	UserID      param.Field[string] `json:"user_id"`
+}
+
+func (r UserUpdateParamsChannelDataDataMsTeamsChannelDataConnection) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataMsTeamsChannelDataConnection) implementsUserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionUnion() {
+}
+
+// A Slack connection, which either includes a channel_id or a user_id
+//
+// Satisfied by
+// [UserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionsTokenConnection],
+// [UserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionsIncomingWebhookConnection],
+// [UserUpdateParamsChannelDataDataMsTeamsChannelDataConnection].
+type UserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionUnion interface {
+	implementsUserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionUnion()
+}
+
+// A Slack connection, which either includes a channel_id or a user_id
+type UserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionsTokenConnection struct {
+	AccessToken param.Field[string] `json:"access_token"`
+	ChannelID   param.Field[string] `json:"channel_id"`
+	UserID      param.Field[string] `json:"user_id"`
+}
+
+func (r UserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionsTokenConnection) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionsTokenConnection) implementsUserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionUnion() {
+}
+
+// An incoming webhook Slack connection
+type UserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionsIncomingWebhookConnection struct {
+	URL param.Field[string] `json:"url,required"`
+}
+
+func (r UserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionsIncomingWebhookConnection) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionsIncomingWebhookConnection) implementsUserUpdateParamsChannelDataDataMsTeamsChannelDataConnectionUnion() {
+}
+
+// Discord channel data
+type UserUpdateParamsChannelDataDataDiscordChannelData struct {
+	Connections param.Field[[]UserUpdateParamsChannelDataDataDiscordChannelDataConnectionUnion] `json:"connections,required"`
+}
+
+func (r UserUpdateParamsChannelDataDataDiscordChannelData) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataDiscordChannelData) implementsUserUpdateParamsChannelDataDataUnion() {
+}
+
+// Discord channel connection
+type UserUpdateParamsChannelDataDataDiscordChannelDataConnection struct {
+	// The Discord channel ID
+	ChannelID param.Field[string] `json:"channel_id"`
+	URL       param.Field[string] `json:"url"`
+}
+
+func (r UserUpdateParamsChannelDataDataDiscordChannelDataConnection) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataDiscordChannelDataConnection) implementsUserUpdateParamsChannelDataDataDiscordChannelDataConnectionUnion() {
+}
+
+// Discord channel connection
+//
+// Satisfied by
+// [UserUpdateParamsChannelDataDataDiscordChannelDataConnectionsChannelConnection],
+// [UserUpdateParamsChannelDataDataDiscordChannelDataConnectionsIncomingWebhookConnection],
+// [UserUpdateParamsChannelDataDataDiscordChannelDataConnection].
+type UserUpdateParamsChannelDataDataDiscordChannelDataConnectionUnion interface {
+	implementsUserUpdateParamsChannelDataDataDiscordChannelDataConnectionUnion()
+}
+
+// Discord channel connection
+type UserUpdateParamsChannelDataDataDiscordChannelDataConnectionsChannelConnection struct {
+	// The Discord channel ID
+	ChannelID param.Field[string] `json:"channel_id,required"`
+}
+
+func (r UserUpdateParamsChannelDataDataDiscordChannelDataConnectionsChannelConnection) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataDiscordChannelDataConnectionsChannelConnection) implementsUserUpdateParamsChannelDataDataDiscordChannelDataConnectionUnion() {
+}
+
+// An incoming webhook Slack connection
+type UserUpdateParamsChannelDataDataDiscordChannelDataConnectionsIncomingWebhookConnection struct {
+	URL param.Field[string] `json:"url,required"`
+}
+
+func (r UserUpdateParamsChannelDataDataDiscordChannelDataConnectionsIncomingWebhookConnection) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsChannelDataDataDiscordChannelDataConnectionsIncomingWebhookConnection) implementsUserUpdateParamsChannelDataDataDiscordChannelDataConnectionUnion() {
+}
+
+// Set preferences for a recipient
 type UserUpdateParamsPreferences struct {
-	Categories   param.Field[UserUpdateParamsPreferencesCategoriesUnion] `json:"categories"`
-	ChannelTypes param.Field[UserUpdateParamsPreferencesChannelTypes]    `json:"channel_types"`
-	Workflows    param.Field[UserUpdateParamsPreferencesWorkflowsUnion]  `json:"workflows"`
+	Categories param.Field[map[string]UserUpdateParamsPreferencesCategoriesUnion] `json:"categories"`
+	// Channel type preferences
+	ChannelTypes param.Field[UserUpdateParamsPreferencesChannelTypes]              `json:"channel_types"`
+	Workflows    param.Field[map[string]UserUpdateParamsPreferencesWorkflowsUnion] `json:"workflows"`
 }
 
 func (r UserUpdateParamsPreferences) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// Workflow or category preferences within a preference set
+//
 // Satisfied by [shared.UnionBool], [UserUpdateParamsPreferencesCategoriesObject].
 type UserUpdateParamsPreferencesCategoriesUnion interface {
 	ImplementsUserUpdateParamsPreferencesCategoriesUnion()
 }
 
 type UserUpdateParamsPreferencesCategoriesObject struct {
+	// Channel type preferences
 	ChannelTypes param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypes] `json:"channel_types"`
 	Conditions   param.Field[[]UserUpdateParamsPreferencesCategoriesObjectCondition]  `json:"conditions"`
 }
@@ -255,10 +489,12 @@ func (r UserUpdateParamsPreferencesCategoriesObject) MarshalJSON() (data []byte,
 func (r UserUpdateParamsPreferencesCategoriesObject) ImplementsUserUpdateParamsPreferencesCategoriesUnion() {
 }
 
+// Channel type preferences
 type UserUpdateParamsPreferencesCategoriesObjectChannelTypes struct {
 	Chat      param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatUnion]      `json:"chat"`
 	Email     param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailUnion]     `json:"email"`
 	HTTP      param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPUnion]      `json:"http"`
+	InApp     param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppUnion]     `json:"in_app"`
 	InAppFeed param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion] `json:"in_app_feed"`
 	Push      param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushUnion]      `json:"push"`
 	SMS       param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSUnion]       `json:"sms"`
@@ -285,6 +521,7 @@ func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditions) M
 func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditions) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesChatUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsCondition struct {
 	Argument param.Field[string]                                                                                  `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator] `json:"operator,required"`
@@ -309,11 +546,17 @@ const (
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -336,6 +579,7 @@ func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditions) 
 func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditions) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsCondition struct {
 	Argument param.Field[string]                                                                                   `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator] `json:"operator,required"`
@@ -360,11 +604,17 @@ const (
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -387,6 +637,7 @@ func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditions) M
 func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditions) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsCondition struct {
 	Argument param.Field[string]                                                                                  `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator] `json:"operator,required"`
@@ -411,11 +662,75 @@ const (
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember:
+		return true
+	}
+	return false
+}
+
+// Satisfied by [shared.UnionBool],
+// [UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditions].
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppUnion interface {
+	ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppUnion()
+}
+
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsCondition] `json:"conditions,required"`
+}
+
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditions) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditions) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppUnion() {
+}
+
+// A condition to be evaluated
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsCondition struct {
+	Argument param.Field[string]                                                                                   `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                   `json:"variable,required"`
+}
+
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsCondition) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator string
+
+const (
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorContains             UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator = "is_audience_member"
+)
+
+func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperator) IsKnown() bool {
+	switch r {
+	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -438,6 +753,7 @@ func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditio
 func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditions) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsCondition struct {
 	Argument param.Field[string]                                                                                       `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator] `json:"operator,required"`
@@ -462,11 +778,17 @@ const (
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -489,6 +811,7 @@ func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditions) M
 func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditions) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesPushUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsCondition struct {
 	Argument param.Field[string]                                                                                  `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator] `json:"operator,required"`
@@ -513,11 +836,17 @@ const (
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -540,6 +869,7 @@ func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditions) Ma
 func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditions) ImplementsUserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsCondition struct {
 	Argument param.Field[string]                                                                                 `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator] `json:"operator,required"`
@@ -564,16 +894,23 @@ const (
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesCategoriesObjectCondition struct {
 	Argument param.Field[string]                                                        `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesCategoriesObjectConditionsOperator] `json:"operator,required"`
@@ -598,20 +935,28 @@ const (
 	UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesCategoriesObjectConditionsOperator = "empty"
 	UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesCategoriesObjectConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesCategoriesObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesCategoriesObjectConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesCategoriesObjectConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesCategoriesObjectConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesCategoriesObjectConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesCategoriesObjectConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesCategoriesObjectConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesCategoriesObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorContains, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorContainsAll, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// Channel type preferences
 type UserUpdateParamsPreferencesChannelTypes struct {
 	Chat      param.Field[UserUpdateParamsPreferencesChannelTypesChatUnion]      `json:"chat"`
 	Email     param.Field[UserUpdateParamsPreferencesChannelTypesEmailUnion]     `json:"email"`
 	HTTP      param.Field[UserUpdateParamsPreferencesChannelTypesHTTPUnion]      `json:"http"`
+	InApp     param.Field[UserUpdateParamsPreferencesChannelTypesInAppUnion]     `json:"in_app"`
 	InAppFeed param.Field[UserUpdateParamsPreferencesChannelTypesInAppFeedUnion] `json:"in_app_feed"`
 	Push      param.Field[UserUpdateParamsPreferencesChannelTypesPushUnion]      `json:"push"`
 	SMS       param.Field[UserUpdateParamsPreferencesChannelTypesSMSUnion]       `json:"sms"`
@@ -638,6 +983,7 @@ func (r UserUpdateParamsPreferencesChannelTypesChatConditions) MarshalJSON() (da
 func (r UserUpdateParamsPreferencesChannelTypesChatConditions) ImplementsUserUpdateParamsPreferencesChannelTypesChatUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesChannelTypesChatConditionsCondition struct {
 	Argument param.Field[string]                                                                  `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator] `json:"operator,required"`
@@ -662,11 +1008,17 @@ const (
 	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -689,6 +1041,7 @@ func (r UserUpdateParamsPreferencesChannelTypesEmailConditions) MarshalJSON() (d
 func (r UserUpdateParamsPreferencesChannelTypesEmailConditions) ImplementsUserUpdateParamsPreferencesChannelTypesEmailUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesChannelTypesEmailConditionsCondition struct {
 	Argument param.Field[string]                                                                   `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator] `json:"operator,required"`
@@ -713,11 +1066,17 @@ const (
 	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -740,6 +1099,7 @@ func (r UserUpdateParamsPreferencesChannelTypesHTTPConditions) MarshalJSON() (da
 func (r UserUpdateParamsPreferencesChannelTypesHTTPConditions) ImplementsUserUpdateParamsPreferencesChannelTypesHTTPUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesChannelTypesHTTPConditionsCondition struct {
 	Argument param.Field[string]                                                                  `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator] `json:"operator,required"`
@@ -764,11 +1124,75 @@ const (
 	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember:
+		return true
+	}
+	return false
+}
+
+// Satisfied by [shared.UnionBool],
+// [UserUpdateParamsPreferencesChannelTypesInAppConditions].
+type UserUpdateParamsPreferencesChannelTypesInAppUnion interface {
+	ImplementsUserUpdateParamsPreferencesChannelTypesInAppUnion()
+}
+
+type UserUpdateParamsPreferencesChannelTypesInAppConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesChannelTypesInAppConditionsCondition] `json:"conditions,required"`
+}
+
+func (r UserUpdateParamsPreferencesChannelTypesInAppConditions) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsPreferencesChannelTypesInAppConditions) ImplementsUserUpdateParamsPreferencesChannelTypesInAppUnion() {
+}
+
+// A condition to be evaluated
+type UserUpdateParamsPreferencesChannelTypesInAppConditionsCondition struct {
+	Argument param.Field[string]                                                                   `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                   `json:"variable,required"`
+}
+
+func (r UserUpdateParamsPreferencesChannelTypesInAppConditionsCondition) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator string
+
+const (
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorContains             UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator = "is_audience_member"
+)
+
+func (r UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperator) IsKnown() bool {
+	switch r {
+	case UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesChannelTypesInAppConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -791,6 +1215,7 @@ func (r UserUpdateParamsPreferencesChannelTypesInAppFeedConditions) MarshalJSON(
 func (r UserUpdateParamsPreferencesChannelTypesInAppFeedConditions) ImplementsUserUpdateParamsPreferencesChannelTypesInAppFeedUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsCondition struct {
 	Argument param.Field[string]                                                                       `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator] `json:"operator,required"`
@@ -815,11 +1240,17 @@ const (
 	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -842,6 +1273,7 @@ func (r UserUpdateParamsPreferencesChannelTypesPushConditions) MarshalJSON() (da
 func (r UserUpdateParamsPreferencesChannelTypesPushConditions) ImplementsUserUpdateParamsPreferencesChannelTypesPushUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesChannelTypesPushConditionsCondition struct {
 	Argument param.Field[string]                                                                  `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator] `json:"operator,required"`
@@ -866,11 +1298,17 @@ const (
 	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -893,6 +1331,7 @@ func (r UserUpdateParamsPreferencesChannelTypesSMSConditions) MarshalJSON() (dat
 func (r UserUpdateParamsPreferencesChannelTypesSMSConditions) ImplementsUserUpdateParamsPreferencesChannelTypesSMSUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesChannelTypesSMSConditionsCondition struct {
 	Argument param.Field[string]                                                                 `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator] `json:"operator,required"`
@@ -917,22 +1356,31 @@ const (
 	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorContains, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// Workflow or category preferences within a preference set
+//
 // Satisfied by [shared.UnionBool], [UserUpdateParamsPreferencesWorkflowsObject].
 type UserUpdateParamsPreferencesWorkflowsUnion interface {
 	ImplementsUserUpdateParamsPreferencesWorkflowsUnion()
 }
 
 type UserUpdateParamsPreferencesWorkflowsObject struct {
+	// Channel type preferences
 	ChannelTypes param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypes] `json:"channel_types"`
 	Conditions   param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectCondition]  `json:"conditions"`
 }
@@ -944,10 +1392,12 @@ func (r UserUpdateParamsPreferencesWorkflowsObject) MarshalJSON() (data []byte, 
 func (r UserUpdateParamsPreferencesWorkflowsObject) ImplementsUserUpdateParamsPreferencesWorkflowsUnion() {
 }
 
+// Channel type preferences
 type UserUpdateParamsPreferencesWorkflowsObjectChannelTypes struct {
 	Chat      param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatUnion]      `json:"chat"`
 	Email     param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailUnion]     `json:"email"`
 	HTTP      param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion]      `json:"http"`
+	InApp     param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppUnion]     `json:"in_app"`
 	InAppFeed param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion] `json:"in_app_feed"`
 	Push      param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushUnion]      `json:"push"`
 	SMS       param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSUnion]       `json:"sms"`
@@ -974,6 +1424,7 @@ func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditions) Ma
 func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditions) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsCondition struct {
 	Argument param.Field[string]                                                                                 `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator] `json:"operator,required"`
@@ -998,11 +1449,17 @@ const (
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -1025,6 +1482,7 @@ func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditions) M
 func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditions) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsCondition struct {
 	Argument param.Field[string]                                                                                  `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator] `json:"operator,required"`
@@ -1049,11 +1507,17 @@ const (
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -1076,6 +1540,7 @@ func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditions) Ma
 func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditions) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsCondition struct {
 	Argument param.Field[string]                                                                                 `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator] `json:"operator,required"`
@@ -1100,11 +1565,75 @@ const (
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember:
+		return true
+	}
+	return false
+}
+
+// Satisfied by [shared.UnionBool],
+// [UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditions].
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppUnion interface {
+	ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppUnion()
+}
+
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditions struct {
+	Conditions param.Field[[]UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsCondition] `json:"conditions,required"`
+}
+
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditions) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditions) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppUnion() {
+}
+
+// A condition to be evaluated
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsCondition struct {
+	Argument param.Field[string]                                                                                  `json:"argument,required"`
+	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                  `json:"variable,required"`
+}
+
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsCondition) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator string
+
+const (
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorEqualTo              UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorNotEqualTo           UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "not_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorGreaterThan          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "greater_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorLessThan             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "less_than"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorGreaterThanOrEqualTo UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "greater_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorLessThanOrEqualTo    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "less_than_or_equal_to"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorContains             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorNotContains          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "not_contains"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "not_empty"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator = "is_audience_member"
+)
+
+func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperator) IsKnown() bool {
+	switch r {
+	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -1127,6 +1656,7 @@ func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedCondition
 func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditions) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsCondition struct {
 	Argument param.Field[string]                                                                                      `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator] `json:"operator,required"`
@@ -1151,11 +1681,17 @@ const (
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -1178,6 +1714,7 @@ func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditions) Ma
 func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditions) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsCondition struct {
 	Argument param.Field[string]                                                                                 `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator] `json:"operator,required"`
@@ -1202,11 +1739,17 @@ const (
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -1229,6 +1772,7 @@ func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditions) Mar
 func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditions) ImplementsUserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSUnion() {
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsCondition struct {
 	Argument param.Field[string]                                                                                `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator] `json:"operator,required"`
@@ -1253,16 +1797,23 @@ const (
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "empty"
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContainsAll, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A condition to be evaluated
 type UserUpdateParamsPreferencesWorkflowsObjectCondition struct {
 	Argument param.Field[string]                                                       `json:"argument,required"`
 	Operator param.Field[UserUpdateParamsPreferencesWorkflowsObjectConditionsOperator] `json:"operator,required"`
@@ -1287,11 +1838,17 @@ const (
 	UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorEmpty                UserUpdateParamsPreferencesWorkflowsObjectConditionsOperator = "empty"
 	UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorNotEmpty             UserUpdateParamsPreferencesWorkflowsObjectConditionsOperator = "not_empty"
 	UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorContainsAll          UserUpdateParamsPreferencesWorkflowsObjectConditionsOperator = "contains_all"
+	UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestamp          UserUpdateParamsPreferencesWorkflowsObjectConditionsOperator = "is_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorIsNotTimestamp       UserUpdateParamsPreferencesWorkflowsObjectConditionsOperator = "is_not_timestamp"
+	UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestampAfter     UserUpdateParamsPreferencesWorkflowsObjectConditionsOperator = "is_timestamp_after"
+	UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestampBefore    UserUpdateParamsPreferencesWorkflowsObjectConditionsOperator = "is_timestamp_before"
+	UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestampBetween   UserUpdateParamsPreferencesWorkflowsObjectConditionsOperator = "is_timestamp_between"
+	UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorIsAudienceMember     UserUpdateParamsPreferencesWorkflowsObjectConditionsOperator = "is_audience_member"
 )
 
 func (r UserUpdateParamsPreferencesWorkflowsObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorContainsAll:
+	case UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorEqualTo, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorNotEqualTo, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorGreaterThan, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorLessThan, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorGreaterThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorLessThanOrEqualTo, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorContains, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorNotContains, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorEmpty, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorNotEmpty, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorContainsAll, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestamp, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorIsNotTimestamp, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestampAfter, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestampBefore, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestampBetween, UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false

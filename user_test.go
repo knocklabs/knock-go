@@ -34,38 +34,29 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 		knock.UserUpdateParams{
 			ChannelData: knock.F(map[string]knock.UserUpdateParamsChannelData{
 				"97c5837d-c65c-4d54-aa39-080eeb81c69d": {
-					Data: knock.F(knock.UserUpdateParamsChannelDataData{
-						Tokens: knock.F([]string{"push_token_xxx"}),
+					Data: knock.F[knock.UserUpdateParamsChannelDataDataUnion](knock.UserUpdateParamsChannelDataDataPushChannelData{
+						Tokens: knock.F([]string{"string"}),
 					}),
 				},
 			}),
 			CreatedAt: knock.F(time.Now()),
 			Preferences: knock.F(map[string]knock.UserUpdateParamsPreferences{
 				"default": {
-					Categories: knock.F[knock.UserUpdateParamsPreferencesCategoriesUnion](knock.UserUpdateParamsPreferencesCategoriesObject{
-						ChannelTypes: knock.F(knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypes{
-							Chat:      knock.F[knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatUnion](shared.UnionBool(true)),
-							Email:     knock.F[knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailUnion](shared.UnionBool(true)),
-							HTTP:      knock.F[knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
-							InAppFeed: knock.F[knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
-							Push:      knock.F[knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushUnion](shared.UnionBool(true)),
-							SMS:       knock.F[knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSUnion](shared.UnionBool(true)),
-						}),
-						Conditions: knock.F([]knock.UserUpdateParamsPreferencesCategoriesObjectCondition{{
-							Argument: knock.F("some_property"),
-							Operator: knock.F(knock.UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorEqualTo),
-							Variable: knock.F("recipient.property"),
-						}}),
+					Categories: knock.F(map[string]knock.UserUpdateParamsPreferencesCategoriesUnion{
+						"transactional": shared.UnionBool(true),
 					}),
 					ChannelTypes: knock.F(knock.UserUpdateParamsPreferencesChannelTypes{
 						Chat:      knock.F[knock.UserUpdateParamsPreferencesChannelTypesChatUnion](shared.UnionBool(true)),
 						Email:     knock.F[knock.UserUpdateParamsPreferencesChannelTypesEmailUnion](shared.UnionBool(true)),
 						HTTP:      knock.F[knock.UserUpdateParamsPreferencesChannelTypesHTTPUnion](shared.UnionBool(true)),
+						InApp:     knock.F[knock.UserUpdateParamsPreferencesChannelTypesInAppUnion](shared.UnionBool(true)),
 						InAppFeed: knock.F[knock.UserUpdateParamsPreferencesChannelTypesInAppFeedUnion](shared.UnionBool(true)),
 						Push:      knock.F[knock.UserUpdateParamsPreferencesChannelTypesPushUnion](shared.UnionBool(true)),
 						SMS:       knock.F[knock.UserUpdateParamsPreferencesChannelTypesSMSUnion](shared.UnionBool(true)),
 					}),
-					Workflows: knock.F[knock.UserUpdateParamsPreferencesWorkflowsUnion](shared.UnionBool(false)),
+					Workflows: knock.F(map[string]knock.UserUpdateParamsPreferencesWorkflowsUnion{
+						"dinosaurs-loose": shared.UnionBool(true),
+					}),
 				},
 			}),
 		},
