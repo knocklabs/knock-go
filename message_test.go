@@ -7,15 +7,13 @@ import (
 	"errors"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/stainless-sdks/knock-go"
 	"github.com/stainless-sdks/knock-go/internal/testutil"
 	"github.com/stainless-sdks/knock-go/option"
-	"github.com/stainless-sdks/knock-go/shared"
 )
 
-func TestUserUpdateWithOptionalParams(t *testing.T) {
+func TestMessageListWithOptionalParams(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -28,64 +26,20 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithToken("My Token"),
 	)
-	_, err := client.Users.Update(
-		context.TODO(),
-		"user_id",
-		knock.UserUpdateParams{
-			ChannelData: knock.F(map[string]knock.UserUpdateParamsChannelData{
-				"97c5837d-c65c-4d54-aa39-080eeb81c69d": {
-					Data: knock.F[knock.UserUpdateParamsChannelDataDataUnion](knock.UserUpdateParamsChannelDataDataPushChannelData{
-						Tokens: knock.F([]string{"string"}),
-					}),
-				},
-			}),
-			CreatedAt: knock.F(time.Now()),
-			Preferences: knock.F(map[string]knock.UserUpdateParamsPreferences{
-				"default": {
-					Categories: knock.F(map[string]knock.UserUpdateParamsPreferencesCategoriesUnion{
-						"transactional": shared.UnionBool(true),
-					}),
-					ChannelTypes: knock.F(knock.UserUpdateParamsPreferencesChannelTypes{
-						Chat:      knock.F[knock.UserUpdateParamsPreferencesChannelTypesChatUnion](shared.UnionBool(true)),
-						Email:     knock.F[knock.UserUpdateParamsPreferencesChannelTypesEmailUnion](shared.UnionBool(true)),
-						HTTP:      knock.F[knock.UserUpdateParamsPreferencesChannelTypesHTTPUnion](shared.UnionBool(true)),
-						InAppFeed: knock.F[knock.UserUpdateParamsPreferencesChannelTypesInAppFeedUnion](shared.UnionBool(true)),
-						Push:      knock.F[knock.UserUpdateParamsPreferencesChannelTypesPushUnion](shared.UnionBool(true)),
-						SMS:       knock.F[knock.UserUpdateParamsPreferencesChannelTypesSMSUnion](shared.UnionBool(true)),
-					}),
-					Workflows: knock.F(map[string]knock.UserUpdateParamsPreferencesWorkflowsUnion{
-						"dinosaurs-loose": shared.UnionBool(true),
-					}),
-				},
-			}),
-		},
-	)
-	if err != nil {
-		var apierr *knock.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestUserListWithOptionalParams(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := knock.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithToken("My Token"),
-	)
-	_, err := client.Users.List(context.TODO(), knock.UserListParams{
-		After:    knock.F("after"),
-		Before:   knock.F("before"),
-		PageSize: knock.F(int64(0)),
+	_, err := client.Messages.List(context.TODO(), knock.MessageListParams{
+		After:                  knock.F("after"),
+		Before:                 knock.F("before"),
+		ChannelID:              knock.F("channel_id"),
+		EngagementStatus:       knock.F([]knock.MessageListParamsEngagementStatus{knock.MessageListParamsEngagementStatusSeen}),
+		MessageIDs:             knock.F([]string{"string"}),
+		PageSize:               knock.F(int64(0)),
+		Source:                 knock.F("source"),
+		Status:                 knock.F([]knock.MessageListParamsStatus{knock.MessageListParamsStatusQueued}),
+		Tenant:                 knock.F("tenant"),
+		TriggerData:            knock.F("trigger_data"),
+		WorkflowCategories:     knock.F([]string{"string"}),
+		WorkflowRecipientRunID: knock.F("182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e"),
+		WorkflowRunID:          knock.F("182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e"),
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -96,7 +50,7 @@ func TestUserListWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestUserDelete(t *testing.T) {
+func TestMessageArchive(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -109,7 +63,7 @@ func TestUserDelete(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithToken("My Token"),
 	)
-	_, err := client.Users.Delete(context.TODO(), "user_id")
+	_, err := client.Messages.Archive(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {
@@ -119,7 +73,7 @@ func TestUserDelete(t *testing.T) {
 	}
 }
 
-func TestUserGet(t *testing.T) {
+func TestMessageGet(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -132,7 +86,7 @@ func TestUserGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithToken("My Token"),
 	)
-	_, err := client.Users.Get(context.TODO(), "user_id")
+	_, err := client.Messages.Get(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {
@@ -142,7 +96,7 @@ func TestUserGet(t *testing.T) {
 	}
 }
 
-func TestUserGetChannelData(t *testing.T) {
+func TestMessageGetContent(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -155,39 +109,37 @@ func TestUserGetChannelData(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithToken("My Token"),
 	)
-	_, err := client.Users.GetChannelData(
+	_, err := client.Messages.GetContent(context.TODO(), "message_id")
+	if err != nil {
+		var apierr *knock.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestMessageListActivitiesWithOptionalParams(t *testing.T) {
+	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := knock.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithToken("My Token"),
+	)
+	_, err := client.Messages.ListActivities(
 		context.TODO(),
-		"user_id",
-		"182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
-	)
-	if err != nil {
-		var apierr *knock.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestUserGetPreferencesWithOptionalParams(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := knock.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithToken("My Token"),
-	)
-	_, err := client.Users.GetPreferences(
-		context.TODO(),
-		"user_id",
-		"id",
-		knock.UserGetPreferencesParams{
-			Tenant: knock.F("tenant"),
+		"message_id",
+		knock.MessageListActivitiesParams{
+			After:       knock.F("after"),
+			Before:      knock.F("before"),
+			PageSize:    knock.F(int64(0)),
+			TriggerData: knock.F("trigger_data"),
 		},
 	)
 	if err != nil {
@@ -199,7 +151,7 @@ func TestUserGetPreferencesWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestUserListMessagesWithOptionalParams(t *testing.T) {
+func TestMessageListDeliveryLogsWithOptionalParams(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -212,79 +164,13 @@ func TestUserListMessagesWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithToken("My Token"),
 	)
-	_, err := client.Users.ListMessages(
+	_, err := client.Messages.ListDeliveryLogs(
 		context.TODO(),
-		"user-123",
-		knock.UserListMessagesParams{
-			After:                  knock.F("after"),
-			Before:                 knock.F("before"),
-			ChannelID:              knock.F("channel_id"),
-			EngagementStatus:       knock.F([]knock.UserListMessagesParamsEngagementStatus{knock.UserListMessagesParamsEngagementStatusSeen}),
-			MessageIDs:             knock.F([]string{"string"}),
-			PageSize:               knock.F(int64(0)),
-			Source:                 knock.F("source"),
-			Status:                 knock.F([]knock.UserListMessagesParamsStatus{knock.UserListMessagesParamsStatusQueued}),
-			Tenant:                 knock.F("tenant"),
-			TriggerData:            knock.F("trigger_data"),
-			WorkflowCategories:     knock.F([]string{"string"}),
-			WorkflowRecipientRunID: knock.F("182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e"),
-			WorkflowRunID:          knock.F("182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e"),
-		},
-	)
-	if err != nil {
-		var apierr *knock.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestUserListPreferences(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := knock.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithToken("My Token"),
-	)
-	_, err := client.Users.ListPreferences(context.TODO(), "user_id")
-	if err != nil {
-		var apierr *knock.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestUserListSchedulesWithOptionalParams(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := knock.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithToken("My Token"),
-	)
-	_, err := client.Users.ListSchedules(
-		context.TODO(),
-		"user_id",
-		knock.UserListSchedulesParams{
+		"message_id",
+		knock.MessageListDeliveryLogsParams{
 			After:    knock.F("after"),
 			Before:   knock.F("before"),
 			PageSize: knock.F(int64(0)),
-			Tenant:   knock.F("tenant"),
-			Workflow: knock.F("workflow"),
 		},
 	)
 	if err != nil {
@@ -296,7 +182,7 @@ func TestUserListSchedulesWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestUserListSubscriptionsWithOptionalParams(t *testing.T) {
+func TestMessageListEventsWithOptionalParams(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -309,13 +195,12 @@ func TestUserListSubscriptionsWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithToken("My Token"),
 	)
-	_, err := client.Users.ListSubscriptions(
+	_, err := client.Messages.ListEvents(
 		context.TODO(),
-		"user_id",
-		knock.UserListSubscriptionsParams{
+		"message_id",
+		knock.MessageListEventsParams{
 			After:    knock.F("after"),
 			Before:   knock.F("before"),
-			Objects:  knock.F([]knock.UserListSubscriptionsParamsObjectUnion{shared.UnionString("user_123")}),
 			PageSize: knock.F(int64(0)),
 		},
 	)
@@ -328,7 +213,7 @@ func TestUserListSubscriptionsWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestUserMerge(t *testing.T) {
+func TestMessageMarkAsInteractedWithOptionalParams(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -341,42 +226,12 @@ func TestUserMerge(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithToken("My Token"),
 	)
-	_, err := client.Users.Merge(
+	_, err := client.Messages.MarkAsInteracted(
 		context.TODO(),
-		"user_id",
-		knock.UserMergeParams{
-			FromUserID: knock.F("user_1"),
-		},
-	)
-	if err != nil {
-		var apierr *knock.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestUserSetChannelDataWithOptionalParams(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := knock.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithToken("My Token"),
-	)
-	_, err := client.Users.SetChannelData(
-		context.TODO(),
-		"user_id",
-		"182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
-		knock.UserSetChannelDataParams{
-			Data: knock.F[knock.UserSetChannelDataParamsDataUnion](knock.UserSetChannelDataParamsDataPushChannelData{
-				Tokens: knock.F([]string{"string"}),
+		"1jNaXzB2RZX3LY8wVQnfCKyPnv7",
+		knock.MessageMarkAsInteractedParams{
+			Metadata: knock.F(map[string]interface{}{
+				"key": "bar",
 			}),
 		},
 	)
@@ -389,7 +244,7 @@ func TestUserSetChannelDataWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestUserSetPreferencesWithOptionalParams(t *testing.T) {
+func TestMessageMarkAsRead(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -402,28 +257,7 @@ func TestUserSetPreferencesWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithToken("My Token"),
 	)
-	_, err := client.Users.SetPreferences(
-		context.TODO(),
-		"user_id",
-		"id",
-		knock.UserSetPreferencesParams{
-			Categories: knock.F(map[string]knock.UserSetPreferencesParamsCategoriesUnion{
-				"marketing":     shared.UnionBool(false),
-				"transactional": shared.UnionBool(true),
-			}),
-			ChannelTypes: knock.F(knock.UserSetPreferencesParamsChannelTypes{
-				Chat:      knock.F[knock.UserSetPreferencesParamsChannelTypesChatUnion](shared.UnionBool(true)),
-				Email:     knock.F[knock.UserSetPreferencesParamsChannelTypesEmailUnion](shared.UnionBool(true)),
-				HTTP:      knock.F[knock.UserSetPreferencesParamsChannelTypesHTTPUnion](shared.UnionBool(true)),
-				InAppFeed: knock.F[knock.UserSetPreferencesParamsChannelTypesInAppFeedUnion](shared.UnionBool(true)),
-				Push:      knock.F[knock.UserSetPreferencesParamsChannelTypesPushUnion](shared.UnionBool(true)),
-				SMS:       knock.F[knock.UserSetPreferencesParamsChannelTypesSMSUnion](shared.UnionBool(true)),
-			}),
-			Workflows: knock.F(map[string]knock.UserSetPreferencesParamsWorkflowsUnion{
-				"dinosaurs-loose": shared.UnionBool(true),
-			}),
-		},
-	)
+	_, err := client.Messages.MarkAsRead(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {
@@ -433,7 +267,7 @@ func TestUserSetPreferencesWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestUserUnsetChannelData(t *testing.T) {
+func TestMessageMarkAsSeen(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -446,11 +280,76 @@ func TestUserUnsetChannelData(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithToken("My Token"),
 	)
-	_, err := client.Users.UnsetChannelData(
-		context.TODO(),
-		"user_id",
-		"182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
+	_, err := client.Messages.MarkAsSeen(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
+	if err != nil {
+		var apierr *knock.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestMessageMarkAsUnread(t *testing.T) {
+	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := knock.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithToken("My Token"),
 	)
+	_, err := client.Messages.MarkAsUnread(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
+	if err != nil {
+		var apierr *knock.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestMessageMarkAsUnseen(t *testing.T) {
+	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := knock.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithToken("My Token"),
+	)
+	_, err := client.Messages.MarkAsUnseen(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
+	if err != nil {
+		var apierr *knock.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestMessageUnarchive(t *testing.T) {
+	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := knock.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithToken("My Token"),
+	)
+	_, err := client.Messages.Unarchive(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {

@@ -15,8 +15,17 @@ import (
 // interacting with the knock API. You should not instantiate this client directly,
 // and instead use the [NewClient] method instead.
 type Client struct {
-	Options []option.RequestOption
-	Users   *UserService
+	Options        []option.RequestOption
+	Users          *UserService
+	Objects        *ObjectService
+	Tenants        *TenantService
+	BulkOperations *BulkOperationService
+	Messages       *MessageService
+	Providers      *ProviderService
+	Workflows      *WorkflowService
+	Schedules      *ScheduleService
+	Channels       *ChannelService
+	Audiences      *AudienceService
 }
 
 // NewClient generates a new client with the default option read from the
@@ -33,6 +42,15 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r = &Client{Options: opts}
 
 	r.Users = NewUserService(opts...)
+	r.Objects = NewObjectService(opts...)
+	r.Tenants = NewTenantService(opts...)
+	r.BulkOperations = NewBulkOperationService(opts...)
+	r.Messages = NewMessageService(opts...)
+	r.Providers = NewProviderService(opts...)
+	r.Workflows = NewWorkflowService(opts...)
+	r.Schedules = NewScheduleService(opts...)
+	r.Channels = NewChannelService(opts...)
+	r.Audiences = NewAudienceService(opts...)
 
 	return
 }
