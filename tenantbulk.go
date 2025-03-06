@@ -236,7 +236,7 @@ type TenantBulkDeleteParams struct {
 // URLQuery serializes [TenantBulkDeleteParams]'s query parameters as `url.Values`.
 func (r TenantBulkDeleteParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }

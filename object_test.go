@@ -221,6 +221,48 @@ func TestObjectGetPreferencesWithOptionalParams(t *testing.T) {
 	}
 }
 
+func TestObjectListMessagesWithOptionalParams(t *testing.T) {
+	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := knock.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithToken("My Token"),
+	)
+	_, err := client.Objects.ListMessages(
+		context.TODO(),
+		"projects",
+		"project-123",
+		knock.ObjectListMessagesParams{
+			After:                  knock.F("after"),
+			Before:                 knock.F("before"),
+			ChannelID:              knock.F("channel_id"),
+			EngagementStatus:       knock.F([]knock.ObjectListMessagesParamsEngagementStatus{knock.ObjectListMessagesParamsEngagementStatusSeen}),
+			MessageIDs:             knock.F([]string{"string"}),
+			PageSize:               knock.F(int64(0)),
+			Source:                 knock.F("source"),
+			Status:                 knock.F([]knock.ObjectListMessagesParamsStatus{knock.ObjectListMessagesParamsStatusQueued}),
+			Tenant:                 knock.F("tenant"),
+			TriggerData:            knock.F("trigger_data"),
+			WorkflowCategories:     knock.F([]string{"string"}),
+			WorkflowRecipientRunID: knock.F("182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e"),
+			WorkflowRunID:          knock.F("182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e"),
+		},
+	)
+	if err != nil {
+		var apierr *knock.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
 func TestObjectListPreferences(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
@@ -238,6 +280,40 @@ func TestObjectListPreferences(t *testing.T) {
 		context.TODO(),
 		"collection",
 		"object_id",
+	)
+	if err != nil {
+		var apierr *knock.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestObjectListSchedulesWithOptionalParams(t *testing.T) {
+	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := knock.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithToken("My Token"),
+	)
+	_, err := client.Objects.ListSchedules(
+		context.TODO(),
+		"collection",
+		"id",
+		knock.ObjectListSchedulesParams{
+			After:    knock.F("after"),
+			Before:   knock.F("before"),
+			PageSize: knock.F(int64(0)),
+			Tenant:   knock.F("tenant"),
+			Workflow: knock.F("workflow"),
+		},
 	)
 	if err != nil {
 		var apierr *knock.Error

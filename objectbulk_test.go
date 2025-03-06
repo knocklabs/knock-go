@@ -64,7 +64,9 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 			Subscriptions: knock.F([]knock.ObjectBulkAddSubscriptionsParamsSubscription{{
 				ID:         knock.F("project-1"),
 				Recipients: knock.F([]knock.ObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion{shared.UnionString("string")}),
-				Properties: knock.F[any](nil),
+				Properties: knock.F(map[string]interface{}{
+					"foo": "bar",
+				}),
 			}}),
 		},
 	)

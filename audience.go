@@ -97,8 +97,8 @@ func (r audienceListMembersResponseJSON) RawJSON() string {
 
 // A user belonging to an audience
 type AudienceListMembersResponseEntry struct {
-	Typename string `json:"__typename,required"`
-	AddedAt  string `json:"added_at,required" format:"date_time"`
+	Typename string    `json:"__typename,required"`
+	AddedAt  time.Time `json:"added_at,required" format:"date-time"`
 	// A user object
 	User   User                                 `json:"user,required"`
 	UserID string                               `json:"user_id,required"`

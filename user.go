@@ -235,9 +235,9 @@ type User struct {
 	UpdatedAt   time.Time              `json:"updated_at,required" format:"date-time"`
 	Avatar      string                 `json:"avatar,nullable"`
 	CreatedAt   time.Time              `json:"created_at,nullable" format:"date-time"`
-	Email       string                 `json:"email,nullable" format:"email"`
+	Email       string                 `json:"email,nullable"`
 	Name        string                 `json:"name,nullable"`
-	PhoneNumber string                 `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                 `json:"phone_number,nullable"`
 	Timezone    string                 `json:"timezone,nullable"`
 	ExtraFields map[string]interface{} `json:"-,extras"`
 	JSON        userJSON               `json:"-"`
@@ -281,6 +281,10 @@ func (r User) implementsUserFeedGetResponseEntriesActor() {}
 func (r User) implementsObjectAddSubscriptionsResponseRecipient() {}
 
 func (r User) implementsObjectDeleteSubscriptionsResponseRecipient() {}
+
+func (r User) implementsObjectListSchedulesResponseEntriesRecipient() {}
+
+func (r User) implementsObjectListSchedulesResponseEntriesActor() {}
 
 func (r User) implementsObjectListSubscriptionsResponseEntriesRecipient() {}
 
@@ -3526,7 +3530,7 @@ type UserListMessagesResponseEntry struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []UserListMessagesResponseEntriesEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -3536,7 +3540,7 @@ type UserListMessagesResponseEntry struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -6293,9 +6297,9 @@ type UserListSchedulesResponseEntriesRecipient struct {
 	Avatar      string                                        `json:"avatar,nullable"`
 	Collection  string                                        `json:"collection"`
 	CreatedAt   time.Time                                     `json:"created_at,nullable" format:"date-time"`
-	Email       string                                        `json:"email,nullable" format:"email"`
+	Email       string                                        `json:"email,nullable"`
 	Name        string                                        `json:"name,nullable"`
-	PhoneNumber string                                        `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                                        `json:"phone_number,nullable"`
 	Timezone    string                                        `json:"timezone,nullable"`
 	JSON        userListSchedulesResponseEntriesRecipientJSON `json:"-"`
 	union       UserListSchedulesResponseEntriesRecipientUnion
@@ -6475,9 +6479,9 @@ type UserListSchedulesResponseEntriesActor struct {
 	Avatar      string                                    `json:"avatar,nullable"`
 	Collection  string                                    `json:"collection"`
 	CreatedAt   time.Time                                 `json:"created_at,nullable" format:"date-time"`
-	Email       string                                    `json:"email,nullable" format:"email"`
+	Email       string                                    `json:"email,nullable"`
 	Name        string                                    `json:"name,nullable"`
-	PhoneNumber string                                    `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                                    `json:"phone_number,nullable"`
 	Timezone    string                                    `json:"timezone,nullable"`
 	JSON        userListSchedulesResponseEntriesActorJSON `json:"-"`
 	union       UserListSchedulesResponseEntriesActorUnion
@@ -6706,9 +6710,9 @@ type UserListSubscriptionsResponseEntriesRecipient struct {
 	Avatar      string                                            `json:"avatar,nullable"`
 	Collection  string                                            `json:"collection"`
 	CreatedAt   time.Time                                         `json:"created_at,nullable" format:"date-time"`
-	Email       string                                            `json:"email,nullable" format:"email"`
+	Email       string                                            `json:"email,nullable"`
 	Name        string                                            `json:"name,nullable"`
-	PhoneNumber string                                            `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                                            `json:"phone_number,nullable"`
 	Timezone    string                                            `json:"timezone,nullable"`
 	JSON        userListSubscriptionsResponseEntriesRecipientJSON `json:"-"`
 	union       UserListSubscriptionsResponseEntriesRecipientUnion
@@ -11640,7 +11644,7 @@ type UserListParams struct {
 // URLQuery serializes [UserListParams]'s query parameters as `url.Values`.
 func (r UserListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -11654,7 +11658,7 @@ type UserGetPreferencesParams struct {
 // `url.Values`.
 func (r UserGetPreferencesParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -11691,7 +11695,7 @@ type UserListMessagesParams struct {
 // URLQuery serializes [UserListMessagesParams]'s query parameters as `url.Values`.
 func (r UserListMessagesParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -11751,7 +11755,7 @@ type UserListSchedulesParams struct {
 // `url.Values`.
 func (r UserListSchedulesParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -11771,7 +11775,7 @@ type UserListSubscriptionsParams struct {
 // `url.Values`.
 func (r UserListSubscriptionsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -11797,7 +11801,7 @@ type UserListSubscriptionsParamsObjectsObjectReference struct {
 // parameters as `url.Values`.
 func (r UserListSubscriptionsParamsObjectsObjectReference) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }

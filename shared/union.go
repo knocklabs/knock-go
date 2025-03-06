@@ -7,6 +7,8 @@ type UnionString string
 func (UnionString) ImplementsUserListMessagesResponseEntriesActorsUnion()                  {}
 func (UnionString) ImplementsUserListMessagesResponseEntriesRecipientUnion()               {}
 func (UnionString) ImplementsUserListSubscriptionsParamsObjectUnion()                      {}
+func (UnionString) ImplementsObjectListMessagesResponseEntriesActorsUnion()                {}
+func (UnionString) ImplementsObjectListMessagesResponseEntriesRecipientUnion()             {}
 func (UnionString) ImplementsObjectAddSubscriptionsParamsRecipientUnion()                  {}
 func (UnionString) ImplementsObjectDeleteSubscriptionsParamsRecipientUnion()               {}
 func (UnionString) ImplementsObjectListSubscriptionsParamsObjectUnion()                    {}
@@ -19,6 +21,8 @@ func (UnionString) ImplementsMessageArchiveResponseActorsUnion()                
 func (UnionString) ImplementsMessageArchiveResponseRecipientUnion()                        {}
 func (UnionString) ImplementsMessageGetResponseActorsUnion()                               {}
 func (UnionString) ImplementsMessageGetResponseRecipientUnion()                            {}
+func (UnionString) ImplementsMessageListDeliveryLogsResponseEntriesRequestBodyUnion()      {}
+func (UnionString) ImplementsMessageListDeliveryLogsResponseEntriesResponseBodyUnion()     {}
 func (UnionString) ImplementsMessageListEventsResponseEntriesRecipientUnion()              {}
 func (UnionString) ImplementsMessageMarkAsInteractedResponseActorsUnion()                  {}
 func (UnionString) ImplementsMessageMarkAsInteractedResponseRecipientUnion()               {}

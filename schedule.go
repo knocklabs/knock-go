@@ -122,9 +122,9 @@ type ScheduleNewResponseRecipient struct {
 	Avatar      string                           `json:"avatar,nullable"`
 	Collection  string                           `json:"collection"`
 	CreatedAt   time.Time                        `json:"created_at,nullable" format:"date-time"`
-	Email       string                           `json:"email,nullable" format:"email"`
+	Email       string                           `json:"email,nullable"`
 	Name        string                           `json:"name,nullable"`
-	PhoneNumber string                           `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                           `json:"phone_number,nullable"`
 	Timezone    string                           `json:"timezone,nullable"`
 	JSON        scheduleNewResponseRecipientJSON `json:"-"`
 	union       ScheduleNewResponseRecipientUnion
@@ -303,9 +303,9 @@ type ScheduleNewResponseActor struct {
 	Avatar      string                       `json:"avatar,nullable"`
 	Collection  string                       `json:"collection"`
 	CreatedAt   time.Time                    `json:"created_at,nullable" format:"date-time"`
-	Email       string                       `json:"email,nullable" format:"email"`
+	Email       string                       `json:"email,nullable"`
 	Name        string                       `json:"name,nullable"`
-	PhoneNumber string                       `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                       `json:"phone_number,nullable"`
 	Timezone    string                       `json:"timezone,nullable"`
 	JSON        scheduleNewResponseActorJSON `json:"-"`
 	union       ScheduleNewResponseActorUnion
@@ -459,9 +459,9 @@ type ScheduleUpdateResponseRecipient struct {
 	Avatar      string                              `json:"avatar,nullable"`
 	Collection  string                              `json:"collection"`
 	CreatedAt   time.Time                           `json:"created_at,nullable" format:"date-time"`
-	Email       string                              `json:"email,nullable" format:"email"`
+	Email       string                              `json:"email,nullable"`
 	Name        string                              `json:"name,nullable"`
-	PhoneNumber string                              `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                              `json:"phone_number,nullable"`
 	Timezone    string                              `json:"timezone,nullable"`
 	JSON        scheduleUpdateResponseRecipientJSON `json:"-"`
 	union       ScheduleUpdateResponseRecipientUnion
@@ -640,9 +640,9 @@ type ScheduleUpdateResponseActor struct {
 	Avatar      string                          `json:"avatar,nullable"`
 	Collection  string                          `json:"collection"`
 	CreatedAt   time.Time                       `json:"created_at,nullable" format:"date-time"`
-	Email       string                          `json:"email,nullable" format:"email"`
+	Email       string                          `json:"email,nullable"`
 	Name        string                          `json:"name,nullable"`
-	PhoneNumber string                          `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                          `json:"phone_number,nullable"`
 	Timezone    string                          `json:"timezone,nullable"`
 	JSON        scheduleUpdateResponseActorJSON `json:"-"`
 	union       ScheduleUpdateResponseActorUnion
@@ -822,9 +822,9 @@ type ScheduleListResponseEntriesRecipient struct {
 	Avatar      string                                   `json:"avatar,nullable"`
 	Collection  string                                   `json:"collection"`
 	CreatedAt   time.Time                                `json:"created_at,nullable" format:"date-time"`
-	Email       string                                   `json:"email,nullable" format:"email"`
+	Email       string                                   `json:"email,nullable"`
 	Name        string                                   `json:"name,nullable"`
-	PhoneNumber string                                   `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                                   `json:"phone_number,nullable"`
 	Timezone    string                                   `json:"timezone,nullable"`
 	JSON        scheduleListResponseEntriesRecipientJSON `json:"-"`
 	union       ScheduleListResponseEntriesRecipientUnion
@@ -1004,9 +1004,9 @@ type ScheduleListResponseEntriesActor struct {
 	Avatar      string                               `json:"avatar,nullable"`
 	Collection  string                               `json:"collection"`
 	CreatedAt   time.Time                            `json:"created_at,nullable" format:"date-time"`
-	Email       string                               `json:"email,nullable" format:"email"`
+	Email       string                               `json:"email,nullable"`
 	Name        string                               `json:"name,nullable"`
-	PhoneNumber string                               `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                               `json:"phone_number,nullable"`
 	Timezone    string                               `json:"timezone,nullable"`
 	JSON        scheduleListResponseEntriesActorJSON `json:"-"`
 	union       ScheduleListResponseEntriesActorUnion
@@ -1188,9 +1188,9 @@ type ScheduleDeleteResponseRecipient struct {
 	Avatar      string                              `json:"avatar,nullable"`
 	Collection  string                              `json:"collection"`
 	CreatedAt   time.Time                           `json:"created_at,nullable" format:"date-time"`
-	Email       string                              `json:"email,nullable" format:"email"`
+	Email       string                              `json:"email,nullable"`
 	Name        string                              `json:"name,nullable"`
-	PhoneNumber string                              `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                              `json:"phone_number,nullable"`
 	Timezone    string                              `json:"timezone,nullable"`
 	JSON        scheduleDeleteResponseRecipientJSON `json:"-"`
 	union       ScheduleDeleteResponseRecipientUnion
@@ -1369,9 +1369,9 @@ type ScheduleDeleteResponseActor struct {
 	Avatar      string                          `json:"avatar,nullable"`
 	Collection  string                          `json:"collection"`
 	CreatedAt   time.Time                       `json:"created_at,nullable" format:"date-time"`
-	Email       string                          `json:"email,nullable" format:"email"`
+	Email       string                          `json:"email,nullable"`
 	Name        string                          `json:"name,nullable"`
-	PhoneNumber string                          `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                          `json:"phone_number,nullable"`
 	Timezone    string                          `json:"timezone,nullable"`
 	JSON        scheduleDeleteResponseActorJSON `json:"-"`
 	union       ScheduleDeleteResponseActorUnion
@@ -11135,7 +11135,7 @@ type ScheduleListParams struct {
 // URLQuery serializes [ScheduleListParams]'s query parameters as `url.Values`.
 func (r ScheduleListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -11161,7 +11161,7 @@ type ScheduleListParamsRecipientsObjectReference struct {
 // parameters as `url.Values`.
 func (r ScheduleListParamsRecipientsObjectReference) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }

@@ -161,8 +161,8 @@ type UserFeedGetResponseEntriesActivity struct {
 	// A recipient, which is either a user or an object
 	Actor UserFeedGetResponseEntriesActivitiesActor `json:"actor,nullable"`
 	// The data associated with the activity
-	Data       interface{} `json:"data,nullable"`
-	InsertedAt time.Time   `json:"inserted_at" format:"date-time"`
+	Data       map[string]interface{} `json:"data,nullable"`
+	InsertedAt time.Time              `json:"inserted_at" format:"date-time"`
 	// A recipient, which is either a user or an object
 	Recipient UserFeedGetResponseEntriesActivitiesRecipient `json:"recipient"`
 	UpdatedAt time.Time                                     `json:"updated_at" format:"date-time"`
@@ -199,9 +199,9 @@ type UserFeedGetResponseEntriesActivitiesActor struct {
 	Avatar      string                                        `json:"avatar,nullable"`
 	Collection  string                                        `json:"collection"`
 	CreatedAt   time.Time                                     `json:"created_at,nullable" format:"date-time"`
-	Email       string                                        `json:"email,nullable" format:"email"`
+	Email       string                                        `json:"email,nullable"`
 	Name        string                                        `json:"name,nullable"`
-	PhoneNumber string                                        `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                                        `json:"phone_number,nullable"`
 	Timezone    string                                        `json:"timezone,nullable"`
 	JSON        userFeedGetResponseEntriesActivitiesActorJSON `json:"-"`
 	union       UserFeedGetResponseEntriesActivitiesActorUnion
@@ -310,9 +310,9 @@ type UserFeedGetResponseEntriesActivitiesRecipient struct {
 	Avatar      string                                            `json:"avatar,nullable"`
 	Collection  string                                            `json:"collection"`
 	CreatedAt   time.Time                                         `json:"created_at,nullable" format:"date-time"`
-	Email       string                                            `json:"email,nullable" format:"email"`
+	Email       string                                            `json:"email,nullable"`
 	Name        string                                            `json:"name,nullable"`
-	PhoneNumber string                                            `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                                            `json:"phone_number,nullable"`
 	Timezone    string                                            `json:"timezone,nullable"`
 	JSON        userFeedGetResponseEntriesActivitiesRecipientJSON `json:"-"`
 	union       UserFeedGetResponseEntriesActivitiesRecipientUnion
@@ -422,9 +422,9 @@ type UserFeedGetResponseEntriesActor struct {
 	Avatar      string                              `json:"avatar,nullable"`
 	Collection  string                              `json:"collection"`
 	CreatedAt   time.Time                           `json:"created_at,nullable" format:"date-time"`
-	Email       string                              `json:"email,nullable" format:"email"`
+	Email       string                              `json:"email,nullable"`
 	Name        string                              `json:"name,nullable"`
-	PhoneNumber string                              `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                              `json:"phone_number,nullable"`
 	Timezone    string                              `json:"timezone,nullable"`
 	JSON        userFeedGetResponseEntriesActorJSON `json:"-"`
 	union       UserFeedGetResponseEntriesActorsUnion
@@ -878,7 +878,7 @@ type UserFeedGetParams struct {
 // URLQuery serializes [UserFeedGetParams]'s query parameters as `url.Values`.
 func (r UserFeedGetParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }

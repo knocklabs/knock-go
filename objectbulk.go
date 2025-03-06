@@ -347,7 +347,7 @@ type ObjectBulkDeleteParams struct {
 // URLQuery serializes [ObjectBulkDeleteParams]'s query parameters as `url.Values`.
 func (r ObjectBulkDeleteParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -363,7 +363,7 @@ func (r ObjectBulkAddSubscriptionsParams) MarshalJSON() (data []byte, err error)
 type ObjectBulkAddSubscriptionsParamsSubscription struct {
 	ID         param.Field[string]                                                        `json:"id,required"`
 	Recipients param.Field[[]ObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion] `json:"recipients,required"`
-	Properties param.Field[interface{}]                                                   `json:"properties"`
+	Properties param.Field[map[string]interface{}]                                        `json:"properties"`
 }
 
 func (r ObjectBulkAddSubscriptionsParamsSubscription) MarshalJSON() (data []byte, err error) {

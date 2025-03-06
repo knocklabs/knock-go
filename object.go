@@ -157,6 +157,22 @@ func (r *ObjectService) GetPreferences(ctx context.Context, collection string, o
 	return
 }
 
+// Returns a paginated list of messages for an object
+func (r *ObjectService) ListMessages(ctx context.Context, collection string, id string, query ObjectListMessagesParams, opts ...option.RequestOption) (res *ObjectListMessagesResponse, err error) {
+	opts = append(r.Options[:], opts...)
+	if collection == "" {
+		err = errors.New("missing required collection parameter")
+		return
+	}
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/objects/%s/%s/messages", collection, id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
 // List preference sets for an object
 func (r *ObjectService) ListPreferences(ctx context.Context, collection string, objectID string, opts ...option.RequestOption) (res *[]ObjectListPreferencesResponse, err error) {
 	opts = append(r.Options[:], opts...)
@@ -170,6 +186,22 @@ func (r *ObjectService) ListPreferences(ctx context.Context, collection string, 
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/preferences", collection, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	return
+}
+
+// List schedules for an object
+func (r *ObjectService) ListSchedules(ctx context.Context, collection string, id string, query ObjectListSchedulesParams, opts ...option.RequestOption) (res *ObjectListSchedulesResponse, err error) {
+	opts = append(r.Options[:], opts...)
+	if collection == "" {
+		err = errors.New("missing required collection parameter")
+		return
+	}
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/objects/%s/%s/schedules", collection, id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
 }
 
@@ -426,9 +458,9 @@ type ObjectAddSubscriptionsResponseRecipient struct {
 	Avatar      string                                      `json:"avatar,nullable"`
 	Collection  string                                      `json:"collection"`
 	CreatedAt   time.Time                                   `json:"created_at,nullable" format:"date-time"`
-	Email       string                                      `json:"email,nullable" format:"email"`
+	Email       string                                      `json:"email,nullable"`
 	Name        string                                      `json:"name,nullable"`
-	PhoneNumber string                                      `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                                      `json:"phone_number,nullable"`
 	Timezone    string                                      `json:"timezone,nullable"`
 	JSON        objectAddSubscriptionsResponseRecipientJSON `json:"-"`
 	union       ObjectAddSubscriptionsResponseRecipientUnion
@@ -603,9 +635,9 @@ type ObjectDeleteSubscriptionsResponseRecipient struct {
 	Avatar      string                                         `json:"avatar,nullable"`
 	Collection  string                                         `json:"collection"`
 	CreatedAt   time.Time                                      `json:"created_at,nullable" format:"date-time"`
-	Email       string                                         `json:"email,nullable" format:"email"`
+	Email       string                                         `json:"email,nullable"`
 	Name        string                                         `json:"name,nullable"`
-	PhoneNumber string                                         `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                                         `json:"phone_number,nullable"`
 	Timezone    string                                         `json:"timezone,nullable"`
 	JSON        objectDeleteSubscriptionsResponseRecipientJSON `json:"-"`
 	union       ObjectDeleteSubscriptionsResponseRecipientUnion
@@ -3866,6 +3898,323 @@ func (r ObjectGetPreferencesResponseWorkflowsPreferenceSetWorkflowCategorySettin
 	return false
 }
 
+// A paginated list of messages.
+type ObjectListMessagesResponse struct {
+	// The list of messages
+	Entries []ObjectListMessagesResponseEntry `json:"entries,required"`
+	// The information about a paginated result
+	PageInfo ObjectListMessagesResponsePageInfo `json:"page_info,required"`
+	JSON     objectListMessagesResponseJSON     `json:"-"`
+}
+
+// objectListMessagesResponseJSON contains the JSON metadata for the struct
+// [ObjectListMessagesResponse]
+type objectListMessagesResponseJSON struct {
+	Entries     apijson.Field
+	PageInfo    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ObjectListMessagesResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r objectListMessagesResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// Represents a single message that was generated by a workflow for a given
+// channel.
+type ObjectListMessagesResponseEntry struct {
+	// The message ID
+	ID       string `json:"id"`
+	Typename string `json:"__typename"`
+	// A list of actor representations associated with the message (up to 10)
+	Actors []ObjectListMessagesResponseEntriesActorsUnion `json:"actors"`
+	// Timestamp when message was archived
+	ArchivedAt time.Time `json:"archived_at,nullable" format:"date-time"`
+	// Channel ID associated with the message
+	ChannelID string `json:"channel_id" format:"uuid"`
+	// Timestamp when message was clicked
+	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
+	// Additional message data
+	Data map[string]interface{} `json:"data,nullable"`
+	// List of engagement statuses
+	EngagementStatuses []ObjectListMessagesResponseEntriesEngagementStatus `json:"engagement_statuses"`
+	// Timestamp of creation
+	InsertedAt time.Time `json:"inserted_at" format:"date-time"`
+	// Timestamp when message was interacted with
+	InteractedAt time.Time `json:"interacted_at,nullable" format:"date-time"`
+	// Timestamp when a link in the message was clicked
+	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
+	// Message metadata
+	Metadata map[string]interface{} `json:"metadata,nullable"`
+	// Timestamp when message was read
+	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
+	// A reference to a recipient, either a user identifier (string) or an object
+	// reference (id, collection).
+	Recipient ObjectListMessagesResponseEntriesRecipientUnion `json:"recipient"`
+	// Timestamp when message was scheduled for
+	ScheduledAt time.Time `json:"scheduled_at,nullable" format:"date-time"`
+	// Timestamp when message was seen
+	SeenAt time.Time `json:"seen_at,nullable" format:"date-time"`
+	// Source information
+	Source ObjectListMessagesResponseEntriesSource `json:"source"`
+	// Message delivery status
+	Status ObjectListMessagesResponseEntriesStatus `json:"status"`
+	// Tenant ID that the message belongs to
+	Tenant string `json:"tenant,nullable"`
+	// Timestamp of last update
+	UpdatedAt time.Time `json:"updated_at" format:"date-time"`
+	// Workflow key used to create the message
+	//
+	// Deprecated: deprecated
+	Workflow string                              `json:"workflow,nullable"`
+	JSON     objectListMessagesResponseEntryJSON `json:"-"`
+}
+
+// objectListMessagesResponseEntryJSON contains the JSON metadata for the struct
+// [ObjectListMessagesResponseEntry]
+type objectListMessagesResponseEntryJSON struct {
+	ID                 apijson.Field
+	Typename           apijson.Field
+	Actors             apijson.Field
+	ArchivedAt         apijson.Field
+	ChannelID          apijson.Field
+	ClickedAt          apijson.Field
+	Data               apijson.Field
+	EngagementStatuses apijson.Field
+	InsertedAt         apijson.Field
+	InteractedAt       apijson.Field
+	LinkClickedAt      apijson.Field
+	Metadata           apijson.Field
+	ReadAt             apijson.Field
+	Recipient          apijson.Field
+	ScheduledAt        apijson.Field
+	SeenAt             apijson.Field
+	Source             apijson.Field
+	Status             apijson.Field
+	Tenant             apijson.Field
+	UpdatedAt          apijson.Field
+	Workflow           apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
+}
+
+func (r *ObjectListMessagesResponseEntry) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r objectListMessagesResponseEntryJSON) RawJSON() string {
+	return r.raw
+}
+
+// A reference to a recipient, either a user identifier (string) or an object
+// reference (id, collection).
+//
+// Union satisfied by [shared.UnionString] or
+// [ObjectListMessagesResponseEntriesActorsObjectReference].
+type ObjectListMessagesResponseEntriesActorsUnion interface {
+	ImplementsObjectListMessagesResponseEntriesActorsUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*ObjectListMessagesResponseEntriesActorsUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(shared.UnionString("")),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ObjectListMessagesResponseEntriesActorsObjectReference{}),
+		},
+	)
+}
+
+// An object reference to a recipient
+type ObjectListMessagesResponseEntriesActorsObjectReference struct {
+	// An object identifier
+	ID string `json:"id,required"`
+	// The collection the object belongs to
+	Collection string                                                     `json:"collection,required"`
+	JSON       objectListMessagesResponseEntriesActorsObjectReferenceJSON `json:"-"`
+}
+
+// objectListMessagesResponseEntriesActorsObjectReferenceJSON contains the JSON
+// metadata for the struct [ObjectListMessagesResponseEntriesActorsObjectReference]
+type objectListMessagesResponseEntriesActorsObjectReferenceJSON struct {
+	ID          apijson.Field
+	Collection  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ObjectListMessagesResponseEntriesActorsObjectReference) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r objectListMessagesResponseEntriesActorsObjectReferenceJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r ObjectListMessagesResponseEntriesActorsObjectReference) ImplementsObjectListMessagesResponseEntriesActorsUnion() {
+}
+
+type ObjectListMessagesResponseEntriesEngagementStatus string
+
+const (
+	ObjectListMessagesResponseEntriesEngagementStatusSeen        ObjectListMessagesResponseEntriesEngagementStatus = "seen"
+	ObjectListMessagesResponseEntriesEngagementStatusRead        ObjectListMessagesResponseEntriesEngagementStatus = "read"
+	ObjectListMessagesResponseEntriesEngagementStatusInteracted  ObjectListMessagesResponseEntriesEngagementStatus = "interacted"
+	ObjectListMessagesResponseEntriesEngagementStatusLinkClicked ObjectListMessagesResponseEntriesEngagementStatus = "link_clicked"
+	ObjectListMessagesResponseEntriesEngagementStatusArchived    ObjectListMessagesResponseEntriesEngagementStatus = "archived"
+)
+
+func (r ObjectListMessagesResponseEntriesEngagementStatus) IsKnown() bool {
+	switch r {
+	case ObjectListMessagesResponseEntriesEngagementStatusSeen, ObjectListMessagesResponseEntriesEngagementStatusRead, ObjectListMessagesResponseEntriesEngagementStatusInteracted, ObjectListMessagesResponseEntriesEngagementStatusLinkClicked, ObjectListMessagesResponseEntriesEngagementStatusArchived:
+		return true
+	}
+	return false
+}
+
+// A reference to a recipient, either a user identifier (string) or an object
+// reference (id, collection).
+//
+// Union satisfied by [shared.UnionString] or
+// [ObjectListMessagesResponseEntriesRecipientObjectReference].
+type ObjectListMessagesResponseEntriesRecipientUnion interface {
+	ImplementsObjectListMessagesResponseEntriesRecipientUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*ObjectListMessagesResponseEntriesRecipientUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(shared.UnionString("")),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ObjectListMessagesResponseEntriesRecipientObjectReference{}),
+		},
+	)
+}
+
+// An object reference to a recipient
+type ObjectListMessagesResponseEntriesRecipientObjectReference struct {
+	// An object identifier
+	ID string `json:"id,required"`
+	// The collection the object belongs to
+	Collection string                                                        `json:"collection,required"`
+	JSON       objectListMessagesResponseEntriesRecipientObjectReferenceJSON `json:"-"`
+}
+
+// objectListMessagesResponseEntriesRecipientObjectReferenceJSON contains the JSON
+// metadata for the struct
+// [ObjectListMessagesResponseEntriesRecipientObjectReference]
+type objectListMessagesResponseEntriesRecipientObjectReferenceJSON struct {
+	ID          apijson.Field
+	Collection  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ObjectListMessagesResponseEntriesRecipientObjectReference) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r objectListMessagesResponseEntriesRecipientObjectReferenceJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r ObjectListMessagesResponseEntriesRecipientObjectReference) ImplementsObjectListMessagesResponseEntriesRecipientUnion() {
+}
+
+// Source information
+type ObjectListMessagesResponseEntriesSource struct {
+	Typename string `json:"__typename,required"`
+	// The workflow categories
+	Categories []string `json:"categories,required"`
+	// The workflow key
+	Key string `json:"key,required"`
+	// The source version ID
+	VersionID string                                      `json:"version_id,required" format:"uuid"`
+	JSON      objectListMessagesResponseEntriesSourceJSON `json:"-"`
+}
+
+// objectListMessagesResponseEntriesSourceJSON contains the JSON metadata for the
+// struct [ObjectListMessagesResponseEntriesSource]
+type objectListMessagesResponseEntriesSourceJSON struct {
+	Typename    apijson.Field
+	Categories  apijson.Field
+	Key         apijson.Field
+	VersionID   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ObjectListMessagesResponseEntriesSource) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r objectListMessagesResponseEntriesSourceJSON) RawJSON() string {
+	return r.raw
+}
+
+// Message delivery status
+type ObjectListMessagesResponseEntriesStatus string
+
+const (
+	ObjectListMessagesResponseEntriesStatusQueued            ObjectListMessagesResponseEntriesStatus = "queued"
+	ObjectListMessagesResponseEntriesStatusSent              ObjectListMessagesResponseEntriesStatus = "sent"
+	ObjectListMessagesResponseEntriesStatusDelivered         ObjectListMessagesResponseEntriesStatus = "delivered"
+	ObjectListMessagesResponseEntriesStatusDeliveryAttempted ObjectListMessagesResponseEntriesStatus = "delivery_attempted"
+	ObjectListMessagesResponseEntriesStatusUndelivered       ObjectListMessagesResponseEntriesStatus = "undelivered"
+	ObjectListMessagesResponseEntriesStatusNotSent           ObjectListMessagesResponseEntriesStatus = "not_sent"
+	ObjectListMessagesResponseEntriesStatusBounced           ObjectListMessagesResponseEntriesStatus = "bounced"
+)
+
+func (r ObjectListMessagesResponseEntriesStatus) IsKnown() bool {
+	switch r {
+	case ObjectListMessagesResponseEntriesStatusQueued, ObjectListMessagesResponseEntriesStatusSent, ObjectListMessagesResponseEntriesStatusDelivered, ObjectListMessagesResponseEntriesStatusDeliveryAttempted, ObjectListMessagesResponseEntriesStatusUndelivered, ObjectListMessagesResponseEntriesStatusNotSent, ObjectListMessagesResponseEntriesStatusBounced:
+		return true
+	}
+	return false
+}
+
+// The information about a paginated result
+type ObjectListMessagesResponsePageInfo struct {
+	Typename string                                 `json:"__typename,required"`
+	PageSize int64                                  `json:"page_size,required"`
+	After    string                                 `json:"after,nullable"`
+	Before   string                                 `json:"before,nullable"`
+	JSON     objectListMessagesResponsePageInfoJSON `json:"-"`
+}
+
+// objectListMessagesResponsePageInfoJSON contains the JSON metadata for the struct
+// [ObjectListMessagesResponsePageInfo]
+type objectListMessagesResponsePageInfoJSON struct {
+	Typename    apijson.Field
+	PageSize    apijson.Field
+	After       apijson.Field
+	Before      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ObjectListMessagesResponsePageInfo) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r objectListMessagesResponsePageInfoJSON) RawJSON() string {
+	return r.raw
+}
+
 // A preference set object.
 type ObjectListPreferencesResponse struct {
 	ID       string `json:"id,required"`
@@ -6277,6 +6626,400 @@ func (r ObjectListPreferencesResponseWorkflowsPreferenceSetWorkflowCategorySetti
 	return false
 }
 
+// A paginated list of schedules in a collection.
+type ObjectListSchedulesResponse struct {
+	// The list of schedules
+	Entries []ObjectListSchedulesResponseEntry `json:"entries,required"`
+	// The information about a paginated result
+	PageInfo ObjectListSchedulesResponsePageInfo `json:"page_info,required"`
+	JSON     objectListSchedulesResponseJSON     `json:"-"`
+}
+
+// objectListSchedulesResponseJSON contains the JSON metadata for the struct
+// [ObjectListSchedulesResponse]
+type objectListSchedulesResponseJSON struct {
+	Entries     apijson.Field
+	PageInfo    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ObjectListSchedulesResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r objectListSchedulesResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// A schedule that represents a recurring workflow execution
+type ObjectListSchedulesResponseEntry struct {
+	ID         string    `json:"id,required" format:"uuid"`
+	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
+	// A recipient, which is either a user or an object
+	Recipient ObjectListSchedulesResponseEntriesRecipient `json:"recipient,required"`
+	Repeats   []ObjectListSchedulesResponseEntriesRepeat  `json:"repeats,required"`
+	UpdatedAt time.Time                                   `json:"updated_at,required" format:"date-time"`
+	Workflow  string                                      `json:"workflow,required"`
+	Typename  string                                      `json:"__typename"`
+	// A recipient, which is either a user or an object
+	Actor            ObjectListSchedulesResponseEntriesActor `json:"actor,nullable"`
+	Data             map[string]interface{}                  `json:"data,nullable"`
+	LastOccurrenceAt time.Time                               `json:"last_occurrence_at,nullable" format:"date-time"`
+	NextOccurrenceAt time.Time                               `json:"next_occurrence_at,nullable" format:"date-time"`
+	Tenant           string                                  `json:"tenant,nullable"`
+	JSON             objectListSchedulesResponseEntryJSON    `json:"-"`
+}
+
+// objectListSchedulesResponseEntryJSON contains the JSON metadata for the struct
+// [ObjectListSchedulesResponseEntry]
+type objectListSchedulesResponseEntryJSON struct {
+	ID               apijson.Field
+	InsertedAt       apijson.Field
+	Recipient        apijson.Field
+	Repeats          apijson.Field
+	UpdatedAt        apijson.Field
+	Workflow         apijson.Field
+	Typename         apijson.Field
+	Actor            apijson.Field
+	Data             apijson.Field
+	LastOccurrenceAt apijson.Field
+	NextOccurrenceAt apijson.Field
+	Tenant           apijson.Field
+	raw              string
+	ExtraFields      map[string]apijson.Field
+}
+
+func (r *ObjectListSchedulesResponseEntry) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r objectListSchedulesResponseEntryJSON) RawJSON() string {
+	return r.raw
+}
+
+// A recipient, which is either a user or an object
+type ObjectListSchedulesResponseEntriesRecipient struct {
+	ID          string                                          `json:"id,required"`
+	Typename    string                                          `json:"__typename,required"`
+	UpdatedAt   time.Time                                       `json:"updated_at,required" format:"date-time"`
+	Avatar      string                                          `json:"avatar,nullable"`
+	Collection  string                                          `json:"collection"`
+	CreatedAt   time.Time                                       `json:"created_at,nullable" format:"date-time"`
+	Email       string                                          `json:"email,nullable"`
+	Name        string                                          `json:"name,nullable"`
+	PhoneNumber string                                          `json:"phone_number,nullable"`
+	Timezone    string                                          `json:"timezone,nullable"`
+	JSON        objectListSchedulesResponseEntriesRecipientJSON `json:"-"`
+	union       ObjectListSchedulesResponseEntriesRecipientUnion
+}
+
+// objectListSchedulesResponseEntriesRecipientJSON contains the JSON metadata for
+// the struct [ObjectListSchedulesResponseEntriesRecipient]
+type objectListSchedulesResponseEntriesRecipientJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	UpdatedAt   apijson.Field
+	Avatar      apijson.Field
+	Collection  apijson.Field
+	CreatedAt   apijson.Field
+	Email       apijson.Field
+	Name        apijson.Field
+	PhoneNumber apijson.Field
+	Timezone    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r objectListSchedulesResponseEntriesRecipientJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *ObjectListSchedulesResponseEntriesRecipient) UnmarshalJSON(data []byte) (err error) {
+	*r = ObjectListSchedulesResponseEntriesRecipient{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [ObjectListSchedulesResponseEntriesRecipientUnion] interface
+// which you can cast to the specific types for more type safety.
+//
+// Possible runtime types of the union are [User],
+// [ObjectListSchedulesResponseEntriesRecipientObject].
+func (r ObjectListSchedulesResponseEntriesRecipient) AsUnion() ObjectListSchedulesResponseEntriesRecipientUnion {
+	return r.union
+}
+
+// A recipient, which is either a user or an object
+//
+// Union satisfied by [User] or
+// [ObjectListSchedulesResponseEntriesRecipientObject].
+type ObjectListSchedulesResponseEntriesRecipientUnion interface {
+	implementsObjectListSchedulesResponseEntriesRecipient()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*ObjectListSchedulesResponseEntriesRecipientUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(User{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ObjectListSchedulesResponseEntriesRecipientObject{}),
+		},
+	)
+}
+
+// A custom-object entity which belongs to a collection.
+type ObjectListSchedulesResponseEntriesRecipientObject struct {
+	ID          string                                                `json:"id,required"`
+	Typename    string                                                `json:"__typename,required"`
+	Collection  string                                                `json:"collection,required"`
+	UpdatedAt   time.Time                                             `json:"updated_at,required" format:"date-time"`
+	CreatedAt   time.Time                                             `json:"created_at,nullable" format:"date-time"`
+	ExtraFields map[string]interface{}                                `json:"-,extras"`
+	JSON        objectListSchedulesResponseEntriesRecipientObjectJSON `json:"-"`
+}
+
+// objectListSchedulesResponseEntriesRecipientObjectJSON contains the JSON metadata
+// for the struct [ObjectListSchedulesResponseEntriesRecipientObject]
+type objectListSchedulesResponseEntriesRecipientObjectJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	Collection  apijson.Field
+	UpdatedAt   apijson.Field
+	CreatedAt   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ObjectListSchedulesResponseEntriesRecipientObject) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r objectListSchedulesResponseEntriesRecipientObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r ObjectListSchedulesResponseEntriesRecipientObject) implementsObjectListSchedulesResponseEntriesRecipient() {
+}
+
+// A schedule repeat rule
+type ObjectListSchedulesResponseEntriesRepeat struct {
+	Typename   string                                             `json:"__typename,required"`
+	Frequency  ObjectListSchedulesResponseEntriesRepeatsFrequency `json:"frequency,required"`
+	DayOfMonth int64                                              `json:"day_of_month,nullable"`
+	Days       []ObjectListSchedulesResponseEntriesRepeatsDay     `json:"days,nullable"`
+	Hours      int64                                              `json:"hours,nullable"`
+	Interval   int64                                              `json:"interval"`
+	Minutes    int64                                              `json:"minutes,nullable"`
+	JSON       objectListSchedulesResponseEntriesRepeatJSON       `json:"-"`
+}
+
+// objectListSchedulesResponseEntriesRepeatJSON contains the JSON metadata for the
+// struct [ObjectListSchedulesResponseEntriesRepeat]
+type objectListSchedulesResponseEntriesRepeatJSON struct {
+	Typename    apijson.Field
+	Frequency   apijson.Field
+	DayOfMonth  apijson.Field
+	Days        apijson.Field
+	Hours       apijson.Field
+	Interval    apijson.Field
+	Minutes     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ObjectListSchedulesResponseEntriesRepeat) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r objectListSchedulesResponseEntriesRepeatJSON) RawJSON() string {
+	return r.raw
+}
+
+type ObjectListSchedulesResponseEntriesRepeatsFrequency string
+
+const (
+	ObjectListSchedulesResponseEntriesRepeatsFrequencyDaily   ObjectListSchedulesResponseEntriesRepeatsFrequency = "daily"
+	ObjectListSchedulesResponseEntriesRepeatsFrequencyWeekly  ObjectListSchedulesResponseEntriesRepeatsFrequency = "weekly"
+	ObjectListSchedulesResponseEntriesRepeatsFrequencyMonthly ObjectListSchedulesResponseEntriesRepeatsFrequency = "monthly"
+	ObjectListSchedulesResponseEntriesRepeatsFrequencyHourly  ObjectListSchedulesResponseEntriesRepeatsFrequency = "hourly"
+)
+
+func (r ObjectListSchedulesResponseEntriesRepeatsFrequency) IsKnown() bool {
+	switch r {
+	case ObjectListSchedulesResponseEntriesRepeatsFrequencyDaily, ObjectListSchedulesResponseEntriesRepeatsFrequencyWeekly, ObjectListSchedulesResponseEntriesRepeatsFrequencyMonthly, ObjectListSchedulesResponseEntriesRepeatsFrequencyHourly:
+		return true
+	}
+	return false
+}
+
+type ObjectListSchedulesResponseEntriesRepeatsDay string
+
+const (
+	ObjectListSchedulesResponseEntriesRepeatsDayMon ObjectListSchedulesResponseEntriesRepeatsDay = "mon"
+	ObjectListSchedulesResponseEntriesRepeatsDayTue ObjectListSchedulesResponseEntriesRepeatsDay = "tue"
+	ObjectListSchedulesResponseEntriesRepeatsDayWed ObjectListSchedulesResponseEntriesRepeatsDay = "wed"
+	ObjectListSchedulesResponseEntriesRepeatsDayThu ObjectListSchedulesResponseEntriesRepeatsDay = "thu"
+	ObjectListSchedulesResponseEntriesRepeatsDayFri ObjectListSchedulesResponseEntriesRepeatsDay = "fri"
+	ObjectListSchedulesResponseEntriesRepeatsDaySat ObjectListSchedulesResponseEntriesRepeatsDay = "sat"
+	ObjectListSchedulesResponseEntriesRepeatsDaySun ObjectListSchedulesResponseEntriesRepeatsDay = "sun"
+)
+
+func (r ObjectListSchedulesResponseEntriesRepeatsDay) IsKnown() bool {
+	switch r {
+	case ObjectListSchedulesResponseEntriesRepeatsDayMon, ObjectListSchedulesResponseEntriesRepeatsDayTue, ObjectListSchedulesResponseEntriesRepeatsDayWed, ObjectListSchedulesResponseEntriesRepeatsDayThu, ObjectListSchedulesResponseEntriesRepeatsDayFri, ObjectListSchedulesResponseEntriesRepeatsDaySat, ObjectListSchedulesResponseEntriesRepeatsDaySun:
+		return true
+	}
+	return false
+}
+
+// A recipient, which is either a user or an object
+type ObjectListSchedulesResponseEntriesActor struct {
+	ID          string                                      `json:"id,required"`
+	Typename    string                                      `json:"__typename,required"`
+	UpdatedAt   time.Time                                   `json:"updated_at,required" format:"date-time"`
+	Avatar      string                                      `json:"avatar,nullable"`
+	Collection  string                                      `json:"collection"`
+	CreatedAt   time.Time                                   `json:"created_at,nullable" format:"date-time"`
+	Email       string                                      `json:"email,nullable"`
+	Name        string                                      `json:"name,nullable"`
+	PhoneNumber string                                      `json:"phone_number,nullable"`
+	Timezone    string                                      `json:"timezone,nullable"`
+	JSON        objectListSchedulesResponseEntriesActorJSON `json:"-"`
+	union       ObjectListSchedulesResponseEntriesActorUnion
+}
+
+// objectListSchedulesResponseEntriesActorJSON contains the JSON metadata for the
+// struct [ObjectListSchedulesResponseEntriesActor]
+type objectListSchedulesResponseEntriesActorJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	UpdatedAt   apijson.Field
+	Avatar      apijson.Field
+	Collection  apijson.Field
+	CreatedAt   apijson.Field
+	Email       apijson.Field
+	Name        apijson.Field
+	PhoneNumber apijson.Field
+	Timezone    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r objectListSchedulesResponseEntriesActorJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *ObjectListSchedulesResponseEntriesActor) UnmarshalJSON(data []byte) (err error) {
+	*r = ObjectListSchedulesResponseEntriesActor{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [ObjectListSchedulesResponseEntriesActorUnion] interface which
+// you can cast to the specific types for more type safety.
+//
+// Possible runtime types of the union are [User],
+// [ObjectListSchedulesResponseEntriesActorObject].
+func (r ObjectListSchedulesResponseEntriesActor) AsUnion() ObjectListSchedulesResponseEntriesActorUnion {
+	return r.union
+}
+
+// A recipient, which is either a user or an object
+//
+// Union satisfied by [User] or [ObjectListSchedulesResponseEntriesActorObject].
+type ObjectListSchedulesResponseEntriesActorUnion interface {
+	implementsObjectListSchedulesResponseEntriesActor()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*ObjectListSchedulesResponseEntriesActorUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(User{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ObjectListSchedulesResponseEntriesActorObject{}),
+		},
+	)
+}
+
+// A custom-object entity which belongs to a collection.
+type ObjectListSchedulesResponseEntriesActorObject struct {
+	ID          string                                            `json:"id,required"`
+	Typename    string                                            `json:"__typename,required"`
+	Collection  string                                            `json:"collection,required"`
+	UpdatedAt   time.Time                                         `json:"updated_at,required" format:"date-time"`
+	CreatedAt   time.Time                                         `json:"created_at,nullable" format:"date-time"`
+	ExtraFields map[string]interface{}                            `json:"-,extras"`
+	JSON        objectListSchedulesResponseEntriesActorObjectJSON `json:"-"`
+}
+
+// objectListSchedulesResponseEntriesActorObjectJSON contains the JSON metadata for
+// the struct [ObjectListSchedulesResponseEntriesActorObject]
+type objectListSchedulesResponseEntriesActorObjectJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	Collection  apijson.Field
+	UpdatedAt   apijson.Field
+	CreatedAt   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ObjectListSchedulesResponseEntriesActorObject) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r objectListSchedulesResponseEntriesActorObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r ObjectListSchedulesResponseEntriesActorObject) implementsObjectListSchedulesResponseEntriesActor() {
+}
+
+// The information about a paginated result
+type ObjectListSchedulesResponsePageInfo struct {
+	Typename string                                  `json:"__typename,required"`
+	PageSize int64                                   `json:"page_size,required"`
+	After    string                                  `json:"after,nullable"`
+	Before   string                                  `json:"before,nullable"`
+	JSON     objectListSchedulesResponsePageInfoJSON `json:"-"`
+}
+
+// objectListSchedulesResponsePageInfoJSON contains the JSON metadata for the
+// struct [ObjectListSchedulesResponsePageInfo]
+type objectListSchedulesResponsePageInfoJSON struct {
+	Typename    apijson.Field
+	PageSize    apijson.Field
+	After       apijson.Field
+	Before      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ObjectListSchedulesResponsePageInfo) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r objectListSchedulesResponsePageInfoJSON) RawJSON() string {
+	return r.raw
+}
+
 // A paginated list of subscriptions for an object.
 type ObjectListSubscriptionsResponse struct {
 	// The list of subscriptions
@@ -6377,9 +7120,9 @@ type ObjectListSubscriptionsResponseEntriesRecipient struct {
 	Avatar      string                                              `json:"avatar,nullable"`
 	Collection  string                                              `json:"collection"`
 	CreatedAt   time.Time                                           `json:"created_at,nullable" format:"date-time"`
-	Email       string                                              `json:"email,nullable" format:"email"`
+	Email       string                                              `json:"email,nullable"`
 	Name        string                                              `json:"name,nullable"`
-	PhoneNumber string                                              `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                                              `json:"phone_number,nullable"`
 	Timezone    string                                              `json:"timezone,nullable"`
 	JSON        objectListSubscriptionsResponseEntriesRecipientJSON `json:"-"`
 	union       ObjectListSubscriptionsResponseEntriesRecipientUnion
@@ -9681,7 +10424,7 @@ type ObjectListParams struct {
 // URLQuery serializes [ObjectListParams]'s query parameters as `url.Values`.
 func (r ObjectListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -16474,7 +17217,105 @@ type ObjectGetPreferencesParams struct {
 // `url.Values`.
 func (r ObjectGetPreferencesParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ObjectListMessagesParams struct {
+	// The cursor to fetch entries after
+	After param.Field[string] `query:"after"`
+	// The cursor to fetch entries before
+	Before param.Field[string] `query:"before"`
+	// The channel ID
+	ChannelID param.Field[string] `query:"channel_id"`
+	// The engagement status of the message
+	EngagementStatus param.Field[[]ObjectListMessagesParamsEngagementStatus] `query:"engagement_status"`
+	// The message IDs to filter messages by
+	MessageIDs param.Field[[]string] `query:"message_ids"`
+	// The page size to fetch
+	PageSize param.Field[int64] `query:"page_size"`
+	// The source of the message (workflow key)
+	Source param.Field[string] `query:"source"`
+	// The status of the message
+	Status param.Field[[]ObjectListMessagesParamsStatus] `query:"status"`
+	// The tenant ID
+	Tenant param.Field[string] `query:"tenant"`
+	// The trigger data to filter messages by. Must be a valid JSON object.
+	TriggerData param.Field[string] `query:"trigger_data"`
+	// The workflow categories to filter messages by
+	WorkflowCategories param.Field[[]string] `query:"workflow_categories"`
+	// The workflow recipient run ID to filter messages by
+	WorkflowRecipientRunID param.Field[string] `query:"workflow_recipient_run_id" format:"uuid"`
+	// The workflow run ID to filter messages by
+	WorkflowRunID param.Field[string] `query:"workflow_run_id" format:"uuid"`
+}
+
+// URLQuery serializes [ObjectListMessagesParams]'s query parameters as
+// `url.Values`.
+func (r ObjectListMessagesParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ObjectListMessagesParamsEngagementStatus string
+
+const (
+	ObjectListMessagesParamsEngagementStatusSeen        ObjectListMessagesParamsEngagementStatus = "seen"
+	ObjectListMessagesParamsEngagementStatusRead        ObjectListMessagesParamsEngagementStatus = "read"
+	ObjectListMessagesParamsEngagementStatusInteracted  ObjectListMessagesParamsEngagementStatus = "interacted"
+	ObjectListMessagesParamsEngagementStatusLinkClicked ObjectListMessagesParamsEngagementStatus = "link_clicked"
+	ObjectListMessagesParamsEngagementStatusArchived    ObjectListMessagesParamsEngagementStatus = "archived"
+)
+
+func (r ObjectListMessagesParamsEngagementStatus) IsKnown() bool {
+	switch r {
+	case ObjectListMessagesParamsEngagementStatusSeen, ObjectListMessagesParamsEngagementStatusRead, ObjectListMessagesParamsEngagementStatusInteracted, ObjectListMessagesParamsEngagementStatusLinkClicked, ObjectListMessagesParamsEngagementStatusArchived:
+		return true
+	}
+	return false
+}
+
+type ObjectListMessagesParamsStatus string
+
+const (
+	ObjectListMessagesParamsStatusQueued            ObjectListMessagesParamsStatus = "queued"
+	ObjectListMessagesParamsStatusSent              ObjectListMessagesParamsStatus = "sent"
+	ObjectListMessagesParamsStatusDelivered         ObjectListMessagesParamsStatus = "delivered"
+	ObjectListMessagesParamsStatusDeliveryAttempted ObjectListMessagesParamsStatus = "delivery_attempted"
+	ObjectListMessagesParamsStatusUndelivered       ObjectListMessagesParamsStatus = "undelivered"
+	ObjectListMessagesParamsStatusNotSent           ObjectListMessagesParamsStatus = "not_sent"
+	ObjectListMessagesParamsStatusBounced           ObjectListMessagesParamsStatus = "bounced"
+)
+
+func (r ObjectListMessagesParamsStatus) IsKnown() bool {
+	switch r {
+	case ObjectListMessagesParamsStatusQueued, ObjectListMessagesParamsStatusSent, ObjectListMessagesParamsStatusDelivered, ObjectListMessagesParamsStatusDeliveryAttempted, ObjectListMessagesParamsStatusUndelivered, ObjectListMessagesParamsStatusNotSent, ObjectListMessagesParamsStatusBounced:
+		return true
+	}
+	return false
+}
+
+type ObjectListSchedulesParams struct {
+	// The cursor to fetch entries after
+	After param.Field[string] `query:"after"`
+	// The cursor to fetch entries before
+	Before param.Field[string] `query:"before"`
+	// The page size to fetch
+	PageSize param.Field[int64] `query:"page_size"`
+	// The ID of the tenant to list schedules for
+	Tenant param.Field[string] `query:"tenant"`
+	// The ID of the workflow to list schedules for
+	Workflow param.Field[string] `query:"workflow"`
+}
+
+// URLQuery serializes [ObjectListSchedulesParams]'s query parameters as
+// `url.Values`.
+func (r ObjectListSchedulesParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -16498,7 +17339,7 @@ type ObjectListSubscriptionsParams struct {
 // `url.Values`.
 func (r ObjectListSubscriptionsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -16540,7 +17381,7 @@ type ObjectListSubscriptionsParamsObjectsObjectReference struct {
 // query parameters as `url.Values`.
 func (r ObjectListSubscriptionsParamsObjectsObjectReference) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -16569,7 +17410,7 @@ type ObjectListSubscriptionsParamsRecipientsObjectReference struct {
 // query parameters as `url.Values`.
 func (r ObjectListSubscriptionsParamsRecipientsObjectReference) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }

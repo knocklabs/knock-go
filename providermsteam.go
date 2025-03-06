@@ -241,7 +241,7 @@ type ProviderMsTeamCheckAuthParams struct {
 // `url.Values`.
 func (r ProviderMsTeamCheckAuthParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -258,7 +258,7 @@ type ProviderMsTeamListChannelsParams struct {
 // `url.Values`.
 func (r ProviderMsTeamListChannelsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -276,7 +276,7 @@ type ProviderMsTeamListChannelsParamsQueryOptions struct {
 // parameters as `url.Values`.
 func (r ProviderMsTeamListChannelsParamsQueryOptions) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -291,7 +291,7 @@ type ProviderMsTeamListTeamsParams struct {
 // `url.Values`.
 func (r ProviderMsTeamListTeamsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -315,7 +315,7 @@ type ProviderMsTeamListTeamsParamsQueryOptions struct {
 // parameters as `url.Values`.
 func (r ProviderMsTeamListTeamsParamsQueryOptions) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -329,7 +329,7 @@ type ProviderMsTeamRevokeAccessParams struct {
 // `url.Values`.
 func (r ProviderMsTeamRevokeAccessParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }

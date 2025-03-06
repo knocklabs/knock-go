@@ -234,7 +234,7 @@ type MessageListResponseEntry struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageListResponseEntriesEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -244,7 +244,7 @@ type MessageListResponseEntry struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -524,7 +524,7 @@ type MessageArchiveResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageArchiveResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -534,7 +534,7 @@ type MessageArchiveResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -785,7 +785,7 @@ type MessageGetResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageGetResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -795,7 +795,7 @@ type MessageGetResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -1069,13 +1069,13 @@ type MessageGetContentResponseData struct {
 	Blocks interface{} `json:"blocks"`
 	Body   string      `json:"body"`
 	Cc     string      `json:"cc,nullable"`
-	// This field can have the runtime type of [interface{}].
+	// This field can have the runtime type of [map[string]interface{}].
 	Connection interface{} `json:"connection"`
 	// This field can have the runtime type of [interface{}].
 	Data     interface{} `json:"data"`
 	From     string      `json:"from"`
 	HTMLBody string      `json:"html_body"`
-	// This field can have the runtime type of [interface{}].
+	// This field can have the runtime type of [map[string]interface{}].
 	Metadata    interface{} `json:"metadata"`
 	ReplyTo     string      `json:"reply_to,nullable"`
 	SubjectLine string      `json:"subject_line"`
@@ -1281,9 +1281,9 @@ func (r MessageGetContentResponseDataMessagePushContent) implementsMessageGetCon
 type MessageGetContentResponseDataMessageChatContent struct {
 	Typename string `json:"__typename,required"`
 	// The channel data connection from the recipient to the underlying provider
-	Connection interface{}                                             `json:"connection,required"`
+	Connection map[string]interface{}                                  `json:"connection,required"`
 	Template   MessageGetContentResponseDataMessageChatContentTemplate `json:"template,required"`
-	Metadata   interface{}                                             `json:"metadata,nullable"`
+	Metadata   map[string]interface{}                                  `json:"metadata,nullable"`
 	JSON       messageGetContentResponseDataMessageChatContentJSON     `json:"-"`
 }
 
@@ -1312,7 +1312,7 @@ type MessageGetContentResponseDataMessageChatContentTemplate struct {
 	// The structured blocks of the message
 	Blocks []MessageGetContentResponseDataMessageChatContentTemplateBlock `json:"blocks,nullable"`
 	// The JSON content of the message
-	JsonContent interface{}                                                 `json:"json_content,nullable"`
+	JsonContent map[string]interface{}                                      `json:"json_content,nullable"`
 	Summary     string                                                      `json:"summary,nullable"`
 	JSON        messageGetContentResponseDataMessageChatContentTemplateJSON `json:"-"`
 }
@@ -1647,8 +1647,8 @@ type MessageListActivitiesResponseItem struct {
 	// A recipient, which is either a user or an object
 	Actor MessageListActivitiesResponseItemsActor `json:"actor,nullable"`
 	// The data associated with the activity
-	Data       interface{} `json:"data,nullable"`
-	InsertedAt time.Time   `json:"inserted_at" format:"date-time"`
+	Data       map[string]interface{} `json:"data,nullable"`
+	InsertedAt time.Time              `json:"inserted_at" format:"date-time"`
 	// A recipient, which is either a user or an object
 	Recipient MessageListActivitiesResponseItemsRecipient `json:"recipient"`
 	UpdatedAt time.Time                                   `json:"updated_at" format:"date-time"`
@@ -1685,9 +1685,9 @@ type MessageListActivitiesResponseItemsActor struct {
 	Avatar      string                                      `json:"avatar,nullable"`
 	Collection  string                                      `json:"collection"`
 	CreatedAt   time.Time                                   `json:"created_at,nullable" format:"date-time"`
-	Email       string                                      `json:"email,nullable" format:"email"`
+	Email       string                                      `json:"email,nullable"`
 	Name        string                                      `json:"name,nullable"`
-	PhoneNumber string                                      `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                                      `json:"phone_number,nullable"`
 	Timezone    string                                      `json:"timezone,nullable"`
 	JSON        messageListActivitiesResponseItemsActorJSON `json:"-"`
 	union       MessageListActivitiesResponseItemsActorUnion
@@ -1796,9 +1796,9 @@ type MessageListActivitiesResponseItemsRecipient struct {
 	Avatar      string                                          `json:"avatar,nullable"`
 	Collection  string                                          `json:"collection"`
 	CreatedAt   time.Time                                       `json:"created_at,nullable" format:"date-time"`
-	Email       string                                          `json:"email,nullable" format:"email"`
+	Email       string                                          `json:"email,nullable"`
 	Name        string                                          `json:"name,nullable"`
-	PhoneNumber string                                          `json:"phone_number,nullable" format:"phone-number"`
+	PhoneNumber string                                          `json:"phone_number,nullable"`
 	Timezone    string                                          `json:"timezone,nullable"`
 	JSON        messageListActivitiesResponseItemsRecipientJSON `json:"-"`
 	union       MessageListActivitiesResponseItemsRecipientUnion
@@ -1991,13 +1991,13 @@ func (r messageListDeliveryLogsResponseEntryJSON) RawJSON() string {
 
 // A message delivery log request
 type MessageListDeliveryLogsResponseEntriesRequest struct {
-	Body    interface{}                                         `json:"body"`
-	Headers interface{}                                         `json:"headers,nullable"`
-	Host    string                                              `json:"host"`
-	Method  MessageListDeliveryLogsResponseEntriesRequestMethod `json:"method"`
-	Path    string                                              `json:"path"`
-	Query   string                                              `json:"query,nullable"`
-	JSON    messageListDeliveryLogsResponseEntriesRequestJSON   `json:"-"`
+	Body    MessageListDeliveryLogsResponseEntriesRequestBodyUnion `json:"body"`
+	Headers map[string]interface{}                                 `json:"headers,nullable"`
+	Host    string                                                 `json:"host"`
+	Method  MessageListDeliveryLogsResponseEntriesRequestMethod    `json:"method"`
+	Path    string                                                 `json:"path"`
+	Query   string                                                 `json:"query,nullable"`
+	JSON    messageListDeliveryLogsResponseEntriesRequestJSON      `json:"-"`
 }
 
 // messageListDeliveryLogsResponseEntriesRequestJSON contains the JSON metadata for
@@ -2021,6 +2021,28 @@ func (r messageListDeliveryLogsResponseEntriesRequestJSON) RawJSON() string {
 	return r.raw
 }
 
+// Union satisfied by [shared.UnionString] or
+// [MessageListDeliveryLogsResponseEntriesRequestBodyMap].
+type MessageListDeliveryLogsResponseEntriesRequestBodyUnion interface {
+	ImplementsMessageListDeliveryLogsResponseEntriesRequestBodyUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*MessageListDeliveryLogsResponseEntriesRequestBodyUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(shared.UnionString("")),
+		},
+	)
+}
+
+type MessageListDeliveryLogsResponseEntriesRequestBodyMap map[string]interface{}
+
+func (r MessageListDeliveryLogsResponseEntriesRequestBodyMap) ImplementsMessageListDeliveryLogsResponseEntriesRequestBodyUnion() {
+}
+
 type MessageListDeliveryLogsResponseEntriesRequestMethod string
 
 const (
@@ -2041,10 +2063,10 @@ func (r MessageListDeliveryLogsResponseEntriesRequestMethod) IsKnown() bool {
 
 // A message delivery log response
 type MessageListDeliveryLogsResponseEntriesResponse struct {
-	Body    interface{}                                        `json:"body"`
-	Headers interface{}                                        `json:"headers,nullable"`
-	Status  int64                                              `json:"status"`
-	JSON    messageListDeliveryLogsResponseEntriesResponseJSON `json:"-"`
+	Body    MessageListDeliveryLogsResponseEntriesResponseBodyUnion `json:"body"`
+	Headers map[string]interface{}                                  `json:"headers,nullable"`
+	Status  int64                                                   `json:"status"`
+	JSON    messageListDeliveryLogsResponseEntriesResponseJSON      `json:"-"`
 }
 
 // messageListDeliveryLogsResponseEntriesResponseJSON contains the JSON metadata
@@ -2063,6 +2085,28 @@ func (r *MessageListDeliveryLogsResponseEntriesResponse) UnmarshalJSON(data []by
 
 func (r messageListDeliveryLogsResponseEntriesResponseJSON) RawJSON() string {
 	return r.raw
+}
+
+// Union satisfied by [shared.UnionString] or
+// [MessageListDeliveryLogsResponseEntriesResponseBodyMap].
+type MessageListDeliveryLogsResponseEntriesResponseBodyUnion interface {
+	ImplementsMessageListDeliveryLogsResponseEntriesResponseBodyUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*MessageListDeliveryLogsResponseEntriesResponseBodyUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(shared.UnionString("")),
+		},
+	)
+}
+
+type MessageListDeliveryLogsResponseEntriesResponseBodyMap map[string]interface{}
+
+func (r MessageListDeliveryLogsResponseEntriesResponseBodyMap) ImplementsMessageListDeliveryLogsResponseEntriesResponseBodyUnion() {
 }
 
 // The information about a paginated result
@@ -2129,7 +2173,7 @@ type MessageListEventsResponseEntry struct {
 	Recipient MessageListEventsResponseEntriesRecipientUnion `json:"recipient,required"`
 	Type      MessageListEventsResponseEntriesType           `json:"type,required"`
 	// The data associated with the event. Only present for some event types
-	Data interface{}                        `json:"data,nullable"`
+	Data map[string]interface{}             `json:"data,nullable"`
 	JSON messageListEventsResponseEntryJSON `json:"-"`
 }
 
@@ -2277,7 +2321,7 @@ type MessageMarkAsInteractedResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageMarkAsInteractedResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -2287,7 +2331,7 @@ type MessageMarkAsInteractedResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -2540,7 +2584,7 @@ type MessageMarkAsReadResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageMarkAsReadResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -2550,7 +2594,7 @@ type MessageMarkAsReadResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -2802,7 +2846,7 @@ type MessageMarkAsSeenResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageMarkAsSeenResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -2812,7 +2856,7 @@ type MessageMarkAsSeenResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -3064,7 +3108,7 @@ type MessageMarkAsUnreadResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageMarkAsUnreadResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -3074,7 +3118,7 @@ type MessageMarkAsUnreadResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -3326,7 +3370,7 @@ type MessageMarkAsUnseenResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageMarkAsUnseenResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -3336,7 +3380,7 @@ type MessageMarkAsUnseenResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -3588,7 +3632,7 @@ type MessageUnarchiveResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageUnarchiveResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -3598,7 +3642,7 @@ type MessageUnarchiveResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -3867,7 +3911,7 @@ type MessageListParams struct {
 // URLQuery serializes [MessageListParams]'s query parameters as `url.Values`.
 func (r MessageListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -3925,7 +3969,7 @@ type MessageListActivitiesParams struct {
 // `url.Values`.
 func (r MessageListActivitiesParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -3943,7 +3987,7 @@ type MessageListDeliveryLogsParams struct {
 // `url.Values`.
 func (r MessageListDeliveryLogsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
@@ -3961,7 +4005,7 @@ type MessageListEventsParams struct {
 // `url.Values`.
 func (r MessageListEventsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }

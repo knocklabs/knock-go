@@ -52,7 +52,7 @@ func TestMessageBatchGetContent(t *testing.T) {
 		option.WithToken("My Token"),
 	)
 	_, err := client.Messages.Batch.GetContent(context.TODO(), knock.MessageBatchGetContentParams{
-		MessageIDs: knock.F([]interface{}{map[string]interface{}{}}),
+		MessageIDs: knock.F([]string{"string"}),
 	})
 	if err != nil {
 		var apierr *knock.Error

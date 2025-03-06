@@ -116,7 +116,7 @@ type MessageBatchArchiveResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageBatchArchiveResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -126,7 +126,7 @@ type MessageBatchArchiveResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -402,13 +402,13 @@ type MessageBatchGetContentResponseData struct {
 	Blocks interface{} `json:"blocks"`
 	Body   string      `json:"body"`
 	Cc     string      `json:"cc,nullable"`
-	// This field can have the runtime type of [interface{}].
+	// This field can have the runtime type of [map[string]interface{}].
 	Connection interface{} `json:"connection"`
 	// This field can have the runtime type of [interface{}].
 	Data     interface{} `json:"data"`
 	From     string      `json:"from"`
 	HTMLBody string      `json:"html_body"`
-	// This field can have the runtime type of [interface{}].
+	// This field can have the runtime type of [map[string]interface{}].
 	Metadata    interface{} `json:"metadata"`
 	ReplyTo     string      `json:"reply_to,nullable"`
 	SubjectLine string      `json:"subject_line"`
@@ -617,9 +617,9 @@ func (r MessageBatchGetContentResponseDataMessagePushContent) implementsMessageB
 type MessageBatchGetContentResponseDataMessageChatContent struct {
 	Typename string `json:"__typename,required"`
 	// The channel data connection from the recipient to the underlying provider
-	Connection interface{}                                                  `json:"connection,required"`
+	Connection map[string]interface{}                                       `json:"connection,required"`
 	Template   MessageBatchGetContentResponseDataMessageChatContentTemplate `json:"template,required"`
-	Metadata   interface{}                                                  `json:"metadata,nullable"`
+	Metadata   map[string]interface{}                                       `json:"metadata,nullable"`
 	JSON       messageBatchGetContentResponseDataMessageChatContentJSON     `json:"-"`
 }
 
@@ -649,7 +649,7 @@ type MessageBatchGetContentResponseDataMessageChatContentTemplate struct {
 	// The structured blocks of the message
 	Blocks []MessageBatchGetContentResponseDataMessageChatContentTemplateBlock `json:"blocks,nullable"`
 	// The JSON content of the message
-	JsonContent interface{}                                                      `json:"json_content,nullable"`
+	JsonContent map[string]interface{}                                           `json:"json_content,nullable"`
 	Summary     string                                                           `json:"summary,nullable"`
 	JSON        messageBatchGetContentResponseDataMessageChatContentTemplateJSON `json:"-"`
 }
@@ -968,7 +968,7 @@ type MessageBatchMarkAsInteractedResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageBatchMarkAsInteractedResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -978,7 +978,7 @@ type MessageBatchMarkAsInteractedResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -1232,7 +1232,7 @@ type MessageBatchMarkAsReadResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageBatchMarkAsReadResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -1242,7 +1242,7 @@ type MessageBatchMarkAsReadResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -1494,7 +1494,7 @@ type MessageBatchMarkAsSeenResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageBatchMarkAsSeenResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -1504,7 +1504,7 @@ type MessageBatchMarkAsSeenResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -1756,7 +1756,7 @@ type MessageBatchMarkAsUnreadResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageBatchMarkAsUnreadResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -1766,7 +1766,7 @@ type MessageBatchMarkAsUnreadResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -2019,7 +2019,7 @@ type MessageBatchMarkAsUnseenResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageBatchMarkAsUnseenResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -2029,7 +2029,7 @@ type MessageBatchMarkAsUnseenResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -2282,7 +2282,7 @@ type MessageBatchUnarchiveResponse struct {
 	// Timestamp when message was clicked
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Additional message data
-	Data interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data,nullable"`
 	// List of engagement statuses
 	EngagementStatuses []MessageBatchUnarchiveResponseEngagementStatus `json:"engagement_statuses"`
 	// Timestamp of creation
@@ -2292,7 +2292,7 @@ type MessageBatchUnarchiveResponse struct {
 	// Timestamp when a link in the message was clicked
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
 	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when message was read
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
@@ -2535,14 +2535,14 @@ type MessageBatchArchiveParams struct {
 
 type MessageBatchGetContentParams struct {
 	// The IDs of the messages to fetch contents of
-	MessageIDs param.Field[[]interface{}] `query:"message_ids,required"`
+	MessageIDs param.Field[[]string] `query:"message_ids,required"`
 }
 
 // URLQuery serializes [MessageBatchGetContentParams]'s query parameters as
 // `url.Values`.
 func (r MessageBatchGetContentParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
