@@ -62,8 +62,8 @@ func TestProviderSlackListChannelsWithOptionalParams(t *testing.T) {
 			AccessTokenObject: knock.F("access_token_object"),
 			QueryOptions: knock.F(knock.ProviderSlackListChannelsParamsQueryOptions{
 				Cursor:          knock.F("cursor"),
-				ExcludeArchived: knock.F("exclude_archived"),
-				Limit:           knock.F("limit"),
+				ExcludeArchived: knock.F(true),
+				Limit:           knock.F(int64(0)),
 				TeamID:          knock.F("team_id"),
 				Types:           knock.F("types"),
 			}),

@@ -232,6 +232,6 @@ func WithEnvironmentProduction() RequestOption {
 func WithBearerToken(value string) RequestOption {
 	return func(r *requestconfig.RequestConfig) error {
 		r.BearerToken = value
-		return nil
+		return r.Apply(WithHeader("authorization", fmt.Sprintf("Bearer %s", r.BearerToken)))
 	}
 }
