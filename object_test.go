@@ -124,7 +124,7 @@ func TestObjectDeleteSubscriptions(t *testing.T) {
 		"collection",
 		"object_id",
 		knock.ObjectDeleteSubscriptionsParams{
-			Recipients: knock.F([]knock.ObjectDeleteSubscriptionsParamsRecipientUnion{knock.ObjectDeleteSubscriptionsParamsRecipientsInlineIdentifyUserRequest{
+			Recipients: knock.F([]knock.ObjectDeleteSubscriptionsParamsRecipientUnion{shared.InlineIdentifyUserRequestParam{
 				ID: knock.F("user_1"),
 				ChannelData: knock.F(map[string]shared.ChannelDataRequestParam{
 					"97c5837d-c65c-4d54-aa39-080eeb81c69d": {

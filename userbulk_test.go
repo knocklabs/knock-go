@@ -55,7 +55,7 @@ func TestUserBulkIdentify(t *testing.T) {
 		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Users.Bulk.Identify(context.TODO(), knock.UserBulkIdentifyParams{
-		Users: knock.F([]knock.UserBulkIdentifyParamsUser{{
+		Users: knock.F([]shared.InlineIdentifyUserRequestParam{{
 			ID: knock.F("user_1"),
 			ChannelData: knock.F(map[string]shared.ChannelDataRequestParam{
 				"97c5837d-c65c-4d54-aa39-080eeb81c69d": {

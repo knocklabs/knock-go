@@ -3,6 +3,7 @@
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared#ChannelDataRequestParam">ChannelDataRequestParam</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared#ConditionParam">ConditionParam</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared#DiscordChannelDataParam">DiscordChannelDataParam</a>
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared#InlineIdentifyUserRequestParam">InlineIdentifyUserRequestParam</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared#MsTeamsChannelDataParam">MsTeamsChannelDataParam</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared#OneSignalChannelDataParam">OneSignalChannelDataParam</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared#PreferenceSetChannelTypesParam">PreferenceSetChannelTypesParam</a>

@@ -1881,35 +1881,11 @@ func (r ObjectAddSubscriptionsParamsRecipient) ImplementsObjectAddSubscriptionsP
 // (string), an inline user request (object), or an inline object request, which is
 // determined by the presence of a `collection` property.
 //
-// Satisfied by [shared.UnionString],
-// [ObjectAddSubscriptionsParamsRecipientsInlineIdentifyUserRequest],
+// Satisfied by [shared.UnionString], [shared.InlineIdentifyUserRequestParam],
 // [ObjectAddSubscriptionsParamsRecipientsInlineIdentifyObjectRequest],
 // [ObjectAddSubscriptionsParamsRecipient].
 type ObjectAddSubscriptionsParamsRecipientUnion interface {
 	ImplementsObjectAddSubscriptionsParamsRecipientUnion()
-}
-
-// A set of parameters to inline-identify a user with. Inline identifying the user
-// will ensure that the user is available before the request is executed in Knock.
-// It will perform an upsert against the user you're supplying, replacing any
-// properties specified.
-type ObjectAddSubscriptionsParamsRecipientsInlineIdentifyUserRequest struct {
-	// The ID of the user to identify. This is an ID that you supply.
-	ID param.Field[string] `json:"id,required"`
-	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[map[string]shared.ChannelDataRequestParam] `json:"channel_data"`
-	// The creation date of the user from your system.
-	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[map[string]shared.PreferenceSetRequestParam] `json:"preferences"`
-	ExtraFields map[string]interface{}                                   `json:"-,extras"`
-}
-
-func (r ObjectAddSubscriptionsParamsRecipientsInlineIdentifyUserRequest) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ObjectAddSubscriptionsParamsRecipientsInlineIdentifyUserRequest) ImplementsObjectAddSubscriptionsParamsRecipientUnion() {
 }
 
 // Inline identifies a custom object belonging to a collection
@@ -1963,35 +1939,11 @@ func (r ObjectDeleteSubscriptionsParamsRecipient) ImplementsObjectDeleteSubscrip
 // (string), an inline user request (object), or an inline object request, which is
 // determined by the presence of a `collection` property.
 //
-// Satisfied by [shared.UnionString],
-// [ObjectDeleteSubscriptionsParamsRecipientsInlineIdentifyUserRequest],
+// Satisfied by [shared.UnionString], [shared.InlineIdentifyUserRequestParam],
 // [ObjectDeleteSubscriptionsParamsRecipientsInlineIdentifyObjectRequest],
 // [ObjectDeleteSubscriptionsParamsRecipient].
 type ObjectDeleteSubscriptionsParamsRecipientUnion interface {
 	ImplementsObjectDeleteSubscriptionsParamsRecipientUnion()
-}
-
-// A set of parameters to inline-identify a user with. Inline identifying the user
-// will ensure that the user is available before the request is executed in Knock.
-// It will perform an upsert against the user you're supplying, replacing any
-// properties specified.
-type ObjectDeleteSubscriptionsParamsRecipientsInlineIdentifyUserRequest struct {
-	// The ID of the user to identify. This is an ID that you supply.
-	ID param.Field[string] `json:"id,required"`
-	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[map[string]shared.ChannelDataRequestParam] `json:"channel_data"`
-	// The creation date of the user from your system.
-	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[map[string]shared.PreferenceSetRequestParam] `json:"preferences"`
-	ExtraFields map[string]interface{}                                   `json:"-,extras"`
-}
-
-func (r ObjectDeleteSubscriptionsParamsRecipientsInlineIdentifyUserRequest) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ObjectDeleteSubscriptionsParamsRecipientsInlineIdentifyUserRequest) ImplementsObjectDeleteSubscriptionsParamsRecipientUnion() {
 }
 
 // Inline identifies a custom object belonging to a collection

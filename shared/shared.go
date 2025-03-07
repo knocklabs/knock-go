@@ -356,6 +356,39 @@ func (r DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWeb
 	return apijson.MarshalRoot(r)
 }
 
+// A set of parameters to inline-identify a user with. Inline identifying the user
+// will ensure that the user is available before the request is executed in Knock.
+// It will perform an upsert against the user you're supplying, replacing any
+// properties specified.
+type InlineIdentifyUserRequestParam struct {
+	// The ID of the user to identify. This is an ID that you supply.
+	ID param.Field[string] `json:"id,required"`
+	// Allows inline setting channel data for a recipient
+	ChannelData param.Field[map[string]ChannelDataRequestParam] `json:"channel_data"`
+	// The creation date of the user from your system.
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[map[string]PreferenceSetRequestParam] `json:"preferences"`
+	ExtraFields map[string]interface{}                            `json:"-,extras"`
+}
+
+func (r InlineIdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r InlineIdentifyUserRequestParam) ImplementsObjectAddSubscriptionsParamsRecipientUnion() {}
+
+func (r InlineIdentifyUserRequestParam) ImplementsObjectDeleteSubscriptionsParamsRecipientUnion() {}
+
+func (r InlineIdentifyUserRequestParam) ImplementsObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion() {
+}
+
+func (r InlineIdentifyUserRequestParam) ImplementsWorkflowTriggerParamsActorUnion() {}
+
+func (r InlineIdentifyUserRequestParam) ImplementsWorkflowTriggerParamsRecipientUnion() {}
+
+func (r InlineIdentifyUserRequestParam) ImplementsScheduleUpdateParamsActorUnion() {}
+
 // Microsoft Teams channel data
 type MsTeamsChannelData struct {
 	Connections []MsTeamsChannelDataConnection `json:"connections,required"`

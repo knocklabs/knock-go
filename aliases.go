@@ -133,6 +133,14 @@ type DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionParam = shared
 // This is an alias to an internal type.
 type DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookParam = shared.DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookParam
 
+// A set of parameters to inline-identify a user with. Inline identifying the user
+// will ensure that the user is available before the request is executed in Knock.
+// It will perform an upsert against the user you're supplying, replacing any
+// properties specified.
+//
+// This is an alias to an internal type.
+type InlineIdentifyUserRequestParam = shared.InlineIdentifyUserRequestParam
+
 // Microsoft Teams channel data
 //
 // This is an alias to an internal type.

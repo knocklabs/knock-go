@@ -345,30 +345,10 @@ func (r UserBulkDeleteParams) URLQuery() (v url.Values) {
 }
 
 type UserBulkIdentifyParams struct {
-	Users param.Field[[]UserBulkIdentifyParamsUser] `json:"users,required"`
+	Users param.Field[[]shared.InlineIdentifyUserRequestParam] `json:"users,required"`
 }
 
 func (r UserBulkIdentifyParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// A set of parameters to inline-identify a user with. Inline identifying the user
-// will ensure that the user is available before the request is executed in Knock.
-// It will perform an upsert against the user you're supplying, replacing any
-// properties specified.
-type UserBulkIdentifyParamsUser struct {
-	// The ID of the user to identify. This is an ID that you supply.
-	ID param.Field[string] `json:"id,required"`
-	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[map[string]shared.ChannelDataRequestParam] `json:"channel_data"`
-	// The creation date of the user from your system.
-	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[map[string]shared.PreferenceSetRequestParam] `json:"preferences"`
-	ExtraFields map[string]interface{}                                   `json:"-,extras"`
-}
-
-func (r UserBulkIdentifyParamsUser) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
