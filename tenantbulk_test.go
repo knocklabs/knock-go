@@ -53,7 +53,7 @@ func TestTenantBulkSet(t *testing.T) {
 		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Tenants.Bulk.Set(context.TODO(), knock.TenantBulkSetParams{
-		Tenants: knock.F([]knock.TenantBulkSetParamsTenantUnion{shared.UnionString("string")}),
+		Tenants: knock.F([]shared.InlineTenantRequestUnionParam{shared.UnionString("string")}),
 	})
 	if err != nil {
 		var apierr *knock.Error
