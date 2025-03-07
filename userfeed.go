@@ -16,6 +16,7 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
+	"github.com/stainless-sdks/knock-go/packages/pagination"
 	"github.com/tidwall/gjson"
 )
 
@@ -38,23 +39,7 @@ func NewUserFeedService(opts ...option.RequestOption) (r *UserFeedService) {
 	return
 }
 
-// Get a user's feed of in-app messages
-func (r *UserFeedService) Get(ctx context.Context, userID string, id string, query UserFeedGetParams, opts ...option.RequestOption) (res *UserFeedGetResponse, err error) {
-	opts = append(r.Options[:], opts...)
-	if userID == "" {
-		err = errors.New("missing required user_id parameter")
-		return
-	}
-	if id == "" {
-		err = errors.New("missing required id parameter")
-		return
-	}
-	path := fmt.Sprintf("v1/users/%s/feeds/%s", userID, id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
-}
-
-// Get a user's feed settings
+// Returns the feed settings for a user.
 func (r *UserFeedService) GetSettings(ctx context.Context, userID string, id string, opts ...option.RequestOption) (res *UserFeedGetSettingsResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
@@ -70,737 +55,37 @@ func (r *UserFeedService) GetSettings(ctx context.Context, userID string, id str
 	return
 }
 
-// The response for the user's feed
-type UserFeedGetResponse struct {
-	Entries  []UserFeedGetResponseEntry  `json:"entries,required"`
-	Meta     UserFeedGetResponseMeta     `json:"meta,required"`
-	PageInfo UserFeedGetResponsePageInfo `json:"page_info,required"`
-	Vars     map[string]interface{}      `json:"vars,required"`
-	JSON     userFeedGetResponseJSON     `json:"-"`
-}
-
-// userFeedGetResponseJSON contains the JSON metadata for the struct
-// [UserFeedGetResponse]
-type userFeedGetResponseJSON struct {
-	Entries     apijson.Field
-	Meta        apijson.Field
-	PageInfo    apijson.Field
-	Vars        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedGetResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedGetResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// An in-app feed message in a user's feed
-type UserFeedGetResponseEntry struct {
-	ID              string                               `json:"id,required"`
-	Typename        string                               `json:"__typename,required"`
-	Activities      []UserFeedGetResponseEntriesActivity `json:"activities,required"`
-	Actors          []UserFeedGetResponseEntriesActor    `json:"actors,required"`
-	Blocks          []UserFeedGetResponseEntriesBlock    `json:"blocks,required"`
-	Data            map[string]interface{}               `json:"data,required,nullable"`
-	InsertedAt      string                               `json:"inserted_at,required"`
-	Source          UserFeedGetResponseEntriesSource     `json:"source,required"`
-	Tenant          string                               `json:"tenant,required,nullable"`
-	TotalActivities int64                                `json:"total_activities,required"`
-	TotalActors     int64                                `json:"total_actors,required"`
-	UpdatedAt       string                               `json:"updated_at,required"`
-	ArchivedAt      string                               `json:"archived_at,nullable"`
-	ClickedAt       string                               `json:"clicked_at,nullable"`
-	InteractedAt    string                               `json:"interacted_at,nullable"`
-	LinkClickedAt   string                               `json:"link_clicked_at,nullable"`
-	ReadAt          string                               `json:"read_at,nullable"`
-	SeenAt          string                               `json:"seen_at,nullable"`
-	JSON            userFeedGetResponseEntryJSON         `json:"-"`
-}
-
-// userFeedGetResponseEntryJSON contains the JSON metadata for the struct
-// [UserFeedGetResponseEntry]
-type userFeedGetResponseEntryJSON struct {
-	ID              apijson.Field
-	Typename        apijson.Field
-	Activities      apijson.Field
-	Actors          apijson.Field
-	Blocks          apijson.Field
-	Data            apijson.Field
-	InsertedAt      apijson.Field
-	Source          apijson.Field
-	Tenant          apijson.Field
-	TotalActivities apijson.Field
-	TotalActors     apijson.Field
-	UpdatedAt       apijson.Field
-	ArchivedAt      apijson.Field
-	ClickedAt       apijson.Field
-	InteractedAt    apijson.Field
-	LinkClickedAt   apijson.Field
-	ReadAt          apijson.Field
-	SeenAt          apijson.Field
-	raw             string
-	ExtraFields     map[string]apijson.Field
-}
-
-func (r *UserFeedGetResponseEntry) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedGetResponseEntryJSON) RawJSON() string {
-	return r.raw
-}
-
-// An activity associated with a workflow run
-type UserFeedGetResponseEntriesActivity struct {
-	ID       string `json:"id"`
-	Typename string `json:"__typename"`
-	// A recipient, which is either a user or an object
-	Actor UserFeedGetResponseEntriesActivitiesActor `json:"actor,nullable"`
-	// The data associated with the activity
-	Data       interface{} `json:"data,nullable"`
-	InsertedAt time.Time   `json:"inserted_at" format:"date-time"`
-	// A recipient, which is either a user or an object
-	Recipient UserFeedGetResponseEntriesActivitiesRecipient `json:"recipient"`
-	UpdatedAt time.Time                                     `json:"updated_at" format:"date-time"`
-	JSON      userFeedGetResponseEntriesActivityJSON        `json:"-"`
-}
-
-// userFeedGetResponseEntriesActivityJSON contains the JSON metadata for the struct
-// [UserFeedGetResponseEntriesActivity]
-type userFeedGetResponseEntriesActivityJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	Actor       apijson.Field
-	Data        apijson.Field
-	InsertedAt  apijson.Field
-	Recipient   apijson.Field
-	UpdatedAt   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedGetResponseEntriesActivity) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedGetResponseEntriesActivityJSON) RawJSON() string {
-	return r.raw
-}
-
-// A recipient, which is either a user or an object
-type UserFeedGetResponseEntriesActivitiesActor struct {
-	ID          string                                        `json:"id,required"`
-	Typename    string                                        `json:"__typename,required"`
-	UpdatedAt   time.Time                                     `json:"updated_at,required" format:"date-time"`
-	Avatar      string                                        `json:"avatar,nullable"`
-	Collection  string                                        `json:"collection"`
-	CreatedAt   time.Time                                     `json:"created_at,nullable" format:"date-time"`
-	Email       string                                        `json:"email,nullable" format:"email"`
-	Name        string                                        `json:"name,nullable"`
-	PhoneNumber string                                        `json:"phone_number,nullable" format:"phone-number"`
-	Timezone    string                                        `json:"timezone,nullable"`
-	JSON        userFeedGetResponseEntriesActivitiesActorJSON `json:"-"`
-	union       UserFeedGetResponseEntriesActivitiesActorUnion
-}
-
-// userFeedGetResponseEntriesActivitiesActorJSON contains the JSON metadata for the
-// struct [UserFeedGetResponseEntriesActivitiesActor]
-type userFeedGetResponseEntriesActivitiesActorJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	UpdatedAt   apijson.Field
-	Avatar      apijson.Field
-	Collection  apijson.Field
-	CreatedAt   apijson.Field
-	Email       apijson.Field
-	Name        apijson.Field
-	PhoneNumber apijson.Field
-	Timezone    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r userFeedGetResponseEntriesActivitiesActorJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *UserFeedGetResponseEntriesActivitiesActor) UnmarshalJSON(data []byte) (err error) {
-	*r = UserFeedGetResponseEntriesActivitiesActor{}
-	err = apijson.UnmarshalRoot(data, &r.union)
+// Returns a paginated list of feed items for a user, including metadata about the
+// feed.
+func (r *UserFeedService) ListItems(ctx context.Context, userID string, id string, query UserFeedListItemsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[UserFeedListItemsResponse], err error) {
+	var raw *http.Response
+	opts = append(r.Options[:], opts...)
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
+	if userID == "" {
+		err = errors.New("missing required user_id parameter")
+		return
+	}
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/users/%s/feeds/%s", userID, id)
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return apijson.Port(r.union, &r)
-}
-
-// AsUnion returns a [UserFeedGetResponseEntriesActivitiesActorUnion] interface
-// which you can cast to the specific types for more type safety.
-//
-// Possible runtime types of the union are [User],
-// [UserFeedGetResponseEntriesActivitiesActorObject].
-func (r UserFeedGetResponseEntriesActivitiesActor) AsUnion() UserFeedGetResponseEntriesActivitiesActorUnion {
-	return r.union
-}
-
-// A recipient, which is either a user or an object
-//
-// Union satisfied by [User] or [UserFeedGetResponseEntriesActivitiesActorObject].
-type UserFeedGetResponseEntriesActivitiesActorUnion interface {
-	implementsUserFeedGetResponseEntriesActivitiesActor()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*UserFeedGetResponseEntriesActivitiesActorUnion)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(User{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(UserFeedGetResponseEntriesActivitiesActorObject{}),
-		},
-	)
-}
-
-// A custom-object entity which belongs to a collection.
-type UserFeedGetResponseEntriesActivitiesActorObject struct {
-	ID          string                                              `json:"id,required"`
-	Typename    string                                              `json:"__typename,required"`
-	Collection  string                                              `json:"collection,required"`
-	UpdatedAt   time.Time                                           `json:"updated_at,required" format:"date-time"`
-	CreatedAt   time.Time                                           `json:"created_at,nullable" format:"date-time"`
-	ExtraFields map[string]interface{}                              `json:"-,extras"`
-	JSON        userFeedGetResponseEntriesActivitiesActorObjectJSON `json:"-"`
-}
-
-// userFeedGetResponseEntriesActivitiesActorObjectJSON contains the JSON metadata
-// for the struct [UserFeedGetResponseEntriesActivitiesActorObject]
-type userFeedGetResponseEntriesActivitiesActorObjectJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	Collection  apijson.Field
-	UpdatedAt   apijson.Field
-	CreatedAt   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedGetResponseEntriesActivitiesActorObject) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedGetResponseEntriesActivitiesActorObjectJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r UserFeedGetResponseEntriesActivitiesActorObject) implementsUserFeedGetResponseEntriesActivitiesActor() {
-}
-
-// A recipient, which is either a user or an object
-type UserFeedGetResponseEntriesActivitiesRecipient struct {
-	ID          string                                            `json:"id,required"`
-	Typename    string                                            `json:"__typename,required"`
-	UpdatedAt   time.Time                                         `json:"updated_at,required" format:"date-time"`
-	Avatar      string                                            `json:"avatar,nullable"`
-	Collection  string                                            `json:"collection"`
-	CreatedAt   time.Time                                         `json:"created_at,nullable" format:"date-time"`
-	Email       string                                            `json:"email,nullable" format:"email"`
-	Name        string                                            `json:"name,nullable"`
-	PhoneNumber string                                            `json:"phone_number,nullable" format:"phone-number"`
-	Timezone    string                                            `json:"timezone,nullable"`
-	JSON        userFeedGetResponseEntriesActivitiesRecipientJSON `json:"-"`
-	union       UserFeedGetResponseEntriesActivitiesRecipientUnion
-}
-
-// userFeedGetResponseEntriesActivitiesRecipientJSON contains the JSON metadata for
-// the struct [UserFeedGetResponseEntriesActivitiesRecipient]
-type userFeedGetResponseEntriesActivitiesRecipientJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	UpdatedAt   apijson.Field
-	Avatar      apijson.Field
-	Collection  apijson.Field
-	CreatedAt   apijson.Field
-	Email       apijson.Field
-	Name        apijson.Field
-	PhoneNumber apijson.Field
-	Timezone    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r userFeedGetResponseEntriesActivitiesRecipientJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *UserFeedGetResponseEntriesActivitiesRecipient) UnmarshalJSON(data []byte) (err error) {
-	*r = UserFeedGetResponseEntriesActivitiesRecipient{}
-	err = apijson.UnmarshalRoot(data, &r.union)
+	err = cfg.Execute()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return apijson.Port(r.union, &r)
+	res.SetPageConfig(cfg, raw)
+	return res, nil
 }
 
-// AsUnion returns a [UserFeedGetResponseEntriesActivitiesRecipientUnion] interface
-// which you can cast to the specific types for more type safety.
-//
-// Possible runtime types of the union are [User],
-// [UserFeedGetResponseEntriesActivitiesRecipientObject].
-func (r UserFeedGetResponseEntriesActivitiesRecipient) AsUnion() UserFeedGetResponseEntriesActivitiesRecipientUnion {
-	return r.union
-}
-
-// A recipient, which is either a user or an object
-//
-// Union satisfied by [User] or
-// [UserFeedGetResponseEntriesActivitiesRecipientObject].
-type UserFeedGetResponseEntriesActivitiesRecipientUnion interface {
-	implementsUserFeedGetResponseEntriesActivitiesRecipient()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*UserFeedGetResponseEntriesActivitiesRecipientUnion)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(User{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(UserFeedGetResponseEntriesActivitiesRecipientObject{}),
-		},
-	)
-}
-
-// A custom-object entity which belongs to a collection.
-type UserFeedGetResponseEntriesActivitiesRecipientObject struct {
-	ID          string                                                  `json:"id,required"`
-	Typename    string                                                  `json:"__typename,required"`
-	Collection  string                                                  `json:"collection,required"`
-	UpdatedAt   time.Time                                               `json:"updated_at,required" format:"date-time"`
-	CreatedAt   time.Time                                               `json:"created_at,nullable" format:"date-time"`
-	ExtraFields map[string]interface{}                                  `json:"-,extras"`
-	JSON        userFeedGetResponseEntriesActivitiesRecipientObjectJSON `json:"-"`
-}
-
-// userFeedGetResponseEntriesActivitiesRecipientObjectJSON contains the JSON
-// metadata for the struct [UserFeedGetResponseEntriesActivitiesRecipientObject]
-type userFeedGetResponseEntriesActivitiesRecipientObjectJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	Collection  apijson.Field
-	UpdatedAt   apijson.Field
-	CreatedAt   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedGetResponseEntriesActivitiesRecipientObject) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedGetResponseEntriesActivitiesRecipientObjectJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r UserFeedGetResponseEntriesActivitiesRecipientObject) implementsUserFeedGetResponseEntriesActivitiesRecipient() {
-}
-
-// A recipient, which is either a user or an object
-type UserFeedGetResponseEntriesActor struct {
-	ID          string                              `json:"id,required"`
-	Typename    string                              `json:"__typename,required"`
-	UpdatedAt   time.Time                           `json:"updated_at,required" format:"date-time"`
-	Avatar      string                              `json:"avatar,nullable"`
-	Collection  string                              `json:"collection"`
-	CreatedAt   time.Time                           `json:"created_at,nullable" format:"date-time"`
-	Email       string                              `json:"email,nullable" format:"email"`
-	Name        string                              `json:"name,nullable"`
-	PhoneNumber string                              `json:"phone_number,nullable" format:"phone-number"`
-	Timezone    string                              `json:"timezone,nullable"`
-	JSON        userFeedGetResponseEntriesActorJSON `json:"-"`
-	union       UserFeedGetResponseEntriesActorsUnion
-}
-
-// userFeedGetResponseEntriesActorJSON contains the JSON metadata for the struct
-// [UserFeedGetResponseEntriesActor]
-type userFeedGetResponseEntriesActorJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	UpdatedAt   apijson.Field
-	Avatar      apijson.Field
-	Collection  apijson.Field
-	CreatedAt   apijson.Field
-	Email       apijson.Field
-	Name        apijson.Field
-	PhoneNumber apijson.Field
-	Timezone    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r userFeedGetResponseEntriesActorJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *UserFeedGetResponseEntriesActor) UnmarshalJSON(data []byte) (err error) {
-	*r = UserFeedGetResponseEntriesActor{}
-	err = apijson.UnmarshalRoot(data, &r.union)
-	if err != nil {
-		return err
-	}
-	return apijson.Port(r.union, &r)
-}
-
-// AsUnion returns a [UserFeedGetResponseEntriesActorsUnion] interface which you
-// can cast to the specific types for more type safety.
-//
-// Possible runtime types of the union are [User],
-// [UserFeedGetResponseEntriesActorsObject].
-func (r UserFeedGetResponseEntriesActor) AsUnion() UserFeedGetResponseEntriesActorsUnion {
-	return r.union
-}
-
-// A recipient, which is either a user or an object
-//
-// Union satisfied by [User] or [UserFeedGetResponseEntriesActorsObject].
-type UserFeedGetResponseEntriesActorsUnion interface {
-	implementsUserFeedGetResponseEntriesActor()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*UserFeedGetResponseEntriesActorsUnion)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(User{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(UserFeedGetResponseEntriesActorsObject{}),
-		},
-	)
-}
-
-// A custom-object entity which belongs to a collection.
-type UserFeedGetResponseEntriesActorsObject struct {
-	ID          string                                     `json:"id,required"`
-	Typename    string                                     `json:"__typename,required"`
-	Collection  string                                     `json:"collection,required"`
-	UpdatedAt   time.Time                                  `json:"updated_at,required" format:"date-time"`
-	CreatedAt   time.Time                                  `json:"created_at,nullable" format:"date-time"`
-	ExtraFields map[string]interface{}                     `json:"-,extras"`
-	JSON        userFeedGetResponseEntriesActorsObjectJSON `json:"-"`
-}
-
-// userFeedGetResponseEntriesActorsObjectJSON contains the JSON metadata for the
-// struct [UserFeedGetResponseEntriesActorsObject]
-type userFeedGetResponseEntriesActorsObjectJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	Collection  apijson.Field
-	UpdatedAt   apijson.Field
-	CreatedAt   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedGetResponseEntriesActorsObject) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedGetResponseEntriesActorsObjectJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r UserFeedGetResponseEntriesActorsObject) implementsUserFeedGetResponseEntriesActor() {}
-
-// A content (text or markdown) block in a message in an app feed
-type UserFeedGetResponseEntriesBlock struct {
-	Name string                               `json:"name,required"`
-	Type UserFeedGetResponseEntriesBlocksType `json:"type,required"`
-	// This field can have the runtime type of
-	// [[]UserFeedGetResponseEntriesBlocksButtonSetBlockButton].
-	Buttons  interface{}                         `json:"buttons"`
-	Content  string                              `json:"content"`
-	Rendered string                              `json:"rendered"`
-	JSON     userFeedGetResponseEntriesBlockJSON `json:"-"`
-	union    UserFeedGetResponseEntriesBlocksUnion
-}
-
-// userFeedGetResponseEntriesBlockJSON contains the JSON metadata for the struct
-// [UserFeedGetResponseEntriesBlock]
-type userFeedGetResponseEntriesBlockJSON struct {
-	Name        apijson.Field
-	Type        apijson.Field
-	Buttons     apijson.Field
-	Content     apijson.Field
-	Rendered    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r userFeedGetResponseEntriesBlockJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *UserFeedGetResponseEntriesBlock) UnmarshalJSON(data []byte) (err error) {
-	*r = UserFeedGetResponseEntriesBlock{}
-	err = apijson.UnmarshalRoot(data, &r.union)
-	if err != nil {
-		return err
-	}
-	return apijson.Port(r.union, &r)
-}
-
-// AsUnion returns a [UserFeedGetResponseEntriesBlocksUnion] interface which you
-// can cast to the specific types for more type safety.
-//
-// Possible runtime types of the union are
-// [UserFeedGetResponseEntriesBlocksContentBlock],
-// [UserFeedGetResponseEntriesBlocksButtonSetBlock].
-func (r UserFeedGetResponseEntriesBlock) AsUnion() UserFeedGetResponseEntriesBlocksUnion {
-	return r.union
-}
-
-// A content (text or markdown) block in a message in an app feed
-//
-// Union satisfied by [UserFeedGetResponseEntriesBlocksContentBlock] or
-// [UserFeedGetResponseEntriesBlocksButtonSetBlock].
-type UserFeedGetResponseEntriesBlocksUnion interface {
-	implementsUserFeedGetResponseEntriesBlock()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*UserFeedGetResponseEntriesBlocksUnion)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(UserFeedGetResponseEntriesBlocksContentBlock{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(UserFeedGetResponseEntriesBlocksButtonSetBlock{}),
-		},
-	)
-}
-
-// A content (text or markdown) block in a message in an app feed
-type UserFeedGetResponseEntriesBlocksContentBlock struct {
-	Content  string                                           `json:"content,required"`
-	Name     string                                           `json:"name,required"`
-	Rendered string                                           `json:"rendered,required"`
-	Type     UserFeedGetResponseEntriesBlocksContentBlockType `json:"type,required"`
-	JSON     userFeedGetResponseEntriesBlocksContentBlockJSON `json:"-"`
-}
-
-// userFeedGetResponseEntriesBlocksContentBlockJSON contains the JSON metadata for
-// the struct [UserFeedGetResponseEntriesBlocksContentBlock]
-type userFeedGetResponseEntriesBlocksContentBlockJSON struct {
-	Content     apijson.Field
-	Name        apijson.Field
-	Rendered    apijson.Field
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedGetResponseEntriesBlocksContentBlock) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedGetResponseEntriesBlocksContentBlockJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r UserFeedGetResponseEntriesBlocksContentBlock) implementsUserFeedGetResponseEntriesBlock() {}
-
-type UserFeedGetResponseEntriesBlocksContentBlockType string
-
-const (
-	UserFeedGetResponseEntriesBlocksContentBlockTypeMarkdown UserFeedGetResponseEntriesBlocksContentBlockType = "markdown"
-	UserFeedGetResponseEntriesBlocksContentBlockTypeText     UserFeedGetResponseEntriesBlocksContentBlockType = "text"
-)
-
-func (r UserFeedGetResponseEntriesBlocksContentBlockType) IsKnown() bool {
-	switch r {
-	case UserFeedGetResponseEntriesBlocksContentBlockTypeMarkdown, UserFeedGetResponseEntriesBlocksContentBlockTypeText:
-		return true
-	}
-	return false
-}
-
-// A set of buttons in a message in an app feed
-type UserFeedGetResponseEntriesBlocksButtonSetBlock struct {
-	Buttons []UserFeedGetResponseEntriesBlocksButtonSetBlockButton `json:"buttons,required"`
-	Name    string                                                 `json:"name,required"`
-	Type    UserFeedGetResponseEntriesBlocksButtonSetBlockType     `json:"type,required"`
-	JSON    userFeedGetResponseEntriesBlocksButtonSetBlockJSON     `json:"-"`
-}
-
-// userFeedGetResponseEntriesBlocksButtonSetBlockJSON contains the JSON metadata
-// for the struct [UserFeedGetResponseEntriesBlocksButtonSetBlock]
-type userFeedGetResponseEntriesBlocksButtonSetBlockJSON struct {
-	Buttons     apijson.Field
-	Name        apijson.Field
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedGetResponseEntriesBlocksButtonSetBlock) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedGetResponseEntriesBlocksButtonSetBlockJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r UserFeedGetResponseEntriesBlocksButtonSetBlock) implementsUserFeedGetResponseEntriesBlock() {}
-
-// A button in a set of buttons
-type UserFeedGetResponseEntriesBlocksButtonSetBlockButton struct {
-	Action string                                                   `json:"action,required"`
-	Label  string                                                   `json:"label,required"`
-	Name   string                                                   `json:"name,required"`
-	JSON   userFeedGetResponseEntriesBlocksButtonSetBlockButtonJSON `json:"-"`
-}
-
-// userFeedGetResponseEntriesBlocksButtonSetBlockButtonJSON contains the JSON
-// metadata for the struct [UserFeedGetResponseEntriesBlocksButtonSetBlockButton]
-type userFeedGetResponseEntriesBlocksButtonSetBlockButtonJSON struct {
-	Action      apijson.Field
-	Label       apijson.Field
-	Name        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedGetResponseEntriesBlocksButtonSetBlockButton) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedGetResponseEntriesBlocksButtonSetBlockButtonJSON) RawJSON() string {
-	return r.raw
-}
-
-type UserFeedGetResponseEntriesBlocksButtonSetBlockType string
-
-const (
-	UserFeedGetResponseEntriesBlocksButtonSetBlockTypeButtonSet UserFeedGetResponseEntriesBlocksButtonSetBlockType = "button_set"
-)
-
-func (r UserFeedGetResponseEntriesBlocksButtonSetBlockType) IsKnown() bool {
-	switch r {
-	case UserFeedGetResponseEntriesBlocksButtonSetBlockTypeButtonSet:
-		return true
-	}
-	return false
-}
-
-type UserFeedGetResponseEntriesBlocksType string
-
-const (
-	UserFeedGetResponseEntriesBlocksTypeMarkdown  UserFeedGetResponseEntriesBlocksType = "markdown"
-	UserFeedGetResponseEntriesBlocksTypeText      UserFeedGetResponseEntriesBlocksType = "text"
-	UserFeedGetResponseEntriesBlocksTypeButtonSet UserFeedGetResponseEntriesBlocksType = "button_set"
-)
-
-func (r UserFeedGetResponseEntriesBlocksType) IsKnown() bool {
-	switch r {
-	case UserFeedGetResponseEntriesBlocksTypeMarkdown, UserFeedGetResponseEntriesBlocksTypeText, UserFeedGetResponseEntriesBlocksTypeButtonSet:
-		return true
-	}
-	return false
-}
-
-type UserFeedGetResponseEntriesSource struct {
-	Typename   string                               `json:"__typename,required"`
-	Categories []string                             `json:"categories,required"`
-	Key        string                               `json:"key,required"`
-	VersionID  string                               `json:"version_id,required" format:"uuid"`
-	JSON       userFeedGetResponseEntriesSourceJSON `json:"-"`
-}
-
-// userFeedGetResponseEntriesSourceJSON contains the JSON metadata for the struct
-// [UserFeedGetResponseEntriesSource]
-type userFeedGetResponseEntriesSourceJSON struct {
-	Typename    apijson.Field
-	Categories  apijson.Field
-	Key         apijson.Field
-	VersionID   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedGetResponseEntriesSource) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedGetResponseEntriesSourceJSON) RawJSON() string {
-	return r.raw
-}
-
-type UserFeedGetResponseMeta struct {
-	Typename    string                      `json:"__typename,required"`
-	TotalCount  int64                       `json:"total_count,required"`
-	UnreadCount int64                       `json:"unread_count,required"`
-	UnseenCount int64                       `json:"unseen_count,required"`
-	JSON        userFeedGetResponseMetaJSON `json:"-"`
-}
-
-// userFeedGetResponseMetaJSON contains the JSON metadata for the struct
-// [UserFeedGetResponseMeta]
-type userFeedGetResponseMetaJSON struct {
-	Typename    apijson.Field
-	TotalCount  apijson.Field
-	UnreadCount apijson.Field
-	UnseenCount apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedGetResponseMeta) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedGetResponseMetaJSON) RawJSON() string {
-	return r.raw
-}
-
-type UserFeedGetResponsePageInfo struct {
-	HasNextPage     bool                            `json:"has_next_page,required"`
-	HasPreviousPage bool                            `json:"has_previous_page,required"`
-	TotalCount      int64                           `json:"total_count,required"`
-	JSON            userFeedGetResponsePageInfoJSON `json:"-"`
-}
-
-// userFeedGetResponsePageInfoJSON contains the JSON metadata for the struct
-// [UserFeedGetResponsePageInfo]
-type userFeedGetResponsePageInfoJSON struct {
-	HasNextPage     apijson.Field
-	HasPreviousPage apijson.Field
-	TotalCount      apijson.Field
-	raw             string
-	ExtraFields     map[string]apijson.Field
-}
-
-func (r *UserFeedGetResponsePageInfo) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedGetResponsePageInfoJSON) RawJSON() string {
-	return r.raw
+// Returns a paginated list of feed items for a user, including metadata about the
+// feed.
+func (r *UserFeedService) ListItemsAutoPaging(ctx context.Context, userID string, id string, query UserFeedListItemsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[UserFeedListItemsResponse] {
+	return pagination.NewEntriesCursorAutoPager(r.ListItems(ctx, userID, id, query, opts...))
 }
 
 // The response for the user's feed settings
@@ -846,11 +131,669 @@ func (r userFeedGetSettingsResponseFeaturesJSON) RawJSON() string {
 	return r.raw
 }
 
-type UserFeedGetParams struct {
+// An in-app feed message in a user's feed
+type UserFeedListItemsResponse struct {
+	ID              string                              `json:"id,required"`
+	Typename        string                              `json:"__typename,required"`
+	Activities      []UserFeedListItemsResponseActivity `json:"activities,required"`
+	Actors          []UserFeedListItemsResponseActor    `json:"actors,required"`
+	Blocks          []UserFeedListItemsResponseBlock    `json:"blocks,required"`
+	Data            map[string]interface{}              `json:"data,required,nullable"`
+	InsertedAt      string                              `json:"inserted_at,required"`
+	Source          UserFeedListItemsResponseSource     `json:"source,required"`
+	Tenant          string                              `json:"tenant,required,nullable"`
+	TotalActivities int64                               `json:"total_activities,required"`
+	TotalActors     int64                               `json:"total_actors,required"`
+	UpdatedAt       string                              `json:"updated_at,required"`
+	ArchivedAt      string                              `json:"archived_at,nullable"`
+	ClickedAt       string                              `json:"clicked_at,nullable"`
+	InteractedAt    string                              `json:"interacted_at,nullable"`
+	LinkClickedAt   string                              `json:"link_clicked_at,nullable"`
+	ReadAt          string                              `json:"read_at,nullable"`
+	SeenAt          string                              `json:"seen_at,nullable"`
+	JSON            userFeedListItemsResponseJSON       `json:"-"`
+}
+
+// userFeedListItemsResponseJSON contains the JSON metadata for the struct
+// [UserFeedListItemsResponse]
+type userFeedListItemsResponseJSON struct {
+	ID              apijson.Field
+	Typename        apijson.Field
+	Activities      apijson.Field
+	Actors          apijson.Field
+	Blocks          apijson.Field
+	Data            apijson.Field
+	InsertedAt      apijson.Field
+	Source          apijson.Field
+	Tenant          apijson.Field
+	TotalActivities apijson.Field
+	TotalActors     apijson.Field
+	UpdatedAt       apijson.Field
+	ArchivedAt      apijson.Field
+	ClickedAt       apijson.Field
+	InteractedAt    apijson.Field
+	LinkClickedAt   apijson.Field
+	ReadAt          apijson.Field
+	SeenAt          apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *UserFeedListItemsResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userFeedListItemsResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// An activity associated with a workflow run
+type UserFeedListItemsResponseActivity struct {
+	ID       string `json:"id"`
+	Typename string `json:"__typename"`
+	// A recipient, which is either a user or an object
+	Actor UserFeedListItemsResponseActivitiesActor `json:"actor,nullable"`
+	// The data associated with the activity
+	Data       map[string]interface{} `json:"data,nullable"`
+	InsertedAt time.Time              `json:"inserted_at" format:"date-time"`
+	// A recipient, which is either a user or an object
+	Recipient UserFeedListItemsResponseActivitiesRecipient `json:"recipient"`
+	UpdatedAt time.Time                                    `json:"updated_at" format:"date-time"`
+	JSON      userFeedListItemsResponseActivityJSON        `json:"-"`
+}
+
+// userFeedListItemsResponseActivityJSON contains the JSON metadata for the struct
+// [UserFeedListItemsResponseActivity]
+type userFeedListItemsResponseActivityJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	Actor       apijson.Field
+	Data        apijson.Field
+	InsertedAt  apijson.Field
+	Recipient   apijson.Field
+	UpdatedAt   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserFeedListItemsResponseActivity) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userFeedListItemsResponseActivityJSON) RawJSON() string {
+	return r.raw
+}
+
+// A recipient, which is either a user or an object
+type UserFeedListItemsResponseActivitiesActor struct {
+	ID          string                                       `json:"id,required"`
+	Typename    string                                       `json:"__typename,required"`
+	UpdatedAt   time.Time                                    `json:"updated_at,required" format:"date-time"`
+	Avatar      string                                       `json:"avatar,nullable"`
+	Collection  string                                       `json:"collection"`
+	CreatedAt   time.Time                                    `json:"created_at,nullable" format:"date-time"`
+	Email       string                                       `json:"email,nullable"`
+	Name        string                                       `json:"name,nullable"`
+	PhoneNumber string                                       `json:"phone_number,nullable"`
+	Timezone    string                                       `json:"timezone,nullable"`
+	JSON        userFeedListItemsResponseActivitiesActorJSON `json:"-"`
+	union       UserFeedListItemsResponseActivitiesActorUnion
+}
+
+// userFeedListItemsResponseActivitiesActorJSON contains the JSON metadata for the
+// struct [UserFeedListItemsResponseActivitiesActor]
+type userFeedListItemsResponseActivitiesActorJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	UpdatedAt   apijson.Field
+	Avatar      apijson.Field
+	Collection  apijson.Field
+	CreatedAt   apijson.Field
+	Email       apijson.Field
+	Name        apijson.Field
+	PhoneNumber apijson.Field
+	Timezone    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r userFeedListItemsResponseActivitiesActorJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *UserFeedListItemsResponseActivitiesActor) UnmarshalJSON(data []byte) (err error) {
+	*r = UserFeedListItemsResponseActivitiesActor{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [UserFeedListItemsResponseActivitiesActorUnion] interface
+// which you can cast to the specific types for more type safety.
+//
+// Possible runtime types of the union are [User],
+// [UserFeedListItemsResponseActivitiesActorObject].
+func (r UserFeedListItemsResponseActivitiesActor) AsUnion() UserFeedListItemsResponseActivitiesActorUnion {
+	return r.union
+}
+
+// A recipient, which is either a user or an object
+//
+// Union satisfied by [User] or [UserFeedListItemsResponseActivitiesActorObject].
+type UserFeedListItemsResponseActivitiesActorUnion interface {
+	implementsUserFeedListItemsResponseActivitiesActor()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*UserFeedListItemsResponseActivitiesActorUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(User{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(UserFeedListItemsResponseActivitiesActorObject{}),
+		},
+	)
+}
+
+// A custom-object entity which belongs to a collection.
+type UserFeedListItemsResponseActivitiesActorObject struct {
+	ID          string                                             `json:"id,required"`
+	Typename    string                                             `json:"__typename,required"`
+	Collection  string                                             `json:"collection,required"`
+	UpdatedAt   time.Time                                          `json:"updated_at,required" format:"date-time"`
+	CreatedAt   time.Time                                          `json:"created_at,nullable" format:"date-time"`
+	ExtraFields map[string]interface{}                             `json:"-,extras"`
+	JSON        userFeedListItemsResponseActivitiesActorObjectJSON `json:"-"`
+}
+
+// userFeedListItemsResponseActivitiesActorObjectJSON contains the JSON metadata
+// for the struct [UserFeedListItemsResponseActivitiesActorObject]
+type userFeedListItemsResponseActivitiesActorObjectJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	Collection  apijson.Field
+	UpdatedAt   apijson.Field
+	CreatedAt   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserFeedListItemsResponseActivitiesActorObject) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userFeedListItemsResponseActivitiesActorObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r UserFeedListItemsResponseActivitiesActorObject) implementsUserFeedListItemsResponseActivitiesActor() {
+}
+
+// A recipient, which is either a user or an object
+type UserFeedListItemsResponseActivitiesRecipient struct {
+	ID          string                                           `json:"id,required"`
+	Typename    string                                           `json:"__typename,required"`
+	UpdatedAt   time.Time                                        `json:"updated_at,required" format:"date-time"`
+	Avatar      string                                           `json:"avatar,nullable"`
+	Collection  string                                           `json:"collection"`
+	CreatedAt   time.Time                                        `json:"created_at,nullable" format:"date-time"`
+	Email       string                                           `json:"email,nullable"`
+	Name        string                                           `json:"name,nullable"`
+	PhoneNumber string                                           `json:"phone_number,nullable"`
+	Timezone    string                                           `json:"timezone,nullable"`
+	JSON        userFeedListItemsResponseActivitiesRecipientJSON `json:"-"`
+	union       UserFeedListItemsResponseActivitiesRecipientUnion
+}
+
+// userFeedListItemsResponseActivitiesRecipientJSON contains the JSON metadata for
+// the struct [UserFeedListItemsResponseActivitiesRecipient]
+type userFeedListItemsResponseActivitiesRecipientJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	UpdatedAt   apijson.Field
+	Avatar      apijson.Field
+	Collection  apijson.Field
+	CreatedAt   apijson.Field
+	Email       apijson.Field
+	Name        apijson.Field
+	PhoneNumber apijson.Field
+	Timezone    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r userFeedListItemsResponseActivitiesRecipientJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *UserFeedListItemsResponseActivitiesRecipient) UnmarshalJSON(data []byte) (err error) {
+	*r = UserFeedListItemsResponseActivitiesRecipient{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [UserFeedListItemsResponseActivitiesRecipientUnion] interface
+// which you can cast to the specific types for more type safety.
+//
+// Possible runtime types of the union are [User],
+// [UserFeedListItemsResponseActivitiesRecipientObject].
+func (r UserFeedListItemsResponseActivitiesRecipient) AsUnion() UserFeedListItemsResponseActivitiesRecipientUnion {
+	return r.union
+}
+
+// A recipient, which is either a user or an object
+//
+// Union satisfied by [User] or
+// [UserFeedListItemsResponseActivitiesRecipientObject].
+type UserFeedListItemsResponseActivitiesRecipientUnion interface {
+	implementsUserFeedListItemsResponseActivitiesRecipient()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*UserFeedListItemsResponseActivitiesRecipientUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(User{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(UserFeedListItemsResponseActivitiesRecipientObject{}),
+		},
+	)
+}
+
+// A custom-object entity which belongs to a collection.
+type UserFeedListItemsResponseActivitiesRecipientObject struct {
+	ID          string                                                 `json:"id,required"`
+	Typename    string                                                 `json:"__typename,required"`
+	Collection  string                                                 `json:"collection,required"`
+	UpdatedAt   time.Time                                              `json:"updated_at,required" format:"date-time"`
+	CreatedAt   time.Time                                              `json:"created_at,nullable" format:"date-time"`
+	ExtraFields map[string]interface{}                                 `json:"-,extras"`
+	JSON        userFeedListItemsResponseActivitiesRecipientObjectJSON `json:"-"`
+}
+
+// userFeedListItemsResponseActivitiesRecipientObjectJSON contains the JSON
+// metadata for the struct [UserFeedListItemsResponseActivitiesRecipientObject]
+type userFeedListItemsResponseActivitiesRecipientObjectJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	Collection  apijson.Field
+	UpdatedAt   apijson.Field
+	CreatedAt   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserFeedListItemsResponseActivitiesRecipientObject) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userFeedListItemsResponseActivitiesRecipientObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r UserFeedListItemsResponseActivitiesRecipientObject) implementsUserFeedListItemsResponseActivitiesRecipient() {
+}
+
+// A recipient, which is either a user or an object
+type UserFeedListItemsResponseActor struct {
+	ID          string                             `json:"id,required"`
+	Typename    string                             `json:"__typename,required"`
+	UpdatedAt   time.Time                          `json:"updated_at,required" format:"date-time"`
+	Avatar      string                             `json:"avatar,nullable"`
+	Collection  string                             `json:"collection"`
+	CreatedAt   time.Time                          `json:"created_at,nullable" format:"date-time"`
+	Email       string                             `json:"email,nullable"`
+	Name        string                             `json:"name,nullable"`
+	PhoneNumber string                             `json:"phone_number,nullable"`
+	Timezone    string                             `json:"timezone,nullable"`
+	JSON        userFeedListItemsResponseActorJSON `json:"-"`
+	union       UserFeedListItemsResponseActorsUnion
+}
+
+// userFeedListItemsResponseActorJSON contains the JSON metadata for the struct
+// [UserFeedListItemsResponseActor]
+type userFeedListItemsResponseActorJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	UpdatedAt   apijson.Field
+	Avatar      apijson.Field
+	Collection  apijson.Field
+	CreatedAt   apijson.Field
+	Email       apijson.Field
+	Name        apijson.Field
+	PhoneNumber apijson.Field
+	Timezone    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r userFeedListItemsResponseActorJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *UserFeedListItemsResponseActor) UnmarshalJSON(data []byte) (err error) {
+	*r = UserFeedListItemsResponseActor{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [UserFeedListItemsResponseActorsUnion] interface which you can
+// cast to the specific types for more type safety.
+//
+// Possible runtime types of the union are [User],
+// [UserFeedListItemsResponseActorsObject].
+func (r UserFeedListItemsResponseActor) AsUnion() UserFeedListItemsResponseActorsUnion {
+	return r.union
+}
+
+// A recipient, which is either a user or an object
+//
+// Union satisfied by [User] or [UserFeedListItemsResponseActorsObject].
+type UserFeedListItemsResponseActorsUnion interface {
+	implementsUserFeedListItemsResponseActor()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*UserFeedListItemsResponseActorsUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(User{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(UserFeedListItemsResponseActorsObject{}),
+		},
+	)
+}
+
+// A custom-object entity which belongs to a collection.
+type UserFeedListItemsResponseActorsObject struct {
+	ID          string                                    `json:"id,required"`
+	Typename    string                                    `json:"__typename,required"`
+	Collection  string                                    `json:"collection,required"`
+	UpdatedAt   time.Time                                 `json:"updated_at,required" format:"date-time"`
+	CreatedAt   time.Time                                 `json:"created_at,nullable" format:"date-time"`
+	ExtraFields map[string]interface{}                    `json:"-,extras"`
+	JSON        userFeedListItemsResponseActorsObjectJSON `json:"-"`
+}
+
+// userFeedListItemsResponseActorsObjectJSON contains the JSON metadata for the
+// struct [UserFeedListItemsResponseActorsObject]
+type userFeedListItemsResponseActorsObjectJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	Collection  apijson.Field
+	UpdatedAt   apijson.Field
+	CreatedAt   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserFeedListItemsResponseActorsObject) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userFeedListItemsResponseActorsObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r UserFeedListItemsResponseActorsObject) implementsUserFeedListItemsResponseActor() {}
+
+// A content (text or markdown) block in a message in an app feed
+type UserFeedListItemsResponseBlock struct {
+	Name string                              `json:"name,required"`
+	Type UserFeedListItemsResponseBlocksType `json:"type,required"`
+	// This field can have the runtime type of
+	// [[]UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton].
+	Buttons  interface{}                        `json:"buttons"`
+	Content  string                             `json:"content"`
+	Rendered string                             `json:"rendered"`
+	JSON     userFeedListItemsResponseBlockJSON `json:"-"`
+	union    UserFeedListItemsResponseBlocksUnion
+}
+
+// userFeedListItemsResponseBlockJSON contains the JSON metadata for the struct
+// [UserFeedListItemsResponseBlock]
+type userFeedListItemsResponseBlockJSON struct {
+	Name        apijson.Field
+	Type        apijson.Field
+	Buttons     apijson.Field
+	Content     apijson.Field
+	Rendered    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r userFeedListItemsResponseBlockJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *UserFeedListItemsResponseBlock) UnmarshalJSON(data []byte) (err error) {
+	*r = UserFeedListItemsResponseBlock{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [UserFeedListItemsResponseBlocksUnion] interface which you can
+// cast to the specific types for more type safety.
+//
+// Possible runtime types of the union are
+// [UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock],
+// [UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock].
+func (r UserFeedListItemsResponseBlock) AsUnion() UserFeedListItemsResponseBlocksUnion {
+	return r.union
+}
+
+// A content (text or markdown) block in a message in an app feed
+//
+// Union satisfied by [UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock]
+// or [UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock].
+type UserFeedListItemsResponseBlocksUnion interface {
+	implementsUserFeedListItemsResponseBlock()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*UserFeedListItemsResponseBlocksUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock{}),
+		},
+	)
+}
+
+// A content (text or markdown) block in a message in an app feed
+type UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock struct {
+	Content  string                                                          `json:"content,required"`
+	Name     string                                                          `json:"name,required"`
+	Rendered string                                                          `json:"rendered,required"`
+	Type     UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockType `json:"type,required"`
+	JSON     userFeedListItemsResponseBlocksMessageInAppFeedContentBlockJSON `json:"-"`
+}
+
+// userFeedListItemsResponseBlocksMessageInAppFeedContentBlockJSON contains the
+// JSON metadata for the struct
+// [UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock]
+type userFeedListItemsResponseBlocksMessageInAppFeedContentBlockJSON struct {
+	Content     apijson.Field
+	Name        apijson.Field
+	Rendered    apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userFeedListItemsResponseBlocksMessageInAppFeedContentBlockJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock) implementsUserFeedListItemsResponseBlock() {
+}
+
+type UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockType string
+
+const (
+	UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockTypeMarkdown UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockType = "markdown"
+	UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockTypeText     UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockType = "text"
+)
+
+func (r UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockType) IsKnown() bool {
+	switch r {
+	case UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockTypeMarkdown, UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockTypeText:
+		return true
+	}
+	return false
+}
+
+// A set of buttons in a message in an app feed
+type UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock struct {
+	Buttons []UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton `json:"buttons,required"`
+	Name    string                                                                `json:"name,required"`
+	Type    UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockType     `json:"type,required"`
+	JSON    userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockJSON     `json:"-"`
+}
+
+// userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockJSON contains the
+// JSON metadata for the struct
+// [UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock]
+type userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockJSON struct {
+	Buttons     apijson.Field
+	Name        apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock) implementsUserFeedListItemsResponseBlock() {
+}
+
+// A button in a set of buttons
+type UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton struct {
+	Action string                                                                  `json:"action,required"`
+	Label  string                                                                  `json:"label,required"`
+	Name   string                                                                  `json:"name,required"`
+	JSON   userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButtonJSON `json:"-"`
+}
+
+// userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButtonJSON contains
+// the JSON metadata for the struct
+// [UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton]
+type userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButtonJSON struct {
+	Action      apijson.Field
+	Label       apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButtonJSON) RawJSON() string {
+	return r.raw
+}
+
+type UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockType string
+
+const (
+	UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockTypeButtonSet UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockType = "button_set"
+)
+
+func (r UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockType) IsKnown() bool {
+	switch r {
+	case UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockTypeButtonSet:
+		return true
+	}
+	return false
+}
+
+type UserFeedListItemsResponseBlocksType string
+
+const (
+	UserFeedListItemsResponseBlocksTypeMarkdown  UserFeedListItemsResponseBlocksType = "markdown"
+	UserFeedListItemsResponseBlocksTypeText      UserFeedListItemsResponseBlocksType = "text"
+	UserFeedListItemsResponseBlocksTypeButtonSet UserFeedListItemsResponseBlocksType = "button_set"
+)
+
+func (r UserFeedListItemsResponseBlocksType) IsKnown() bool {
+	switch r {
+	case UserFeedListItemsResponseBlocksTypeMarkdown, UserFeedListItemsResponseBlocksTypeText, UserFeedListItemsResponseBlocksTypeButtonSet:
+		return true
+	}
+	return false
+}
+
+type UserFeedListItemsResponseSource struct {
+	Typename   string                              `json:"__typename,required"`
+	Categories []string                            `json:"categories,required"`
+	Key        string                              `json:"key,required"`
+	VersionID  string                              `json:"version_id,required" format:"uuid"`
+	JSON       userFeedListItemsResponseSourceJSON `json:"-"`
+}
+
+// userFeedListItemsResponseSourceJSON contains the JSON metadata for the struct
+// [UserFeedListItemsResponseSource]
+type userFeedListItemsResponseSourceJSON struct {
+	Typename    apijson.Field
+	Categories  apijson.Field
+	Key         apijson.Field
+	VersionID   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserFeedListItemsResponseSource) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userFeedListItemsResponseSourceJSON) RawJSON() string {
+	return r.raw
+}
+
+type UserFeedListItemsParams struct {
 	// The cursor to fetch entries after
 	After param.Field[string] `query:"after"`
 	// The archived status of the feed items to return
-	Archived param.Field[UserFeedGetParamsArchived] `query:"archived"`
+	Archived param.Field[UserFeedListItemsParamsArchived] `query:"archived"`
 	// The cursor to fetch entries before
 	Before param.Field[string] `query:"before"`
 	// Whether the feed items have a tenant
@@ -860,7 +803,7 @@ type UserFeedGetParams struct {
 	// The source of the feed items to return
 	Source param.Field[string] `query:"source"`
 	// The status of the feed items to return
-	Status param.Field[UserFeedGetParamsStatus] `query:"status"`
+	Status param.Field[UserFeedListItemsParamsStatus] `query:"status"`
 	// The tenant of the feed items to return
 	Tenant param.Field[string] `query:"tenant"`
 	// The trigger data of the feed items to return (as a JSON string)
@@ -869,8 +812,9 @@ type UserFeedGetParams struct {
 	WorkflowCategories param.Field[[]string] `query:"workflow_categories"`
 }
 
-// URLQuery serializes [UserFeedGetParams]'s query parameters as `url.Values`.
-func (r UserFeedGetParams) URLQuery() (v url.Values) {
+// URLQuery serializes [UserFeedListItemsParams]'s query parameters as
+// `url.Values`.
+func (r UserFeedListItemsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
@@ -878,36 +822,36 @@ func (r UserFeedGetParams) URLQuery() (v url.Values) {
 }
 
 // The archived status of the feed items to return
-type UserFeedGetParamsArchived string
+type UserFeedListItemsParamsArchived string
 
 const (
-	UserFeedGetParamsArchivedExclude UserFeedGetParamsArchived = "exclude"
-	UserFeedGetParamsArchivedInclude UserFeedGetParamsArchived = "include"
-	UserFeedGetParamsArchivedOnly    UserFeedGetParamsArchived = "only"
+	UserFeedListItemsParamsArchivedExclude UserFeedListItemsParamsArchived = "exclude"
+	UserFeedListItemsParamsArchivedInclude UserFeedListItemsParamsArchived = "include"
+	UserFeedListItemsParamsArchivedOnly    UserFeedListItemsParamsArchived = "only"
 )
 
-func (r UserFeedGetParamsArchived) IsKnown() bool {
+func (r UserFeedListItemsParamsArchived) IsKnown() bool {
 	switch r {
-	case UserFeedGetParamsArchivedExclude, UserFeedGetParamsArchivedInclude, UserFeedGetParamsArchivedOnly:
+	case UserFeedListItemsParamsArchivedExclude, UserFeedListItemsParamsArchivedInclude, UserFeedListItemsParamsArchivedOnly:
 		return true
 	}
 	return false
 }
 
 // The status of the feed items to return
-type UserFeedGetParamsStatus string
+type UserFeedListItemsParamsStatus string
 
 const (
-	UserFeedGetParamsStatusUnread UserFeedGetParamsStatus = "unread"
-	UserFeedGetParamsStatusRead   UserFeedGetParamsStatus = "read"
-	UserFeedGetParamsStatusUnseen UserFeedGetParamsStatus = "unseen"
-	UserFeedGetParamsStatusSeen   UserFeedGetParamsStatus = "seen"
-	UserFeedGetParamsStatusAll    UserFeedGetParamsStatus = "all"
+	UserFeedListItemsParamsStatusUnread UserFeedListItemsParamsStatus = "unread"
+	UserFeedListItemsParamsStatusRead   UserFeedListItemsParamsStatus = "read"
+	UserFeedListItemsParamsStatusUnseen UserFeedListItemsParamsStatus = "unseen"
+	UserFeedListItemsParamsStatusSeen   UserFeedListItemsParamsStatus = "seen"
+	UserFeedListItemsParamsStatusAll    UserFeedListItemsParamsStatus = "all"
 )
 
-func (r UserFeedGetParamsStatus) IsKnown() bool {
+func (r UserFeedListItemsParamsStatus) IsKnown() bool {
 	switch r {
-	case UserFeedGetParamsStatusUnread, UserFeedGetParamsStatusRead, UserFeedGetParamsStatusUnseen, UserFeedGetParamsStatusSeen, UserFeedGetParamsStatusAll:
+	case UserFeedListItemsParamsStatusUnread, UserFeedListItemsParamsStatusRead, UserFeedListItemsParamsStatusUnseen, UserFeedListItemsParamsStatusSeen, UserFeedListItemsParamsStatusAll:
 		return true
 	}
 	return false

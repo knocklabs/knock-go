@@ -25,7 +25,7 @@ func TestWorkflowCancelWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithToken("My Token"),
+		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Workflows.Cancel(
 		context.TODO(),
@@ -56,7 +56,7 @@ func TestWorkflowTriggerWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithToken("My Token"),
+		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Workflows.Trigger(
 		context.TODO(),
@@ -64,9 +64,12 @@ func TestWorkflowTriggerWithOptionalParams(t *testing.T) {
 		knock.WorkflowTriggerParams{
 			Actor:           knock.F[knock.WorkflowTriggerParamsActorUnion](shared.UnionString("string")),
 			CancellationKey: knock.Null[string](),
-			Data: knock.F(map[string]string{
-				"park_id":         "prk_1",
-				"welcome_message": "Welcome, to Jurassic Park!",
+			Data: knock.F(map[string]interface{}{
+				"dinosaur_names":  "bar",
+				"is_alert":        "bar",
+				"park_id":         "bar",
+				"severity":        "bar",
+				"welcome_message": "bar",
 			}),
 			Recipients: knock.F([]knock.WorkflowTriggerParamsRecipientUnion{shared.UnionString("jhammond")}),
 			Tenant:     knock.F[knock.WorkflowTriggerParamsTenantUnion](shared.UnionString("acme_corp")),

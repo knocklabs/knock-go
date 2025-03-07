@@ -3,7 +3,7 @@
 <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go"><img src="https://pkg.go.dev/badge/github.com/stainless-sdks/knock-go.svg" alt="Go Reference"></a>
 
 The Knock Go library provides convenient access to [the Knock REST
-API](https://docs.knock.com) from applications written in Go. The full API of this library can be found in [api.md](api.md).
+API](https://docs.knock.app) from applications written in Go. The full API of this library can be found in [api.md](api.md).
 
 It is generated with [Stainless](https://www.stainless.com/).
 
@@ -38,17 +38,27 @@ import (
 
 	"github.com/stainless-sdks/knock-go"
 	"github.com/stainless-sdks/knock-go/option"
+	"github.com/stainless-sdks/knock-go/shared"
 )
 
 func main() {
 	client := knock.NewClient(
-		option.WithToken("My Token"), // defaults to os.LookupEnv("KNOCK_TOKEN")
+		option.WithBearerToken("My Bearer Token"), // defaults to os.LookupEnv("KNOCK_API_KEY")
 	)
-	user, err := client.Users.Get(context.TODO(), "REPLACE_ME")
+	response, err := client.Workflows.Trigger(
+		context.TODO(),
+		"dinosaurs-loose",
+		knock.WorkflowTriggerParams{
+			Data: knock.F(map[string]interface{}{
+				"dinosaur": "triceratops",
+			}),
+			Recipients: knock.F([]knock.WorkflowTriggerParamsRecipientUnion{shared.UnionString("dnedry")}),
+		},
+	)
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Printf("%+v\n", user.ID)
+	fmt.Printf("%+v\n", response.WorkflowRunID)
 }
 
 ```
@@ -153,8 +163,33 @@ This library provides some conveniences for working with paginated list endpoint
 
 You can use `.ListAutoPaging()` methods to iterate through items across all pages:
 
+```go
+iter := client.Users.ListAutoPaging(context.TODO(), knock.UserListParams{})
+// Automatically fetches more pages as needed.
+for iter.Next() {
+	user := iter.Current()
+	fmt.Printf("%+v\n", user)
+}
+if err := iter.Err(); err != nil {
+	panic(err.Error())
+}
+```
+
 Or you can use simple `.List()` methods to fetch a single page and receive a standard response object
 with additional helper methods like `.GetNextPage()`, e.g.:
+
+```go
+page, err := client.Users.List(context.TODO(), knock.UserListParams{})
+for page != nil {
+	for _, user := range page.Entries {
+		fmt.Printf("%+v\n", user)
+	}
+	page, err = page.GetNextPage()
+}
+if err != nil {
+	panic(err.Error())
+}
+```
 
 ### Errors
 
@@ -166,7 +201,7 @@ When the API returns a non-success status code, we return an error with type
 To handle errors, we recommend that you use the `errors.As` pattern:
 
 ```go
-_, err := client.Users.Get(context.TODO(), "REPLACE_ME")
+_, err := client.Users.Get(context.TODO(), "user_id")
 if err != nil {
 	var apierr *knock.Error
 	if errors.As(err, &apierr) {
@@ -193,7 +228,7 @@ ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 defer cancel()
 client.Users.Get(
 	ctx,
-	"REPLACE_ME",
+	"user_id",
 	// This sets the per-retry timeout
 	option.WithRequestTimeout(20*time.Second),
 )
@@ -229,7 +264,7 @@ client := knock.NewClient(
 // Override per-request:
 client.Users.Get(
 	context.TODO(),
-	"REPLACE_ME",
+	"user_id",
 	option.WithMaxRetries(5),
 )
 ```
@@ -244,7 +279,7 @@ you need to examine response headers, status codes, or other details.
 var response *http.Response
 user, err := client.Users.Get(
 	context.TODO(),
-	"REPLACE_ME",
+	"user_id",
 	option.WithResponseInto(&response),
 )
 if err != nil {

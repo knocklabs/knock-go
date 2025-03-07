@@ -10,6 +10,7 @@ import (
 	"github.com/stainless-sdks/knock-go"
 	"github.com/stainless-sdks/knock-go/internal/testutil"
 	"github.com/stainless-sdks/knock-go/option"
+	"github.com/stainless-sdks/knock-go/shared"
 )
 
 func TestUsage(t *testing.T) {
@@ -22,11 +23,20 @@ func TestUsage(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithToken("My Token"),
+		option.WithBearerToken("My Bearer Token"),
 	)
-	user, err := client.Users.Get(context.TODO(), "REPLACE_ME")
+	response, err := client.Workflows.Trigger(
+		context.TODO(),
+		"dinosaurs-loose",
+		knock.WorkflowTriggerParams{
+			Data: knock.F(map[string]interface{}{
+				"dinosaur": "triceratops",
+			}),
+			Recipients: knock.F([]knock.WorkflowTriggerParamsRecipientUnion{shared.UnionString("dnedry")}),
+		},
+	)
 	if err != nil {
 		t.Error(err)
 	}
-	t.Logf("%+v\n", user.ID)
+	t.Logf("%+v\n", response.WorkflowRunID)
 }

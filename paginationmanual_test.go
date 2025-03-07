@@ -4,7 +4,6 @@ package knock_test
 
 import (
 	"context"
-	"errors"
 	"os"
 	"testing"
 
@@ -13,8 +12,7 @@ import (
 	"github.com/stainless-sdks/knock-go/option"
 )
 
-func TestBulkOperationGet(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+func TestManualPagination(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -26,12 +24,21 @@ func TestBulkOperationGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithBearerToken("My Bearer Token"),
 	)
-	_, err := client.BulkOperations.Get(context.TODO(), "182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e")
+	page, err := client.Users.List(context.TODO(), knock.UserListParams{})
 	if err != nil {
-		var apierr *knock.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
 		t.Fatalf("err should be nil: %s", err.Error())
+	}
+	for _, user := range page.Entries {
+		t.Logf("%+v\n", user.ID)
+	}
+	// Prism mock isn't going to give us real pagination
+	page, err = page.GetNextPage()
+	if err != nil {
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+	if page != nil {
+		for _, user := range page.Entries {
+			t.Logf("%+v\n", user.ID)
+		}
 	}
 }

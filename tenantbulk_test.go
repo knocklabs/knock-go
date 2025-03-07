@@ -11,6 +11,7 @@ import (
 	"github.com/stainless-sdks/knock-go"
 	"github.com/stainless-sdks/knock-go/internal/testutil"
 	"github.com/stainless-sdks/knock-go/option"
+	"github.com/stainless-sdks/knock-go/shared"
 )
 
 func TestTenantBulkDelete(t *testing.T) {
@@ -24,7 +25,7 @@ func TestTenantBulkDelete(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithToken("My Token"),
+		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Tenants.Bulk.Delete(context.TODO(), knock.TenantBulkDeleteParams{
 		TenantIDs: knock.F([]string{"string"}),
@@ -49,9 +50,11 @@ func TestTenantBulkSet(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithToken("My Token"),
+		option.WithBearerToken("My Bearer Token"),
 	)
-	_, err := client.Tenants.Bulk.Set(context.TODO())
+	_, err := client.Tenants.Bulk.Set(context.TODO(), knock.TenantBulkSetParams{
+		Tenants: knock.F([]knock.TenantBulkSetParamsTenantUnion{shared.UnionString("string")}),
+	})
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {

@@ -14,6 +14,7 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
+	"github.com/stainless-sdks/knock-go/packages/pagination"
 )
 
 // TenantService contains methods and other services that help with interacting
@@ -38,11 +39,26 @@ func NewTenantService(opts ...option.RequestOption) (r *TenantService) {
 }
 
 // List tenants
-func (r *TenantService) List(ctx context.Context, query TenantListParams, opts ...option.RequestOption) (res *TenantListResponse, err error) {
+func (r *TenantService) List(ctx context.Context, query TenantListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[TenantListResponse], err error) {
+	var raw *http.Response
 	opts = append(r.Options[:], opts...)
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	path := "v1/tenants"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// List tenants
+func (r *TenantService) ListAutoPaging(ctx context.Context, query TenantListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[TenantListResponse] {
+	return pagination.NewEntriesCursorAutoPager(r.List(ctx, query, opts...))
 }
 
 // Delete a tenant
@@ -81,20 +97,19 @@ func (r *TenantService) Set(ctx context.Context, id string, body TenantSetParams
 	return
 }
 
-// A paginated list of tenants.
+// A tenant entity
 type TenantListResponse struct {
-	// The list of tenants
-	Entries []TenantListResponseEntry `json:"entries,required"`
-	// The information about a paginated result
-	PageInfo TenantListResponsePageInfo `json:"page_info,required"`
-	JSON     tenantListResponseJSON     `json:"-"`
+	ID          string                 `json:"id,required"`
+	Typename    string                 `json:"__typename,required"`
+	ExtraFields map[string]interface{} `json:"-,extras"`
+	JSON        tenantListResponseJSON `json:"-"`
 }
 
 // tenantListResponseJSON contains the JSON metadata for the struct
 // [TenantListResponse]
 type tenantListResponseJSON struct {
-	Entries     apijson.Field
-	PageInfo    apijson.Field
+	ID          apijson.Field
+	Typename    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -104,59 +119,6 @@ func (r *TenantListResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r tenantListResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// A tenant entity
-type TenantListResponseEntry struct {
-	ID          string                      `json:"id,required"`
-	Typename    string                      `json:"__typename,required"`
-	ExtraFields map[string]interface{}      `json:"-,extras"`
-	JSON        tenantListResponseEntryJSON `json:"-"`
-}
-
-// tenantListResponseEntryJSON contains the JSON metadata for the struct
-// [TenantListResponseEntry]
-type tenantListResponseEntryJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *TenantListResponseEntry) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r tenantListResponseEntryJSON) RawJSON() string {
-	return r.raw
-}
-
-// The information about a paginated result
-type TenantListResponsePageInfo struct {
-	Typename string                         `json:"__typename,required"`
-	PageSize int64                          `json:"page_size,required"`
-	After    string                         `json:"after,nullable"`
-	Before   string                         `json:"before,nullable"`
-	JSON     tenantListResponsePageInfoJSON `json:"-"`
-}
-
-// tenantListResponsePageInfoJSON contains the JSON metadata for the struct
-// [TenantListResponsePageInfo]
-type tenantListResponsePageInfoJSON struct {
-	Typename    apijson.Field
-	PageSize    apijson.Field
-	After       apijson.Field
-	Before      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *TenantListResponsePageInfo) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r tenantListResponsePageInfoJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -305,7 +267,8 @@ func (r TenantSetParamsChannelDataDataOneSignalChannelData) implementsTenantSetP
 // Slack channel data
 type TenantSetParamsChannelDataDataSlackChannelData struct {
 	Connections param.Field[[]TenantSetParamsChannelDataDataSlackChannelDataConnectionUnion] `json:"connections,required"`
-	Token       param.Field[TenantSetParamsChannelDataDataSlackChannelDataToken]             `json:"token"`
+	// A token that's used to store the access token for a Slack workspace.
+	Token param.Field[TenantSetParamsChannelDataDataSlackChannelDataToken] `json:"token"`
 }
 
 func (r TenantSetParamsChannelDataDataSlackChannelData) MarshalJSON() (data []byte, err error) {
@@ -333,39 +296,40 @@ func (r TenantSetParamsChannelDataDataSlackChannelDataConnection) implementsTena
 // A Slack connection, which either includes a channel_id or a user_id
 //
 // Satisfied by
-// [TenantSetParamsChannelDataDataSlackChannelDataConnectionsTokenConnection],
-// [TenantSetParamsChannelDataDataSlackChannelDataConnectionsIncomingWebhookConnection],
+// [TenantSetParamsChannelDataDataSlackChannelDataConnectionsSlackTokenConnection],
+// [TenantSetParamsChannelDataDataSlackChannelDataConnectionsSlackIncomingWebhookConnection],
 // [TenantSetParamsChannelDataDataSlackChannelDataConnection].
 type TenantSetParamsChannelDataDataSlackChannelDataConnectionUnion interface {
 	implementsTenantSetParamsChannelDataDataSlackChannelDataConnectionUnion()
 }
 
 // A Slack connection, which either includes a channel_id or a user_id
-type TenantSetParamsChannelDataDataSlackChannelDataConnectionsTokenConnection struct {
+type TenantSetParamsChannelDataDataSlackChannelDataConnectionsSlackTokenConnection struct {
 	AccessToken param.Field[string] `json:"access_token"`
 	ChannelID   param.Field[string] `json:"channel_id"`
 	UserID      param.Field[string] `json:"user_id"`
 }
 
-func (r TenantSetParamsChannelDataDataSlackChannelDataConnectionsTokenConnection) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsChannelDataDataSlackChannelDataConnectionsSlackTokenConnection) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsChannelDataDataSlackChannelDataConnectionsTokenConnection) implementsTenantSetParamsChannelDataDataSlackChannelDataConnectionUnion() {
+func (r TenantSetParamsChannelDataDataSlackChannelDataConnectionsSlackTokenConnection) implementsTenantSetParamsChannelDataDataSlackChannelDataConnectionUnion() {
 }
 
 // An incoming webhook Slack connection
-type TenantSetParamsChannelDataDataSlackChannelDataConnectionsIncomingWebhookConnection struct {
+type TenantSetParamsChannelDataDataSlackChannelDataConnectionsSlackIncomingWebhookConnection struct {
 	URL param.Field[string] `json:"url,required"`
 }
 
-func (r TenantSetParamsChannelDataDataSlackChannelDataConnectionsIncomingWebhookConnection) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsChannelDataDataSlackChannelDataConnectionsSlackIncomingWebhookConnection) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsChannelDataDataSlackChannelDataConnectionsIncomingWebhookConnection) implementsTenantSetParamsChannelDataDataSlackChannelDataConnectionUnion() {
+func (r TenantSetParamsChannelDataDataSlackChannelDataConnectionsSlackIncomingWebhookConnection) implementsTenantSetParamsChannelDataDataSlackChannelDataConnectionUnion() {
 }
 
+// A token that's used to store the access token for a Slack workspace.
 type TenantSetParamsChannelDataDataSlackChannelDataToken struct {
 	AccessToken param.Field[string] `json:"access_token,required"`
 }
@@ -388,12 +352,17 @@ func (r TenantSetParamsChannelDataDataMsTeamsChannelData) MarshalJSON() (data []
 func (r TenantSetParamsChannelDataDataMsTeamsChannelData) implementsTenantSetParamsChannelDataDataUnion() {
 }
 
-// A Slack connection, which either includes a channel_id or a user_id
+// Microsoft Teams token connection
 type TenantSetParamsChannelDataDataMsTeamsChannelDataConnection struct {
-	AccessToken param.Field[string] `json:"access_token"`
-	ChannelID   param.Field[string] `json:"channel_id"`
-	URL         param.Field[string] `json:"url"`
-	UserID      param.Field[string] `json:"user_id"`
+	IncomingWebhook param.Field[interface{}] `json:"incoming_webhook"`
+	// The Microsoft Teams channel ID
+	MsTeamsChannelID param.Field[string] `json:"ms_teams_channel_id" format:"uuid"`
+	// The Microsoft Teams team ID
+	MsTeamsTeamID param.Field[string] `json:"ms_teams_team_id" format:"uuid"`
+	// The Microsoft Teams tenant ID
+	MsTeamsTenantID param.Field[string] `json:"ms_teams_tenant_id" format:"uuid"`
+	// The Microsoft Teams user ID
+	MsTeamsUserID param.Field[string] `json:"ms_teams_user_id" format:"uuid"`
 }
 
 func (r TenantSetParamsChannelDataDataMsTeamsChannelDataConnection) MarshalJSON() (data []byte, err error) {
@@ -403,40 +372,56 @@ func (r TenantSetParamsChannelDataDataMsTeamsChannelDataConnection) MarshalJSON(
 func (r TenantSetParamsChannelDataDataMsTeamsChannelDataConnection) implementsTenantSetParamsChannelDataDataMsTeamsChannelDataConnectionUnion() {
 }
 
-// A Slack connection, which either includes a channel_id or a user_id
+// Microsoft Teams token connection
 //
 // Satisfied by
-// [TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsTokenConnection],
-// [TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsIncomingWebhookConnection],
+// [TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsMsTeamsTokenConnection],
+// [TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection],
 // [TenantSetParamsChannelDataDataMsTeamsChannelDataConnection].
 type TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionUnion interface {
 	implementsTenantSetParamsChannelDataDataMsTeamsChannelDataConnectionUnion()
 }
 
-// A Slack connection, which either includes a channel_id or a user_id
-type TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsTokenConnection struct {
-	AccessToken param.Field[string] `json:"access_token"`
-	ChannelID   param.Field[string] `json:"channel_id"`
-	UserID      param.Field[string] `json:"user_id"`
+// Microsoft Teams token connection
+type TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsMsTeamsTokenConnection struct {
+	// The Microsoft Teams channel ID
+	MsTeamsChannelID param.Field[string] `json:"ms_teams_channel_id" format:"uuid"`
+	// The Microsoft Teams team ID
+	MsTeamsTeamID param.Field[string] `json:"ms_teams_team_id" format:"uuid"`
+	// The Microsoft Teams tenant ID
+	MsTeamsTenantID param.Field[string] `json:"ms_teams_tenant_id" format:"uuid"`
+	// The Microsoft Teams user ID
+	MsTeamsUserID param.Field[string] `json:"ms_teams_user_id" format:"uuid"`
 }
 
-func (r TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsTokenConnection) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsMsTeamsTokenConnection) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsTokenConnection) implementsTenantSetParamsChannelDataDataMsTeamsChannelDataConnectionUnion() {
+func (r TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsMsTeamsTokenConnection) implementsTenantSetParamsChannelDataDataMsTeamsChannelDataConnectionUnion() {
 }
 
-// An incoming webhook Slack connection
-type TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsIncomingWebhookConnection struct {
+// Microsoft Teams incoming webhook connection
+type TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection struct {
+	// The incoming webhook
+	IncomingWebhook param.Field[TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook] `json:"incoming_webhook,required"`
+}
+
+func (r TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection) implementsTenantSetParamsChannelDataDataMsTeamsChannelDataConnectionUnion() {
+}
+
+// The incoming webhook
+type TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook struct {
+	// The URL of the incoming webhook
 	URL param.Field[string] `json:"url,required"`
 }
 
-func (r TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsIncomingWebhookConnection) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-func (r TenantSetParamsChannelDataDataMsTeamsChannelDataConnectionsIncomingWebhookConnection) implementsTenantSetParamsChannelDataDataMsTeamsChannelDataConnectionUnion() {
 }
 
 // Discord channel data
@@ -454,8 +439,8 @@ func (r TenantSetParamsChannelDataDataDiscordChannelData) implementsTenantSetPar
 // Discord channel connection
 type TenantSetParamsChannelDataDataDiscordChannelDataConnection struct {
 	// The Discord channel ID
-	ChannelID param.Field[string] `json:"channel_id"`
-	URL       param.Field[string] `json:"url"`
+	ChannelID       param.Field[string]      `json:"channel_id"`
+	IncomingWebhook param.Field[interface{}] `json:"incoming_webhook"`
 }
 
 func (r TenantSetParamsChannelDataDataDiscordChannelDataConnection) MarshalJSON() (data []byte, err error) {
@@ -468,44 +453,59 @@ func (r TenantSetParamsChannelDataDataDiscordChannelDataConnection) implementsTe
 // Discord channel connection
 //
 // Satisfied by
-// [TenantSetParamsChannelDataDataDiscordChannelDataConnectionsChannelConnection],
-// [TenantSetParamsChannelDataDataDiscordChannelDataConnectionsIncomingWebhookConnection],
+// [TenantSetParamsChannelDataDataDiscordChannelDataConnectionsDiscordChannelConnection],
+// [TenantSetParamsChannelDataDataDiscordChannelDataConnectionsDiscordIncomingWebhookConnection],
 // [TenantSetParamsChannelDataDataDiscordChannelDataConnection].
 type TenantSetParamsChannelDataDataDiscordChannelDataConnectionUnion interface {
 	implementsTenantSetParamsChannelDataDataDiscordChannelDataConnectionUnion()
 }
 
 // Discord channel connection
-type TenantSetParamsChannelDataDataDiscordChannelDataConnectionsChannelConnection struct {
+type TenantSetParamsChannelDataDataDiscordChannelDataConnectionsDiscordChannelConnection struct {
 	// The Discord channel ID
 	ChannelID param.Field[string] `json:"channel_id,required"`
 }
 
-func (r TenantSetParamsChannelDataDataDiscordChannelDataConnectionsChannelConnection) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsChannelDataDataDiscordChannelDataConnectionsDiscordChannelConnection) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsChannelDataDataDiscordChannelDataConnectionsChannelConnection) implementsTenantSetParamsChannelDataDataDiscordChannelDataConnectionUnion() {
+func (r TenantSetParamsChannelDataDataDiscordChannelDataConnectionsDiscordChannelConnection) implementsTenantSetParamsChannelDataDataDiscordChannelDataConnectionUnion() {
 }
 
-// An incoming webhook Slack connection
-type TenantSetParamsChannelDataDataDiscordChannelDataConnectionsIncomingWebhookConnection struct {
+// Discord incoming webhook connection
+type TenantSetParamsChannelDataDataDiscordChannelDataConnectionsDiscordIncomingWebhookConnection struct {
+	// The incoming webhook
+	IncomingWebhook param.Field[TenantSetParamsChannelDataDataDiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhook] `json:"incoming_webhook,required"`
+}
+
+func (r TenantSetParamsChannelDataDataDiscordChannelDataConnectionsDiscordIncomingWebhookConnection) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r TenantSetParamsChannelDataDataDiscordChannelDataConnectionsDiscordIncomingWebhookConnection) implementsTenantSetParamsChannelDataDataDiscordChannelDataConnectionUnion() {
+}
+
+// The incoming webhook
+type TenantSetParamsChannelDataDataDiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhook struct {
+	// The URL of the incoming webhook
 	URL param.Field[string] `json:"url,required"`
 }
 
-func (r TenantSetParamsChannelDataDataDiscordChannelDataConnectionsIncomingWebhookConnection) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsChannelDataDataDiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhook) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-func (r TenantSetParamsChannelDataDataDiscordChannelDataConnectionsIncomingWebhookConnection) implementsTenantSetParamsChannelDataDataDiscordChannelDataConnectionUnion() {
 }
 
 // Set preferences for a recipient
 type TenantSetParamsPreferences struct {
+	// A setting for a preference set, where the key in the object is the category, and
+	// the values are the preference settings for that category.
 	Categories param.Field[map[string]TenantSetParamsPreferencesCategoriesUnion] `json:"categories"`
 	// Channel type preferences
-	ChannelTypes param.Field[TenantSetParamsPreferencesChannelTypes]              `json:"channel_types"`
-	Workflows    param.Field[map[string]TenantSetParamsPreferencesWorkflowsUnion] `json:"workflows"`
+	ChannelTypes param.Field[TenantSetParamsPreferencesChannelTypes] `json:"channel_types"`
+	// A setting for a preference set, where the key in the object is the workflow key,
+	// and the values are the preference settings for that workflow.
+	Workflows param.Field[map[string]TenantSetParamsPreferencesWorkflowsUnion] `json:"workflows"`
 }
 
 func (r TenantSetParamsPreferences) MarshalJSON() (data []byte, err error) {
@@ -514,422 +514,467 @@ func (r TenantSetParamsPreferences) MarshalJSON() (data []byte, err error) {
 
 // Workflow or category preferences within a preference set
 //
-// Satisfied by [shared.UnionBool], [TenantSetParamsPreferencesCategoriesObject].
+// Satisfied by [shared.UnionBool],
+// [TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObject].
 type TenantSetParamsPreferencesCategoriesUnion interface {
 	ImplementsTenantSetParamsPreferencesCategoriesUnion()
 }
 
-type TenantSetParamsPreferencesCategoriesObject struct {
+// The settings object for a workflow or category, where you can specify channel
+// types or conditions.
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObject struct {
 	// Channel type preferences
-	ChannelTypes param.Field[TenantSetParamsPreferencesCategoriesObjectChannelTypes] `json:"channel_types"`
-	Conditions   param.Field[[]TenantSetParamsPreferencesCategoriesObjectCondition]  `json:"conditions"`
+	ChannelTypes param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypes] `json:"channel_types"`
+	Conditions   param.Field[[]TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectCondition]  `json:"conditions"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObject) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesCategoriesObject) ImplementsTenantSetParamsPreferencesCategoriesUnion() {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObject) ImplementsTenantSetParamsPreferencesCategoriesUnion() {
 }
 
 // Channel type preferences
-type TenantSetParamsPreferencesCategoriesObjectChannelTypes struct {
-	Chat      param.Field[TenantSetParamsPreferencesCategoriesObjectChannelTypesChatUnion]      `json:"chat"`
-	Email     param.Field[TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailUnion]     `json:"email"`
-	HTTP      param.Field[TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPUnion]      `json:"http"`
-	InAppFeed param.Field[TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion] `json:"in_app_feed"`
-	Push      param.Field[TenantSetParamsPreferencesCategoriesObjectChannelTypesPushUnion]      `json:"push"`
-	SMS       param.Field[TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSUnion]       `json:"sms"`
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypes struct {
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Chat param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion] `json:"chat"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Email param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion] `json:"email"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	HTTP param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion] `json:"http"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	InAppFeed param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion] `json:"in_app_feed"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Push param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion] `json:"push"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	SMS param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion] `json:"sms"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypes) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypes) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditions].
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesChatUnion interface {
-	ImplementsTenantSetParamsPreferencesCategoriesObjectChannelTypesChatUnion()
+// [TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion interface {
+	ImplementsTenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion()
 }
 
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditions) ImplementsTenantSetParamsPreferencesCategoriesObjectChannelTypesChatUnion() {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsCondition struct {
-	Argument param.Field[string]                                                                                 `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                 `json:"variable,required"`
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator string
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorContains             TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorContains, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditions].
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailUnion interface {
-	ImplementsTenantSetParamsPreferencesCategoriesObjectChannelTypesEmailUnion()
+// [TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion interface {
+	ImplementsTenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion()
 }
 
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditions) ImplementsTenantSetParamsPreferencesCategoriesObjectChannelTypesEmailUnion() {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsCondition struct {
-	Argument param.Field[string]                                                                                  `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                  `json:"variable,required"`
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                 `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                 `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator string
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContains             TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContains, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditions].
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPUnion interface {
-	ImplementsTenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPUnion()
+// [TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion interface {
+	ImplementsTenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion()
 }
 
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditions) ImplementsTenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPUnion() {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsCondition struct {
-	Argument param.Field[string]                                                                                 `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                 `json:"variable,required"`
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator string
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContains             TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContains, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditions].
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion interface {
-	ImplementsTenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion()
+// [TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion interface {
+	ImplementsTenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion()
 }
 
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditions) ImplementsTenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion() {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsCondition struct {
-	Argument param.Field[string]                                                                                      `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                      `json:"variable,required"`
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                     `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                     `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator string
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContains             TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContains, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditions].
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesPushUnion interface {
-	ImplementsTenantSetParamsPreferencesCategoriesObjectChannelTypesPushUnion()
+// [TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion interface {
+	ImplementsTenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion()
 }
 
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditions) ImplementsTenantSetParamsPreferencesCategoriesObjectChannelTypesPushUnion() {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsCondition struct {
-	Argument param.Field[string]                                                                                 `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                 `json:"variable,required"`
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator string
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorContains             TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorContains, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditions].
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSUnion interface {
-	ImplementsTenantSetParamsPreferencesCategoriesObjectChannelTypesSMSUnion()
+// [TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion interface {
+	ImplementsTenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion()
 }
 
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditions) ImplementsTenantSetParamsPreferencesCategoriesObjectChannelTypesSMSUnion() {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsCondition struct {
-	Argument param.Field[string]                                                                                `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                `json:"variable,required"`
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                               `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                               `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator string
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContains             TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContains, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesCategoriesObjectCondition struct {
-	Argument param.Field[string]                                                       `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesCategoriesObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                       `json:"variable,required"`
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectCondition struct {
+	Argument param.Field[string]                                                                                           `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                           `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesCategoriesObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesCategoriesObjectConditionsOperator string
+type TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "less_than"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorContains             TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "contains"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "empty"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesCategoriesObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesObjectConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContains             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesCategoriesObjectConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesCategoriesObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorContains, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesObjectConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -937,361 +982,403 @@ func (r TenantSetParamsPreferencesCategoriesObjectConditionsOperator) IsKnown() 
 
 // Channel type preferences
 type TenantSetParamsPreferencesChannelTypes struct {
-	Chat      param.Field[TenantSetParamsPreferencesChannelTypesChatUnion]      `json:"chat"`
-	Email     param.Field[TenantSetParamsPreferencesChannelTypesEmailUnion]     `json:"email"`
-	HTTP      param.Field[TenantSetParamsPreferencesChannelTypesHTTPUnion]      `json:"http"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Chat param.Field[TenantSetParamsPreferencesChannelTypesChatUnion] `json:"chat"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Email param.Field[TenantSetParamsPreferencesChannelTypesEmailUnion] `json:"email"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	HTTP param.Field[TenantSetParamsPreferencesChannelTypesHTTPUnion] `json:"http"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
 	InAppFeed param.Field[TenantSetParamsPreferencesChannelTypesInAppFeedUnion] `json:"in_app_feed"`
-	Push      param.Field[TenantSetParamsPreferencesChannelTypesPushUnion]      `json:"push"`
-	SMS       param.Field[TenantSetParamsPreferencesChannelTypesSMSUnion]       `json:"sms"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Push param.Field[TenantSetParamsPreferencesChannelTypesPushUnion] `json:"push"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	SMS param.Field[TenantSetParamsPreferencesChannelTypesSMSUnion] `json:"sms"`
 }
 
 func (r TenantSetParamsPreferencesChannelTypes) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesChannelTypesChatConditions].
+// [TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObject].
 type TenantSetParamsPreferencesChannelTypesChatUnion interface {
 	ImplementsTenantSetParamsPreferencesChannelTypesChatUnion()
 }
 
-type TenantSetParamsPreferencesChannelTypesChatConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesChannelTypesChatConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesChannelTypesChatConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesChannelTypesChatConditions) ImplementsTenantSetParamsPreferencesChannelTypesChatUnion() {
+func (r TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesChannelTypesChatUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesChannelTypesChatConditionsCondition struct {
-	Argument param.Field[string]                                                                 `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                 `json:"variable,required"`
+type TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                            `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                            `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesChannelTypesChatConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator string
+type TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorContains             TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorContains, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesChannelTypesChatConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesChannelTypesEmailConditions].
+// [TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObject].
 type TenantSetParamsPreferencesChannelTypesEmailUnion interface {
 	ImplementsTenantSetParamsPreferencesChannelTypesEmailUnion()
 }
 
-type TenantSetParamsPreferencesChannelTypesEmailConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesChannelTypesEmailConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesChannelTypesEmailConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesChannelTypesEmailConditions) ImplementsTenantSetParamsPreferencesChannelTypesEmailUnion() {
+func (r TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesChannelTypesEmailUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesChannelTypesEmailConditionsCondition struct {
-	Argument param.Field[string]                                                                  `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                  `json:"variable,required"`
+type TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                             `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                             `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesChannelTypesEmailConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator string
+type TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorContains             TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorContains, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesChannelTypesEmailConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesChannelTypesHTTPConditions].
+// [TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObject].
 type TenantSetParamsPreferencesChannelTypesHTTPUnion interface {
 	ImplementsTenantSetParamsPreferencesChannelTypesHTTPUnion()
 }
 
-type TenantSetParamsPreferencesChannelTypesHTTPConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesChannelTypesHTTPConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesChannelTypesHTTPConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesChannelTypesHTTPConditions) ImplementsTenantSetParamsPreferencesChannelTypesHTTPUnion() {
+func (r TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesChannelTypesHTTPUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesChannelTypesHTTPConditionsCondition struct {
-	Argument param.Field[string]                                                                 `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                 `json:"variable,required"`
+type TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                            `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                            `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesChannelTypesHTTPConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator string
+type TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorContains             TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorContains, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesChannelTypesInAppFeedConditions].
+// [TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject].
 type TenantSetParamsPreferencesChannelTypesInAppFeedUnion interface {
 	ImplementsTenantSetParamsPreferencesChannelTypesInAppFeedUnion()
 }
 
-type TenantSetParamsPreferencesChannelTypesInAppFeedConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesChannelTypesInAppFeedConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesChannelTypesInAppFeedConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesChannelTypesInAppFeedConditions) ImplementsTenantSetParamsPreferencesChannelTypesInAppFeedUnion() {
+func (r TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesChannelTypesInAppFeedUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesChannelTypesInAppFeedConditionsCondition struct {
-	Argument param.Field[string]                                                                      `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                      `json:"variable,required"`
+type TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                 `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                 `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesChannelTypesInAppFeedConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator string
+type TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorContains             TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorContains, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesChannelTypesPushConditions].
+// [TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObject].
 type TenantSetParamsPreferencesChannelTypesPushUnion interface {
 	ImplementsTenantSetParamsPreferencesChannelTypesPushUnion()
 }
 
-type TenantSetParamsPreferencesChannelTypesPushConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesChannelTypesPushConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesChannelTypesPushConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesChannelTypesPushConditions) ImplementsTenantSetParamsPreferencesChannelTypesPushUnion() {
+func (r TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesChannelTypesPushUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesChannelTypesPushConditionsCondition struct {
-	Argument param.Field[string]                                                                 `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                 `json:"variable,required"`
+type TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                            `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                            `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesChannelTypesPushConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator string
+type TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorContains             TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorContains, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesChannelTypesPushConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesChannelTypesSMSConditions].
+// [TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObject].
 type TenantSetParamsPreferencesChannelTypesSMSUnion interface {
 	ImplementsTenantSetParamsPreferencesChannelTypesSMSUnion()
 }
 
-type TenantSetParamsPreferencesChannelTypesSMSConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesChannelTypesSMSConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesChannelTypesSMSConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesChannelTypesSMSConditions) ImplementsTenantSetParamsPreferencesChannelTypesSMSUnion() {
+func (r TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesChannelTypesSMSUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesChannelTypesSMSConditionsCondition struct {
-	Argument param.Field[string]                                                                `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                `json:"variable,required"`
+type TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                           `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                           `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesChannelTypesSMSConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator string
+type TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorContains             TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorContains, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -1299,422 +1386,467 @@ func (r TenantSetParamsPreferencesChannelTypesSMSConditionsConditionsOperator) I
 
 // Workflow or category preferences within a preference set
 //
-// Satisfied by [shared.UnionBool], [TenantSetParamsPreferencesWorkflowsObject].
+// Satisfied by [shared.UnionBool],
+// [TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObject].
 type TenantSetParamsPreferencesWorkflowsUnion interface {
 	ImplementsTenantSetParamsPreferencesWorkflowsUnion()
 }
 
-type TenantSetParamsPreferencesWorkflowsObject struct {
+// The settings object for a workflow or category, where you can specify channel
+// types or conditions.
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObject struct {
 	// Channel type preferences
-	ChannelTypes param.Field[TenantSetParamsPreferencesWorkflowsObjectChannelTypes] `json:"channel_types"`
-	Conditions   param.Field[[]TenantSetParamsPreferencesWorkflowsObjectCondition]  `json:"conditions"`
+	ChannelTypes param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypes] `json:"channel_types"`
+	Conditions   param.Field[[]TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectCondition]  `json:"conditions"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObject) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObject) ImplementsTenantSetParamsPreferencesWorkflowsUnion() {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObject) ImplementsTenantSetParamsPreferencesWorkflowsUnion() {
 }
 
 // Channel type preferences
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypes struct {
-	Chat      param.Field[TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatUnion]      `json:"chat"`
-	Email     param.Field[TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailUnion]     `json:"email"`
-	HTTP      param.Field[TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion]      `json:"http"`
-	InAppFeed param.Field[TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion] `json:"in_app_feed"`
-	Push      param.Field[TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushUnion]      `json:"push"`
-	SMS       param.Field[TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSUnion]       `json:"sms"`
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypes struct {
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Chat param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion] `json:"chat"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Email param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion] `json:"email"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	HTTP param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion] `json:"http"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	InAppFeed param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion] `json:"in_app_feed"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Push param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion] `json:"push"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	SMS param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion] `json:"sms"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypes) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypes) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditions].
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatUnion interface {
-	ImplementsTenantSetParamsPreferencesWorkflowsObjectChannelTypesChatUnion()
+// [TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion interface {
+	ImplementsTenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion()
 }
 
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditions) ImplementsTenantSetParamsPreferencesWorkflowsObjectChannelTypesChatUnion() {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsCondition struct {
-	Argument param.Field[string]                                                                                `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                `json:"variable,required"`
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                               `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                               `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator string
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditions].
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailUnion interface {
-	ImplementsTenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailUnion()
+// [TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion interface {
+	ImplementsTenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion()
 }
 
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditions) ImplementsTenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailUnion() {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsCondition struct {
-	Argument param.Field[string]                                                                                 `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                 `json:"variable,required"`
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator string
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditions].
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion interface {
-	ImplementsTenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion()
+// [TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion interface {
+	ImplementsTenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion()
 }
 
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditions) ImplementsTenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion() {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsCondition struct {
-	Argument param.Field[string]                                                                                `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                `json:"variable,required"`
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                               `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                               `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator string
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditions].
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion interface {
-	ImplementsTenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion()
+// [TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion interface {
+	ImplementsTenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion()
 }
 
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditions) ImplementsTenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion() {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsCondition struct {
-	Argument param.Field[string]                                                                                     `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                     `json:"variable,required"`
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                    `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                    `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator string
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditions].
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushUnion interface {
-	ImplementsTenantSetParamsPreferencesWorkflowsObjectChannelTypesPushUnion()
+// [TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion interface {
+	ImplementsTenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion()
 }
 
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditions) ImplementsTenantSetParamsPreferencesWorkflowsObjectChannelTypesPushUnion() {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsCondition struct {
-	Argument param.Field[string]                                                                                `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                `json:"variable,required"`
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                               `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                               `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator string
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditions].
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSUnion interface {
-	ImplementsTenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSUnion()
+// [TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion interface {
+	ImplementsTenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion()
 }
 
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditions struct {
-	Conditions param.Field[[]TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditions) ImplementsTenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSUnion() {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsCondition struct {
-	Argument param.Field[string]                                                                               `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                               `json:"variable,required"`
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                              `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                              `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator string
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "less_than"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "contains"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "empty"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
 // A condition to be evaluated
-type TenantSetParamsPreferencesWorkflowsObjectCondition struct {
-	Argument param.Field[string]                                                      `json:"argument,required"`
-	Operator param.Field[TenantSetParamsPreferencesWorkflowsObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                      `json:"variable,required"`
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectCondition struct {
+	Argument param.Field[string]                                                                                          `json:"argument,required"`
+	Operator param.Field[TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                          `json:"variable,required"`
 }
 
-func (r TenantSetParamsPreferencesWorkflowsObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsPreferencesWorkflowsObjectConditionsOperator string
+type TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "not_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "greater_than"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "less_than"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "contains"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "not_contains"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "empty"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "not_empty"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "contains_all"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "is_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "is_not_timestamp"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "is_timestamp_after"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "is_timestamp_before"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "is_timestamp_between"
-	TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsObjectConditionsOperator = "is_audience_member"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo              TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEqualTo           TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThan          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThan             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "less_than"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContains             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotContains          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEmpty                TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEmpty             TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContainsAll          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestamp          TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsPreferencesWorkflowsObjectConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorIsAudienceMember:
+	case TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThan, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotContains, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEmpty, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContainsAll, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -1743,10 +1875,14 @@ func (r TenantSetParamsSettingsBranding) MarshalJSON() (data []byte, err error) 
 
 // Set preferences for a recipient
 type TenantSetParamsSettingsPreferenceSet struct {
+	// A setting for a preference set, where the key in the object is the category, and
+	// the values are the preference settings for that category.
 	Categories param.Field[map[string]TenantSetParamsSettingsPreferenceSetCategoriesUnion] `json:"categories"`
 	// Channel type preferences
-	ChannelTypes param.Field[TenantSetParamsSettingsPreferenceSetChannelTypes]              `json:"channel_types"`
-	Workflows    param.Field[map[string]TenantSetParamsSettingsPreferenceSetWorkflowsUnion] `json:"workflows"`
+	ChannelTypes param.Field[TenantSetParamsSettingsPreferenceSetChannelTypes] `json:"channel_types"`
+	// A setting for a preference set, where the key in the object is the workflow key,
+	// and the values are the preference settings for that workflow.
+	Workflows param.Field[map[string]TenantSetParamsSettingsPreferenceSetWorkflowsUnion] `json:"workflows"`
 }
 
 func (r TenantSetParamsSettingsPreferenceSet) MarshalJSON() (data []byte, err error) {
@@ -1756,422 +1892,466 @@ func (r TenantSetParamsSettingsPreferenceSet) MarshalJSON() (data []byte, err er
 // Workflow or category preferences within a preference set
 //
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetCategoriesObject].
+// [TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject].
 type TenantSetParamsSettingsPreferenceSetCategoriesUnion interface {
 	ImplementsTenantSetParamsSettingsPreferenceSetCategoriesUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObject struct {
+// The settings object for a workflow or category, where you can specify channel
+// types or conditions.
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject struct {
 	// Channel type preferences
-	ChannelTypes param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypes] `json:"channel_types"`
-	Conditions   param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesObjectCondition]  `json:"conditions"`
+	ChannelTypes param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypes] `json:"channel_types"`
+	Conditions   param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectCondition]  `json:"conditions"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObject) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObject) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesUnion() {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesUnion() {
 }
 
 // Channel type preferences
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypes struct {
-	Chat      param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatUnion]      `json:"chat"`
-	Email     param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailUnion]     `json:"email"`
-	HTTP      param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPUnion]      `json:"http"`
-	InAppFeed param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedUnion] `json:"in_app_feed"`
-	Push      param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushUnion]      `json:"push"`
-	SMS       param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSUnion]       `json:"sms"`
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypes struct {
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Chat param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion] `json:"chat"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Email param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion] `json:"email"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	HTTP param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion] `json:"http"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	InAppFeed param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion] `json:"in_app_feed"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Push param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion] `json:"push"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	SMS param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion] `json:"sms"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypes) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypes) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditions].
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatUnion interface {
-	ImplementsTenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatUnion()
+// [TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion interface {
+	ImplementsTenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditions) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatUnion() {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsCondition struct {
-	Argument param.Field[string]                                                                                           `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                           `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                          `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                          `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditions].
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailUnion interface {
-	ImplementsTenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailUnion()
+// [TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion interface {
+	ImplementsTenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditions) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailUnion() {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsCondition struct {
-	Argument param.Field[string]                                                                                            `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                            `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                           `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                           `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditions].
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPUnion interface {
-	ImplementsTenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPUnion()
+// [TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion interface {
+	ImplementsTenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditions) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPUnion() {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsCondition struct {
-	Argument param.Field[string]                                                                                           `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                           `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                          `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                          `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditions].
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedUnion interface {
-	ImplementsTenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedUnion()
+// [TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion interface {
+	ImplementsTenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditions) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedUnion() {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsCondition struct {
-	Argument param.Field[string]                                                                                                `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                                `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                               `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                               `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditions].
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushUnion interface {
-	ImplementsTenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushUnion()
+// [TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion interface {
+	ImplementsTenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditions) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushUnion() {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsCondition struct {
-	Argument param.Field[string]                                                                                           `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                           `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                          `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                          `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditions].
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSUnion interface {
-	ImplementsTenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSUnion()
+// [TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion interface {
+	ImplementsTenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditions) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSUnion() {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsCondition struct {
-	Argument param.Field[string]                                                                                          `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                          `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                         `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                         `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectCondition struct {
-	Argument param.Field[string]                                                                 `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                 `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                     `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                     `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -2179,361 +2359,403 @@ func (r TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperator) 
 
 // Channel type preferences
 type TenantSetParamsSettingsPreferenceSetChannelTypes struct {
-	Chat      param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesChatUnion]      `json:"chat"`
-	Email     param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesEmailUnion]     `json:"email"`
-	HTTP      param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesHTTPUnion]      `json:"http"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Chat param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesChatUnion] `json:"chat"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Email param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesEmailUnion] `json:"email"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	HTTP param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesHTTPUnion] `json:"http"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
 	InAppFeed param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedUnion] `json:"in_app_feed"`
-	Push      param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesPushUnion]      `json:"push"`
-	SMS       param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesSMSUnion]       `json:"sms"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Push param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesPushUnion] `json:"push"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	SMS param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesSMSUnion] `json:"sms"`
 }
 
 func (r TenantSetParamsSettingsPreferenceSetChannelTypes) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetChannelTypesChatConditions].
+// [TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObject].
 type TenantSetParamsSettingsPreferenceSetChannelTypesChatUnion interface {
 	ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesChatUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetChannelTypesChatConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesChatConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesChatConditions) ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesChatUnion() {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesChatUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsCondition struct {
-	Argument param.Field[string]                                                                           `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                           `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                      `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                      `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetChannelTypesChatConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditions].
+// [TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObject].
 type TenantSetParamsSettingsPreferenceSetChannelTypesEmailUnion interface {
 	ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesEmailUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditions) ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesEmailUnion() {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesEmailUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsCondition struct {
-	Argument param.Field[string]                                                                            `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                            `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                       `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                       `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetChannelTypesEmailConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditions].
+// [TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObject].
 type TenantSetParamsSettingsPreferenceSetChannelTypesHTTPUnion interface {
 	ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesHTTPUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditions) ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesHTTPUnion() {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesHTTPUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsCondition struct {
-	Argument param.Field[string]                                                                           `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                           `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                      `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                      `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditions].
+// [TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject].
 type TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedUnion interface {
 	ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditions) ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedUnion() {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsCondition struct {
-	Argument param.Field[string]                                                                                `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                           `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                           `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetChannelTypesPushConditions].
+// [TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObject].
 type TenantSetParamsSettingsPreferenceSetChannelTypesPushUnion interface {
 	ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesPushUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetChannelTypesPushConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesPushConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesPushConditions) ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesPushUnion() {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesPushUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsCondition struct {
-	Argument param.Field[string]                                                                           `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                           `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                      `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                      `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetChannelTypesPushConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditions].
+// [TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObject].
 type TenantSetParamsSettingsPreferenceSetChannelTypesSMSUnion interface {
 	ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesSMSUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditions) ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesSMSUnion() {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetChannelTypesSMSUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsCondition struct {
-	Argument param.Field[string]                                                                          `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                          `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                     `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                     `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
@@ -2542,422 +2764,466 @@ func (r TenantSetParamsSettingsPreferenceSetChannelTypesSMSConditionsConditionsO
 // Workflow or category preferences within a preference set
 //
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetWorkflowsObject].
+// [TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject].
 type TenantSetParamsSettingsPreferenceSetWorkflowsUnion interface {
 	ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObject struct {
+// The settings object for a workflow or category, where you can specify channel
+// types or conditions.
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject struct {
 	// Channel type preferences
-	ChannelTypes param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypes] `json:"channel_types"`
-	Conditions   param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsObjectCondition]  `json:"conditions"`
+	ChannelTypes param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypes] `json:"channel_types"`
+	Conditions   param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectCondition]  `json:"conditions"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObject) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObject) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsUnion() {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsUnion() {
 }
 
 // Channel type preferences
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypes struct {
-	Chat      param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatUnion]      `json:"chat"`
-	Email     param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailUnion]     `json:"email"`
-	HTTP      param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPUnion]      `json:"http"`
-	InAppFeed param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedUnion] `json:"in_app_feed"`
-	Push      param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushUnion]      `json:"push"`
-	SMS       param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSUnion]       `json:"sms"`
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypes struct {
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Chat param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion] `json:"chat"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Email param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion] `json:"email"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	HTTP param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion] `json:"http"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	InAppFeed param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion] `json:"in_app_feed"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	Push param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion] `json:"push"`
+	// A set of settings for a channel type. Currently, this can only be a list of
+	// conditions to apply.
+	SMS param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion] `json:"sms"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypes) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypes) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditions].
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatUnion interface {
-	ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatUnion()
+// [TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion interface {
+	ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditions) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatUnion() {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsCondition struct {
-	Argument param.Field[string]                                                                                          `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                          `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                         `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                         `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditions].
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailUnion interface {
-	ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailUnion()
+// [TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion interface {
+	ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditions) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailUnion() {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsCondition struct {
-	Argument param.Field[string]                                                                                           `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                           `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                          `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                          `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditions].
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPUnion interface {
-	ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPUnion()
+// [TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion interface {
+	ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditions) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPUnion() {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsCondition struct {
-	Argument param.Field[string]                                                                                          `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                          `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                         `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                         `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditions].
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedUnion interface {
-	ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedUnion()
+// [TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion interface {
+	ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditions) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedUnion() {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsCondition struct {
-	Argument param.Field[string]                                                                                               `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                               `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                              `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                              `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditions].
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushUnion interface {
-	ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushUnion()
+// [TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion interface {
+	ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditions) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushUnion() {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsCondition struct {
-	Argument param.Field[string]                                                                                          `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                          `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                         `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                         `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
 // Satisfied by [shared.UnionBool],
-// [TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditions].
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSUnion interface {
-	ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSUnion()
+// [TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject].
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion interface {
+	ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion()
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditions struct {
-	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsCondition] `json:"conditions,required"`
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject struct {
+	Conditions param.Field[[]TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition] `json:"conditions,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditions) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditions) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSUnion() {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObject) ImplementsTenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion() {
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsCondition struct {
-	Argument param.Field[string]                                                                                         `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                                         `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                                                                        `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                                                                        `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSConditionsConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSPreferenceSetChannelTypeSettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
 }
 
 // A condition to be evaluated
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectCondition struct {
-	Argument param.Field[string]                                                                `json:"argument,required"`
-	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator] `json:"operator,required"`
-	Variable param.Field[string]                                                                `json:"variable,required"`
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectCondition struct {
+	Argument param.Field[string]                                                                                                    `json:"argument,required"`
+	Operator param.Field[TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator] `json:"operator,required"`
+	Variable param.Field[string]                                                                                                    `json:"variable,required"`
 }
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectCondition) MarshalJSON() (data []byte, err error) {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectCondition) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator string
+type TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator string
 
 const (
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "not_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "greater_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "less_than"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "greater_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "less_than_or_equal_to"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "not_contains"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "not_empty"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "contains_all"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "is_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "is_not_timestamp"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "is_timestamp_after"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "is_timestamp_before"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "is_timestamp_between"
-	TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator = "is_audience_member"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo              TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEqualTo           TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "not_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThan          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "greater_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThan             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "less_than"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThanOrEqualTo TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "greater_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThanOrEqualTo    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "less_than_or_equal_to"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContains             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotContains          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "not_contains"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEmpty                TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEmpty             TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "not_empty"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContainsAll          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "contains_all"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestamp          TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsNotTimestamp       TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_not_timestamp"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampAfter     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp_after"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBefore    TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp_before"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBetween   TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_timestamp_between"
+	TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsAudienceMember     TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator = "is_audience_member"
 )
 
-func (r TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperator) IsKnown() bool {
+func (r TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperator) IsKnown() bool {
 	switch r {
-	case TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorIsAudienceMember:
+	case TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThan, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorGreaterThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorLessThanOrEqualTo, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotContains, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorNotEmpty, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorContainsAll, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsNotTimestamp, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampAfter, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBefore, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsTimestampBetween, TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorIsAudienceMember:
 		return true
 	}
 	return false
