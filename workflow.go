@@ -12,7 +12,6 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
-	"github.com/stainless-sdks/knock-go/shared"
 )
 
 // WorkflowService contains methods and other services that help with interacting
@@ -104,7 +103,7 @@ type WorkflowTriggerParams struct {
 	// Specifies a recipient in a request. This can either be a user identifier
 	// (string), an inline user request (object), or an inline object request, which is
 	// determined by the presence of a `collection` property.
-	Actor param.Field[shared.RecipientRequestUnionParam] `json:"actor"`
+	Actor param.Field[RecipientRequestUnionParam] `json:"actor"`
 	// An optional key that is used in the workflow cancellation endpoint to target a
 	// cancellation of any workflow runs associated with this trigger.
 	CancellationKey param.Field[string] `json:"cancellation_key"`
@@ -113,9 +112,9 @@ type WorkflowTriggerParams struct {
 	Data param.Field[map[string]interface{}] `json:"data"`
 	// The recipients to trigger the workflow for. Cannot exceed 1000 recipients in a
 	// single trigger.
-	Recipients param.Field[[]shared.RecipientRequestUnionParam] `json:"recipients"`
+	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients"`
 	// An inline tenant request
-	Tenant param.Field[shared.InlineTenantRequestUnionParam] `json:"tenant"`
+	Tenant param.Field[InlineTenantRequestUnionParam] `json:"tenant"`
 }
 
 func (r WorkflowTriggerParams) MarshalJSON() (data []byte, err error) {

@@ -14,7 +14,6 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
-	"github.com/stainless-sdks/knock-go/shared"
 )
 
 // ObjectBulkService contains methods and other services that help with interacting
@@ -95,9 +94,9 @@ func (r ObjectBulkAddSubscriptionsParams) MarshalJSON() (data []byte, err error)
 }
 
 type ObjectBulkAddSubscriptionsParamsSubscription struct {
-	ID         param.Field[string]                              `json:"id,required"`
-	Recipients param.Field[[]shared.RecipientRequestUnionParam] `json:"recipients,required"`
-	Properties param.Field[map[string]interface{}]              `json:"properties"`
+	ID         param.Field[string]                       `json:"id,required"`
+	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
+	Properties param.Field[map[string]interface{}]       `json:"properties"`
 }
 
 func (r ObjectBulkAddSubscriptionsParamsSubscription) MarshalJSON() (data []byte, err error) {
@@ -105,7 +104,7 @@ func (r ObjectBulkAddSubscriptionsParamsSubscription) MarshalJSON() (data []byte
 }
 
 type ObjectBulkSetParams struct {
-	Objects param.Field[[]shared.InlineObjectRequestParam] `json:"objects,required"`
+	Objects param.Field[[]InlineObjectRequestParam] `json:"objects,required"`
 }
 
 func (r ObjectBulkSetParams) MarshalJSON() (data []byte, err error) {

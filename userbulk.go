@@ -12,7 +12,6 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
-	"github.com/stainless-sdks/knock-go/shared"
 )
 
 // UserBulkService contains methods and other services that help with interacting
@@ -77,7 +76,7 @@ func (r UserBulkDeleteParams) URLQuery() (v url.Values) {
 }
 
 type UserBulkIdentifyParams struct {
-	Users param.Field[[]shared.InlineIdentifyUserRequestParam] `json:"users,required"`
+	Users param.Field[[]InlineIdentifyUserRequestParam] `json:"users,required"`
 }
 
 func (r UserBulkIdentifyParams) MarshalJSON() (data []byte, err error) {
@@ -86,8 +85,8 @@ func (r UserBulkIdentifyParams) MarshalJSON() (data []byte, err error) {
 
 type UserBulkSetPreferencesParams struct {
 	// Set preferences for a recipient
-	Preferences param.Field[shared.PreferenceSetRequestParam] `json:"preferences,required"`
-	UserIDs     param.Field[[]string]                         `json:"user_ids,required"`
+	Preferences param.Field[PreferenceSetRequestParam] `json:"preferences,required"`
+	UserIDs     param.Field[[]string]                  `json:"user_ids,required"`
 }
 
 func (r UserBulkSetPreferencesParams) MarshalJSON() (data []byte, err error) {

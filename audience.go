@@ -13,7 +13,6 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
-	"github.com/stainless-sdks/knock-go/shared"
 )
 
 // AudienceService contains methods and other services that help with interacting
@@ -76,7 +75,7 @@ type AudienceMember struct {
 	Typename string    `json:"__typename,required"`
 	AddedAt  time.Time `json:"added_at,required" format:"date-time"`
 	// A user object
-	User   shared.User        `json:"user,required"`
+	User   User               `json:"user,required"`
 	UserID string             `json:"user_id,required"`
 	Tenant string             `json:"tenant,nullable"`
 	JSON   audienceMemberJSON `json:"-"`
@@ -168,8 +167,8 @@ type AudienceAddMembersParamsMember struct {
 	// will ensure that the user is available before the request is executed in Knock.
 	// It will perform an upsert against the user you're supplying, replacing any
 	// properties specified.
-	User   param.Field[shared.InlineIdentifyUserRequestParam] `json:"user,required"`
-	Tenant param.Field[string]                                `json:"tenant"`
+	User   param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
+	Tenant param.Field[string]                         `json:"tenant"`
 }
 
 func (r AudienceAddMembersParamsMember) MarshalJSON() (data []byte, err error) {
@@ -190,8 +189,8 @@ type AudienceRemoveMembersParamsMember struct {
 	// will ensure that the user is available before the request is executed in Knock.
 	// It will perform an upsert against the user you're supplying, replacing any
 	// properties specified.
-	User   param.Field[shared.InlineIdentifyUserRequestParam] `json:"user,required"`
-	Tenant param.Field[string]                                `json:"tenant"`
+	User   param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
+	Tenant param.Field[string]                         `json:"tenant"`
 }
 
 func (r AudienceRemoveMembersParamsMember) MarshalJSON() (data []byte, err error) {

@@ -15,7 +15,6 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
 	"github.com/stainless-sdks/knock-go/packages/pagination"
-	"github.com/stainless-sdks/knock-go/shared"
 )
 
 // TenantService contains methods and other services that help with interacting
@@ -40,7 +39,7 @@ func NewTenantService(opts ...option.RequestOption) (r *TenantService) {
 }
 
 // List tenants
-func (r *TenantService) List(ctx context.Context, query TenantListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[shared.Tenant], err error) {
+func (r *TenantService) List(ctx context.Context, query TenantListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Tenant], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -58,7 +57,7 @@ func (r *TenantService) List(ctx context.Context, query TenantListParams, opts .
 }
 
 // List tenants
-func (r *TenantService) ListAutoPaging(ctx context.Context, query TenantListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[shared.Tenant] {
+func (r *TenantService) ListAutoPaging(ctx context.Context, query TenantListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Tenant] {
 	return pagination.NewEntriesCursorAutoPager(r.List(ctx, query, opts...))
 }
 
@@ -75,7 +74,7 @@ func (r *TenantService) Delete(ctx context.Context, id string, opts ...option.Re
 }
 
 // Get a tenant
-func (r *TenantService) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *shared.Tenant, err error) {
+func (r *TenantService) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *Tenant, err error) {
 	opts = append(r.Options[:], opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
@@ -87,7 +86,7 @@ func (r *TenantService) Get(ctx context.Context, id string, opts ...option.Reque
 }
 
 // Set a tenant
-func (r *TenantService) Set(ctx context.Context, id string, body TenantSetParams, opts ...option.RequestOption) (res *shared.Tenant, err error) {
+func (r *TenantService) Set(ctx context.Context, id string, body TenantSetParams, opts ...option.RequestOption) (res *Tenant, err error) {
 	opts = append(r.Options[:], opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
@@ -96,6 +95,75 @@ func (r *TenantService) Set(ctx context.Context, id string, body TenantSetParams
 	path := fmt.Sprintf("v1/tenants/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
 	return
+}
+
+// An inline tenant request
+//
+// Satisfied by [shared.UnionString], [TenantRequestParam].
+type InlineTenantRequestUnionParam interface {
+	ImplementsInlineTenantRequestUnionParam()
+}
+
+// A tenant entity
+type Tenant struct {
+	ID          string                 `json:"id,required"`
+	Typename    string                 `json:"__typename,required"`
+	ExtraFields map[string]interface{} `json:"-,extras"`
+	JSON        tenantJSON             `json:"-"`
+}
+
+// tenantJSON contains the JSON metadata for the struct [Tenant]
+type tenantJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *Tenant) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r tenantJSON) RawJSON() string {
+	return r.raw
+}
+
+// A tenant to be set in the system
+type TenantRequestParam struct {
+	ID param.Field[string] `json:"id,required"`
+	// Allows inline setting channel data for a recipient
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+	Settings    param.Field[TenantRequestSettingsParam]      `json:"settings"`
+	ExtraFields map[string]interface{}                       `json:"-,extras"`
+}
+
+func (r TenantRequestParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r TenantRequestParam) ImplementsInlineTenantRequestUnionParam() {}
+
+type TenantRequestSettingsParam struct {
+	Branding param.Field[TenantRequestSettingsBrandingParam] `json:"branding"`
+	// Set preferences for a recipient
+	PreferenceSet param.Field[PreferenceSetRequestParam] `json:"preference_set"`
+}
+
+func (r TenantRequestSettingsParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type TenantRequestSettingsBrandingParam struct {
+	IconURL              param.Field[string] `json:"icon_url"`
+	LogoURL              param.Field[string] `json:"logo_url"`
+	PrimaryColor         param.Field[string] `json:"primary_color"`
+	PrimaryColorContrast param.Field[string] `json:"primary_color_contrast"`
+}
+
+func (r TenantRequestSettingsBrandingParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type TenantListParams struct {
@@ -117,10 +185,10 @@ func (r TenantListParams) URLQuery() (v url.Values) {
 
 type TenantSetParams struct {
 	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
-	Settings    param.Field[TenantSetParamsSettings]                `json:"settings"`
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+	Settings    param.Field[TenantSetParamsSettings]         `json:"settings"`
 }
 
 func (r TenantSetParams) MarshalJSON() (data []byte, err error) {
@@ -130,7 +198,7 @@ func (r TenantSetParams) MarshalJSON() (data []byte, err error) {
 type TenantSetParamsSettings struct {
 	Branding param.Field[TenantSetParamsSettingsBranding] `json:"branding"`
 	// Set preferences for a recipient
-	PreferenceSet param.Field[shared.PreferenceSetRequestParam] `json:"preference_set"`
+	PreferenceSet param.Field[PreferenceSetRequestParam] `json:"preference_set"`
 }
 
 func (r TenantSetParamsSettings) MarshalJSON() (data []byte, err error) {

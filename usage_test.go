@@ -32,7 +32,7 @@ func TestUsage(t *testing.T) {
 			Data: knock.F(map[string]interface{}{
 				"dinosaur": "triceratops",
 			}),
-			Recipients: knock.F([]shared.RecipientRequestUnionParam{shared.UnionString("dnedry")}),
+			Recipients: knock.F([]knock.RecipientRequestUnionParam{shared.UnionString("dnedry")}),
 		},
 	)
 	if err != nil {

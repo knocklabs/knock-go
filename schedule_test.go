@@ -30,11 +30,11 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 	)
 	_, err := client.Schedules.New(context.TODO(), knock.ScheduleNewParams{
 		Recipients: knock.F([]knock.ScheduleNewParamsRecipientUnion{shared.UnionString("user_123")}),
-		Repeats: knock.F([]shared.ScheduleRepeatRuleParam{{
+		Repeats: knock.F([]knock.ScheduleRepeatRuleParam{{
 			Typename:   knock.F("ScheduleRepeat"),
-			Frequency:  knock.F(shared.ScheduleRepeatRuleFrequencyDaily),
+			Frequency:  knock.F(knock.ScheduleRepeatRuleFrequencyDaily),
 			DayOfMonth: knock.Null[int64](),
-			Days:       knock.F([]shared.ScheduleRepeatRuleDay{shared.ScheduleRepeatRuleDayMon, shared.ScheduleRepeatRuleDayTue, shared.ScheduleRepeatRuleDayWed, shared.ScheduleRepeatRuleDayThu, shared.ScheduleRepeatRuleDayFri, shared.ScheduleRepeatRuleDaySat, shared.ScheduleRepeatRuleDaySun}),
+			Days:       knock.F([]knock.ScheduleRepeatRuleDay{knock.ScheduleRepeatRuleDayMon, knock.ScheduleRepeatRuleDayTue, knock.ScheduleRepeatRuleDayWed, knock.ScheduleRepeatRuleDayThu, knock.ScheduleRepeatRuleDayFri, knock.ScheduleRepeatRuleDaySat, knock.ScheduleRepeatRuleDaySun}),
 			Hours:      knock.Null[int64](),
 			Interval:   knock.F(int64(1)),
 			Minutes:    knock.Null[int64](),
@@ -45,7 +45,7 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 		}),
 		EndingAt:    knock.Null[time.Time](),
 		ScheduledAt: knock.Null[time.Time](),
-		Tenant:      knock.F[shared.InlineTenantRequestUnionParam](shared.UnionString("acme_corp")),
+		Tenant:      knock.F[knock.InlineTenantRequestUnionParam](shared.UnionString("acme_corp")),
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -71,22 +71,22 @@ func TestScheduleUpdateWithOptionalParams(t *testing.T) {
 	)
 	_, err := client.Schedules.Update(context.TODO(), knock.ScheduleUpdateParams{
 		ScheduleIDs: knock.F([]string{"123e4567-e89b-12d3-a456-426614174000"}),
-		Actor:       knock.F[shared.RecipientRequestUnionParam](shared.UnionString("string")),
+		Actor:       knock.F[knock.RecipientRequestUnionParam](shared.UnionString("string")),
 		Data: knock.F(map[string]interface{}{
 			"key": "bar",
 		}),
 		EndingAt: knock.Null[time.Time](),
-		Repeats: knock.F([]shared.ScheduleRepeatRuleParam{{
+		Repeats: knock.F([]knock.ScheduleRepeatRuleParam{{
 			Typename:   knock.F("ScheduleRepeat"),
-			Frequency:  knock.F(shared.ScheduleRepeatRuleFrequencyDaily),
+			Frequency:  knock.F(knock.ScheduleRepeatRuleFrequencyDaily),
 			DayOfMonth: knock.Null[int64](),
-			Days:       knock.F([]shared.ScheduleRepeatRuleDay{shared.ScheduleRepeatRuleDayMon, shared.ScheduleRepeatRuleDayTue, shared.ScheduleRepeatRuleDayWed, shared.ScheduleRepeatRuleDayThu, shared.ScheduleRepeatRuleDayFri, shared.ScheduleRepeatRuleDaySat, shared.ScheduleRepeatRuleDaySun}),
+			Days:       knock.F([]knock.ScheduleRepeatRuleDay{knock.ScheduleRepeatRuleDayMon, knock.ScheduleRepeatRuleDayTue, knock.ScheduleRepeatRuleDayWed, knock.ScheduleRepeatRuleDayThu, knock.ScheduleRepeatRuleDayFri, knock.ScheduleRepeatRuleDaySat, knock.ScheduleRepeatRuleDaySun}),
 			Hours:      knock.Null[int64](),
 			Interval:   knock.F(int64(1)),
 			Minutes:    knock.Null[int64](),
 		}}),
 		ScheduledAt: knock.Null[time.Time](),
-		Tenant:      knock.F[shared.InlineTenantRequestUnionParam](shared.UnionString("acme_corp")),
+		Tenant:      knock.F[knock.InlineTenantRequestUnionParam](shared.UnionString("acme_corp")),
 	})
 	if err != nil {
 		var apierr *knock.Error

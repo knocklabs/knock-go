@@ -130,7 +130,7 @@ func (r *MessageService) ListActivitiesAutoPaging(ctx context.Context, messageID
 }
 
 // List delivery logs
-func (r *MessageService) ListDeliveryLogs(ctx context.Context, messageID string, query MessageListDeliveryLogsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[MessageListDeliveryLogsResponse], err error) {
+func (r *MessageService) ListDeliveryLogs(ctx context.Context, messageID string, query MessageListDeliveryLogsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[MessageDeliveryLog], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -152,7 +152,7 @@ func (r *MessageService) ListDeliveryLogs(ctx context.Context, messageID string,
 }
 
 // List delivery logs
-func (r *MessageService) ListDeliveryLogsAutoPaging(ctx context.Context, messageID string, query MessageListDeliveryLogsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[MessageListDeliveryLogsResponse] {
+func (r *MessageService) ListDeliveryLogsAutoPaging(ctx context.Context, messageID string, query MessageListDeliveryLogsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[MessageDeliveryLog] {
 	return pagination.NewEntriesCursorAutoPager(r.ListDeliveryLogs(ctx, messageID, query, opts...))
 }
 
@@ -260,14 +260,14 @@ type Activity struct {
 	ID       string `json:"id"`
 	Typename string `json:"__typename"`
 	// A recipient, which is either a user or an object
-	Actor shared.Recipient `json:"actor,nullable"`
+	Actor Recipient `json:"actor,nullable"`
 	// The data associated with the activity
 	Data       map[string]interface{} `json:"data,nullable"`
 	InsertedAt time.Time              `json:"inserted_at" format:"date-time"`
 	// A recipient, which is either a user or an object
-	Recipient shared.Recipient `json:"recipient"`
-	UpdatedAt time.Time        `json:"updated_at" format:"date-time"`
-	JSON      activityJSON     `json:"-"`
+	Recipient Recipient    `json:"recipient"`
+	UpdatedAt time.Time    `json:"updated_at" format:"date-time"`
+	JSON      activityJSON `json:"-"`
 }
 
 // activityJSON contains the JSON metadata for the struct [Activity]
@@ -546,6 +546,158 @@ func (r MessageStatus) IsKnown() bool {
 	}
 	return false
 }
+
+// A message delivery log
+type MessageDeliveryLog struct {
+	ID            string `json:"id,required"`
+	Typename      string `json:"__typename,required"`
+	EnvironmentID string `json:"environment_id,required" format:"uuid"`
+	InsertedAt    string `json:"inserted_at,required"`
+	// A message delivery log request
+	Request MessageDeliveryLogRequest `json:"request,required"`
+	// A message delivery log response
+	Response    MessageDeliveryLogResponse `json:"response,required"`
+	ServiceName string                     `json:"service_name,required"`
+	JSON        messageDeliveryLogJSON     `json:"-"`
+}
+
+// messageDeliveryLogJSON contains the JSON metadata for the struct
+// [MessageDeliveryLog]
+type messageDeliveryLogJSON struct {
+	ID            apijson.Field
+	Typename      apijson.Field
+	EnvironmentID apijson.Field
+	InsertedAt    apijson.Field
+	Request       apijson.Field
+	Response      apijson.Field
+	ServiceName   apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
+}
+
+func (r *MessageDeliveryLog) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageDeliveryLogJSON) RawJSON() string {
+	return r.raw
+}
+
+// A message delivery log request
+type MessageDeliveryLogRequest struct {
+	Body    MessageDeliveryLogRequestBodyUnion `json:"body"`
+	Headers map[string]interface{}             `json:"headers,nullable"`
+	Host    string                             `json:"host"`
+	Method  MessageDeliveryLogRequestMethod    `json:"method"`
+	Path    string                             `json:"path"`
+	Query   string                             `json:"query,nullable"`
+	JSON    messageDeliveryLogRequestJSON      `json:"-"`
+}
+
+// messageDeliveryLogRequestJSON contains the JSON metadata for the struct
+// [MessageDeliveryLogRequest]
+type messageDeliveryLogRequestJSON struct {
+	Body        apijson.Field
+	Headers     apijson.Field
+	Host        apijson.Field
+	Method      apijson.Field
+	Path        apijson.Field
+	Query       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageDeliveryLogRequest) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageDeliveryLogRequestJSON) RawJSON() string {
+	return r.raw
+}
+
+// Union satisfied by [shared.UnionString] or [MessageDeliveryLogRequestBodyMap].
+type MessageDeliveryLogRequestBodyUnion interface {
+	ImplementsMessageDeliveryLogRequestBodyUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*MessageDeliveryLogRequestBodyUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(shared.UnionString("")),
+		},
+	)
+}
+
+type MessageDeliveryLogRequestBodyMap map[string]interface{}
+
+func (r MessageDeliveryLogRequestBodyMap) ImplementsMessageDeliveryLogRequestBodyUnion() {}
+
+type MessageDeliveryLogRequestMethod string
+
+const (
+	MessageDeliveryLogRequestMethodGet    MessageDeliveryLogRequestMethod = "GET"
+	MessageDeliveryLogRequestMethodPost   MessageDeliveryLogRequestMethod = "POST"
+	MessageDeliveryLogRequestMethodPut    MessageDeliveryLogRequestMethod = "PUT"
+	MessageDeliveryLogRequestMethodDelete MessageDeliveryLogRequestMethod = "DELETE"
+	MessageDeliveryLogRequestMethodPatch  MessageDeliveryLogRequestMethod = "PATCH"
+)
+
+func (r MessageDeliveryLogRequestMethod) IsKnown() bool {
+	switch r {
+	case MessageDeliveryLogRequestMethodGet, MessageDeliveryLogRequestMethodPost, MessageDeliveryLogRequestMethodPut, MessageDeliveryLogRequestMethodDelete, MessageDeliveryLogRequestMethodPatch:
+		return true
+	}
+	return false
+}
+
+// A message delivery log response
+type MessageDeliveryLogResponse struct {
+	Body    MessageDeliveryLogResponseBodyUnion `json:"body"`
+	Headers map[string]interface{}              `json:"headers,nullable"`
+	Status  int64                               `json:"status"`
+	JSON    messageDeliveryLogResponseJSON      `json:"-"`
+}
+
+// messageDeliveryLogResponseJSON contains the JSON metadata for the struct
+// [MessageDeliveryLogResponse]
+type messageDeliveryLogResponseJSON struct {
+	Body        apijson.Field
+	Headers     apijson.Field
+	Status      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageDeliveryLogResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageDeliveryLogResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// Union satisfied by [shared.UnionString] or [MessageDeliveryLogResponseBodyMap].
+type MessageDeliveryLogResponseBodyUnion interface {
+	ImplementsMessageDeliveryLogResponseBodyUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*MessageDeliveryLogResponseBodyUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(shared.UnionString("")),
+		},
+	)
+}
+
+type MessageDeliveryLogResponseBodyMap map[string]interface{}
+
+func (r MessageDeliveryLogResponseBodyMap) ImplementsMessageDeliveryLogResponseBodyUnion() {}
 
 // A single event that occurred for a message
 type MessageEvent struct {
@@ -1242,162 +1394,6 @@ func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksType) IsKnown(
 		return true
 	}
 	return false
-}
-
-// A message delivery log
-type MessageListDeliveryLogsResponse struct {
-	ID            string `json:"id,required"`
-	Typename      string `json:"__typename,required"`
-	EnvironmentID string `json:"environment_id,required" format:"uuid"`
-	InsertedAt    string `json:"inserted_at,required"`
-	// A message delivery log request
-	Request MessageListDeliveryLogsResponseRequest `json:"request,required"`
-	// A message delivery log response
-	Response    MessageListDeliveryLogsResponseResponse `json:"response,required"`
-	ServiceName string                                  `json:"service_name,required"`
-	JSON        messageListDeliveryLogsResponseJSON     `json:"-"`
-}
-
-// messageListDeliveryLogsResponseJSON contains the JSON metadata for the struct
-// [MessageListDeliveryLogsResponse]
-type messageListDeliveryLogsResponseJSON struct {
-	ID            apijson.Field
-	Typename      apijson.Field
-	EnvironmentID apijson.Field
-	InsertedAt    apijson.Field
-	Request       apijson.Field
-	Response      apijson.Field
-	ServiceName   apijson.Field
-	raw           string
-	ExtraFields   map[string]apijson.Field
-}
-
-func (r *MessageListDeliveryLogsResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageListDeliveryLogsResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// A message delivery log request
-type MessageListDeliveryLogsResponseRequest struct {
-	Body    MessageListDeliveryLogsResponseRequestBodyUnion `json:"body"`
-	Headers map[string]interface{}                          `json:"headers,nullable"`
-	Host    string                                          `json:"host"`
-	Method  MessageListDeliveryLogsResponseRequestMethod    `json:"method"`
-	Path    string                                          `json:"path"`
-	Query   string                                          `json:"query,nullable"`
-	JSON    messageListDeliveryLogsResponseRequestJSON      `json:"-"`
-}
-
-// messageListDeliveryLogsResponseRequestJSON contains the JSON metadata for the
-// struct [MessageListDeliveryLogsResponseRequest]
-type messageListDeliveryLogsResponseRequestJSON struct {
-	Body        apijson.Field
-	Headers     apijson.Field
-	Host        apijson.Field
-	Method      apijson.Field
-	Path        apijson.Field
-	Query       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *MessageListDeliveryLogsResponseRequest) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageListDeliveryLogsResponseRequestJSON) RawJSON() string {
-	return r.raw
-}
-
-// Union satisfied by [shared.UnionString] or
-// [MessageListDeliveryLogsResponseRequestBodyMap].
-type MessageListDeliveryLogsResponseRequestBodyUnion interface {
-	ImplementsMessageListDeliveryLogsResponseRequestBodyUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*MessageListDeliveryLogsResponseRequestBodyUnion)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(shared.UnionString("")),
-		},
-	)
-}
-
-type MessageListDeliveryLogsResponseRequestBodyMap map[string]interface{}
-
-func (r MessageListDeliveryLogsResponseRequestBodyMap) ImplementsMessageListDeliveryLogsResponseRequestBodyUnion() {
-}
-
-type MessageListDeliveryLogsResponseRequestMethod string
-
-const (
-	MessageListDeliveryLogsResponseRequestMethodGet    MessageListDeliveryLogsResponseRequestMethod = "GET"
-	MessageListDeliveryLogsResponseRequestMethodPost   MessageListDeliveryLogsResponseRequestMethod = "POST"
-	MessageListDeliveryLogsResponseRequestMethodPut    MessageListDeliveryLogsResponseRequestMethod = "PUT"
-	MessageListDeliveryLogsResponseRequestMethodDelete MessageListDeliveryLogsResponseRequestMethod = "DELETE"
-	MessageListDeliveryLogsResponseRequestMethodPatch  MessageListDeliveryLogsResponseRequestMethod = "PATCH"
-)
-
-func (r MessageListDeliveryLogsResponseRequestMethod) IsKnown() bool {
-	switch r {
-	case MessageListDeliveryLogsResponseRequestMethodGet, MessageListDeliveryLogsResponseRequestMethodPost, MessageListDeliveryLogsResponseRequestMethodPut, MessageListDeliveryLogsResponseRequestMethodDelete, MessageListDeliveryLogsResponseRequestMethodPatch:
-		return true
-	}
-	return false
-}
-
-// A message delivery log response
-type MessageListDeliveryLogsResponseResponse struct {
-	Body    MessageListDeliveryLogsResponseResponseBodyUnion `json:"body"`
-	Headers map[string]interface{}                           `json:"headers,nullable"`
-	Status  int64                                            `json:"status"`
-	JSON    messageListDeliveryLogsResponseResponseJSON      `json:"-"`
-}
-
-// messageListDeliveryLogsResponseResponseJSON contains the JSON metadata for the
-// struct [MessageListDeliveryLogsResponseResponse]
-type messageListDeliveryLogsResponseResponseJSON struct {
-	Body        apijson.Field
-	Headers     apijson.Field
-	Status      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *MessageListDeliveryLogsResponseResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageListDeliveryLogsResponseResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// Union satisfied by [shared.UnionString] or
-// [MessageListDeliveryLogsResponseResponseBodyMap].
-type MessageListDeliveryLogsResponseResponseBodyUnion interface {
-	ImplementsMessageListDeliveryLogsResponseResponseBodyUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*MessageListDeliveryLogsResponseResponseBodyUnion)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(shared.UnionString("")),
-		},
-	)
-}
-
-type MessageListDeliveryLogsResponseResponseBodyMap map[string]interface{}
-
-func (r MessageListDeliveryLogsResponseResponseBodyMap) ImplementsMessageListDeliveryLogsResponseResponseBodyUnion() {
 }
 
 type MessageListParams struct {

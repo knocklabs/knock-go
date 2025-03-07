@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/stainless-sdks/knock-go/internal/apijson"
 	"github.com/stainless-sdks/knock-go/internal/apiquery"
@@ -15,7 +16,6 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
 	"github.com/stainless-sdks/knock-go/packages/pagination"
-	"github.com/stainless-sdks/knock-go/shared"
 )
 
 // ObjectService contains methods and other services that help with interacting
@@ -40,7 +40,7 @@ func NewObjectService(opts ...option.RequestOption) (r *ObjectService) {
 }
 
 // List objects in a collection
-func (r *ObjectService) List(ctx context.Context, collection string, query ObjectListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[shared.Object], err error) {
+func (r *ObjectService) List(ctx context.Context, collection string, query ObjectListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Object], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -62,7 +62,7 @@ func (r *ObjectService) List(ctx context.Context, collection string, query Objec
 }
 
 // List objects in a collection
-func (r *ObjectService) ListAutoPaging(ctx context.Context, collection string, query ObjectListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[shared.Object] {
+func (r *ObjectService) ListAutoPaging(ctx context.Context, collection string, query ObjectListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Object] {
 	return pagination.NewEntriesCursorAutoPager(r.List(ctx, collection, query, opts...))
 }
 
@@ -84,7 +84,7 @@ func (r *ObjectService) Delete(ctx context.Context, collection string, id string
 
 // Add subscriptions for an object. If a subscription already exists, it will be
 // updated.
-func (r *ObjectService) AddSubscriptions(ctx context.Context, collection string, objectID string, body ObjectAddSubscriptionsParams, opts ...option.RequestOption) (res *[]shared.Subscription, err error) {
+func (r *ObjectService) AddSubscriptions(ctx context.Context, collection string, objectID string, body ObjectAddSubscriptionsParams, opts ...option.RequestOption) (res *[]Subscription, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -100,7 +100,7 @@ func (r *ObjectService) AddSubscriptions(ctx context.Context, collection string,
 }
 
 // Delete subscriptions
-func (r *ObjectService) DeleteSubscriptions(ctx context.Context, collection string, objectID string, body ObjectDeleteSubscriptionsParams, opts ...option.RequestOption) (res *[]shared.Subscription, err error) {
+func (r *ObjectService) DeleteSubscriptions(ctx context.Context, collection string, objectID string, body ObjectDeleteSubscriptionsParams, opts ...option.RequestOption) (res *[]Subscription, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -116,7 +116,7 @@ func (r *ObjectService) DeleteSubscriptions(ctx context.Context, collection stri
 }
 
 // Get an object
-func (r *ObjectService) Get(ctx context.Context, collection string, id string, opts ...option.RequestOption) (res *shared.Object, err error) {
+func (r *ObjectService) Get(ctx context.Context, collection string, id string, opts ...option.RequestOption) (res *Object, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -132,7 +132,7 @@ func (r *ObjectService) Get(ctx context.Context, collection string, id string, o
 }
 
 // Get channel data
-func (r *ObjectService) GetChannelData(ctx context.Context, collection string, objectID string, channelID string, opts ...option.RequestOption) (res *shared.ChannelData, err error) {
+func (r *ObjectService) GetChannelData(ctx context.Context, collection string, objectID string, channelID string, opts ...option.RequestOption) (res *ChannelData, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -152,7 +152,7 @@ func (r *ObjectService) GetChannelData(ctx context.Context, collection string, o
 }
 
 // Get a preference set
-func (r *ObjectService) GetPreferences(ctx context.Context, collection string, objectID string, id string, query ObjectGetPreferencesParams, opts ...option.RequestOption) (res *shared.PreferenceSet, err error) {
+func (r *ObjectService) GetPreferences(ctx context.Context, collection string, objectID string, id string, query ObjectGetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -203,7 +203,7 @@ func (r *ObjectService) ListMessagesAutoPaging(ctx context.Context, collection s
 }
 
 // List preference sets
-func (r *ObjectService) ListPreferences(ctx context.Context, collection string, objectID string, opts ...option.RequestOption) (res *[]shared.PreferenceSet, err error) {
+func (r *ObjectService) ListPreferences(ctx context.Context, collection string, objectID string, opts ...option.RequestOption) (res *[]PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -219,7 +219,7 @@ func (r *ObjectService) ListPreferences(ctx context.Context, collection string, 
 }
 
 // List schedules
-func (r *ObjectService) ListSchedules(ctx context.Context, collection string, id string, query ObjectListSchedulesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[shared.Schedule], err error) {
+func (r *ObjectService) ListSchedules(ctx context.Context, collection string, id string, query ObjectListSchedulesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Schedule], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -245,14 +245,14 @@ func (r *ObjectService) ListSchedules(ctx context.Context, collection string, id
 }
 
 // List schedules
-func (r *ObjectService) ListSchedulesAutoPaging(ctx context.Context, collection string, id string, query ObjectListSchedulesParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[shared.Schedule] {
+func (r *ObjectService) ListSchedulesAutoPaging(ctx context.Context, collection string, id string, query ObjectListSchedulesParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Schedule] {
 	return pagination.NewEntriesCursorAutoPager(r.ListSchedules(ctx, collection, id, query, opts...))
 }
 
 // List subscriptions for an object. Either list all subscriptions that belong to
 // the object, or all subscriptions that this object has. Determined by the `mode`
 // query parameter.
-func (r *ObjectService) ListSubscriptions(ctx context.Context, collection string, objectID string, query ObjectListSubscriptionsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[shared.Subscription], err error) {
+func (r *ObjectService) ListSubscriptions(ctx context.Context, collection string, objectID string, query ObjectListSubscriptionsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Subscription], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -280,12 +280,12 @@ func (r *ObjectService) ListSubscriptions(ctx context.Context, collection string
 // List subscriptions for an object. Either list all subscriptions that belong to
 // the object, or all subscriptions that this object has. Determined by the `mode`
 // query parameter.
-func (r *ObjectService) ListSubscriptionsAutoPaging(ctx context.Context, collection string, objectID string, query ObjectListSubscriptionsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[shared.Subscription] {
+func (r *ObjectService) ListSubscriptionsAutoPaging(ctx context.Context, collection string, objectID string, query ObjectListSubscriptionsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Subscription] {
 	return pagination.NewEntriesCursorAutoPager(r.ListSubscriptions(ctx, collection, objectID, query, opts...))
 }
 
 // Set (identify) an object
-func (r *ObjectService) Set(ctx context.Context, collection string, id string, body ObjectSetParams, opts ...option.RequestOption) (res *shared.Object, err error) {
+func (r *ObjectService) Set(ctx context.Context, collection string, id string, body ObjectSetParams, opts ...option.RequestOption) (res *Object, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -301,7 +301,7 @@ func (r *ObjectService) Set(ctx context.Context, collection string, id string, b
 }
 
 // Set channel data
-func (r *ObjectService) SetChannelData(ctx context.Context, collection string, objectID string, channelID string, body ObjectSetChannelDataParams, opts ...option.RequestOption) (res *shared.ChannelData, err error) {
+func (r *ObjectService) SetChannelData(ctx context.Context, collection string, objectID string, channelID string, body ObjectSetChannelDataParams, opts ...option.RequestOption) (res *ChannelData, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -321,7 +321,7 @@ func (r *ObjectService) SetChannelData(ctx context.Context, collection string, o
 }
 
 // Update a preference set
-func (r *ObjectService) SetPreferences(ctx context.Context, collection string, objectID string, id string, body ObjectSetPreferencesParams, opts ...option.RequestOption) (res *shared.PreferenceSet, err error) {
+func (r *ObjectService) SetPreferences(ctx context.Context, collection string, objectID string, id string, body ObjectSetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -360,6 +360,56 @@ func (r *ObjectService) UnsetChannelData(ctx context.Context, collection string,
 	return
 }
 
+// Inline identifies a custom object belonging to a collection
+type InlineObjectRequestParam struct {
+	ID         param.Field[string] `json:"id,required"`
+	Collection param.Field[string] `json:"collection,required"`
+	// Allows inline setting channel data for a recipient
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	CreatedAt   param.Field[time.Time]                     `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+	ExtraFields map[string]interface{}                       `json:"-,extras"`
+}
+
+func (r InlineObjectRequestParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r InlineObjectRequestParam) ImplementsRecipientRequestUnionParam() {}
+
+// A custom-object entity which belongs to a collection.
+type Object struct {
+	ID          string                 `json:"id,required"`
+	Typename    string                 `json:"__typename,required"`
+	Collection  string                 `json:"collection,required"`
+	UpdatedAt   time.Time              `json:"updated_at,required" format:"date-time"`
+	CreatedAt   time.Time              `json:"created_at,nullable" format:"date-time"`
+	ExtraFields map[string]interface{} `json:"-,extras"`
+	JSON        objectJSON             `json:"-"`
+}
+
+// objectJSON contains the JSON metadata for the struct [Object]
+type objectJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	Collection  apijson.Field
+	UpdatedAt   apijson.Field
+	CreatedAt   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *Object) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r objectJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r Object) implementsRecipient() {}
+
 type ObjectListParams struct {
 	// The cursor to fetch entries after
 	After param.Field[string] `query:"after"`
@@ -379,7 +429,7 @@ func (r ObjectListParams) URLQuery() (v url.Values) {
 
 type ObjectAddSubscriptionsParams struct {
 	// The recipients to subscribe to the object
-	Recipients param.Field[[]shared.RecipientRequestUnionParam] `json:"recipients,required"`
+	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
 	// The custom properties associated with the subscription
 	Properties param.Field[map[string]interface{}] `json:"properties"`
 }
@@ -389,7 +439,7 @@ func (r ObjectAddSubscriptionsParams) MarshalJSON() (data []byte, err error) {
 }
 
 type ObjectDeleteSubscriptionsParams struct {
-	Recipients param.Field[[]shared.RecipientRequestUnionParam] `json:"recipients,required"`
+	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
 }
 
 func (r ObjectDeleteSubscriptionsParams) MarshalJSON() (data []byte, err error) {
@@ -577,9 +627,9 @@ func (r ObjectListSubscriptionsParamsRecipientsObjectReference) ImplementsObject
 
 type ObjectSetParams struct {
 	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
 }
 
 func (r ObjectSetParams) MarshalJSON() (data []byte, err error) {
@@ -588,7 +638,7 @@ func (r ObjectSetParams) MarshalJSON() (data []byte, err error) {
 
 type ObjectSetChannelDataParams struct {
 	// Set channel data for a type of channel
-	ChannelDataRequest shared.ChannelDataRequestParam `json:"channel_data_request,required"`
+	ChannelDataRequest ChannelDataRequestParam `json:"channel_data_request,required"`
 }
 
 func (r ObjectSetChannelDataParams) MarshalJSON() (data []byte, err error) {
@@ -597,7 +647,7 @@ func (r ObjectSetChannelDataParams) MarshalJSON() (data []byte, err error) {
 
 type ObjectSetPreferencesParams struct {
 	// Set preferences for a recipient
-	PreferenceSetRequest shared.PreferenceSetRequestParam `json:"preference_set_request,required"`
+	PreferenceSetRequest PreferenceSetRequestParam `json:"preference_set_request,required"`
 }
 
 func (r ObjectSetPreferencesParams) MarshalJSON() (data []byte, err error) {

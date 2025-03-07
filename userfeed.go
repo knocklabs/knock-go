@@ -16,7 +16,6 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
 	"github.com/stainless-sdks/knock-go/packages/pagination"
-	"github.com/stainless-sdks/knock-go/shared"
 	"github.com/tidwall/gjson"
 )
 
@@ -136,7 +135,7 @@ type UserFeedListItemsResponse struct {
 	ID              string                           `json:"id,required"`
 	Typename        string                           `json:"__typename,required"`
 	Activities      []Activity                       `json:"activities,required"`
-	Actors          []shared.Recipient               `json:"actors,required"`
+	Actors          []Recipient                      `json:"actors,required"`
 	Blocks          []UserFeedListItemsResponseBlock `json:"blocks,required"`
 	Data            map[string]interface{}           `json:"data,required,nullable"`
 	InsertedAt      string                           `json:"inserted_at,required"`

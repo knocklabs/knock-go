@@ -16,7 +16,6 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
 	"github.com/stainless-sdks/knock-go/packages/pagination"
-	"github.com/stainless-sdks/knock-go/shared"
 )
 
 // UserService contains methods and other services that help with interacting with
@@ -43,7 +42,7 @@ func NewUserService(opts ...option.RequestOption) (r *UserService) {
 }
 
 // Identify user
-func (r *UserService) Update(ctx context.Context, userID string, body UserUpdateParams, opts ...option.RequestOption) (res *shared.User, err error) {
+func (r *UserService) Update(ctx context.Context, userID string, body UserUpdateParams, opts ...option.RequestOption) (res *User, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -55,7 +54,7 @@ func (r *UserService) Update(ctx context.Context, userID string, body UserUpdate
 }
 
 // List users
-func (r *UserService) List(ctx context.Context, query UserListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[shared.User], err error) {
+func (r *UserService) List(ctx context.Context, query UserListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[User], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -73,7 +72,7 @@ func (r *UserService) List(ctx context.Context, query UserListParams, opts ...op
 }
 
 // List users
-func (r *UserService) ListAutoPaging(ctx context.Context, query UserListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[shared.User] {
+func (r *UserService) ListAutoPaging(ctx context.Context, query UserListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[User] {
 	return pagination.NewEntriesCursorAutoPager(r.List(ctx, query, opts...))
 }
 
@@ -90,7 +89,7 @@ func (r *UserService) Delete(ctx context.Context, userID string, opts ...option.
 }
 
 // Get user
-func (r *UserService) Get(ctx context.Context, userID string, opts ...option.RequestOption) (res *shared.User, err error) {
+func (r *UserService) Get(ctx context.Context, userID string, opts ...option.RequestOption) (res *User, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -102,7 +101,7 @@ func (r *UserService) Get(ctx context.Context, userID string, opts ...option.Req
 }
 
 // Get channel data
-func (r *UserService) GetChannelData(ctx context.Context, userID string, channelID string, opts ...option.RequestOption) (res *shared.ChannelData, err error) {
+func (r *UserService) GetChannelData(ctx context.Context, userID string, channelID string, opts ...option.RequestOption) (res *ChannelData, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -118,7 +117,7 @@ func (r *UserService) GetChannelData(ctx context.Context, userID string, channel
 }
 
 // Get preference set
-func (r *UserService) GetPreferences(ctx context.Context, userID string, id string, query UserGetPreferencesParams, opts ...option.RequestOption) (res *shared.PreferenceSet, err error) {
+func (r *UserService) GetPreferences(ctx context.Context, userID string, id string, query UserGetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -161,7 +160,7 @@ func (r *UserService) ListMessagesAutoPaging(ctx context.Context, userID string,
 }
 
 // List preference sets
-func (r *UserService) ListPreferences(ctx context.Context, userID string, opts ...option.RequestOption) (res *[]shared.PreferenceSet, err error) {
+func (r *UserService) ListPreferences(ctx context.Context, userID string, opts ...option.RequestOption) (res *[]PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -173,7 +172,7 @@ func (r *UserService) ListPreferences(ctx context.Context, userID string, opts .
 }
 
 // List schedules
-func (r *UserService) ListSchedules(ctx context.Context, userID string, query UserListSchedulesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[shared.Schedule], err error) {
+func (r *UserService) ListSchedules(ctx context.Context, userID string, query UserListSchedulesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Schedule], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -195,12 +194,12 @@ func (r *UserService) ListSchedules(ctx context.Context, userID string, query Us
 }
 
 // List schedules
-func (r *UserService) ListSchedulesAutoPaging(ctx context.Context, userID string, query UserListSchedulesParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[shared.Schedule] {
+func (r *UserService) ListSchedulesAutoPaging(ctx context.Context, userID string, query UserListSchedulesParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Schedule] {
 	return pagination.NewEntriesCursorAutoPager(r.ListSchedules(ctx, userID, query, opts...))
 }
 
 // List subscriptions
-func (r *UserService) ListSubscriptions(ctx context.Context, userID string, query UserListSubscriptionsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[shared.Subscription], err error) {
+func (r *UserService) ListSubscriptions(ctx context.Context, userID string, query UserListSubscriptionsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Subscription], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -222,13 +221,13 @@ func (r *UserService) ListSubscriptions(ctx context.Context, userID string, quer
 }
 
 // List subscriptions
-func (r *UserService) ListSubscriptionsAutoPaging(ctx context.Context, userID string, query UserListSubscriptionsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[shared.Subscription] {
+func (r *UserService) ListSubscriptionsAutoPaging(ctx context.Context, userID string, query UserListSubscriptionsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Subscription] {
 	return pagination.NewEntriesCursorAutoPager(r.ListSubscriptions(ctx, userID, query, opts...))
 }
 
 // Merge two users together, where the user specified with the `from_user_id` param
 // will be merged into the user specified by `user_id`.
-func (r *UserService) Merge(ctx context.Context, userID string, body UserMergeParams, opts ...option.RequestOption) (res *shared.User, err error) {
+func (r *UserService) Merge(ctx context.Context, userID string, body UserMergeParams, opts ...option.RequestOption) (res *User, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -240,7 +239,7 @@ func (r *UserService) Merge(ctx context.Context, userID string, body UserMergePa
 }
 
 // Set channel data
-func (r *UserService) SetChannelData(ctx context.Context, userID string, channelID string, body UserSetChannelDataParams, opts ...option.RequestOption) (res *shared.ChannelData, err error) {
+func (r *UserService) SetChannelData(ctx context.Context, userID string, channelID string, body UserSetChannelDataParams, opts ...option.RequestOption) (res *ChannelData, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -257,7 +256,7 @@ func (r *UserService) SetChannelData(ctx context.Context, userID string, channel
 
 // Updates a complete preference set for a user. This is a destructive operation
 // that will replace the existing preference set for the user.
-func (r *UserService) SetPreferences(ctx context.Context, userID string, id string, body UserSetPreferencesParams, opts ...option.RequestOption) (res *shared.PreferenceSet, err error) {
+func (r *UserService) SetPreferences(ctx context.Context, userID string, id string, body UserSetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -288,16 +287,93 @@ func (r *UserService) UnsetChannelData(ctx context.Context, userID string, chann
 	return
 }
 
-type UserUpdateParams struct {
+// A set of parameters to identify a user with. Does not include the user ID, as
+// that's specified elsewhere in the request. You can supply any additional
+// properties you'd like to upsert against the user.
+type IdentifyUserRequestParam struct {
 	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
-	CreatedAt   param.Field[time.Time]                            `json:"created_at" format:"date-time"`
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	CreatedAt   param.Field[time.Time]                     `json:"created_at" format:"date-time"`
 	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+	ExtraFields map[string]interface{}                       `json:"-,extras"`
+}
+
+func (r IdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// A set of parameters to inline-identify a user with. Inline identifying the user
+// will ensure that the user is available before the request is executed in Knock.
+// It will perform an upsert against the user you're supplying, replacing any
+// properties specified.
+type InlineIdentifyUserRequestParam struct {
+	// The ID of the user to identify. This is an ID that you supply.
+	ID param.Field[string] `json:"id,required"`
+	// Allows inline setting channel data for a recipient
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// The creation date of the user from your system.
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+	ExtraFields map[string]interface{}                       `json:"-,extras"`
+}
+
+func (r InlineIdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r InlineIdentifyUserRequestParam) ImplementsRecipientRequestUnionParam() {}
+
+// A user object
+type User struct {
+	ID          string                 `json:"id,required"`
+	Typename    string                 `json:"__typename,required"`
+	UpdatedAt   time.Time              `json:"updated_at,required" format:"date-time"`
+	Avatar      string                 `json:"avatar,nullable"`
+	CreatedAt   time.Time              `json:"created_at,nullable" format:"date-time"`
+	Email       string                 `json:"email,nullable"`
+	Name        string                 `json:"name,nullable"`
+	PhoneNumber string                 `json:"phone_number,nullable"`
+	Timezone    string                 `json:"timezone,nullable"`
+	ExtraFields map[string]interface{} `json:"-,extras"`
+	JSON        userJSON               `json:"-"`
+}
+
+// userJSON contains the JSON metadata for the struct [User]
+type userJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	UpdatedAt   apijson.Field
+	Avatar      apijson.Field
+	CreatedAt   apijson.Field
+	Email       apijson.Field
+	Name        apijson.Field
+	PhoneNumber apijson.Field
+	Timezone    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *User) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r User) implementsRecipient() {}
+
+type UserUpdateParams struct {
+	// A set of parameters to identify a user with. Does not include the user ID, as
+	// that's specified elsewhere in the request. You can supply any additional
+	// properties you'd like to upsert against the user.
+	IdentifyUserRequest IdentifyUserRequestParam `json:"identify_user_request,required"`
 }
 
 func (r UserUpdateParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+	return apijson.MarshalRoot(r.IdentifyUserRequest)
 }
 
 type UserListParams struct {
@@ -457,7 +533,7 @@ func (r UserMergeParams) MarshalJSON() (data []byte, err error) {
 
 type UserSetChannelDataParams struct {
 	// Set channel data for a type of channel
-	ChannelDataRequest shared.ChannelDataRequestParam `json:"channel_data_request,required"`
+	ChannelDataRequest ChannelDataRequestParam `json:"channel_data_request,required"`
 }
 
 func (r UserSetChannelDataParams) MarshalJSON() (data []byte, err error) {
@@ -466,7 +542,7 @@ func (r UserSetChannelDataParams) MarshalJSON() (data []byte, err error) {
 
 type UserSetPreferencesParams struct {
 	// Set preferences for a recipient
-	PreferenceSetRequest shared.PreferenceSetRequestParam `json:"preference_set_request,required"`
+	PreferenceSetRequest PreferenceSetRequestParam `json:"preference_set_request,required"`
 }
 
 func (r UserSetPreferencesParams) MarshalJSON() (data []byte, err error) {
