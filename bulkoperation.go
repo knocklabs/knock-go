@@ -34,7 +34,7 @@ func NewBulkOperationService(opts ...option.RequestOption) (r *BulkOperationServ
 }
 
 // Retrieves a bulk operation (if it exists) and displays the current state of it.
-func (r *BulkOperationService) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *BulkOperationGetResponse, err error) {
+func (r *BulkOperationService) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
@@ -46,28 +46,27 @@ func (r *BulkOperationService) Get(ctx context.Context, id string, opts ...optio
 }
 
 // A bulk operation entity
-type BulkOperationGetResponse struct {
-	ID                 string                         `json:"id,required" format:"uuid"`
-	Typename           string                         `json:"__typename,required"`
-	EstimatedTotalRows int64                          `json:"estimated_total_rows,required"`
-	InsertedAt         time.Time                      `json:"inserted_at,required" format:"date-time"`
-	Name               string                         `json:"name,required"`
-	ProcessedRows      int64                          `json:"processed_rows,required"`
-	Status             BulkOperationGetResponseStatus `json:"status,required"`
-	SuccessCount       int64                          `json:"success_count,required"`
-	UpdatedAt          time.Time                      `json:"updated_at,required" format:"date-time"`
-	CompletedAt        time.Time                      `json:"completed_at,nullable" format:"date-time"`
-	ErrorCount         int64                          `json:"error_count"`
+type BulkOperation struct {
+	ID                 string              `json:"id,required" format:"uuid"`
+	Typename           string              `json:"__typename,required"`
+	EstimatedTotalRows int64               `json:"estimated_total_rows,required"`
+	InsertedAt         time.Time           `json:"inserted_at,required" format:"date-time"`
+	Name               string              `json:"name,required"`
+	ProcessedRows      int64               `json:"processed_rows,required"`
+	Status             BulkOperationStatus `json:"status,required"`
+	SuccessCount       int64               `json:"success_count,required"`
+	UpdatedAt          time.Time           `json:"updated_at,required" format:"date-time"`
+	CompletedAt        time.Time           `json:"completed_at,nullable" format:"date-time"`
+	ErrorCount         int64               `json:"error_count"`
 	// A list of items that failed to be processed
-	ErrorItems []BulkOperationGetResponseErrorItem `json:"error_items"`
-	FailedAt   time.Time                           `json:"failed_at,nullable" format:"date-time"`
-	StartedAt  time.Time                           `json:"started_at,nullable" format:"date-time"`
-	JSON       bulkOperationGetResponseJSON        `json:"-"`
+	ErrorItems []BulkOperationErrorItem `json:"error_items"`
+	FailedAt   time.Time                `json:"failed_at,nullable" format:"date-time"`
+	StartedAt  time.Time                `json:"started_at,nullable" format:"date-time"`
+	JSON       bulkOperationJSON        `json:"-"`
 }
 
-// bulkOperationGetResponseJSON contains the JSON metadata for the struct
-// [BulkOperationGetResponse]
-type bulkOperationGetResponseJSON struct {
+// bulkOperationJSON contains the JSON metadata for the struct [BulkOperation]
+type bulkOperationJSON struct {
 	ID                 apijson.Field
 	Typename           apijson.Field
 	EstimatedTotalRows apijson.Field
@@ -86,50 +85,50 @@ type bulkOperationGetResponseJSON struct {
 	ExtraFields        map[string]apijson.Field
 }
 
-func (r *BulkOperationGetResponse) UnmarshalJSON(data []byte) (err error) {
+func (r *BulkOperation) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r bulkOperationGetResponseJSON) RawJSON() string {
+func (r bulkOperationJSON) RawJSON() string {
 	return r.raw
 }
 
-type BulkOperationGetResponseStatus string
+type BulkOperationStatus string
 
 const (
-	BulkOperationGetResponseStatusQueued     BulkOperationGetResponseStatus = "queued"
-	BulkOperationGetResponseStatusProcessing BulkOperationGetResponseStatus = "processing"
-	BulkOperationGetResponseStatusCompleted  BulkOperationGetResponseStatus = "completed"
-	BulkOperationGetResponseStatusFailed     BulkOperationGetResponseStatus = "failed"
+	BulkOperationStatusQueued     BulkOperationStatus = "queued"
+	BulkOperationStatusProcessing BulkOperationStatus = "processing"
+	BulkOperationStatusCompleted  BulkOperationStatus = "completed"
+	BulkOperationStatusFailed     BulkOperationStatus = "failed"
 )
 
-func (r BulkOperationGetResponseStatus) IsKnown() bool {
+func (r BulkOperationStatus) IsKnown() bool {
 	switch r {
-	case BulkOperationGetResponseStatusQueued, BulkOperationGetResponseStatusProcessing, BulkOperationGetResponseStatusCompleted, BulkOperationGetResponseStatusFailed:
+	case BulkOperationStatusQueued, BulkOperationStatusProcessing, BulkOperationStatusCompleted, BulkOperationStatusFailed:
 		return true
 	}
 	return false
 }
 
-type BulkOperationGetResponseErrorItem struct {
-	ID         string                                `json:"id,required"`
-	Collection string                                `json:"collection,nullable"`
-	JSON       bulkOperationGetResponseErrorItemJSON `json:"-"`
+type BulkOperationErrorItem struct {
+	ID         string                     `json:"id,required"`
+	Collection string                     `json:"collection,nullable"`
+	JSON       bulkOperationErrorItemJSON `json:"-"`
 }
 
-// bulkOperationGetResponseErrorItemJSON contains the JSON metadata for the struct
-// [BulkOperationGetResponseErrorItem]
-type bulkOperationGetResponseErrorItemJSON struct {
+// bulkOperationErrorItemJSON contains the JSON metadata for the struct
+// [BulkOperationErrorItem]
+type bulkOperationErrorItemJSON struct {
 	ID          apijson.Field
 	Collection  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *BulkOperationGetResponseErrorItem) UnmarshalJSON(data []byte) (err error) {
+func (r *BulkOperationErrorItem) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r bulkOperationGetResponseErrorItemJSON) RawJSON() string {
+func (r bulkOperationErrorItemJSON) RawJSON() string {
 	return r.raw
 }

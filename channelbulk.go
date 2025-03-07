@@ -38,7 +38,7 @@ func NewChannelBulkService(opts ...option.RequestOption) (r *ChannelBulkService)
 // `channel_id` parameter. The action to perform is specified by the `action`
 // parameter, where the action is a status change action (e.g. `archive`,
 // `unarchive`).
-func (r *ChannelBulkService) UpdateMessageStatus(ctx context.Context, channelID string, action ChannelBulkUpdateMessageStatusParamsAction, body ChannelBulkUpdateMessageStatusParams, opts ...option.RequestOption) (res *ChannelBulkUpdateMessageStatusResponse, err error) {
+func (r *ChannelBulkService) UpdateMessageStatus(ctx context.Context, channelID string, action ChannelBulkUpdateMessageStatusParamsAction, body ChannelBulkUpdateMessageStatusParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
@@ -47,95 +47,6 @@ func (r *ChannelBulkService) UpdateMessageStatus(ctx context.Context, channelID 
 	path := fmt.Sprintf("v1/channels/%s/messages/bulk/%v", channelID, action)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
-}
-
-// A bulk operation entity
-type ChannelBulkUpdateMessageStatusResponse struct {
-	ID                 string                                       `json:"id,required" format:"uuid"`
-	Typename           string                                       `json:"__typename,required"`
-	EstimatedTotalRows int64                                        `json:"estimated_total_rows,required"`
-	InsertedAt         time.Time                                    `json:"inserted_at,required" format:"date-time"`
-	Name               string                                       `json:"name,required"`
-	ProcessedRows      int64                                        `json:"processed_rows,required"`
-	Status             ChannelBulkUpdateMessageStatusResponseStatus `json:"status,required"`
-	SuccessCount       int64                                        `json:"success_count,required"`
-	UpdatedAt          time.Time                                    `json:"updated_at,required" format:"date-time"`
-	CompletedAt        time.Time                                    `json:"completed_at,nullable" format:"date-time"`
-	ErrorCount         int64                                        `json:"error_count"`
-	// A list of items that failed to be processed
-	ErrorItems []ChannelBulkUpdateMessageStatusResponseErrorItem `json:"error_items"`
-	FailedAt   time.Time                                         `json:"failed_at,nullable" format:"date-time"`
-	StartedAt  time.Time                                         `json:"started_at,nullable" format:"date-time"`
-	JSON       channelBulkUpdateMessageStatusResponseJSON        `json:"-"`
-}
-
-// channelBulkUpdateMessageStatusResponseJSON contains the JSON metadata for the
-// struct [ChannelBulkUpdateMessageStatusResponse]
-type channelBulkUpdateMessageStatusResponseJSON struct {
-	ID                 apijson.Field
-	Typename           apijson.Field
-	EstimatedTotalRows apijson.Field
-	InsertedAt         apijson.Field
-	Name               apijson.Field
-	ProcessedRows      apijson.Field
-	Status             apijson.Field
-	SuccessCount       apijson.Field
-	UpdatedAt          apijson.Field
-	CompletedAt        apijson.Field
-	ErrorCount         apijson.Field
-	ErrorItems         apijson.Field
-	FailedAt           apijson.Field
-	StartedAt          apijson.Field
-	raw                string
-	ExtraFields        map[string]apijson.Field
-}
-
-func (r *ChannelBulkUpdateMessageStatusResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r channelBulkUpdateMessageStatusResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type ChannelBulkUpdateMessageStatusResponseStatus string
-
-const (
-	ChannelBulkUpdateMessageStatusResponseStatusQueued     ChannelBulkUpdateMessageStatusResponseStatus = "queued"
-	ChannelBulkUpdateMessageStatusResponseStatusProcessing ChannelBulkUpdateMessageStatusResponseStatus = "processing"
-	ChannelBulkUpdateMessageStatusResponseStatusCompleted  ChannelBulkUpdateMessageStatusResponseStatus = "completed"
-	ChannelBulkUpdateMessageStatusResponseStatusFailed     ChannelBulkUpdateMessageStatusResponseStatus = "failed"
-)
-
-func (r ChannelBulkUpdateMessageStatusResponseStatus) IsKnown() bool {
-	switch r {
-	case ChannelBulkUpdateMessageStatusResponseStatusQueued, ChannelBulkUpdateMessageStatusResponseStatusProcessing, ChannelBulkUpdateMessageStatusResponseStatusCompleted, ChannelBulkUpdateMessageStatusResponseStatusFailed:
-		return true
-	}
-	return false
-}
-
-type ChannelBulkUpdateMessageStatusResponseErrorItem struct {
-	ID         string                                              `json:"id,required"`
-	Collection string                                              `json:"collection,nullable"`
-	JSON       channelBulkUpdateMessageStatusResponseErrorItemJSON `json:"-"`
-}
-
-// channelBulkUpdateMessageStatusResponseErrorItemJSON contains the JSON metadata
-// for the struct [ChannelBulkUpdateMessageStatusResponseErrorItem]
-type channelBulkUpdateMessageStatusResponseErrorItemJSON struct {
-	ID          apijson.Field
-	Collection  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ChannelBulkUpdateMessageStatusResponseErrorItem) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r channelBulkUpdateMessageStatusResponseErrorItemJSON) RawJSON() string {
-	return r.raw
 }
 
 type ChannelBulkUpdateMessageStatusParams struct {

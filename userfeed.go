@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"time"
 
 	"github.com/stainless-sdks/knock-go/internal/apijson"
 	"github.com/stainless-sdks/knock-go/internal/apiquery"
@@ -134,25 +133,25 @@ func (r userFeedGetSettingsResponseFeaturesJSON) RawJSON() string {
 
 // An in-app feed message in a user's feed
 type UserFeedListItemsResponse struct {
-	ID              string                              `json:"id,required"`
-	Typename        string                              `json:"__typename,required"`
-	Activities      []UserFeedListItemsResponseActivity `json:"activities,required"`
-	Actors          []shared.Recipient                  `json:"actors,required"`
-	Blocks          []UserFeedListItemsResponseBlock    `json:"blocks,required"`
-	Data            map[string]interface{}              `json:"data,required,nullable"`
-	InsertedAt      string                              `json:"inserted_at,required"`
-	Source          UserFeedListItemsResponseSource     `json:"source,required"`
-	Tenant          string                              `json:"tenant,required,nullable"`
-	TotalActivities int64                               `json:"total_activities,required"`
-	TotalActors     int64                               `json:"total_actors,required"`
-	UpdatedAt       string                              `json:"updated_at,required"`
-	ArchivedAt      string                              `json:"archived_at,nullable"`
-	ClickedAt       string                              `json:"clicked_at,nullable"`
-	InteractedAt    string                              `json:"interacted_at,nullable"`
-	LinkClickedAt   string                              `json:"link_clicked_at,nullable"`
-	ReadAt          string                              `json:"read_at,nullable"`
-	SeenAt          string                              `json:"seen_at,nullable"`
-	JSON            userFeedListItemsResponseJSON       `json:"-"`
+	ID              string                           `json:"id,required"`
+	Typename        string                           `json:"__typename,required"`
+	Activities      []Activity                       `json:"activities,required"`
+	Actors          []shared.Recipient               `json:"actors,required"`
+	Blocks          []UserFeedListItemsResponseBlock `json:"blocks,required"`
+	Data            map[string]interface{}           `json:"data,required,nullable"`
+	InsertedAt      string                           `json:"inserted_at,required"`
+	Source          UserFeedListItemsResponseSource  `json:"source,required"`
+	Tenant          string                           `json:"tenant,required,nullable"`
+	TotalActivities int64                            `json:"total_activities,required"`
+	TotalActors     int64                            `json:"total_actors,required"`
+	UpdatedAt       string                           `json:"updated_at,required"`
+	ArchivedAt      string                           `json:"archived_at,nullable"`
+	ClickedAt       string                           `json:"clicked_at,nullable"`
+	InteractedAt    string                           `json:"interacted_at,nullable"`
+	LinkClickedAt   string                           `json:"link_clicked_at,nullable"`
+	ReadAt          string                           `json:"read_at,nullable"`
+	SeenAt          string                           `json:"seen_at,nullable"`
+	JSON            userFeedListItemsResponseJSON    `json:"-"`
 }
 
 // userFeedListItemsResponseJSON contains the JSON metadata for the struct
@@ -185,43 +184,6 @@ func (r *UserFeedListItemsResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r userFeedListItemsResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// An activity associated with a workflow run
-type UserFeedListItemsResponseActivity struct {
-	ID       string `json:"id"`
-	Typename string `json:"__typename"`
-	// A recipient, which is either a user or an object
-	Actor shared.Recipient `json:"actor,nullable"`
-	// The data associated with the activity
-	Data       map[string]interface{} `json:"data,nullable"`
-	InsertedAt time.Time              `json:"inserted_at" format:"date-time"`
-	// A recipient, which is either a user or an object
-	Recipient shared.Recipient                      `json:"recipient"`
-	UpdatedAt time.Time                             `json:"updated_at" format:"date-time"`
-	JSON      userFeedListItemsResponseActivityJSON `json:"-"`
-}
-
-// userFeedListItemsResponseActivityJSON contains the JSON metadata for the struct
-// [UserFeedListItemsResponseActivity]
-type userFeedListItemsResponseActivityJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	Actor       apijson.Field
-	Data        apijson.Field
-	InsertedAt  apijson.Field
-	Recipient   apijson.Field
-	UpdatedAt   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedListItemsResponseActivity) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedListItemsResponseActivityJSON) RawJSON() string {
 	return r.raw
 }
 

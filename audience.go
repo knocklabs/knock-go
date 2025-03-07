@@ -71,9 +71,39 @@ func (r *AudienceService) RemoveMembers(ctx context.Context, key string, body Au
 	return
 }
 
+// A user belonging to an audience
+type AudienceMember struct {
+	Typename string    `json:"__typename,required"`
+	AddedAt  time.Time `json:"added_at,required" format:"date-time"`
+	// A user object
+	User   shared.User        `json:"user,required"`
+	UserID string             `json:"user_id,required"`
+	Tenant string             `json:"tenant,nullable"`
+	JSON   audienceMemberJSON `json:"-"`
+}
+
+// audienceMemberJSON contains the JSON metadata for the struct [AudienceMember]
+type audienceMemberJSON struct {
+	Typename    apijson.Field
+	AddedAt     apijson.Field
+	User        apijson.Field
+	UserID      apijson.Field
+	Tenant      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *AudienceMember) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r audienceMemberJSON) RawJSON() string {
+	return r.raw
+}
+
 // A response containing a list of audience members
 type AudienceListMembersResponse struct {
-	Entries []AudienceListMembersResponseEntry `json:"entries,required"`
+	Entries []AudienceMember `json:"entries,required"`
 	// The information about a paginated result
 	PageInfo AudienceListMembersResponsePageInfo `json:"page_info,required"`
 	JSON     audienceListMembersResponseJSON     `json:"-"`
@@ -93,37 +123,6 @@ func (r *AudienceListMembersResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r audienceListMembersResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// A user belonging to an audience
-type AudienceListMembersResponseEntry struct {
-	Typename string    `json:"__typename,required"`
-	AddedAt  time.Time `json:"added_at,required" format:"date-time"`
-	// A user object
-	User   shared.User                          `json:"user,required"`
-	UserID string                               `json:"user_id,required"`
-	Tenant string                               `json:"tenant,nullable"`
-	JSON   audienceListMembersResponseEntryJSON `json:"-"`
-}
-
-// audienceListMembersResponseEntryJSON contains the JSON metadata for the struct
-// [AudienceListMembersResponseEntry]
-type audienceListMembersResponseEntryJSON struct {
-	Typename    apijson.Field
-	AddedAt     apijson.Field
-	User        apijson.Field
-	UserID      apijson.Field
-	Tenant      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *AudienceListMembersResponseEntry) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r audienceListMembersResponseEntryJSON) RawJSON() string {
 	return r.raw
 }
 
