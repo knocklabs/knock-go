@@ -72,7 +72,7 @@ func TestWorkflowTriggerWithOptionalParams(t *testing.T) {
 				"welcome_message": "bar",
 			}),
 			Recipients: knock.F([]knock.WorkflowTriggerParamsRecipientUnion{shared.UnionString("jhammond")}),
-			Tenant:     knock.F[shared.InlineTenantRequestUnionParam](shared.UnionString("acme_corp")),
+			Tenant:     knock.F[knock.WorkflowTriggerParamsTenantUnion](shared.UnionString("acme_corp")),
 		},
 	)
 	if err != nil {

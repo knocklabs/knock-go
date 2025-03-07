@@ -1707,16 +1707,17 @@ func (r *MessageListActivitiesResponseActor) UnmarshalJSON(data []byte) (err err
 // AsUnion returns a [MessageListActivitiesResponseActorUnion] interface which you
 // can cast to the specific types for more type safety.
 //
-// Possible runtime types of the union are [User], [shared.Object].
+// Possible runtime types of the union are [User],
+// [MessageListActivitiesResponseActorObject].
 func (r MessageListActivitiesResponseActor) AsUnion() MessageListActivitiesResponseActorUnion {
 	return r.union
 }
 
 // A recipient, which is either a user or an object
 //
-// Union satisfied by [User] or [shared.Object].
+// Union satisfied by [User] or [MessageListActivitiesResponseActorObject].
 type MessageListActivitiesResponseActorUnion interface {
-	ImplementsMessageListActivitiesResponseActor()
+	implementsMessageListActivitiesResponseActor()
 }
 
 func init() {
@@ -1729,10 +1730,43 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.Object{}),
+			Type:       reflect.TypeOf(MessageListActivitiesResponseActorObject{}),
 		},
 	)
 }
+
+// A custom-object entity which belongs to a collection.
+type MessageListActivitiesResponseActorObject struct {
+	ID          string                                       `json:"id,required"`
+	Typename    string                                       `json:"__typename,required"`
+	Collection  string                                       `json:"collection,required"`
+	UpdatedAt   time.Time                                    `json:"updated_at,required" format:"date-time"`
+	CreatedAt   time.Time                                    `json:"created_at,nullable" format:"date-time"`
+	ExtraFields map[string]interface{}                       `json:"-,extras"`
+	JSON        messageListActivitiesResponseActorObjectJSON `json:"-"`
+}
+
+// messageListActivitiesResponseActorObjectJSON contains the JSON metadata for the
+// struct [MessageListActivitiesResponseActorObject]
+type messageListActivitiesResponseActorObjectJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	Collection  apijson.Field
+	UpdatedAt   apijson.Field
+	CreatedAt   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageListActivitiesResponseActorObject) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageListActivitiesResponseActorObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r MessageListActivitiesResponseActorObject) implementsMessageListActivitiesResponseActor() {}
 
 // A recipient, which is either a user or an object
 type MessageListActivitiesResponseRecipient struct {
@@ -1783,16 +1817,17 @@ func (r *MessageListActivitiesResponseRecipient) UnmarshalJSON(data []byte) (err
 // AsUnion returns a [MessageListActivitiesResponseRecipientUnion] interface which
 // you can cast to the specific types for more type safety.
 //
-// Possible runtime types of the union are [User], [shared.Object].
+// Possible runtime types of the union are [User],
+// [MessageListActivitiesResponseRecipientObject].
 func (r MessageListActivitiesResponseRecipient) AsUnion() MessageListActivitiesResponseRecipientUnion {
 	return r.union
 }
 
 // A recipient, which is either a user or an object
 //
-// Union satisfied by [User] or [shared.Object].
+// Union satisfied by [User] or [MessageListActivitiesResponseRecipientObject].
 type MessageListActivitiesResponseRecipientUnion interface {
-	ImplementsMessageListActivitiesResponseRecipient()
+	implementsMessageListActivitiesResponseRecipient()
 }
 
 func init() {
@@ -1805,9 +1840,43 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.Object{}),
+			Type:       reflect.TypeOf(MessageListActivitiesResponseRecipientObject{}),
 		},
 	)
+}
+
+// A custom-object entity which belongs to a collection.
+type MessageListActivitiesResponseRecipientObject struct {
+	ID          string                                           `json:"id,required"`
+	Typename    string                                           `json:"__typename,required"`
+	Collection  string                                           `json:"collection,required"`
+	UpdatedAt   time.Time                                        `json:"updated_at,required" format:"date-time"`
+	CreatedAt   time.Time                                        `json:"created_at,nullable" format:"date-time"`
+	ExtraFields map[string]interface{}                           `json:"-,extras"`
+	JSON        messageListActivitiesResponseRecipientObjectJSON `json:"-"`
+}
+
+// messageListActivitiesResponseRecipientObjectJSON contains the JSON metadata for
+// the struct [MessageListActivitiesResponseRecipientObject]
+type messageListActivitiesResponseRecipientObjectJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	Collection  apijson.Field
+	UpdatedAt   apijson.Field
+	CreatedAt   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageListActivitiesResponseRecipientObject) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageListActivitiesResponseRecipientObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r MessageListActivitiesResponseRecipientObject) implementsMessageListActivitiesResponseRecipient() {
 }
 
 // A message delivery log

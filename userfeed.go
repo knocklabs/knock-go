@@ -17,7 +17,6 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
 	"github.com/stainless-sdks/knock-go/packages/pagination"
-	"github.com/stainless-sdks/knock-go/shared"
 	"github.com/tidwall/gjson"
 )
 
@@ -274,16 +273,17 @@ func (r *UserFeedListItemsResponseActivitiesActor) UnmarshalJSON(data []byte) (e
 // AsUnion returns a [UserFeedListItemsResponseActivitiesActorUnion] interface
 // which you can cast to the specific types for more type safety.
 //
-// Possible runtime types of the union are [User], [shared.Object].
+// Possible runtime types of the union are [User],
+// [UserFeedListItemsResponseActivitiesActorObject].
 func (r UserFeedListItemsResponseActivitiesActor) AsUnion() UserFeedListItemsResponseActivitiesActorUnion {
 	return r.union
 }
 
 // A recipient, which is either a user or an object
 //
-// Union satisfied by [User] or [shared.Object].
+// Union satisfied by [User] or [UserFeedListItemsResponseActivitiesActorObject].
 type UserFeedListItemsResponseActivitiesActorUnion interface {
-	ImplementsUserFeedListItemsResponseActivitiesActor()
+	implementsUserFeedListItemsResponseActivitiesActor()
 }
 
 func init() {
@@ -296,9 +296,43 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.Object{}),
+			Type:       reflect.TypeOf(UserFeedListItemsResponseActivitiesActorObject{}),
 		},
 	)
+}
+
+// A custom-object entity which belongs to a collection.
+type UserFeedListItemsResponseActivitiesActorObject struct {
+	ID          string                                             `json:"id,required"`
+	Typename    string                                             `json:"__typename,required"`
+	Collection  string                                             `json:"collection,required"`
+	UpdatedAt   time.Time                                          `json:"updated_at,required" format:"date-time"`
+	CreatedAt   time.Time                                          `json:"created_at,nullable" format:"date-time"`
+	ExtraFields map[string]interface{}                             `json:"-,extras"`
+	JSON        userFeedListItemsResponseActivitiesActorObjectJSON `json:"-"`
+}
+
+// userFeedListItemsResponseActivitiesActorObjectJSON contains the JSON metadata
+// for the struct [UserFeedListItemsResponseActivitiesActorObject]
+type userFeedListItemsResponseActivitiesActorObjectJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	Collection  apijson.Field
+	UpdatedAt   apijson.Field
+	CreatedAt   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserFeedListItemsResponseActivitiesActorObject) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userFeedListItemsResponseActivitiesActorObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r UserFeedListItemsResponseActivitiesActorObject) implementsUserFeedListItemsResponseActivitiesActor() {
 }
 
 // A recipient, which is either a user or an object
@@ -350,16 +384,18 @@ func (r *UserFeedListItemsResponseActivitiesRecipient) UnmarshalJSON(data []byte
 // AsUnion returns a [UserFeedListItemsResponseActivitiesRecipientUnion] interface
 // which you can cast to the specific types for more type safety.
 //
-// Possible runtime types of the union are [User], [shared.Object].
+// Possible runtime types of the union are [User],
+// [UserFeedListItemsResponseActivitiesRecipientObject].
 func (r UserFeedListItemsResponseActivitiesRecipient) AsUnion() UserFeedListItemsResponseActivitiesRecipientUnion {
 	return r.union
 }
 
 // A recipient, which is either a user or an object
 //
-// Union satisfied by [User] or [shared.Object].
+// Union satisfied by [User] or
+// [UserFeedListItemsResponseActivitiesRecipientObject].
 type UserFeedListItemsResponseActivitiesRecipientUnion interface {
-	ImplementsUserFeedListItemsResponseActivitiesRecipient()
+	implementsUserFeedListItemsResponseActivitiesRecipient()
 }
 
 func init() {
@@ -372,9 +408,43 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.Object{}),
+			Type:       reflect.TypeOf(UserFeedListItemsResponseActivitiesRecipientObject{}),
 		},
 	)
+}
+
+// A custom-object entity which belongs to a collection.
+type UserFeedListItemsResponseActivitiesRecipientObject struct {
+	ID          string                                                 `json:"id,required"`
+	Typename    string                                                 `json:"__typename,required"`
+	Collection  string                                                 `json:"collection,required"`
+	UpdatedAt   time.Time                                              `json:"updated_at,required" format:"date-time"`
+	CreatedAt   time.Time                                              `json:"created_at,nullable" format:"date-time"`
+	ExtraFields map[string]interface{}                                 `json:"-,extras"`
+	JSON        userFeedListItemsResponseActivitiesRecipientObjectJSON `json:"-"`
+}
+
+// userFeedListItemsResponseActivitiesRecipientObjectJSON contains the JSON
+// metadata for the struct [UserFeedListItemsResponseActivitiesRecipientObject]
+type userFeedListItemsResponseActivitiesRecipientObjectJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	Collection  apijson.Field
+	UpdatedAt   apijson.Field
+	CreatedAt   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserFeedListItemsResponseActivitiesRecipientObject) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userFeedListItemsResponseActivitiesRecipientObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r UserFeedListItemsResponseActivitiesRecipientObject) implementsUserFeedListItemsResponseActivitiesRecipient() {
 }
 
 // A recipient, which is either a user or an object
@@ -426,16 +496,17 @@ func (r *UserFeedListItemsResponseActor) UnmarshalJSON(data []byte) (err error) 
 // AsUnion returns a [UserFeedListItemsResponseActorsUnion] interface which you can
 // cast to the specific types for more type safety.
 //
-// Possible runtime types of the union are [User], [shared.Object].
+// Possible runtime types of the union are [User],
+// [UserFeedListItemsResponseActorsObject].
 func (r UserFeedListItemsResponseActor) AsUnion() UserFeedListItemsResponseActorsUnion {
 	return r.union
 }
 
 // A recipient, which is either a user or an object
 //
-// Union satisfied by [User] or [shared.Object].
+// Union satisfied by [User] or [UserFeedListItemsResponseActorsObject].
 type UserFeedListItemsResponseActorsUnion interface {
-	ImplementsUserFeedListItemsResponseActor()
+	implementsUserFeedListItemsResponseActor()
 }
 
 func init() {
@@ -448,10 +519,43 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.Object{}),
+			Type:       reflect.TypeOf(UserFeedListItemsResponseActorsObject{}),
 		},
 	)
 }
+
+// A custom-object entity which belongs to a collection.
+type UserFeedListItemsResponseActorsObject struct {
+	ID          string                                    `json:"id,required"`
+	Typename    string                                    `json:"__typename,required"`
+	Collection  string                                    `json:"collection,required"`
+	UpdatedAt   time.Time                                 `json:"updated_at,required" format:"date-time"`
+	CreatedAt   time.Time                                 `json:"created_at,nullable" format:"date-time"`
+	ExtraFields map[string]interface{}                    `json:"-,extras"`
+	JSON        userFeedListItemsResponseActorsObjectJSON `json:"-"`
+}
+
+// userFeedListItemsResponseActorsObjectJSON contains the JSON metadata for the
+// struct [UserFeedListItemsResponseActorsObject]
+type userFeedListItemsResponseActorsObjectJSON struct {
+	ID          apijson.Field
+	Typename    apijson.Field
+	Collection  apijson.Field
+	UpdatedAt   apijson.Field
+	CreatedAt   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserFeedListItemsResponseActorsObject) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userFeedListItemsResponseActorsObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r UserFeedListItemsResponseActorsObject) implementsUserFeedListItemsResponseActor() {}
 
 // A content (text or markdown) block in a message in an app feed
 type UserFeedListItemsResponseBlock struct {
