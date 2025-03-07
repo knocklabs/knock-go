@@ -201,7 +201,7 @@ When the API returns a non-success status code, we return an error with type
 To handle errors, we recommend that you use the `errors.As` pattern:
 
 ```go
-_, err := client.Users.Get(context.TODO(), "user_id")
+_, err := client.Users.Get(context.TODO(), "dnedry")
 if err != nil {
 	var apierr *knock.Error
 	if errors.As(err, &apierr) {
@@ -228,7 +228,7 @@ ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 defer cancel()
 client.Users.Get(
 	ctx,
-	"user_id",
+	"dnedry",
 	// This sets the per-retry timeout
 	option.WithRequestTimeout(20*time.Second),
 )
@@ -264,7 +264,7 @@ client := knock.NewClient(
 // Override per-request:
 client.Users.Get(
 	context.TODO(),
-	"user_id",
+	"dnedry",
 	option.WithMaxRetries(5),
 )
 ```
@@ -279,7 +279,7 @@ you need to examine response headers, status codes, or other details.
 var response *http.Response
 user, err := client.Users.Get(
 	context.TODO(),
-	"user_id",
+	"dnedry",
 	option.WithResponseInto(&response),
 )
 if err != nil {
