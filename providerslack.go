@@ -14,6 +14,7 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
+	"github.com/stainless-sdks/knock-go/packages/pagination"
 )
 
 // ProviderSlackService contains methods and other services that help with
@@ -48,15 +49,30 @@ func (r *ProviderSlackService) CheckAuth(ctx context.Context, channelID string, 
 }
 
 // List Slack channels for a Slack workspace
-func (r *ProviderSlackService) ListChannels(ctx context.Context, channelID string, query ProviderSlackListChannelsParams, opts ...option.RequestOption) (res *ProviderSlackListChannelsResponse, err error) {
+func (r *ProviderSlackService) ListChannels(ctx context.Context, channelID string, query ProviderSlackListChannelsParams, opts ...option.RequestOption) (res *pagination.SlackChannelsCursor[ProviderSlackListChannelsResponse], err error) {
+	var raw *http.Response
 	opts = append(r.Options[:], opts...)
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/providers/slack/%s/channels", channelID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// List Slack channels for a Slack workspace
+func (r *ProviderSlackService) ListChannelsAutoPaging(ctx context.Context, channelID string, query ProviderSlackListChannelsParams, opts ...option.RequestOption) *pagination.SlackChannelsCursorAutoPager[ProviderSlackListChannelsResponse] {
+	return pagination.NewSlackChannelsCursorAutoPager(r.ListChannels(ctx, channelID, query, opts...))
 }
 
 // Revoke access for a Slack channel
@@ -116,42 +132,18 @@ func (r providerSlackCheckAuthResponseConnectionJSON) RawJSON() string {
 	return r.raw
 }
 
-// The response from a Slack channels for provider request
 type ProviderSlackListChannelsResponse struct {
-	NextCursor    string                                          `json:"next_cursor,required,nullable"`
-	SlackChannels []ProviderSlackListChannelsResponseSlackChannel `json:"slack_channels,required"`
-	JSON          providerSlackListChannelsResponseJSON           `json:"-"`
+	ID            string                                `json:"id,required"`
+	ContextTeamID string                                `json:"context_team_id,required"`
+	IsIm          bool                                  `json:"is_im,required"`
+	IsPrivate     bool                                  `json:"is_private,required"`
+	Name          string                                `json:"name,required"`
+	JSON          providerSlackListChannelsResponseJSON `json:"-"`
 }
 
 // providerSlackListChannelsResponseJSON contains the JSON metadata for the struct
 // [ProviderSlackListChannelsResponse]
 type providerSlackListChannelsResponseJSON struct {
-	NextCursor    apijson.Field
-	SlackChannels apijson.Field
-	raw           string
-	ExtraFields   map[string]apijson.Field
-}
-
-func (r *ProviderSlackListChannelsResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r providerSlackListChannelsResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type ProviderSlackListChannelsResponseSlackChannel struct {
-	ID            string                                            `json:"id,required"`
-	ContextTeamID string                                            `json:"context_team_id,required"`
-	IsIm          bool                                              `json:"is_im,required"`
-	IsPrivate     bool                                              `json:"is_private,required"`
-	Name          string                                            `json:"name,required"`
-	JSON          providerSlackListChannelsResponseSlackChannelJSON `json:"-"`
-}
-
-// providerSlackListChannelsResponseSlackChannelJSON contains the JSON metadata for
-// the struct [ProviderSlackListChannelsResponseSlackChannel]
-type providerSlackListChannelsResponseSlackChannelJSON struct {
 	ID            apijson.Field
 	ContextTeamID apijson.Field
 	IsIm          apijson.Field
@@ -161,11 +153,11 @@ type providerSlackListChannelsResponseSlackChannelJSON struct {
 	ExtraFields   map[string]apijson.Field
 }
 
-func (r *ProviderSlackListChannelsResponseSlackChannel) UnmarshalJSON(data []byte) (err error) {
+func (r *ProviderSlackListChannelsResponse) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r providerSlackListChannelsResponseSlackChannelJSON) RawJSON() string {
+func (r providerSlackListChannelsResponseJSON) RawJSON() string {
 	return r.raw
 }
 

@@ -245,3 +245,101 @@ func (r *ItemsCursorAutoPager[T]) Err() error {
 func (r *ItemsCursorAutoPager[T]) Index() int {
 	return r.run
 }
+
+type SlackChannelsCursor[T any] struct {
+	NextCursor    string                  `json:"next_cursor"`
+	SlackChannels []T                     `json:"slack_channels"`
+	JSON          slackChannelsCursorJSON `json:"-"`
+	cfg           *requestconfig.RequestConfig
+	res           *http.Response
+}
+
+// slackChannelsCursorJSON contains the JSON metadata for the struct
+// [SlackChannelsCursor[T]]
+type slackChannelsCursorJSON struct {
+	NextCursor    apijson.Field
+	SlackChannels apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
+}
+
+func (r *SlackChannelsCursor[T]) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r slackChannelsCursorJSON) RawJSON() string {
+	return r.raw
+}
+
+// GetNextPage returns the next page as defined by this pagination style. When
+// there is no next page, this function will return a 'nil' for the page value, but
+// will not return an error
+func (r *SlackChannelsCursor[T]) GetNextPage() (res *SlackChannelsCursor[T], err error) {
+	next := r.NextCursor
+	if len(next) == 0 {
+		return nil, nil
+	}
+	cfg := r.cfg.Clone(r.cfg.Context)
+	cfg.Apply(option.WithQuery("query_options.cursor", next))
+	var raw *http.Response
+	cfg.ResponseInto = &raw
+	cfg.ResponseBodyInto = &res
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+func (r *SlackChannelsCursor[T]) SetPageConfig(cfg *requestconfig.RequestConfig, res *http.Response) {
+	if r == nil {
+		r = &SlackChannelsCursor[T]{}
+	}
+	r.cfg = cfg
+	r.res = res
+}
+
+type SlackChannelsCursorAutoPager[T any] struct {
+	page *SlackChannelsCursor[T]
+	cur  T
+	idx  int
+	run  int
+	err  error
+}
+
+func NewSlackChannelsCursorAutoPager[T any](page *SlackChannelsCursor[T], err error) *SlackChannelsCursorAutoPager[T] {
+	return &SlackChannelsCursorAutoPager[T]{
+		page: page,
+		err:  err,
+	}
+}
+
+func (r *SlackChannelsCursorAutoPager[T]) Next() bool {
+	if r.page == nil || len(r.page.SlackChannels) == 0 {
+		return false
+	}
+	if r.idx >= len(r.page.SlackChannels) {
+		r.idx = 0
+		r.page, r.err = r.page.GetNextPage()
+		if r.err != nil || r.page == nil || len(r.page.SlackChannels) == 0 {
+			return false
+		}
+	}
+	r.cur = r.page.SlackChannels[r.idx]
+	r.run += 1
+	r.idx += 1
+	return true
+}
+
+func (r *SlackChannelsCursorAutoPager[T]) Current() T {
+	return r.cur
+}
+
+func (r *SlackChannelsCursorAutoPager[T]) Err() error {
+	return r.err
+}
+
+func (r *SlackChannelsCursorAutoPager[T]) Index() int {
+	return r.run
+}
