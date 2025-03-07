@@ -52,7 +52,7 @@ func main() {
 			Data: knock.F(map[string]interface{}{
 				"dinosaur": "triceratops",
 			}),
-			Recipients: knock.F([]knock.WorkflowTriggerParamsRecipientUnion{shared.UnionString("dnedry")}),
+			Recipients: knock.F([]shared.RecipientRequestUnionParam{shared.UnionString("dnedry")}),
 		},
 	)
 	if err != nil {

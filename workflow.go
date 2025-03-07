@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/stainless-sdks/knock-go/internal/apijson"
 	"github.com/stainless-sdks/knock-go/internal/param"
@@ -105,7 +104,7 @@ type WorkflowTriggerParams struct {
 	// Specifies a recipient in a request. This can either be a user identifier
 	// (string), an inline user request (object), or an inline object request, which is
 	// determined by the presence of a `collection` property.
-	Actor param.Field[WorkflowTriggerParamsActorUnion] `json:"actor"`
+	Actor param.Field[shared.RecipientRequestUnionParam] `json:"actor"`
 	// An optional key that is used in the workflow cancellation endpoint to target a
 	// cancellation of any workflow runs associated with this trigger.
 	CancellationKey param.Field[string] `json:"cancellation_key"`
@@ -114,73 +113,11 @@ type WorkflowTriggerParams struct {
 	Data param.Field[map[string]interface{}] `json:"data"`
 	// The recipients to trigger the workflow for. Cannot exceed 1000 recipients in a
 	// single trigger.
-	Recipients param.Field[[]WorkflowTriggerParamsRecipientUnion] `json:"recipients"`
+	Recipients param.Field[[]shared.RecipientRequestUnionParam] `json:"recipients"`
 	// An inline tenant request
 	Tenant param.Field[shared.InlineTenantRequestUnionParam] `json:"tenant"`
 }
 
 func (r WorkflowTriggerParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-// Specifies a recipient in a request. This can either be a user identifier
-// (string), an inline user request (object), or an inline object request, which is
-// determined by the presence of a `collection` property.
-type WorkflowTriggerParamsActor struct {
-	// The ID of the user to identify. This is an ID that you supply.
-	ID param.Field[string] `json:"id,required"`
-	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
-	Collection  param.Field[string]                               `json:"collection"`
-	// The creation date of the user from your system.
-	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
-}
-
-func (r WorkflowTriggerParamsActor) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r WorkflowTriggerParamsActor) ImplementsWorkflowTriggerParamsActorUnion() {}
-
-// Specifies a recipient in a request. This can either be a user identifier
-// (string), an inline user request (object), or an inline object request, which is
-// determined by the presence of a `collection` property.
-//
-// Satisfied by [shared.UnionString], [shared.InlineIdentifyUserRequestParam],
-// [shared.InlineIdentifyObjectRequestParam], [WorkflowTriggerParamsActor].
-type WorkflowTriggerParamsActorUnion interface {
-	ImplementsWorkflowTriggerParamsActorUnion()
-}
-
-// Specifies a recipient in a request. This can either be a user identifier
-// (string), an inline user request (object), or an inline object request, which is
-// determined by the presence of a `collection` property.
-type WorkflowTriggerParamsRecipient struct {
-	// The ID of the user to identify. This is an ID that you supply.
-	ID param.Field[string] `json:"id,required"`
-	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
-	Collection  param.Field[string]                               `json:"collection"`
-	// The creation date of the user from your system.
-	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
-}
-
-func (r WorkflowTriggerParamsRecipient) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r WorkflowTriggerParamsRecipient) ImplementsWorkflowTriggerParamsRecipientUnion() {}
-
-// Specifies a recipient in a request. This can either be a user identifier
-// (string), an inline user request (object), or an inline object request, which is
-// determined by the presence of a `collection` property.
-//
-// Satisfied by [shared.UnionString], [shared.InlineIdentifyUserRequestParam],
-// [shared.InlineIdentifyObjectRequestParam], [WorkflowTriggerParamsRecipient].
-type WorkflowTriggerParamsRecipientUnion interface {
-	ImplementsWorkflowTriggerParamsRecipientUnion()
 }

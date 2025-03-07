@@ -1626,14 +1626,14 @@ type MessageListActivitiesResponse struct {
 	ID       string `json:"id"`
 	Typename string `json:"__typename"`
 	// A recipient, which is either a user or an object
-	Actor MessageListActivitiesResponseActor `json:"actor,nullable"`
+	Actor shared.Recipient `json:"actor,nullable"`
 	// The data associated with the activity
 	Data       map[string]interface{} `json:"data,nullable"`
 	InsertedAt time.Time              `json:"inserted_at" format:"date-time"`
 	// A recipient, which is either a user or an object
-	Recipient MessageListActivitiesResponseRecipient `json:"recipient"`
-	UpdatedAt time.Time                              `json:"updated_at" format:"date-time"`
-	JSON      messageListActivitiesResponseJSON      `json:"-"`
+	Recipient shared.Recipient                  `json:"recipient"`
+	UpdatedAt time.Time                         `json:"updated_at" format:"date-time"`
+	JSON      messageListActivitiesResponseJSON `json:"-"`
 }
 
 // messageListActivitiesResponseJSON contains the JSON metadata for the struct
@@ -1656,158 +1656,6 @@ func (r *MessageListActivitiesResponse) UnmarshalJSON(data []byte) (err error) {
 
 func (r messageListActivitiesResponseJSON) RawJSON() string {
 	return r.raw
-}
-
-// A recipient, which is either a user or an object
-type MessageListActivitiesResponseActor struct {
-	ID          string                                 `json:"id,required"`
-	Typename    string                                 `json:"__typename,required"`
-	UpdatedAt   time.Time                              `json:"updated_at,required" format:"date-time"`
-	Avatar      string                                 `json:"avatar,nullable"`
-	Collection  string                                 `json:"collection"`
-	CreatedAt   time.Time                              `json:"created_at,nullable" format:"date-time"`
-	Email       string                                 `json:"email,nullable"`
-	Name        string                                 `json:"name,nullable"`
-	PhoneNumber string                                 `json:"phone_number,nullable"`
-	Timezone    string                                 `json:"timezone,nullable"`
-	JSON        messageListActivitiesResponseActorJSON `json:"-"`
-	union       MessageListActivitiesResponseActorUnion
-}
-
-// messageListActivitiesResponseActorJSON contains the JSON metadata for the struct
-// [MessageListActivitiesResponseActor]
-type messageListActivitiesResponseActorJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	UpdatedAt   apijson.Field
-	Avatar      apijson.Field
-	Collection  apijson.Field
-	CreatedAt   apijson.Field
-	Email       apijson.Field
-	Name        apijson.Field
-	PhoneNumber apijson.Field
-	Timezone    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r messageListActivitiesResponseActorJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *MessageListActivitiesResponseActor) UnmarshalJSON(data []byte) (err error) {
-	*r = MessageListActivitiesResponseActor{}
-	err = apijson.UnmarshalRoot(data, &r.union)
-	if err != nil {
-		return err
-	}
-	return apijson.Port(r.union, &r)
-}
-
-// AsUnion returns a [MessageListActivitiesResponseActorUnion] interface which you
-// can cast to the specific types for more type safety.
-//
-// Possible runtime types of the union are [User], [shared.Object].
-func (r MessageListActivitiesResponseActor) AsUnion() MessageListActivitiesResponseActorUnion {
-	return r.union
-}
-
-// A recipient, which is either a user or an object
-//
-// Union satisfied by [User] or [shared.Object].
-type MessageListActivitiesResponseActorUnion interface {
-	ImplementsMessageListActivitiesResponseActor()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*MessageListActivitiesResponseActorUnion)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(User{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.Object{}),
-		},
-	)
-}
-
-// A recipient, which is either a user or an object
-type MessageListActivitiesResponseRecipient struct {
-	ID          string                                     `json:"id,required"`
-	Typename    string                                     `json:"__typename,required"`
-	UpdatedAt   time.Time                                  `json:"updated_at,required" format:"date-time"`
-	Avatar      string                                     `json:"avatar,nullable"`
-	Collection  string                                     `json:"collection"`
-	CreatedAt   time.Time                                  `json:"created_at,nullable" format:"date-time"`
-	Email       string                                     `json:"email,nullable"`
-	Name        string                                     `json:"name,nullable"`
-	PhoneNumber string                                     `json:"phone_number,nullable"`
-	Timezone    string                                     `json:"timezone,nullable"`
-	JSON        messageListActivitiesResponseRecipientJSON `json:"-"`
-	union       MessageListActivitiesResponseRecipientUnion
-}
-
-// messageListActivitiesResponseRecipientJSON contains the JSON metadata for the
-// struct [MessageListActivitiesResponseRecipient]
-type messageListActivitiesResponseRecipientJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	UpdatedAt   apijson.Field
-	Avatar      apijson.Field
-	Collection  apijson.Field
-	CreatedAt   apijson.Field
-	Email       apijson.Field
-	Name        apijson.Field
-	PhoneNumber apijson.Field
-	Timezone    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r messageListActivitiesResponseRecipientJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *MessageListActivitiesResponseRecipient) UnmarshalJSON(data []byte) (err error) {
-	*r = MessageListActivitiesResponseRecipient{}
-	err = apijson.UnmarshalRoot(data, &r.union)
-	if err != nil {
-		return err
-	}
-	return apijson.Port(r.union, &r)
-}
-
-// AsUnion returns a [MessageListActivitiesResponseRecipientUnion] interface which
-// you can cast to the specific types for more type safety.
-//
-// Possible runtime types of the union are [User], [shared.Object].
-func (r MessageListActivitiesResponseRecipient) AsUnion() MessageListActivitiesResponseRecipientUnion {
-	return r.union
-}
-
-// A recipient, which is either a user or an object
-//
-// Union satisfied by [User] or [shared.Object].
-type MessageListActivitiesResponseRecipientUnion interface {
-	ImplementsMessageListActivitiesResponseRecipient()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*MessageListActivitiesResponseRecipientUnion)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(User{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.Object{}),
-		},
-	)
 }
 
 // A message delivery log

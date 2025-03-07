@@ -101,7 +101,7 @@ type AudienceListMembersResponseEntry struct {
 	Typename string    `json:"__typename,required"`
 	AddedAt  time.Time `json:"added_at,required" format:"date-time"`
 	// A user object
-	User   User                                 `json:"user,required"`
+	User   shared.User                          `json:"user,required"`
 	UserID string                               `json:"user_id,required"`
 	Tenant string                               `json:"tenant,nullable"`
 	JSON   audienceListMembersResponseEntryJSON `json:"-"`

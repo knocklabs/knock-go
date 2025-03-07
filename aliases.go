@@ -9,6 +9,16 @@ import (
 
 type Error = apierror.Error
 
+// Channel data for various channel types
+//
+// This is an alias to an internal type.
+type ChannelData = shared.ChannelData
+
+// Channel data for push providers
+//
+// This is an alias to an internal type.
+type ChannelDataData = shared.ChannelDataData
+
 // Set channel data for a type of channel
 //
 // This is an alias to an internal type.
@@ -138,11 +148,6 @@ type DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhoo
 // This is an alias to an internal type.
 type InlineChannelDataRequestParam = shared.InlineChannelDataRequestParam
 
-// Inline identifies a custom object belonging to a collection
-//
-// This is an alias to an internal type.
-type InlineIdentifyObjectRequestParam = shared.InlineIdentifyObjectRequestParam
-
 // A set of parameters to inline-identify a user with. Inline identifying the user
 // will ensure that the user is available before the request is executed in Knock.
 // It will perform an upsert against the user you're supplying, replacing any
@@ -150,6 +155,11 @@ type InlineIdentifyObjectRequestParam = shared.InlineIdentifyObjectRequestParam
 //
 // This is an alias to an internal type.
 type InlineIdentifyUserRequestParam = shared.InlineIdentifyUserRequestParam
+
+// Inline identifies a custom object belonging to a collection
+//
+// This is an alias to an internal type.
+type InlineObjectRequestParam = shared.InlineObjectRequestParam
 
 // Inline set preferences for a recipient, where the key is the preference set name
 //
@@ -226,6 +236,45 @@ type OneSignalChannelData = shared.OneSignalChannelData
 // This is an alias to an internal type.
 type OneSignalChannelDataParam = shared.OneSignalChannelDataParam
 
+// A preference set object.
+//
+// This is an alias to an internal type.
+type PreferenceSet = shared.PreferenceSet
+
+// Workflow or category preferences within a preference set
+//
+// This is an alias to an internal type.
+type PreferenceSetCategoriesUnion = shared.PreferenceSetCategoriesUnion
+
+// The settings object for a workflow or category, where you can specify channel
+// types or conditions.
+//
+// This is an alias to an internal type.
+type PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject = shared.PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject
+
+// Workflow or category preferences within a preference set
+//
+// This is an alias to an internal type.
+type PreferenceSetWorkflowsUnion = shared.PreferenceSetWorkflowsUnion
+
+// The settings object for a workflow or category, where you can specify channel
+// types or conditions.
+//
+// This is an alias to an internal type.
+type PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject = shared.PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject
+
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
+// This is an alias to an internal type.
+type PreferenceSetChannelTypeSetting = shared.PreferenceSetChannelTypeSetting
+
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+//
+// This is an alias to an internal type.
+type PreferenceSetChannelTypeSettingParam = shared.PreferenceSetChannelTypeSettingParam
+
 // Channel type preferences
 //
 // This is an alias to an internal type.
@@ -241,19 +290,7 @@ type PreferenceSetChannelTypesChatUnion = shared.PreferenceSetChannelTypesChatUn
 // conditions to apply.
 //
 // This is an alias to an internal type.
-type PreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObject = shared.PreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObject
-
-// A set of settings for a channel type. Currently, this can only be a list of
-// conditions to apply.
-//
-// This is an alias to an internal type.
 type PreferenceSetChannelTypesEmailUnion = shared.PreferenceSetChannelTypesEmailUnion
-
-// A set of settings for a channel type. Currently, this can only be a list of
-// conditions to apply.
-//
-// This is an alias to an internal type.
-type PreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObject = shared.PreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObject
 
 // A set of settings for a channel type. Currently, this can only be a list of
 // conditions to apply.
@@ -265,19 +302,7 @@ type PreferenceSetChannelTypesHTTPUnion = shared.PreferenceSetChannelTypesHTTPUn
 // conditions to apply.
 //
 // This is an alias to an internal type.
-type PreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObject = shared.PreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObject
-
-// A set of settings for a channel type. Currently, this can only be a list of
-// conditions to apply.
-//
-// This is an alias to an internal type.
 type PreferenceSetChannelTypesInAppFeedUnion = shared.PreferenceSetChannelTypesInAppFeedUnion
-
-// A set of settings for a channel type. Currently, this can only be a list of
-// conditions to apply.
-//
-// This is an alias to an internal type.
-type PreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject = shared.PreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObject
 
 // A set of settings for a channel type. Currently, this can only be a list of
 // conditions to apply.
@@ -289,19 +314,7 @@ type PreferenceSetChannelTypesPushUnion = shared.PreferenceSetChannelTypesPushUn
 // conditions to apply.
 //
 // This is an alias to an internal type.
-type PreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObject = shared.PreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObject
-
-// A set of settings for a channel type. Currently, this can only be a list of
-// conditions to apply.
-//
-// This is an alias to an internal type.
 type PreferenceSetChannelTypesSMSUnion = shared.PreferenceSetChannelTypesSMSUnion
-
-// A set of settings for a channel type. Currently, this can only be a list of
-// conditions to apply.
-//
-// This is an alias to an internal type.
-type PreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObject = shared.PreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObject
 
 // Channel type preferences
 //
@@ -318,19 +331,7 @@ type PreferenceSetChannelTypesChatUnionParam = shared.PreferenceSetChannelTypesC
 // conditions to apply.
 //
 // This is an alias to an internal type.
-type PreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectParam = shared.PreferenceSetChannelTypesChatPreferenceSetChannelTypeSettingObjectParam
-
-// A set of settings for a channel type. Currently, this can only be a list of
-// conditions to apply.
-//
-// This is an alias to an internal type.
 type PreferenceSetChannelTypesEmailUnionParam = shared.PreferenceSetChannelTypesEmailUnionParam
-
-// A set of settings for a channel type. Currently, this can only be a list of
-// conditions to apply.
-//
-// This is an alias to an internal type.
-type PreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectParam = shared.PreferenceSetChannelTypesEmailPreferenceSetChannelTypeSettingObjectParam
 
 // A set of settings for a channel type. Currently, this can only be a list of
 // conditions to apply.
@@ -342,19 +343,7 @@ type PreferenceSetChannelTypesHTTPUnionParam = shared.PreferenceSetChannelTypesH
 // conditions to apply.
 //
 // This is an alias to an internal type.
-type PreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectParam = shared.PreferenceSetChannelTypesHTTPPreferenceSetChannelTypeSettingObjectParam
-
-// A set of settings for a channel type. Currently, this can only be a list of
-// conditions to apply.
-//
-// This is an alias to an internal type.
 type PreferenceSetChannelTypesInAppFeedUnionParam = shared.PreferenceSetChannelTypesInAppFeedUnionParam
-
-// A set of settings for a channel type. Currently, this can only be a list of
-// conditions to apply.
-//
-// This is an alias to an internal type.
-type PreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectParam = shared.PreferenceSetChannelTypesInAppFeedPreferenceSetChannelTypeSettingObjectParam
 
 // A set of settings for a channel type. Currently, this can only be a list of
 // conditions to apply.
@@ -366,19 +355,7 @@ type PreferenceSetChannelTypesPushUnionParam = shared.PreferenceSetChannelTypesP
 // conditions to apply.
 //
 // This is an alias to an internal type.
-type PreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectParam = shared.PreferenceSetChannelTypesPushPreferenceSetChannelTypeSettingObjectParam
-
-// A set of settings for a channel type. Currently, this can only be a list of
-// conditions to apply.
-//
-// This is an alias to an internal type.
 type PreferenceSetChannelTypesSMSUnionParam = shared.PreferenceSetChannelTypesSMSUnionParam
-
-// A set of settings for a channel type. Currently, this can only be a list of
-// conditions to apply.
-//
-// This is an alias to an internal type.
-type PreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectParam = shared.PreferenceSetChannelTypesSMSPreferenceSetChannelTypeSettingObjectParam
 
 // Set preferences for a recipient
 //
@@ -416,6 +393,23 @@ type PushChannelData = shared.PushChannelData
 //
 // This is an alias to an internal type.
 type PushChannelDataParam = shared.PushChannelDataParam
+
+// A recipient, which is either a user or an object
+//
+// This is an alias to an internal type.
+type Recipient = shared.Recipient
+
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+//
+// This is an alias to an internal type.
+type RecipientRequestUnionParam = shared.RecipientRequestUnionParam
+
+// A schedule that represents a recurring workflow execution
+//
+// This is an alias to an internal type.
+type Schedule = shared.Schedule
 
 // A schedule repeat rule
 //
@@ -516,6 +510,16 @@ type SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam = shared.Sla
 // This is an alias to an internal type.
 type SlackChannelDataTokenParam = shared.SlackChannelDataTokenParam
 
+// A subscription object
+//
+// This is an alias to an internal type.
+type Subscription = shared.Subscription
+
+// A tenant entity
+//
+// This is an alias to an internal type.
+type Tenant = shared.Tenant
+
 // A tenant to be set in the system
 //
 // This is an alias to an internal type.
@@ -526,3 +530,8 @@ type TenantRequestSettingsParam = shared.TenantRequestSettingsParam
 
 // This is an alias to an internal type.
 type TenantRequestSettingsBrandingParam = shared.TenantRequestSettingsBrandingParam
+
+// A user object
+//
+// This is an alias to an internal type.
+type User = shared.User

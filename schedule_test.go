@@ -71,7 +71,7 @@ func TestScheduleUpdateWithOptionalParams(t *testing.T) {
 	)
 	_, err := client.Schedules.Update(context.TODO(), knock.ScheduleUpdateParams{
 		ScheduleIDs: knock.F([]string{"123e4567-e89b-12d3-a456-426614174000"}),
-		Actor:       knock.F[knock.ScheduleUpdateParamsActorUnion](shared.UnionString("string")),
+		Actor:       knock.F[shared.RecipientRequestUnionParam](shared.UnionString("string")),
 		Data: knock.F(map[string]interface{}{
 			"key": "bar",
 		}),

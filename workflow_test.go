@@ -62,7 +62,7 @@ func TestWorkflowTriggerWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"key",
 		knock.WorkflowTriggerParams{
-			Actor:           knock.F[knock.WorkflowTriggerParamsActorUnion](shared.UnionString("string")),
+			Actor:           knock.F[shared.RecipientRequestUnionParam](shared.UnionString("string")),
 			CancellationKey: knock.Null[string](),
 			Data: knock.F(map[string]interface{}{
 				"dinosaur_names":  "bar",
@@ -71,7 +71,7 @@ func TestWorkflowTriggerWithOptionalParams(t *testing.T) {
 				"severity":        "bar",
 				"welcome_message": "bar",
 			}),
-			Recipients: knock.F([]knock.WorkflowTriggerParamsRecipientUnion{shared.UnionString("jhammond")}),
+			Recipients: knock.F([]shared.RecipientRequestUnionParam{shared.UnionString("jhammond")}),
 			Tenant:     knock.F[shared.InlineTenantRequestUnionParam](shared.UnionString("acme_corp")),
 		},
 	)

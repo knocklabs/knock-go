@@ -40,7 +40,7 @@ func NewTenantService(opts ...option.RequestOption) (r *TenantService) {
 }
 
 // List tenants
-func (r *TenantService) List(ctx context.Context, query TenantListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[TenantListResponse], err error) {
+func (r *TenantService) List(ctx context.Context, query TenantListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[shared.Tenant], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -58,7 +58,7 @@ func (r *TenantService) List(ctx context.Context, query TenantListParams, opts .
 }
 
 // List tenants
-func (r *TenantService) ListAutoPaging(ctx context.Context, query TenantListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[TenantListResponse] {
+func (r *TenantService) ListAutoPaging(ctx context.Context, query TenantListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[shared.Tenant] {
 	return pagination.NewEntriesCursorAutoPager(r.List(ctx, query, opts...))
 }
 
@@ -75,7 +75,7 @@ func (r *TenantService) Delete(ctx context.Context, id string, opts ...option.Re
 }
 
 // Get a tenant
-func (r *TenantService) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *TenantGetResponse, err error) {
+func (r *TenantService) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *shared.Tenant, err error) {
 	opts = append(r.Options[:], opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
@@ -87,7 +87,7 @@ func (r *TenantService) Get(ctx context.Context, id string, opts ...option.Reque
 }
 
 // Set a tenant
-func (r *TenantService) Set(ctx context.Context, id string, body TenantSetParams, opts ...option.RequestOption) (res *TenantSetResponse, err error) {
+func (r *TenantService) Set(ctx context.Context, id string, body TenantSetParams, opts ...option.RequestOption) (res *shared.Tenant, err error) {
 	opts = append(r.Options[:], opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
@@ -96,81 +96,6 @@ func (r *TenantService) Set(ctx context.Context, id string, body TenantSetParams
 	path := fmt.Sprintf("v1/tenants/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
 	return
-}
-
-// A tenant entity
-type TenantListResponse struct {
-	ID          string                 `json:"id,required"`
-	Typename    string                 `json:"__typename,required"`
-	ExtraFields map[string]interface{} `json:"-,extras"`
-	JSON        tenantListResponseJSON `json:"-"`
-}
-
-// tenantListResponseJSON contains the JSON metadata for the struct
-// [TenantListResponse]
-type tenantListResponseJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *TenantListResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r tenantListResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// A tenant entity
-type TenantGetResponse struct {
-	ID          string                 `json:"id,required"`
-	Typename    string                 `json:"__typename,required"`
-	ExtraFields map[string]interface{} `json:"-,extras"`
-	JSON        tenantGetResponseJSON  `json:"-"`
-}
-
-// tenantGetResponseJSON contains the JSON metadata for the struct
-// [TenantGetResponse]
-type tenantGetResponseJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *TenantGetResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r tenantGetResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// A tenant entity
-type TenantSetResponse struct {
-	ID          string                 `json:"id,required"`
-	Typename    string                 `json:"__typename,required"`
-	ExtraFields map[string]interface{} `json:"-,extras"`
-	JSON        tenantSetResponseJSON  `json:"-"`
-}
-
-// tenantSetResponseJSON contains the JSON metadata for the struct
-// [TenantSetResponse]
-type tenantSetResponseJSON struct {
-	ID          apijson.Field
-	Typename    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *TenantSetResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r tenantSetResponseJSON) RawJSON() string {
-	return r.raw
 }
 
 type TenantListParams struct {

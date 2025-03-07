@@ -63,7 +63,7 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 		knock.ObjectBulkAddSubscriptionsParams{
 			Subscriptions: knock.F([]knock.ObjectBulkAddSubscriptionsParamsSubscription{{
 				ID: knock.F("project-1"),
-				Recipients: knock.F([]knock.ObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion{shared.InlineIdentifyUserRequestParam{
+				Recipients: knock.F([]shared.RecipientRequestUnionParam{shared.InlineIdentifyUserRequestParam{
 					ID: knock.F("user_1"),
 					ChannelData: knock.F(shared.InlineChannelDataRequestParam{
 						"97c5837d-c65c-4d54-aa39-080eeb81c69d": shared.ChannelDataRequestParam{
@@ -152,7 +152,7 @@ func TestObjectBulkSet(t *testing.T) {
 		context.TODO(),
 		"collection",
 		knock.ObjectBulkSetParams{
-			Objects: knock.F([]shared.InlineIdentifyObjectRequestParam{{
+			Objects: knock.F([]shared.InlineObjectRequestParam{{
 				ID:         knock.F("project_1"),
 				Collection: knock.F("projects"),
 				ChannelData: knock.F(shared.InlineChannelDataRequestParam{

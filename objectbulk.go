@@ -363,50 +363,17 @@ func (r ObjectBulkAddSubscriptionsParams) MarshalJSON() (data []byte, err error)
 }
 
 type ObjectBulkAddSubscriptionsParamsSubscription struct {
-	ID         param.Field[string]                                                        `json:"id,required"`
-	Recipients param.Field[[]ObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion] `json:"recipients,required"`
-	Properties param.Field[map[string]interface{}]                                        `json:"properties"`
+	ID         param.Field[string]                              `json:"id,required"`
+	Recipients param.Field[[]shared.RecipientRequestUnionParam] `json:"recipients,required"`
+	Properties param.Field[map[string]interface{}]              `json:"properties"`
 }
 
 func (r ObjectBulkAddSubscriptionsParamsSubscription) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// Specifies a recipient in a request. This can either be a user identifier
-// (string), an inline user request (object), or an inline object request, which is
-// determined by the presence of a `collection` property.
-type ObjectBulkAddSubscriptionsParamsSubscriptionsRecipient struct {
-	// The ID of the user to identify. This is an ID that you supply.
-	ID param.Field[string] `json:"id,required"`
-	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
-	Collection  param.Field[string]                               `json:"collection"`
-	// The creation date of the user from your system.
-	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
-}
-
-func (r ObjectBulkAddSubscriptionsParamsSubscriptionsRecipient) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ObjectBulkAddSubscriptionsParamsSubscriptionsRecipient) ImplementsObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion() {
-}
-
-// Specifies a recipient in a request. This can either be a user identifier
-// (string), an inline user request (object), or an inline object request, which is
-// determined by the presence of a `collection` property.
-//
-// Satisfied by [shared.UnionString], [shared.InlineIdentifyUserRequestParam],
-// [shared.InlineIdentifyObjectRequestParam],
-// [ObjectBulkAddSubscriptionsParamsSubscriptionsRecipient].
-type ObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion interface {
-	ImplementsObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion()
-}
-
 type ObjectBulkSetParams struct {
-	Objects param.Field[[]shared.InlineIdentifyObjectRequestParam] `json:"objects,required"`
+	Objects param.Field[[]shared.InlineObjectRequestParam] `json:"objects,required"`
 }
 
 func (r ObjectBulkSetParams) MarshalJSON() (data []byte, err error) {
