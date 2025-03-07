@@ -13,6 +13,7 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
+	"github.com/stainless-sdks/knock-go/shared"
 )
 
 // TenantBulkService contains methods and other services that help with interacting
@@ -242,16 +243,9 @@ func (r TenantBulkDeleteParams) URLQuery() (v url.Values) {
 }
 
 type TenantBulkSetParams struct {
-	Tenants param.Field[[]TenantBulkSetParamsTenantUnion] `json:"tenants,required"`
+	Tenants param.Field[[]shared.InlineTenantRequestUnionParam] `json:"tenants,required"`
 }
 
 func (r TenantBulkSetParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-// An inline tenant request
-//
-// Satisfied by [shared.UnionString], [shared.TenantRequestParam].
-type TenantBulkSetParamsTenantUnion interface {
-	ImplementsTenantBulkSetParamsTenantUnion()
 }

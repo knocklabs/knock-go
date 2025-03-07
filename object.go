@@ -1862,12 +1862,14 @@ func (r ObjectAddSubscriptionsParams) MarshalJSON() (data []byte, err error) {
 // determined by the presence of a `collection` property.
 type ObjectAddSubscriptionsParamsRecipient struct {
 	// The ID of the user to identify. This is an ID that you supply.
-	ID          param.Field[string]      `json:"id,required"`
-	ChannelData param.Field[interface{}] `json:"channel_data"`
-	Collection  param.Field[string]      `json:"collection"`
+	ID param.Field[string] `json:"id,required"`
+	// Allows inline setting channel data for a recipient
+	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
+	Collection  param.Field[string]                               `json:"collection"`
 	// The creation date of the user from your system.
-	CreatedAt   param.Field[time.Time]   `json:"created_at" format:"date-time"`
-	Preferences param.Field[interface{}] `json:"preferences"`
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
 }
 
 func (r ObjectAddSubscriptionsParamsRecipient) MarshalJSON() (data []byte, err error) {
@@ -1882,29 +1884,10 @@ func (r ObjectAddSubscriptionsParamsRecipient) ImplementsObjectAddSubscriptionsP
 // determined by the presence of a `collection` property.
 //
 // Satisfied by [shared.UnionString], [shared.InlineIdentifyUserRequestParam],
-// [ObjectAddSubscriptionsParamsRecipientsInlineIdentifyObjectRequest],
+// [shared.InlineIdentifyObjectRequestParam],
 // [ObjectAddSubscriptionsParamsRecipient].
 type ObjectAddSubscriptionsParamsRecipientUnion interface {
 	ImplementsObjectAddSubscriptionsParamsRecipientUnion()
-}
-
-// Inline identifies a custom object belonging to a collection
-type ObjectAddSubscriptionsParamsRecipientsInlineIdentifyObjectRequest struct {
-	ID         param.Field[string] `json:"id,required"`
-	Collection param.Field[string] `json:"collection,required"`
-	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[map[string]shared.ChannelDataRequestParam] `json:"channel_data"`
-	CreatedAt   param.Field[time.Time]                                 `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[map[string]shared.PreferenceSetRequestParam] `json:"preferences"`
-	ExtraFields map[string]interface{}                                   `json:"-,extras"`
-}
-
-func (r ObjectAddSubscriptionsParamsRecipientsInlineIdentifyObjectRequest) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ObjectAddSubscriptionsParamsRecipientsInlineIdentifyObjectRequest) ImplementsObjectAddSubscriptionsParamsRecipientUnion() {
 }
 
 type ObjectDeleteSubscriptionsParams struct {
@@ -1920,12 +1903,14 @@ func (r ObjectDeleteSubscriptionsParams) MarshalJSON() (data []byte, err error) 
 // determined by the presence of a `collection` property.
 type ObjectDeleteSubscriptionsParamsRecipient struct {
 	// The ID of the user to identify. This is an ID that you supply.
-	ID          param.Field[string]      `json:"id,required"`
-	ChannelData param.Field[interface{}] `json:"channel_data"`
-	Collection  param.Field[string]      `json:"collection"`
+	ID param.Field[string] `json:"id,required"`
+	// Allows inline setting channel data for a recipient
+	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
+	Collection  param.Field[string]                               `json:"collection"`
 	// The creation date of the user from your system.
-	CreatedAt   param.Field[time.Time]   `json:"created_at" format:"date-time"`
-	Preferences param.Field[interface{}] `json:"preferences"`
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
 }
 
 func (r ObjectDeleteSubscriptionsParamsRecipient) MarshalJSON() (data []byte, err error) {
@@ -1940,29 +1925,10 @@ func (r ObjectDeleteSubscriptionsParamsRecipient) ImplementsObjectDeleteSubscrip
 // determined by the presence of a `collection` property.
 //
 // Satisfied by [shared.UnionString], [shared.InlineIdentifyUserRequestParam],
-// [ObjectDeleteSubscriptionsParamsRecipientsInlineIdentifyObjectRequest],
+// [shared.InlineIdentifyObjectRequestParam],
 // [ObjectDeleteSubscriptionsParamsRecipient].
 type ObjectDeleteSubscriptionsParamsRecipientUnion interface {
 	ImplementsObjectDeleteSubscriptionsParamsRecipientUnion()
-}
-
-// Inline identifies a custom object belonging to a collection
-type ObjectDeleteSubscriptionsParamsRecipientsInlineIdentifyObjectRequest struct {
-	ID         param.Field[string] `json:"id,required"`
-	Collection param.Field[string] `json:"collection,required"`
-	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[map[string]shared.ChannelDataRequestParam] `json:"channel_data"`
-	CreatedAt   param.Field[time.Time]                                 `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[map[string]shared.PreferenceSetRequestParam] `json:"preferences"`
-	ExtraFields map[string]interface{}                                   `json:"-,extras"`
-}
-
-func (r ObjectDeleteSubscriptionsParamsRecipientsInlineIdentifyObjectRequest) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ObjectDeleteSubscriptionsParamsRecipientsInlineIdentifyObjectRequest) ImplementsObjectDeleteSubscriptionsParamsRecipientUnion() {
 }
 
 type ObjectGetPreferencesParams struct {
@@ -2146,9 +2112,9 @@ func (r ObjectListSubscriptionsParamsRecipientsObjectReference) ImplementsObject
 
 type ObjectSetParams struct {
 	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[map[string]shared.ChannelDataRequestParam] `json:"channel_data"`
+	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
 	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[map[string]shared.PreferenceSetRequestParam] `json:"preferences"`
+	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
 }
 
 func (r ObjectSetParams) MarshalJSON() (data []byte, err error) {

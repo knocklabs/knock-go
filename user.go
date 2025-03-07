@@ -1616,10 +1616,10 @@ func (r UserSetPreferencesResponseWorkflowsPreferenceSetWorkflowCategorySettingO
 
 type UserUpdateParams struct {
 	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[map[string]shared.ChannelDataRequestParam] `json:"channel_data"`
-	CreatedAt   param.Field[time.Time]                                 `json:"created_at" format:"date-time"`
+	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
+	CreatedAt   param.Field[time.Time]                            `json:"created_at" format:"date-time"`
 	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[map[string]shared.PreferenceSetRequestParam] `json:"preferences"`
+	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
 }
 
 func (r UserUpdateParams) MarshalJSON() (data []byte, err error) {

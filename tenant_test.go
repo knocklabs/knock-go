@@ -104,15 +104,15 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		knock.TenantSetParams{
-			ChannelData: knock.F(map[string]shared.ChannelDataRequestParam{
-				"97c5837d-c65c-4d54-aa39-080eeb81c69d": {
+			ChannelData: knock.F(shared.InlineChannelDataRequestParam{
+				"97c5837d-c65c-4d54-aa39-080eeb81c69d": shared.ChannelDataRequestParam{
 					Data: knock.F[shared.ChannelDataRequestDataUnionParam](shared.PushChannelDataParam{
 						Tokens: knock.F([]string{"push_token_xxx"}),
 					}),
 				},
 			}),
-			Preferences: knock.F(map[string]shared.PreferenceSetRequestParam{
-				"default": {
+			Preferences: knock.F(shared.InlinePreferenceSetRequestParam{
+				"default": shared.PreferenceSetRequestParam{
 					Categories: knock.F(map[string]shared.PreferenceSetRequestCategoriesUnionParam{
 						"transactional": shared.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
 							ChannelTypes: knock.F(shared.PreferenceSetChannelTypesParam{

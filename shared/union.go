@@ -4,6 +4,7 @@ package shared
 
 type UnionString string
 
+func (UnionString) ImplementsInlineTenantRequestUnionParam()                               {}
 func (UnionString) ImplementsUserListMessagesResponseActorsUnion()                         {}
 func (UnionString) ImplementsUserListMessagesResponseRecipientUnion()                      {}
 func (UnionString) ImplementsObjectListMessagesResponseActorsUnion()                       {}
@@ -12,7 +13,6 @@ func (UnionString) ImplementsObjectAddSubscriptionsParamsRecipientUnion()       
 func (UnionString) ImplementsObjectDeleteSubscriptionsParamsRecipientUnion()               {}
 func (UnionString) ImplementsObjectListSubscriptionsParamsRecipientUnion()                 {}
 func (UnionString) ImplementsObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion() {}
-func (UnionString) ImplementsTenantBulkSetParamsTenantUnion()                              {}
 func (UnionString) ImplementsMessageListResponseActorsUnion()                              {}
 func (UnionString) ImplementsMessageListResponseRecipientUnion()                           {}
 func (UnionString) ImplementsMessageArchiveResponseActorsUnion()                           {}
@@ -50,11 +50,8 @@ func (UnionString) ImplementsMessageBatchUnarchiveResponseActorsUnion()         
 func (UnionString) ImplementsMessageBatchUnarchiveResponseRecipientUnion()                 {}
 func (UnionString) ImplementsWorkflowTriggerParamsActorUnion()                             {}
 func (UnionString) ImplementsWorkflowTriggerParamsRecipientUnion()                         {}
-func (UnionString) ImplementsWorkflowTriggerParamsTenantUnion()                            {}
 func (UnionString) ImplementsScheduleNewParamsRecipientUnion()                             {}
-func (UnionString) ImplementsScheduleNewParamsTenantUnion()                                {}
 func (UnionString) ImplementsScheduleUpdateParamsActorUnion()                              {}
-func (UnionString) ImplementsScheduleUpdateParamsTenantUnion()                             {}
 func (UnionString) ImplementsScheduleListParamsRecipientUnion()                            {}
 
 type UnionBool bool

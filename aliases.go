@@ -133,6 +133,16 @@ type DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionParam = shared
 // This is an alias to an internal type.
 type DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookParam = shared.DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookParam
 
+// Allows inline setting channel data for a recipient
+//
+// This is an alias to an internal type.
+type InlineChannelDataRequestParam = shared.InlineChannelDataRequestParam
+
+// Inline identifies a custom object belonging to a collection
+//
+// This is an alias to an internal type.
+type InlineIdentifyObjectRequestParam = shared.InlineIdentifyObjectRequestParam
+
 // A set of parameters to inline-identify a user with. Inline identifying the user
 // will ensure that the user is available before the request is executed in Knock.
 // It will perform an upsert against the user you're supplying, replacing any
@@ -140,6 +150,16 @@ type DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhoo
 //
 // This is an alias to an internal type.
 type InlineIdentifyUserRequestParam = shared.InlineIdentifyUserRequestParam
+
+// Inline set preferences for a recipient, where the key is the preference set name
+//
+// This is an alias to an internal type.
+type InlinePreferenceSetRequestParam = shared.InlinePreferenceSetRequestParam
+
+// An inline tenant request
+//
+// This is an alias to an internal type.
+type InlineTenantRequestUnionParam = shared.InlineTenantRequestUnionParam
 
 // Microsoft Teams channel data
 //

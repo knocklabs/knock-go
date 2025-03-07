@@ -116,7 +116,7 @@ type WorkflowTriggerParams struct {
 	// single trigger.
 	Recipients param.Field[[]WorkflowTriggerParamsRecipientUnion] `json:"recipients"`
 	// An inline tenant request
-	Tenant param.Field[WorkflowTriggerParamsTenantUnion] `json:"tenant"`
+	Tenant param.Field[shared.InlineTenantRequestUnionParam] `json:"tenant"`
 }
 
 func (r WorkflowTriggerParams) MarshalJSON() (data []byte, err error) {
@@ -128,12 +128,14 @@ func (r WorkflowTriggerParams) MarshalJSON() (data []byte, err error) {
 // determined by the presence of a `collection` property.
 type WorkflowTriggerParamsActor struct {
 	// The ID of the user to identify. This is an ID that you supply.
-	ID          param.Field[string]      `json:"id,required"`
-	ChannelData param.Field[interface{}] `json:"channel_data"`
-	Collection  param.Field[string]      `json:"collection"`
+	ID param.Field[string] `json:"id,required"`
+	// Allows inline setting channel data for a recipient
+	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
+	Collection  param.Field[string]                               `json:"collection"`
 	// The creation date of the user from your system.
-	CreatedAt   param.Field[time.Time]   `json:"created_at" format:"date-time"`
-	Preferences param.Field[interface{}] `json:"preferences"`
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
 }
 
 func (r WorkflowTriggerParamsActor) MarshalJSON() (data []byte, err error) {
@@ -147,29 +149,9 @@ func (r WorkflowTriggerParamsActor) ImplementsWorkflowTriggerParamsActorUnion() 
 // determined by the presence of a `collection` property.
 //
 // Satisfied by [shared.UnionString], [shared.InlineIdentifyUserRequestParam],
-// [WorkflowTriggerParamsActorInlineIdentifyObjectRequest],
-// [WorkflowTriggerParamsActor].
+// [shared.InlineIdentifyObjectRequestParam], [WorkflowTriggerParamsActor].
 type WorkflowTriggerParamsActorUnion interface {
 	ImplementsWorkflowTriggerParamsActorUnion()
-}
-
-// Inline identifies a custom object belonging to a collection
-type WorkflowTriggerParamsActorInlineIdentifyObjectRequest struct {
-	ID         param.Field[string] `json:"id,required"`
-	Collection param.Field[string] `json:"collection,required"`
-	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[map[string]shared.ChannelDataRequestParam] `json:"channel_data"`
-	CreatedAt   param.Field[time.Time]                                 `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[map[string]shared.PreferenceSetRequestParam] `json:"preferences"`
-	ExtraFields map[string]interface{}                                   `json:"-,extras"`
-}
-
-func (r WorkflowTriggerParamsActorInlineIdentifyObjectRequest) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r WorkflowTriggerParamsActorInlineIdentifyObjectRequest) ImplementsWorkflowTriggerParamsActorUnion() {
 }
 
 // Specifies a recipient in a request. This can either be a user identifier
@@ -177,12 +159,14 @@ func (r WorkflowTriggerParamsActorInlineIdentifyObjectRequest) ImplementsWorkflo
 // determined by the presence of a `collection` property.
 type WorkflowTriggerParamsRecipient struct {
 	// The ID of the user to identify. This is an ID that you supply.
-	ID          param.Field[string]      `json:"id,required"`
-	ChannelData param.Field[interface{}] `json:"channel_data"`
-	Collection  param.Field[string]      `json:"collection"`
+	ID param.Field[string] `json:"id,required"`
+	// Allows inline setting channel data for a recipient
+	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
+	Collection  param.Field[string]                               `json:"collection"`
 	// The creation date of the user from your system.
-	CreatedAt   param.Field[time.Time]   `json:"created_at" format:"date-time"`
-	Preferences param.Field[interface{}] `json:"preferences"`
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
 }
 
 func (r WorkflowTriggerParamsRecipient) MarshalJSON() (data []byte, err error) {
@@ -196,34 +180,7 @@ func (r WorkflowTriggerParamsRecipient) ImplementsWorkflowTriggerParamsRecipient
 // determined by the presence of a `collection` property.
 //
 // Satisfied by [shared.UnionString], [shared.InlineIdentifyUserRequestParam],
-// [WorkflowTriggerParamsRecipientsInlineIdentifyObjectRequest],
-// [WorkflowTriggerParamsRecipient].
+// [shared.InlineIdentifyObjectRequestParam], [WorkflowTriggerParamsRecipient].
 type WorkflowTriggerParamsRecipientUnion interface {
 	ImplementsWorkflowTriggerParamsRecipientUnion()
-}
-
-// Inline identifies a custom object belonging to a collection
-type WorkflowTriggerParamsRecipientsInlineIdentifyObjectRequest struct {
-	ID         param.Field[string] `json:"id,required"`
-	Collection param.Field[string] `json:"collection,required"`
-	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[map[string]shared.ChannelDataRequestParam] `json:"channel_data"`
-	CreatedAt   param.Field[time.Time]                                 `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[map[string]shared.PreferenceSetRequestParam] `json:"preferences"`
-	ExtraFields map[string]interface{}                                   `json:"-,extras"`
-}
-
-func (r WorkflowTriggerParamsRecipientsInlineIdentifyObjectRequest) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r WorkflowTriggerParamsRecipientsInlineIdentifyObjectRequest) ImplementsWorkflowTriggerParamsRecipientUnion() {
-}
-
-// An inline tenant request
-//
-// Satisfied by [shared.UnionString], [shared.TenantRequestParam].
-type WorkflowTriggerParamsTenantUnion interface {
-	ImplementsWorkflowTriggerParamsTenantUnion()
 }

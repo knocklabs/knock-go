@@ -377,12 +377,14 @@ func (r ObjectBulkAddSubscriptionsParamsSubscription) MarshalJSON() (data []byte
 // determined by the presence of a `collection` property.
 type ObjectBulkAddSubscriptionsParamsSubscriptionsRecipient struct {
 	// The ID of the user to identify. This is an ID that you supply.
-	ID          param.Field[string]      `json:"id,required"`
-	ChannelData param.Field[interface{}] `json:"channel_data"`
-	Collection  param.Field[string]      `json:"collection"`
+	ID param.Field[string] `json:"id,required"`
+	// Allows inline setting channel data for a recipient
+	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
+	Collection  param.Field[string]                               `json:"collection"`
 	// The creation date of the user from your system.
-	CreatedAt   param.Field[time.Time]   `json:"created_at" format:"date-time"`
-	Preferences param.Field[interface{}] `json:"preferences"`
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
 }
 
 func (r ObjectBulkAddSubscriptionsParamsSubscriptionsRecipient) MarshalJSON() (data []byte, err error) {
@@ -397,51 +399,16 @@ func (r ObjectBulkAddSubscriptionsParamsSubscriptionsRecipient) ImplementsObject
 // determined by the presence of a `collection` property.
 //
 // Satisfied by [shared.UnionString], [shared.InlineIdentifyUserRequestParam],
-// [ObjectBulkAddSubscriptionsParamsSubscriptionsRecipientsInlineIdentifyObjectRequest],
+// [shared.InlineIdentifyObjectRequestParam],
 // [ObjectBulkAddSubscriptionsParamsSubscriptionsRecipient].
 type ObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion interface {
 	ImplementsObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion()
 }
 
-// Inline identifies a custom object belonging to a collection
-type ObjectBulkAddSubscriptionsParamsSubscriptionsRecipientsInlineIdentifyObjectRequest struct {
-	ID         param.Field[string] `json:"id,required"`
-	Collection param.Field[string] `json:"collection,required"`
-	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[map[string]shared.ChannelDataRequestParam] `json:"channel_data"`
-	CreatedAt   param.Field[time.Time]                                 `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[map[string]shared.PreferenceSetRequestParam] `json:"preferences"`
-	ExtraFields map[string]interface{}                                   `json:"-,extras"`
-}
-
-func (r ObjectBulkAddSubscriptionsParamsSubscriptionsRecipientsInlineIdentifyObjectRequest) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ObjectBulkAddSubscriptionsParamsSubscriptionsRecipientsInlineIdentifyObjectRequest) ImplementsObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion() {
-}
-
 type ObjectBulkSetParams struct {
-	Objects param.Field[[]ObjectBulkSetParamsObject] `json:"objects,required"`
+	Objects param.Field[[]shared.InlineIdentifyObjectRequestParam] `json:"objects,required"`
 }
 
 func (r ObjectBulkSetParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// Inline identifies a custom object belonging to a collection
-type ObjectBulkSetParamsObject struct {
-	ID         param.Field[string] `json:"id,required"`
-	Collection param.Field[string] `json:"collection,required"`
-	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[map[string]shared.ChannelDataRequestParam] `json:"channel_data"`
-	CreatedAt   param.Field[time.Time]                                 `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[map[string]shared.PreferenceSetRequestParam] `json:"preferences"`
-	ExtraFields map[string]interface{}                                   `json:"-,extras"`
-}
-
-func (r ObjectBulkSetParamsObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }

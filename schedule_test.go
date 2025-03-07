@@ -45,7 +45,7 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 		}),
 		EndingAt:    knock.Null[time.Time](),
 		ScheduledAt: knock.Null[time.Time](),
-		Tenant:      knock.F[knock.ScheduleNewParamsTenantUnion](shared.UnionString("acme_corp")),
+		Tenant:      knock.F[shared.InlineTenantRequestUnionParam](shared.UnionString("acme_corp")),
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -86,7 +86,7 @@ func TestScheduleUpdateWithOptionalParams(t *testing.T) {
 			Minutes:    knock.Null[int64](),
 		}}),
 		ScheduledAt: knock.Null[time.Time](),
-		Tenant:      knock.F[knock.ScheduleUpdateParamsTenantUnion](shared.UnionString("acme_corp")),
+		Tenant:      knock.F[shared.InlineTenantRequestUnionParam](shared.UnionString("acme_corp")),
 	})
 	if err != nil {
 		var apierr *knock.Error

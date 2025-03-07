@@ -65,16 +65,16 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 				ID: knock.F("project-1"),
 				Recipients: knock.F([]knock.ObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion{shared.InlineIdentifyUserRequestParam{
 					ID: knock.F("user_1"),
-					ChannelData: knock.F(map[string]shared.ChannelDataRequestParam{
-						"97c5837d-c65c-4d54-aa39-080eeb81c69d": {
+					ChannelData: knock.F(shared.InlineChannelDataRequestParam{
+						"97c5837d-c65c-4d54-aa39-080eeb81c69d": shared.ChannelDataRequestParam{
 							Data: knock.F[shared.ChannelDataRequestDataUnionParam](shared.PushChannelDataParam{
 								Tokens: knock.F([]string{"push_token_xxx"}),
 							}),
 						},
 					}),
 					CreatedAt: knock.F(time.Now()),
-					Preferences: knock.F(map[string]shared.PreferenceSetRequestParam{
-						"default": {
+					Preferences: knock.F(shared.InlinePreferenceSetRequestParam{
+						"default": shared.PreferenceSetRequestParam{
 							Categories: knock.F(map[string]shared.PreferenceSetRequestCategoriesUnionParam{
 								"transactional": shared.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
 									ChannelTypes: knock.F(shared.PreferenceSetChannelTypesParam{
@@ -152,19 +152,19 @@ func TestObjectBulkSet(t *testing.T) {
 		context.TODO(),
 		"collection",
 		knock.ObjectBulkSetParams{
-			Objects: knock.F([]knock.ObjectBulkSetParamsObject{{
+			Objects: knock.F([]shared.InlineIdentifyObjectRequestParam{{
 				ID:         knock.F("project_1"),
 				Collection: knock.F("projects"),
-				ChannelData: knock.F(map[string]shared.ChannelDataRequestParam{
-					"97c5837d-c65c-4d54-aa39-080eeb81c69d": {
+				ChannelData: knock.F(shared.InlineChannelDataRequestParam{
+					"97c5837d-c65c-4d54-aa39-080eeb81c69d": shared.ChannelDataRequestParam{
 						Data: knock.F[shared.ChannelDataRequestDataUnionParam](shared.PushChannelDataParam{
 							Tokens: knock.F([]string{"push_token_xxx"}),
 						}),
 					},
 				}),
 				CreatedAt: knock.F(time.Now()),
-				Preferences: knock.F(map[string]shared.PreferenceSetRequestParam{
-					"default": {
+				Preferences: knock.F(shared.InlinePreferenceSetRequestParam{
+					"default": shared.PreferenceSetRequestParam{
 						Categories: knock.F(map[string]shared.PreferenceSetRequestCategoriesUnionParam{
 							"transactional": shared.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
 								ChannelTypes: knock.F(shared.PreferenceSetChannelTypesParam{

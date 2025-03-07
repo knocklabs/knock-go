@@ -192,10 +192,10 @@ func (r TenantListParams) URLQuery() (v url.Values) {
 
 type TenantSetParams struct {
 	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[map[string]shared.ChannelDataRequestParam] `json:"channel_data"`
+	ChannelData param.Field[shared.InlineChannelDataRequestParam] `json:"channel_data"`
 	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[map[string]shared.PreferenceSetRequestParam] `json:"preferences"`
-	Settings    param.Field[TenantSetParamsSettings]                     `json:"settings"`
+	Preferences param.Field[shared.InlinePreferenceSetRequestParam] `json:"preferences"`
+	Settings    param.Field[TenantSetParamsSettings]                `json:"settings"`
 }
 
 func (r TenantSetParams) MarshalJSON() (data []byte, err error) {
