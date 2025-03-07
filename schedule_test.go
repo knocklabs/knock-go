@@ -30,11 +30,11 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 	)
 	_, err := client.Schedules.New(context.TODO(), knock.ScheduleNewParams{
 		Recipients: knock.F([]knock.ScheduleNewParamsRecipientUnion{shared.UnionString("user_123")}),
-		Repeats: knock.F([]knock.ScheduleNewParamsRepeat{{
+		Repeats: knock.F([]shared.ScheduleRepeatRuleParam{{
 			Typename:   knock.F("ScheduleRepeat"),
-			Frequency:  knock.F(knock.ScheduleNewParamsRepeatsFrequencyDaily),
+			Frequency:  knock.F(shared.ScheduleRepeatRuleFrequencyDaily),
 			DayOfMonth: knock.Null[int64](),
-			Days:       knock.F([]knock.ScheduleNewParamsRepeatsDay{knock.ScheduleNewParamsRepeatsDayMon, knock.ScheduleNewParamsRepeatsDayTue, knock.ScheduleNewParamsRepeatsDayWed, knock.ScheduleNewParamsRepeatsDayThu, knock.ScheduleNewParamsRepeatsDayFri, knock.ScheduleNewParamsRepeatsDaySat, knock.ScheduleNewParamsRepeatsDaySun}),
+			Days:       knock.F([]shared.ScheduleRepeatRuleDay{shared.ScheduleRepeatRuleDayMon, shared.ScheduleRepeatRuleDayTue, shared.ScheduleRepeatRuleDayWed, shared.ScheduleRepeatRuleDayThu, shared.ScheduleRepeatRuleDayFri, shared.ScheduleRepeatRuleDaySat, shared.ScheduleRepeatRuleDaySun}),
 			Hours:      knock.Null[int64](),
 			Interval:   knock.F(int64(1)),
 			Minutes:    knock.Null[int64](),
@@ -76,11 +76,11 @@ func TestScheduleUpdateWithOptionalParams(t *testing.T) {
 			"key": "bar",
 		}),
 		EndingAt: knock.Null[time.Time](),
-		Repeats: knock.F([]knock.ScheduleUpdateParamsRepeat{{
+		Repeats: knock.F([]shared.ScheduleRepeatRuleParam{{
 			Typename:   knock.F("ScheduleRepeat"),
-			Frequency:  knock.F(knock.ScheduleUpdateParamsRepeatsFrequencyDaily),
+			Frequency:  knock.F(shared.ScheduleRepeatRuleFrequencyDaily),
 			DayOfMonth: knock.Null[int64](),
-			Days:       knock.F([]knock.ScheduleUpdateParamsRepeatsDay{knock.ScheduleUpdateParamsRepeatsDayMon, knock.ScheduleUpdateParamsRepeatsDayTue, knock.ScheduleUpdateParamsRepeatsDayWed, knock.ScheduleUpdateParamsRepeatsDayThu, knock.ScheduleUpdateParamsRepeatsDayFri, knock.ScheduleUpdateParamsRepeatsDaySat, knock.ScheduleUpdateParamsRepeatsDaySun}),
+			Days:       knock.F([]shared.ScheduleRepeatRuleDay{shared.ScheduleRepeatRuleDayMon, shared.ScheduleRepeatRuleDayTue, shared.ScheduleRepeatRuleDayWed, shared.ScheduleRepeatRuleDayThu, shared.ScheduleRepeatRuleDayFri, shared.ScheduleRepeatRuleDaySat, shared.ScheduleRepeatRuleDaySun}),
 			Hours:      knock.Null[int64](),
 			Interval:   knock.F(int64(1)),
 			Minutes:    knock.Null[int64](),
