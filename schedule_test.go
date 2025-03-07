@@ -7,7 +7,6 @@ import (
 	"errors"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/stainless-sdks/knock-go"
 	"github.com/stainless-sdks/knock-go/internal/testutil"
@@ -15,7 +14,7 @@ import (
 	"github.com/stainless-sdks/knock-go/shared"
 )
 
-func TestScheduleNewWithOptionalParams(t *testing.T) {
+func TestScheduleNew(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -28,25 +27,7 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithBearerToken("My Bearer Token"),
 	)
-	_, err := client.Schedules.New(context.TODO(), knock.ScheduleNewParams{
-		Recipients: knock.F([]knock.ScheduleNewParamsRecipientUnion{shared.UnionString("user_123")}),
-		Repeats: knock.F([]knock.ScheduleNewParamsRepeat{{
-			Typename:   knock.F("ScheduleRepeat"),
-			Frequency:  knock.F(knock.ScheduleNewParamsRepeatsFrequencyDaily),
-			DayOfMonth: knock.Null[int64](),
-			Days:       knock.F([]knock.ScheduleNewParamsRepeatsDay{knock.ScheduleNewParamsRepeatsDayMon, knock.ScheduleNewParamsRepeatsDayTue, knock.ScheduleNewParamsRepeatsDayWed, knock.ScheduleNewParamsRepeatsDayThu, knock.ScheduleNewParamsRepeatsDayFri, knock.ScheduleNewParamsRepeatsDaySat, knock.ScheduleNewParamsRepeatsDaySun}),
-			Hours:      knock.Null[int64](),
-			Interval:   knock.F(int64(1)),
-			Minutes:    knock.Null[int64](),
-		}}),
-		Workflow: knock.F("comment-created"),
-		Data: knock.F(map[string]interface{}{
-			"key": "bar",
-		}),
-		EndingAt:    knock.Null[time.Time](),
-		ScheduledAt: knock.Null[time.Time](),
-		Tenant:      knock.F[knock.ScheduleNewParamsTenantUnion](shared.UnionString("acme_corp")),
-	})
+	_, err := client.Schedules.New(context.TODO())
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {
@@ -56,7 +37,7 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestScheduleUpdateWithOptionalParams(t *testing.T) {
+func TestScheduleUpdate(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -69,25 +50,7 @@ func TestScheduleUpdateWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithBearerToken("My Bearer Token"),
 	)
-	_, err := client.Schedules.Update(context.TODO(), knock.ScheduleUpdateParams{
-		ScheduleIDs: knock.F([]string{"123e4567-e89b-12d3-a456-426614174000"}),
-		Actor:       knock.F[knock.ScheduleUpdateParamsActorUnion](shared.UnionString("string")),
-		Data: knock.F(map[string]interface{}{
-			"key": "bar",
-		}),
-		EndingAt: knock.Null[time.Time](),
-		Repeats: knock.F([]knock.ScheduleUpdateParamsRepeat{{
-			Typename:   knock.F("ScheduleRepeat"),
-			Frequency:  knock.F(knock.ScheduleUpdateParamsRepeatsFrequencyDaily),
-			DayOfMonth: knock.Null[int64](),
-			Days:       knock.F([]knock.ScheduleUpdateParamsRepeatsDay{knock.ScheduleUpdateParamsRepeatsDayMon, knock.ScheduleUpdateParamsRepeatsDayTue, knock.ScheduleUpdateParamsRepeatsDayWed, knock.ScheduleUpdateParamsRepeatsDayThu, knock.ScheduleUpdateParamsRepeatsDayFri, knock.ScheduleUpdateParamsRepeatsDaySat, knock.ScheduleUpdateParamsRepeatsDaySun}),
-			Hours:      knock.Null[int64](),
-			Interval:   knock.F(int64(1)),
-			Minutes:    knock.Null[int64](),
-		}}),
-		ScheduledAt: knock.Null[time.Time](),
-		Tenant:      knock.F[knock.ScheduleUpdateParamsTenantUnion](shared.UnionString("acme_corp")),
-	})
+	_, err := client.Schedules.Update(context.TODO())
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {
@@ -140,9 +103,7 @@ func TestScheduleDelete(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithBearerToken("My Bearer Token"),
 	)
-	_, err := client.Schedules.Delete(context.TODO(), knock.ScheduleDeleteParams{
-		ScheduleIDs: knock.F([]string{"123e4567-e89b-12d3-a456-426614174000"}),
-	})
+	_, err := client.Schedules.Delete(context.TODO())
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {

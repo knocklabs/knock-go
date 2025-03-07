@@ -48,8 +48,8 @@ func (r *ProviderMsTeamService) CheckAuth(ctx context.Context, channelID string,
 	return
 }
 
-// List the Microsoft Teams channels within a team. By default, archived and
-// private channels are excluded from the results.
+// Get a list of the Microsoft Teams channels within a team. By default, archived
+// and private channels are excluded from the results.
 func (r *ProviderMsTeamService) ListChannels(ctx context.Context, channelID string, query ProviderMsTeamListChannelsParams, opts ...option.RequestOption) (res *ProviderMsTeamListChannelsResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if channelID == "" {
@@ -61,8 +61,7 @@ func (r *ProviderMsTeamService) ListChannels(ctx context.Context, channelID stri
 	return
 }
 
-// Get a list of teams belonging to the Microsoft Entra tenant. By default,
-// archived and private channels are excluded from the results.
+// Get a list of teams belonging to the Microsoft Entra tenant
 func (r *ProviderMsTeamService) ListTeams(ctx context.Context, channelID string, query ProviderMsTeamListTeamsParams, opts ...option.RequestOption) (res *ProviderMsTeamListTeamsResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if channelID == "" {

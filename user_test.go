@@ -43,18 +43,18 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 			Preferences: knock.F(map[string]knock.UserUpdateParamsPreferences{
 				"default": {
 					Categories: knock.F(map[string]knock.UserUpdateParamsPreferencesCategoriesUnion{
-						"transactional": knock.UserUpdateParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObject{
-							ChannelTypes: knock.F(knock.UserUpdateParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypes{
-								Chat:      knock.F[knock.UserUpdateParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion](shared.UnionBool(true)),
-								Email:     knock.F[knock.UserUpdateParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion](shared.UnionBool(false)),
-								HTTP:      knock.F[knock.UserUpdateParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
-								InAppFeed: knock.F[knock.UserUpdateParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
-								Push:      knock.F[knock.UserUpdateParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion](shared.UnionBool(true)),
-								SMS:       knock.F[knock.UserUpdateParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion](shared.UnionBool(true)),
+						"transactional": knock.UserUpdateParamsPreferencesCategoriesObject{
+							ChannelTypes: knock.F(knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypes{
+								Chat:      knock.F[knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypesChatUnion](shared.UnionBool(true)),
+								Email:     knock.F[knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypesEmailUnion](shared.UnionBool(false)),
+								HTTP:      knock.F[knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
+								InAppFeed: knock.F[knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
+								Push:      knock.F[knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypesPushUnion](shared.UnionBool(true)),
+								SMS:       knock.F[knock.UserUpdateParamsPreferencesCategoriesObjectChannelTypesSMSUnion](shared.UnionBool(true)),
 							}),
-							Conditions: knock.F([]knock.UserUpdateParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectCondition{{
+							Conditions: knock.F([]knock.UserUpdateParamsPreferencesCategoriesObjectCondition{{
 								Argument: knock.F("some_property"),
-								Operator: knock.F(knock.UserUpdateParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo),
+								Operator: knock.F(knock.UserUpdateParamsPreferencesCategoriesObjectConditionsOperatorEqualTo),
 								Variable: knock.F("recipient.property"),
 							}}),
 						},
@@ -68,18 +68,18 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 						SMS:       knock.F[knock.UserUpdateParamsPreferencesChannelTypesSMSUnion](shared.UnionBool(true)),
 					}),
 					Workflows: knock.F(map[string]knock.UserUpdateParamsPreferencesWorkflowsUnion{
-						"dinosaurs-loose": knock.UserUpdateParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObject{
-							ChannelTypes: knock.F(knock.UserUpdateParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypes{
-								Chat:      knock.F[knock.UserUpdateParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion](shared.UnionBool(true)),
-								Email:     knock.F[knock.UserUpdateParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion](shared.UnionBool(true)),
-								HTTP:      knock.F[knock.UserUpdateParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
-								InAppFeed: knock.F[knock.UserUpdateParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
-								Push:      knock.F[knock.UserUpdateParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion](shared.UnionBool(true)),
-								SMS:       knock.F[knock.UserUpdateParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion](shared.UnionBool(true)),
+						"dinosaurs-loose": knock.UserUpdateParamsPreferencesWorkflowsObject{
+							ChannelTypes: knock.F(knock.UserUpdateParamsPreferencesWorkflowsObjectChannelTypes{
+								Chat:      knock.F[knock.UserUpdateParamsPreferencesWorkflowsObjectChannelTypesChatUnion](shared.UnionBool(true)),
+								Email:     knock.F[knock.UserUpdateParamsPreferencesWorkflowsObjectChannelTypesEmailUnion](shared.UnionBool(true)),
+								HTTP:      knock.F[knock.UserUpdateParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
+								InAppFeed: knock.F[knock.UserUpdateParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
+								Push:      knock.F[knock.UserUpdateParamsPreferencesWorkflowsObjectChannelTypesPushUnion](shared.UnionBool(true)),
+								SMS:       knock.F[knock.UserUpdateParamsPreferencesWorkflowsObjectChannelTypesSMSUnion](shared.UnionBool(true)),
 							}),
-							Conditions: knock.F([]knock.UserUpdateParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectCondition{{
+							Conditions: knock.F([]knock.UserUpdateParamsPreferencesWorkflowsObjectCondition{{
 								Argument: knock.F("some_property"),
-								Operator: knock.F(knock.UserUpdateParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo),
+								Operator: knock.F(knock.UserUpdateParamsPreferencesWorkflowsObjectConditionsOperatorEqualTo),
 								Variable: knock.F("recipient.property"),
 							}}),
 						},
@@ -343,6 +343,7 @@ func TestUserListSubscriptionsWithOptionalParams(t *testing.T) {
 		knock.UserListSubscriptionsParams{
 			After:    knock.F("after"),
 			Before:   knock.F("before"),
+			Objects:  knock.F([]knock.UserListSubscriptionsParamsObjectUnion{shared.UnionString("user_123")}),
 			PageSize: knock.F(int64(0)),
 		},
 	)
@@ -355,7 +356,7 @@ func TestUserListSubscriptionsWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestUserMerge(t *testing.T) {
+func TestUserMergeWithOptionalParams(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -384,7 +385,7 @@ func TestUserMerge(t *testing.T) {
 	}
 }
 
-func TestUserSetChannelDataWithOptionalParams(t *testing.T) {
+func TestUserSetChannelData(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -401,11 +402,6 @@ func TestUserSetChannelDataWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"user_id",
 		"182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
-		knock.UserSetChannelDataParams{
-			Data: knock.F[knock.UserSetChannelDataParamsDataUnion](knock.UserSetChannelDataParamsDataPushChannelData{
-				Tokens: knock.F([]string{"push_token_1"}),
-			}),
-		},
 	)
 	if err != nil {
 		var apierr *knock.Error
@@ -436,18 +432,18 @@ func TestUserSetPreferencesWithOptionalParams(t *testing.T) {
 		knock.UserSetPreferencesParams{
 			Categories: knock.F(map[string]knock.UserSetPreferencesParamsCategoriesUnion{
 				"marketing": shared.UnionBool(false),
-				"transactional": knock.UserSetPreferencesParamsCategoriesPreferenceSetWorkflowCategorySettingObject{
-					ChannelTypes: knock.F(knock.UserSetPreferencesParamsCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypes{
-						Chat:      knock.F[knock.UserSetPreferencesParamsCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion](shared.UnionBool(true)),
-						Email:     knock.F[knock.UserSetPreferencesParamsCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion](shared.UnionBool(false)),
-						HTTP:      knock.F[knock.UserSetPreferencesParamsCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
-						InAppFeed: knock.F[knock.UserSetPreferencesParamsCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
-						Push:      knock.F[knock.UserSetPreferencesParamsCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion](shared.UnionBool(true)),
-						SMS:       knock.F[knock.UserSetPreferencesParamsCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion](shared.UnionBool(true)),
+				"transactional": knock.UserSetPreferencesParamsCategoriesObject{
+					ChannelTypes: knock.F(knock.UserSetPreferencesParamsCategoriesObjectChannelTypes{
+						Chat:      knock.F[knock.UserSetPreferencesParamsCategoriesObjectChannelTypesChatUnion](shared.UnionBool(true)),
+						Email:     knock.F[knock.UserSetPreferencesParamsCategoriesObjectChannelTypesEmailUnion](shared.UnionBool(false)),
+						HTTP:      knock.F[knock.UserSetPreferencesParamsCategoriesObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
+						InAppFeed: knock.F[knock.UserSetPreferencesParamsCategoriesObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
+						Push:      knock.F[knock.UserSetPreferencesParamsCategoriesObjectChannelTypesPushUnion](shared.UnionBool(true)),
+						SMS:       knock.F[knock.UserSetPreferencesParamsCategoriesObjectChannelTypesSMSUnion](shared.UnionBool(true)),
 					}),
-					Conditions: knock.F([]knock.UserSetPreferencesParamsCategoriesPreferenceSetWorkflowCategorySettingObjectCondition{{
+					Conditions: knock.F([]knock.UserSetPreferencesParamsCategoriesObjectCondition{{
 						Argument: knock.F("some_property"),
-						Operator: knock.F(knock.UserSetPreferencesParamsCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo),
+						Operator: knock.F(knock.UserSetPreferencesParamsCategoriesObjectConditionsOperatorEqualTo),
 						Variable: knock.F("recipient.property"),
 					}}),
 				},
@@ -461,18 +457,18 @@ func TestUserSetPreferencesWithOptionalParams(t *testing.T) {
 				SMS:       knock.F[knock.UserSetPreferencesParamsChannelTypesSMSUnion](shared.UnionBool(true)),
 			}),
 			Workflows: knock.F(map[string]knock.UserSetPreferencesParamsWorkflowsUnion{
-				"dinosaurs-loose": knock.UserSetPreferencesParamsWorkflowsPreferenceSetWorkflowCategorySettingObject{
-					ChannelTypes: knock.F(knock.UserSetPreferencesParamsWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypes{
-						Chat:      knock.F[knock.UserSetPreferencesParamsWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion](shared.UnionBool(true)),
-						Email:     knock.F[knock.UserSetPreferencesParamsWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion](shared.UnionBool(false)),
-						HTTP:      knock.F[knock.UserSetPreferencesParamsWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
-						InAppFeed: knock.F[knock.UserSetPreferencesParamsWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
-						Push:      knock.F[knock.UserSetPreferencesParamsWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion](shared.UnionBool(true)),
-						SMS:       knock.F[knock.UserSetPreferencesParamsWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion](shared.UnionBool(true)),
+				"dinosaurs-loose": knock.UserSetPreferencesParamsWorkflowsObject{
+					ChannelTypes: knock.F(knock.UserSetPreferencesParamsWorkflowsObjectChannelTypes{
+						Chat:      knock.F[knock.UserSetPreferencesParamsWorkflowsObjectChannelTypesChatUnion](shared.UnionBool(true)),
+						Email:     knock.F[knock.UserSetPreferencesParamsWorkflowsObjectChannelTypesEmailUnion](shared.UnionBool(false)),
+						HTTP:      knock.F[knock.UserSetPreferencesParamsWorkflowsObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
+						InAppFeed: knock.F[knock.UserSetPreferencesParamsWorkflowsObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
+						Push:      knock.F[knock.UserSetPreferencesParamsWorkflowsObjectChannelTypesPushUnion](shared.UnionBool(true)),
+						SMS:       knock.F[knock.UserSetPreferencesParamsWorkflowsObjectChannelTypesSMSUnion](shared.UnionBool(true)),
 					}),
-					Conditions: knock.F([]knock.UserSetPreferencesParamsWorkflowsPreferenceSetWorkflowCategorySettingObjectCondition{{
+					Conditions: knock.F([]knock.UserSetPreferencesParamsWorkflowsObjectCondition{{
 						Argument: knock.F("some_property"),
-						Operator: knock.F(knock.UserSetPreferencesParamsWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo),
+						Operator: knock.F(knock.UserSetPreferencesParamsWorkflowsObjectConditionsOperatorEqualTo),
 						Variable: knock.F("recipient.property"),
 					}}),
 				},

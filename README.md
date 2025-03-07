@@ -49,7 +49,7 @@ func main() {
 		context.TODO(),
 		"dinosaurs-loose",
 		knock.WorkflowTriggerParams{
-			Data: knock.F(map[string]interface{}{
+			Data: knock.F(map[string]string{
 				"dinosaur": "triceratops",
 			}),
 			Recipients: knock.F([]knock.WorkflowTriggerParamsRecipientUnion{shared.UnionString("dnedry")}),

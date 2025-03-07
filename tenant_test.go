@@ -114,18 +114,18 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 			Preferences: knock.F(map[string]knock.TenantSetParamsPreferences{
 				"default": {
 					Categories: knock.F(map[string]knock.TenantSetParamsPreferencesCategoriesUnion{
-						"transactional": knock.TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObject{
-							ChannelTypes: knock.F(knock.TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypes{
-								Chat:      knock.F[knock.TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion](shared.UnionBool(true)),
-								Email:     knock.F[knock.TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion](shared.UnionBool(false)),
-								HTTP:      knock.F[knock.TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
-								InAppFeed: knock.F[knock.TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
-								Push:      knock.F[knock.TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion](shared.UnionBool(true)),
-								SMS:       knock.F[knock.TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion](shared.UnionBool(true)),
+						"transactional": knock.TenantSetParamsPreferencesCategoriesObject{
+							ChannelTypes: knock.F(knock.TenantSetParamsPreferencesCategoriesObjectChannelTypes{
+								Chat:      knock.F[knock.TenantSetParamsPreferencesCategoriesObjectChannelTypesChatUnion](shared.UnionBool(true)),
+								Email:     knock.F[knock.TenantSetParamsPreferencesCategoriesObjectChannelTypesEmailUnion](shared.UnionBool(false)),
+								HTTP:      knock.F[knock.TenantSetParamsPreferencesCategoriesObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
+								InAppFeed: knock.F[knock.TenantSetParamsPreferencesCategoriesObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
+								Push:      knock.F[knock.TenantSetParamsPreferencesCategoriesObjectChannelTypesPushUnion](shared.UnionBool(true)),
+								SMS:       knock.F[knock.TenantSetParamsPreferencesCategoriesObjectChannelTypesSMSUnion](shared.UnionBool(true)),
 							}),
-							Conditions: knock.F([]knock.TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectCondition{{
+							Conditions: knock.F([]knock.TenantSetParamsPreferencesCategoriesObjectCondition{{
 								Argument: knock.F("some_property"),
-								Operator: knock.F(knock.TenantSetParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo),
+								Operator: knock.F(knock.TenantSetParamsPreferencesCategoriesObjectConditionsOperatorEqualTo),
 								Variable: knock.F("recipient.property"),
 							}}),
 						},
@@ -139,18 +139,18 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 						SMS:       knock.F[knock.TenantSetParamsPreferencesChannelTypesSMSUnion](shared.UnionBool(true)),
 					}),
 					Workflows: knock.F(map[string]knock.TenantSetParamsPreferencesWorkflowsUnion{
-						"dinosaurs-loose": knock.TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObject{
-							ChannelTypes: knock.F(knock.TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypes{
-								Chat:      knock.F[knock.TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion](shared.UnionBool(true)),
-								Email:     knock.F[knock.TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion](shared.UnionBool(true)),
-								HTTP:      knock.F[knock.TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
-								InAppFeed: knock.F[knock.TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
-								Push:      knock.F[knock.TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion](shared.UnionBool(true)),
-								SMS:       knock.F[knock.TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion](shared.UnionBool(true)),
+						"dinosaurs-loose": knock.TenantSetParamsPreferencesWorkflowsObject{
+							ChannelTypes: knock.F(knock.TenantSetParamsPreferencesWorkflowsObjectChannelTypes{
+								Chat:      knock.F[knock.TenantSetParamsPreferencesWorkflowsObjectChannelTypesChatUnion](shared.UnionBool(true)),
+								Email:     knock.F[knock.TenantSetParamsPreferencesWorkflowsObjectChannelTypesEmailUnion](shared.UnionBool(true)),
+								HTTP:      knock.F[knock.TenantSetParamsPreferencesWorkflowsObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
+								InAppFeed: knock.F[knock.TenantSetParamsPreferencesWorkflowsObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
+								Push:      knock.F[knock.TenantSetParamsPreferencesWorkflowsObjectChannelTypesPushUnion](shared.UnionBool(true)),
+								SMS:       knock.F[knock.TenantSetParamsPreferencesWorkflowsObjectChannelTypesSMSUnion](shared.UnionBool(true)),
 							}),
-							Conditions: knock.F([]knock.TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectCondition{{
+							Conditions: knock.F([]knock.TenantSetParamsPreferencesWorkflowsObjectCondition{{
 								Argument: knock.F("some_property"),
-								Operator: knock.F(knock.TenantSetParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo),
+								Operator: knock.F(knock.TenantSetParamsPreferencesWorkflowsObjectConditionsOperatorEqualTo),
 								Variable: knock.F("recipient.property"),
 							}}),
 						},
@@ -167,18 +167,18 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 				PreferenceSet: knock.F(knock.TenantSetParamsSettingsPreferenceSet{
 					Categories: knock.F(map[string]knock.TenantSetParamsSettingsPreferenceSetCategoriesUnion{
 						"marketing": shared.UnionBool(false),
-						"transactional": knock.TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject{
-							ChannelTypes: knock.F(knock.TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypes{
-								Chat:      knock.F[knock.TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion](shared.UnionBool(true)),
-								Email:     knock.F[knock.TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion](shared.UnionBool(false)),
-								HTTP:      knock.F[knock.TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
-								InAppFeed: knock.F[knock.TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
-								Push:      knock.F[knock.TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion](shared.UnionBool(true)),
-								SMS:       knock.F[knock.TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion](shared.UnionBool(true)),
+						"transactional": knock.TenantSetParamsSettingsPreferenceSetCategoriesObject{
+							ChannelTypes: knock.F(knock.TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypes{
+								Chat:      knock.F[knock.TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesChatUnion](shared.UnionBool(true)),
+								Email:     knock.F[knock.TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesEmailUnion](shared.UnionBool(false)),
+								HTTP:      knock.F[knock.TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
+								InAppFeed: knock.F[knock.TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
+								Push:      knock.F[knock.TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesPushUnion](shared.UnionBool(true)),
+								SMS:       knock.F[knock.TenantSetParamsSettingsPreferenceSetCategoriesObjectChannelTypesSMSUnion](shared.UnionBool(true)),
 							}),
-							Conditions: knock.F([]knock.TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectCondition{{
+							Conditions: knock.F([]knock.TenantSetParamsSettingsPreferenceSetCategoriesObjectCondition{{
 								Argument: knock.F("some_property"),
-								Operator: knock.F(knock.TenantSetParamsSettingsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo),
+								Operator: knock.F(knock.TenantSetParamsSettingsPreferenceSetCategoriesObjectConditionsOperatorEqualTo),
 								Variable: knock.F("recipient.property"),
 							}}),
 						},
@@ -192,18 +192,18 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 						SMS:       knock.F[knock.TenantSetParamsSettingsPreferenceSetChannelTypesSMSUnion](shared.UnionBool(true)),
 					}),
 					Workflows: knock.F(map[string]knock.TenantSetParamsSettingsPreferenceSetWorkflowsUnion{
-						"dinosaurs-loose": knock.TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject{
-							ChannelTypes: knock.F(knock.TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypes{
-								Chat:      knock.F[knock.TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesChatUnion](shared.UnionBool(true)),
-								Email:     knock.F[knock.TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesEmailUnion](shared.UnionBool(false)),
-								HTTP:      knock.F[knock.TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
-								InAppFeed: knock.F[knock.TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
-								Push:      knock.F[knock.TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesPushUnion](shared.UnionBool(true)),
-								SMS:       knock.F[knock.TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelTypesSMSUnion](shared.UnionBool(true)),
+						"dinosaurs-loose": knock.TenantSetParamsSettingsPreferenceSetWorkflowsObject{
+							ChannelTypes: knock.F(knock.TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypes{
+								Chat:      knock.F[knock.TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesChatUnion](shared.UnionBool(true)),
+								Email:     knock.F[knock.TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesEmailUnion](shared.UnionBool(false)),
+								HTTP:      knock.F[knock.TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesHTTPUnion](shared.UnionBool(true)),
+								InAppFeed: knock.F[knock.TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesInAppFeedUnion](shared.UnionBool(true)),
+								Push:      knock.F[knock.TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesPushUnion](shared.UnionBool(true)),
+								SMS:       knock.F[knock.TenantSetParamsSettingsPreferenceSetWorkflowsObjectChannelTypesSMSUnion](shared.UnionBool(true)),
 							}),
-							Conditions: knock.F([]knock.TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectCondition{{
+							Conditions: knock.F([]knock.TenantSetParamsSettingsPreferenceSetWorkflowsObjectCondition{{
 								Argument: knock.F("some_property"),
-								Operator: knock.F(knock.TenantSetParamsSettingsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectConditionsOperatorEqualTo),
+								Operator: knock.F(knock.TenantSetParamsSettingsPreferenceSetWorkflowsObjectConditionsOperatorEqualTo),
 								Variable: knock.F("recipient.property"),
 							}}),
 						},
