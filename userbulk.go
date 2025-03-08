@@ -5,10 +5,8 @@ package knock
 import (
 	"context"
 	"net/http"
-	"net/url"
 
 	"github.com/stainless-sdks/knock-go/internal/apijson"
-	"github.com/stainless-sdks/knock-go/internal/apiquery"
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
@@ -34,10 +32,10 @@ func NewUserBulkService(opts ...option.RequestOption) (r *UserBulkService) {
 }
 
 // Bulk delete users
-func (r *UserBulkService) Delete(ctx context.Context, params UserBulkDeleteParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
+func (r *UserBulkService) Delete(ctx context.Context, body UserBulkDeleteParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/users/bulk/delete"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
 
@@ -58,21 +56,11 @@ func (r *UserBulkService) SetPreferences(ctx context.Context, body UserBulkSetPr
 }
 
 type UserBulkDeleteParams struct {
-	// The IDs of the users to delete
-	QueryUserIDs param.Field[[]string] `query:"user_ids,required"`
-	BodyUserIDs  param.Field[[]string] `json:"user_ids,required"`
+	UserIDs param.Field[[]string] `json:"user_ids,required"`
 }
 
 func (r UserBulkDeleteParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-// URLQuery serializes [UserBulkDeleteParams]'s query parameters as `url.Values`.
-func (r UserBulkDeleteParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
 }
 
 type UserBulkIdentifyParams struct {

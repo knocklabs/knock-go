@@ -54,7 +54,7 @@ func TestTenantDelete(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithBearerToken("My Bearer Token"),
 	)
-	_, err := client.Tenants.Delete(context.TODO(), "id")
+	_, err := client.Tenants.Delete(context.TODO(), "tenant_id")
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {
@@ -77,7 +77,7 @@ func TestTenantGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithBearerToken("My Bearer Token"),
 	)
-	_, err := client.Tenants.Get(context.TODO(), "id")
+	_, err := client.Tenants.Get(context.TODO(), "tenant_id")
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {
@@ -102,7 +102,7 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 	)
 	_, err := client.Tenants.Set(
 		context.TODO(),
-		"id",
+		"tenant_id",
 		knock.TenantSetParams{
 			ChannelData: knock.F(knock.InlineChannelDataRequestParam{
 				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.ChannelDataRequestParam{

@@ -39,24 +39,24 @@ func NewUserFeedService(opts ...option.RequestOption) (r *UserFeedService) {
 }
 
 // Returns the feed settings for a user.
-func (r *UserFeedService) GetSettings(ctx context.Context, userID string, id string, opts ...option.RequestOption) (res *UserFeedGetSettingsResponse, err error) {
+func (r *UserFeedService) GetSettings(ctx context.Context, userID string, channelID string, opts ...option.RequestOption) (res *UserFeedGetSettingsResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
 	}
-	if id == "" {
-		err = errors.New("missing required id parameter")
+	if channelID == "" {
+		err = errors.New("missing required channel_id parameter")
 		return
 	}
-	path := fmt.Sprintf("v1/users/%s/feeds/%s/settings", userID, id)
+	path := fmt.Sprintf("v1/users/%s/feeds/%s/settings", userID, channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
 	return
 }
 
 // Returns a paginated list of feed items for a user, including metadata about the
 // feed.
-func (r *UserFeedService) ListItems(ctx context.Context, userID string, id string, query UserFeedListItemsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[UserFeedListItemsResponse], err error) {
+func (r *UserFeedService) ListItems(ctx context.Context, userID string, channelID string, query UserFeedListItemsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[UserFeedListItemsResponse], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -64,11 +64,11 @@ func (r *UserFeedService) ListItems(ctx context.Context, userID string, id strin
 		err = errors.New("missing required user_id parameter")
 		return
 	}
-	if id == "" {
-		err = errors.New("missing required id parameter")
+	if channelID == "" {
+		err = errors.New("missing required channel_id parameter")
 		return
 	}
-	path := fmt.Sprintf("v1/users/%s/feeds/%s", userID, id)
+	path := fmt.Sprintf("v1/users/%s/feeds/%s", userID, channelID)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
 	if err != nil {
 		return nil, err
@@ -83,8 +83,8 @@ func (r *UserFeedService) ListItems(ctx context.Context, userID string, id strin
 
 // Returns a paginated list of feed items for a user, including metadata about the
 // feed.
-func (r *UserFeedService) ListItemsAutoPaging(ctx context.Context, userID string, id string, query UserFeedListItemsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[UserFeedListItemsResponse] {
-	return pagination.NewEntriesCursorAutoPager(r.ListItems(ctx, userID, id, query, opts...))
+func (r *UserFeedService) ListItemsAutoPaging(ctx context.Context, userID string, channelID string, query UserFeedListItemsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[UserFeedListItemsResponse] {
+	return pagination.NewEntriesCursorAutoPager(r.ListItems(ctx, userID, channelID, query, opts...))
 }
 
 // The response for the user's feed settings

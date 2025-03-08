@@ -62,37 +62,37 @@ func (r *TenantService) ListAutoPaging(ctx context.Context, query TenantListPara
 }
 
 // Delete a tenant
-func (r *TenantService) Delete(ctx context.Context, id string, opts ...option.RequestOption) (res *string, err error) {
+func (r *TenantService) Delete(ctx context.Context, tenantID string, opts ...option.RequestOption) (res *string, err error) {
 	opts = append(r.Options[:], opts...)
-	if id == "" {
-		err = errors.New("missing required id parameter")
+	if tenantID == "" {
+		err = errors.New("missing required tenant_id parameter")
 		return
 	}
-	path := fmt.Sprintf("v1/tenants/%s", id)
+	path := fmt.Sprintf("v1/tenants/%s", tenantID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
 	return
 }
 
 // Get a tenant
-func (r *TenantService) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *Tenant, err error) {
+func (r *TenantService) Get(ctx context.Context, tenantID string, opts ...option.RequestOption) (res *Tenant, err error) {
 	opts = append(r.Options[:], opts...)
-	if id == "" {
-		err = errors.New("missing required id parameter")
+	if tenantID == "" {
+		err = errors.New("missing required tenant_id parameter")
 		return
 	}
-	path := fmt.Sprintf("v1/tenants/%s", id)
+	path := fmt.Sprintf("v1/tenants/%s", tenantID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
 	return
 }
 
 // Set a tenant
-func (r *TenantService) Set(ctx context.Context, id string, body TenantSetParams, opts ...option.RequestOption) (res *Tenant, err error) {
+func (r *TenantService) Set(ctx context.Context, tenantID string, body TenantSetParams, opts ...option.RequestOption) (res *Tenant, err error) {
 	opts = append(r.Options[:], opts...)
-	if id == "" {
-		err = errors.New("missing required id parameter")
+	if tenantID == "" {
+		err = errors.New("missing required tenant_id parameter")
 		return
 	}
-	path := fmt.Sprintf("v1/tenants/%s", id)
+	path := fmt.Sprintf("v1/tenants/%s", tenantID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
 	return
 }

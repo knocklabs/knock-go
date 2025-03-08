@@ -29,8 +29,7 @@ func TestUserBulkDelete(t *testing.T) {
 		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Users.Bulk.Delete(context.TODO(), knock.UserBulkDeleteParams{
-		QueryUserIDs: knock.F([]string{"string"}),
-		BodyUserIDs:  knock.F([]string{"user_1", "user_2"}),
+		UserIDs: knock.F([]string{"user_1", "user_2"}),
 	})
 	if err != nil {
 		var apierr *knock.Error

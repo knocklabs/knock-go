@@ -62,7 +62,7 @@ func TestObjectDelete(t *testing.T) {
 	_, err := client.Objects.Delete(
 		context.TODO(),
 		"collection",
-		"id",
+		"object_id",
 	)
 	if err != nil {
 		var apierr *knock.Error
@@ -208,7 +208,7 @@ func TestObjectGet(t *testing.T) {
 	_, err := client.Objects.Get(
 		context.TODO(),
 		"collection",
-		"id",
+		"object_id",
 	)
 	if err != nil {
 		var apierr *knock.Error
@@ -264,7 +264,7 @@ func TestObjectGetPreferencesWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"collection",
 		"object_id",
-		"id",
+		"default",
 		knock.ObjectGetPreferencesParams{
 			Tenant: knock.F("tenant"),
 		},
@@ -320,33 +320,6 @@ func TestObjectListMessagesWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestObjectListPreferences(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := knock.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
-	)
-	_, err := client.Objects.ListPreferences(
-		context.TODO(),
-		"collection",
-		"object_id",
-	)
-	if err != nil {
-		var apierr *knock.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
 func TestObjectListSchedulesWithOptionalParams(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
@@ -363,7 +336,7 @@ func TestObjectListSchedulesWithOptionalParams(t *testing.T) {
 	_, err := client.Objects.ListSchedules(
 		context.TODO(),
 		"collection",
-		"id",
+		"object_id",
 		knock.ObjectListSchedulesParams{
 			After:    knock.F("after"),
 			Before:   knock.F("before"),
@@ -402,6 +375,7 @@ func TestObjectListSubscriptionsWithOptionalParams(t *testing.T) {
 			After:      knock.F("after"),
 			Before:     knock.F("before"),
 			Mode:       knock.F(knock.ObjectListSubscriptionsParamsModeRecipient),
+			Objects:    knock.F([]knock.ObjectListSubscriptionsParamsObjectUnion{shared.UnionString("user_123")}),
 			PageSize:   knock.F(int64(0)),
 			Recipients: knock.F([]knock.ObjectListSubscriptionsParamsRecipientUnion{shared.UnionString("user_123")}),
 		},
@@ -431,7 +405,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 	_, err := client.Objects.Set(
 		context.TODO(),
 		"collection",
-		"id",
+		"object_id",
 		knock.ObjectSetParams{
 			ChannelData: knock.F(knock.InlineChannelDataRequestParam{
 				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.ChannelDataRequestParam{
@@ -549,7 +523,7 @@ func TestObjectSetPreferencesWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"collection",
 		"object_id",
-		"id",
+		"default",
 		knock.ObjectSetPreferencesParams{
 			PreferenceSetRequest: knock.PreferenceSetRequestParam{
 				Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{

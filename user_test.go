@@ -215,7 +215,7 @@ func TestUserGetPreferencesWithOptionalParams(t *testing.T) {
 	_, err := client.Users.GetPreferences(
 		context.TODO(),
 		"user_id",
-		"id",
+		"default",
 		knock.UserGetPreferencesParams{
 			Tenant: knock.F("tenant"),
 		},
@@ -436,7 +436,7 @@ func TestUserSetPreferencesWithOptionalParams(t *testing.T) {
 	_, err := client.Users.SetPreferences(
 		context.TODO(),
 		"user_id",
-		"id",
+		"default",
 		knock.UserSetPreferencesParams{
 			PreferenceSetRequest: knock.PreferenceSetRequestParam{
 				Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{

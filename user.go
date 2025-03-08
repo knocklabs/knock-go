@@ -117,17 +117,17 @@ func (r *UserService) GetChannelData(ctx context.Context, userID string, channel
 }
 
 // Get preference set
-func (r *UserService) GetPreferences(ctx context.Context, userID string, id string, query UserGetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
+func (r *UserService) GetPreferences(ctx context.Context, userID string, preferenceSetID string, query UserGetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
 	}
-	if id == "" {
-		err = errors.New("missing required id parameter")
+	if preferenceSetID == "" {
+		err = errors.New("missing required preference_set_id parameter")
 		return
 	}
-	path := fmt.Sprintf("v1/users/%s/preferences/%s", userID, id)
+	path := fmt.Sprintf("v1/users/%s/preferences/%s", userID, preferenceSetID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
 }
@@ -256,17 +256,17 @@ func (r *UserService) SetChannelData(ctx context.Context, userID string, channel
 
 // Updates a complete preference set for a user. This is a destructive operation
 // that will replace the existing preference set for the user.
-func (r *UserService) SetPreferences(ctx context.Context, userID string, id string, body UserSetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
+func (r *UserService) SetPreferences(ctx context.Context, userID string, preferenceSetID string, body UserSetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
 	}
-	if id == "" {
-		err = errors.New("missing required id parameter")
+	if preferenceSetID == "" {
+		err = errors.New("missing required preference_set_id parameter")
 		return
 	}
-	path := fmt.Sprintf("v1/users/%s/preferences/%s", userID, id)
+	path := fmt.Sprintf("v1/users/%s/preferences/%s", userID, preferenceSetID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
 	return
 }

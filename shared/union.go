@@ -5,6 +5,7 @@ package shared
 type UnionString string
 
 func (UnionString) ImplementsRecipientRequestUnionParam()                  {}
+func (UnionString) ImplementsObjectListSubscriptionsParamsObjectUnion()    {}
 func (UnionString) ImplementsObjectListSubscriptionsParamsRecipientUnion() {}
 func (UnionString) ImplementsInlineTenantRequestUnionParam()               {}
 func (UnionString) ImplementsMessageActorsUnion()                          {}
