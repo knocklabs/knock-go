@@ -10,17 +10,43 @@
 
 Params Types:
 
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#ChannelDataRequestParam">ChannelDataRequestParam</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#DiscordChannelDataParam">DiscordChannelDataParam</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#InlineChannelDataRequestParam">InlineChannelDataRequestParam</a>
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#RecipientRequestUnionParam">RecipientRequestUnionParam</a>
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#Recipient">Recipient</a>
+
+## Subscriptions
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#Subscription">Subscription</a>
+
+## Preferences
+
+Params Types:
+
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#InlinePreferenceSetRequestParam">InlinePreferenceSetRequestParam</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#MsTeamsChannelDataParam">MsTeamsChannelDataParam</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#OneSignalChannelDataParam">OneSignalChannelDataParam</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#PreferenceSetChannelTypeSettingParam">PreferenceSetChannelTypeSettingParam</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#PreferenceSetChannelTypesParam">PreferenceSetChannelTypesParam</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#PreferenceSetRequestParam">PreferenceSetRequestParam</a>
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#PreferenceSet">PreferenceSet</a>
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#PreferenceSetChannelTypeSetting">PreferenceSetChannelTypeSetting</a>
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#PreferenceSetChannelTypes">PreferenceSetChannelTypes</a>
+
+## ChannelData
+
+Params Types:
+
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#ChannelDataRequestParam">ChannelDataRequestParam</a>
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#DiscordChannelDataParam">DiscordChannelDataParam</a>
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#InlineChannelDataRequestParam">InlineChannelDataRequestParam</a>
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#MsTeamsChannelDataParam">MsTeamsChannelDataParam</a>
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#OneSignalChannelDataParam">OneSignalChannelDataParam</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#PushChannelDataParam">PushChannelDataParam</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#RecipientRequestUnionParam">RecipientRequestUnionParam</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#SlackChannelDataParam">SlackChannelDataParam</a>
 
 Response Types:
@@ -29,13 +55,8 @@ Response Types:
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#DiscordChannelData">DiscordChannelData</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#MsTeamsChannelData">MsTeamsChannelData</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#OneSignalChannelData">OneSignalChannelData</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#PreferenceSet">PreferenceSet</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#PreferenceSetChannelTypeSetting">PreferenceSetChannelTypeSetting</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#PreferenceSetChannelTypes">PreferenceSetChannelTypes</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#PushChannelData">PushChannelData</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#Recipient">Recipient</a>
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#SlackChannelData">SlackChannelData</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#Subscription">Subscription</a>
 
 # Users
 
