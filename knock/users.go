@@ -54,9 +54,9 @@ func NewUsersService(client *Client) *usersService {
 
 type User struct {
 	ID               string    `json:"id"`
-	Name             string    `json:"name"`
-	Email            string    `json:"email"`
-	PhoneNumber      string    `json:"phone_number"`
+	Name             string    `json:"name,omitempty"`
+	Email            string    `json:"email,omitempty"`
+	PhoneNumber      string    `json:"phone_number,omitempty"`
 	Avatar           string    `json:"avatar,omitempty"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
