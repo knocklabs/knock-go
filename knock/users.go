@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/google/go-querystring/query"
@@ -753,10 +754,18 @@ func parseRawUserResponseCustomProperties(rawResponse []byte) (*User, error) {
 		return nil, errors.Wrap(err, "error parsing user custom properties")
 	}
 
+	// Remove fields that are explicitly defined in the struct
 	val := reflect.ValueOf(user)
 	for i := 0; i < val.Type().NumField(); i++ {
-		delete(customProperties, val.Type().Field(i).Tag.Get("json"))
+		jsonTag := val.Type().Field(i).Tag.Get("json")
+		if jsonTag == "" {
+			continue
+		}
+		// Split the json tag to get the field name (ignore omitempty)
+		fieldName := strings.Split(jsonTag, ",")[0]
+		delete(customProperties, fieldName)
 	}
+
 	// This is returned in API responses but is not used
 	delete(customProperties, "__typename")
 
