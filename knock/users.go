@@ -739,6 +739,8 @@ func (user *User) toMapWithCustomProperties() (map[string]interface{}, error) {
 	return flatMap, nil
 }
 
+// parseRawUserResponseCustomProperties unmarshals user data from the Knock API response,
+// separating standard user properties into the User struct and remaining fields into CustomProperties
 func parseRawUserResponseCustomProperties(rawResponse []byte) (*User, error) {
 	user := User{}
 	err := json.Unmarshal(rawResponse, &user)
