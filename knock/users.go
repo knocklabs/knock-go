@@ -746,8 +746,7 @@ func parseRawUserResponseCustomProperties(rawResponse []byte) (*User, error) {
 		return nil, err
 	}
 
-	// Create a map of the full API response, removing keys explicitly defined in the struct
-	// Any remaining keys are custom properties, which will be added to the struct's CustomProperties field
+	// Create a map of the full API response
 	var customProperties map[string]interface{}
 	err = json.Unmarshal(rawResponse, &customProperties)
 	if err != nil {
