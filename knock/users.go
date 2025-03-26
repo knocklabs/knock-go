@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/google/go-querystring/query"
@@ -54,9 +55,9 @@ func NewUsersService(client *Client) *usersService {
 
 type User struct {
 	ID               string    `json:"id"`
-	Name             string    `json:"name"`
-	Email            string    `json:"email"`
-	PhoneNumber      string    `json:"phone_number"`
+	Name             string    `json:"name,omitempty"`
+	Email            string    `json:"email,omitempty"`
+	PhoneNumber      string    `json:"phone_number,omitempty"`
 	Avatar           string    `json:"avatar,omitempty"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
@@ -738,6 +739,8 @@ func (user *User) toMapWithCustomProperties() (map[string]interface{}, error) {
 	return flatMap, nil
 }
 
+// parseRawUserResponseCustomProperties unmarshals user data from the Knock API response,
+// separating standard user properties into the User struct and remaining fields into CustomProperties
 func parseRawUserResponseCustomProperties(rawResponse []byte) (*User, error) {
 	user := User{}
 	err := json.Unmarshal(rawResponse, &user)
@@ -745,18 +748,25 @@ func parseRawUserResponseCustomProperties(rawResponse []byte) (*User, error) {
 		return nil, err
 	}
 
-	// Create a map of the full API response, removing keys explicitly defined in the struct
-	// Any remaining keys are custom properties, which will be added to the struct's CustomProperties field
+	// Create a map of the full API response
 	var customProperties map[string]interface{}
 	err = json.Unmarshal(rawResponse, &customProperties)
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing user custom properties")
 	}
 
+	// Remove fields that are explicitly defined in the struct
 	val := reflect.ValueOf(user)
 	for i := 0; i < val.Type().NumField(); i++ {
-		delete(customProperties, val.Type().Field(i).Tag.Get("json"))
+		jsonTag := val.Type().Field(i).Tag.Get("json")
+		if jsonTag == "" {
+			continue
+		}
+		// Split the json tag to get the field name (ignore omitempty)
+		fieldName := strings.Split(jsonTag, ",")[0]
+		delete(customProperties, fieldName)
 	}
+
 	// This is returned in API responses but is not used
 	delete(customProperties, "__typename")
 
