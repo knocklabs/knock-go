@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/knocklabs/knock-go/knock/internal"
@@ -44,6 +45,7 @@ type Client struct {
 	Tenants        TenantsService
 	Users          UsersService
 	Workflows      WorkflowsService
+	Providers      ProvidersService
 }
 
 // ClientOption provides a variadic option for configuring the client
@@ -117,6 +119,7 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 	c.Tenants = &tenantsService{client: c}
 	c.Users = &usersService{client: c}
 	c.Workflows = &workflowsService{client: c}
+	c.Providers = &providersService{client: c}
 
 	return c, nil
 }
@@ -152,7 +155,9 @@ func (c *Client) handleResponse(ctx context.Context, res *http.Response, v inter
 		}
 
 		// in some scenarios we don't fully control the response, e.g. an ELB 502.
-		if res.Header.Get("Content-Type") != jsonMediaType {
+		// Content-Type could be `application/json` or `application/json; charset=utf-8`
+		// If we match `application/json` at the beginning, that's good enough to be considered good json
+		if !strings.HasPrefix(res.Header.Get("Content-Type"), jsonMediaType) {
 			return nil, &Error{
 				msg:  "malformed non-json error response body received with status code: " + http.StatusText(res.StatusCode),
 				Code: ErrResponseMalformed,
