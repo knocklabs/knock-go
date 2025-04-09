@@ -32,8 +32,8 @@ func TestChannelBulkUpdateMessageStatusWithOptionalParams(t *testing.T) {
 		"182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
 		knock.ChannelBulkUpdateMessageStatusParamsActionSeen,
 		knock.ChannelBulkUpdateMessageStatusParams{
-			Archived:         knock.F(knock.ChannelBulkUpdateMessageStatusParamsArchivedExclude),
-			DeliveryStatus:   knock.F(knock.ChannelBulkUpdateMessageStatusParamsDeliveryStatusQueued),
+			Archived:         knock.F(knock.ChannelBulkUpdateMessageStatusParamsArchivedInclude),
+			DeliveryStatus:   knock.F(knock.ChannelBulkUpdateMessageStatusParamsDeliveryStatusDelivered),
 			EngagementStatus: knock.F(knock.ChannelBulkUpdateMessageStatusParamsEngagementStatusSeen),
 			HasTenant:        knock.F(true),
 			NewerThan:        knock.F(time.Now()),
