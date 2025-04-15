@@ -7,12 +7,10 @@ import (
 	"errors"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/stainless-sdks/knock-go"
 	"github.com/stainless-sdks/knock-go/internal/testutil"
 	"github.com/stainless-sdks/knock-go/option"
-	"github.com/stainless-sdks/knock-go/shared"
 )
 
 func TestUserBulkDelete(t *testing.T) {
@@ -29,7 +27,7 @@ func TestUserBulkDelete(t *testing.T) {
 		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Users.Bulk.Delete(context.TODO(), knock.UserBulkDeleteParams{
-		UserIDs: knock.F([]string{"user_1", "user_2"}),
+		UserIDs: knock.F([]string{"string"}),
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -53,65 +51,7 @@ func TestUserBulkIdentify(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithBearerToken("My Bearer Token"),
 	)
-	_, err := client.Users.Bulk.Identify(context.TODO(), knock.UserBulkIdentifyParams{
-		Users: knock.F([]knock.InlineIdentifyUserRequestParam{{
-			ID: knock.F("user_1"),
-			ChannelData: knock.F(knock.InlineChannelDataRequestParam{
-				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.ChannelDataRequestParam{
-					Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
-						Tokens: knock.F([]string{"push_token_xxx"}),
-					}),
-				},
-			}),
-			CreatedAt: knock.F(time.Now()),
-			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
-				"default": knock.PreferenceSetRequestParam{
-					Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
-						"transactional": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
-							ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-								Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-								Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
-								HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-								Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-								SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
-							}),
-							Conditions: knock.F([]shared.ConditionParam{{
-								Argument: knock.F("some_property"),
-								Operator: knock.F(shared.ConditionOperatorEqualTo),
-								Variable: knock.F("recipient.property"),
-							}}),
-						},
-					}),
-					ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-						Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-						Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
-						HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-						InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-						Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-						SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
-					}),
-					Workflows: knock.F(map[string]knock.PreferenceSetRequestWorkflowsUnionParam{
-						"dinosaurs-loose": knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
-							ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-								Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-								Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
-								HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-								Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-								SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
-							}),
-							Conditions: knock.F([]shared.ConditionParam{{
-								Argument: knock.F("some_property"),
-								Operator: knock.F(shared.ConditionOperatorEqualTo),
-								Variable: knock.F("recipient.property"),
-							}}),
-						},
-					}),
-				},
-			}),
-		}}),
-	})
+	_, err := client.Users.Bulk.Identify(context.TODO())
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {
@@ -121,7 +61,7 @@ func TestUserBulkIdentify(t *testing.T) {
 	}
 }
 
-func TestUserBulkSetPreferencesWithOptionalParams(t *testing.T) {
+func TestUserBulkSetPreferences(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -134,54 +74,7 @@ func TestUserBulkSetPreferencesWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithBearerToken("My Bearer Token"),
 	)
-	_, err := client.Users.Bulk.SetPreferences(context.TODO(), knock.UserBulkSetPreferencesParams{
-		Preferences: knock.F(knock.PreferenceSetRequestParam{
-			Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
-				"marketing": shared.UnionBool(false),
-				"transactional": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
-					ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-						Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-						Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
-						HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-						InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-						Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-						SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
-					}),
-					Conditions: knock.F([]shared.ConditionParam{{
-						Argument: knock.F("some_property"),
-						Operator: knock.F(shared.ConditionOperatorEqualTo),
-						Variable: knock.F("recipient.property"),
-					}}),
-				},
-			}),
-			ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-				Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-				Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
-				HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-				InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-				Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-				SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
-			}),
-			Workflows: knock.F(map[string]knock.PreferenceSetRequestWorkflowsUnionParam{
-				"dinosaurs-loose": knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
-					ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-						Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-						Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
-						HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-						InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-						Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-						SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
-					}),
-					Conditions: knock.F([]shared.ConditionParam{{
-						Argument: knock.F("some_property"),
-						Operator: knock.F(shared.ConditionOperatorEqualTo),
-						Variable: knock.F("recipient.property"),
-					}}),
-				},
-			}),
-		}),
-		UserIDs: knock.F([]string{"user_1", "user_2"}),
-	})
+	_, err := client.Users.Bulk.SetPreferences(context.TODO())
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {

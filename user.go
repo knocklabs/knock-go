@@ -41,7 +41,7 @@ func NewUserService(opts ...option.RequestOption) (r *UserService) {
 	return
 }
 
-// Identify user
+// Identify a user
 func (r *UserService) Update(ctx context.Context, userID string, body UserUpdateParams, opts ...option.RequestOption) (res *User, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
@@ -53,7 +53,7 @@ func (r *UserService) Update(ctx context.Context, userID string, body UserUpdate
 	return
 }
 
-// List users
+// Returns a list of users
 func (r *UserService) List(ctx context.Context, query UserListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[User], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -71,12 +71,12 @@ func (r *UserService) List(ctx context.Context, query UserListParams, opts ...op
 	return res, nil
 }
 
-// List users
+// Returns a list of users
 func (r *UserService) ListAutoPaging(ctx context.Context, query UserListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[User] {
 	return pagination.NewEntriesCursorAutoPager(r.List(ctx, query, opts...))
 }
 
-// Delete user
+// Deletes a user
 func (r *UserService) Delete(ctx context.Context, userID string, opts ...option.RequestOption) (res *string, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
@@ -88,7 +88,7 @@ func (r *UserService) Delete(ctx context.Context, userID string, opts ...option.
 	return
 }
 
-// Get user
+// Returns a user
 func (r *UserService) Get(ctx context.Context, userID string, opts ...option.RequestOption) (res *User, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
@@ -100,7 +100,7 @@ func (r *UserService) Get(ctx context.Context, userID string, opts ...option.Req
 	return
 }
 
-// Get channel data
+// Get channel data for a user
 func (r *UserService) GetChannelData(ctx context.Context, userID string, channelID string, opts ...option.RequestOption) (res *ChannelData, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
@@ -116,23 +116,7 @@ func (r *UserService) GetChannelData(ctx context.Context, userID string, channel
 	return
 }
 
-// Get preference set
-func (r *UserService) GetPreferences(ctx context.Context, userID string, preferenceSetID string, query UserGetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
-	opts = append(r.Options[:], opts...)
-	if userID == "" {
-		err = errors.New("missing required user_id parameter")
-		return
-	}
-	if preferenceSetID == "" {
-		err = errors.New("missing required preference_set_id parameter")
-		return
-	}
-	path := fmt.Sprintf("v1/users/%s/preferences/%s", userID, preferenceSetID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
-}
-
-// List messages
+// Returns a paginated list of messages for a user
 func (r *UserService) ListMessages(ctx context.Context, userID string, query UserListMessagesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Message], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -154,12 +138,12 @@ func (r *UserService) ListMessages(ctx context.Context, userID string, query Use
 	return res, nil
 }
 
-// List messages
+// Returns a paginated list of messages for a user
 func (r *UserService) ListMessagesAutoPaging(ctx context.Context, userID string, query UserListMessagesParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Message] {
 	return pagination.NewEntriesCursorAutoPager(r.ListMessages(ctx, userID, query, opts...))
 }
 
-// List preference sets
+// List preference sets for a user
 func (r *UserService) ListPreferences(ctx context.Context, userID string, opts ...option.RequestOption) (res *[]PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
@@ -171,7 +155,7 @@ func (r *UserService) ListPreferences(ctx context.Context, userID string, opts .
 	return
 }
 
-// List schedules
+// List schedules for a user
 func (r *UserService) ListSchedules(ctx context.Context, userID string, query UserListSchedulesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Schedule], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -193,12 +177,12 @@ func (r *UserService) ListSchedules(ctx context.Context, userID string, query Us
 	return res, nil
 }
 
-// List schedules
+// List schedules for a user
 func (r *UserService) ListSchedulesAutoPaging(ctx context.Context, userID string, query UserListSchedulesParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Schedule] {
 	return pagination.NewEntriesCursorAutoPager(r.ListSchedules(ctx, userID, query, opts...))
 }
 
-// List subscriptions
+// List subscriptions for a user
 func (r *UserService) ListSubscriptions(ctx context.Context, userID string, query UserListSubscriptionsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Subscription], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -220,13 +204,12 @@ func (r *UserService) ListSubscriptions(ctx context.Context, userID string, quer
 	return res, nil
 }
 
-// List subscriptions
+// List subscriptions for a user
 func (r *UserService) ListSubscriptionsAutoPaging(ctx context.Context, userID string, query UserListSubscriptionsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Subscription] {
 	return pagination.NewEntriesCursorAutoPager(r.ListSubscriptions(ctx, userID, query, opts...))
 }
 
-// Merge two users together, where the user specified with the `from_user_id` param
-// will be merged into the user specified by `user_id`.
+// Merges two users together
 func (r *UserService) Merge(ctx context.Context, userID string, body UserMergeParams, opts ...option.RequestOption) (res *User, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
@@ -238,8 +221,8 @@ func (r *UserService) Merge(ctx context.Context, userID string, body UserMergePa
 	return
 }
 
-// Set channel data
-func (r *UserService) SetChannelData(ctx context.Context, userID string, channelID string, body UserSetChannelDataParams, opts ...option.RequestOption) (res *ChannelData, err error) {
+// Sets channel data for a user
+func (r *UserService) SetChannelData(ctx context.Context, userID string, channelID string, opts ...option.RequestOption) (res *ChannelData, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -250,28 +233,11 @@ func (r *UserService) SetChannelData(ctx context.Context, userID string, channel
 		return
 	}
 	path := fmt.Sprintf("v1/users/%s/channel_data/%s", userID, channelID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, nil, &res, opts...)
 	return
 }
 
-// Updates a complete preference set for a user. This is a destructive operation
-// that will replace the existing preference set for the user.
-func (r *UserService) SetPreferences(ctx context.Context, userID string, preferenceSetID string, body UserSetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
-	opts = append(r.Options[:], opts...)
-	if userID == "" {
-		err = errors.New("missing required user_id parameter")
-		return
-	}
-	if preferenceSetID == "" {
-		err = errors.New("missing required preference_set_id parameter")
-		return
-	}
-	path := fmt.Sprintf("v1/users/%s/preferences/%s", userID, preferenceSetID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
-}
-
-// Unset channel data
+// Unsets channel data for a user
 func (r *UserService) UnsetChannelData(ctx context.Context, userID string, channelID string, opts ...option.RequestOption) (res *string, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
@@ -332,9 +298,9 @@ type User struct {
 	UpdatedAt   time.Time              `json:"updated_at,required" format:"date-time"`
 	Avatar      string                 `json:"avatar,nullable"`
 	CreatedAt   time.Time              `json:"created_at,nullable" format:"date-time"`
-	Email       string                 `json:"email,nullable"`
+	Email       string                 `json:"email,nullable" format:"email"`
 	Name        string                 `json:"name,nullable"`
-	PhoneNumber string                 `json:"phone_number,nullable"`
+	PhoneNumber string                 `json:"phone_number,nullable" format:"phone-number"`
 	Timezone    string                 `json:"timezone,nullable"`
 	ExtraFields map[string]interface{} `json:"-,extras"`
 	JSON        userJSON               `json:"-"`
@@ -387,20 +353,6 @@ type UserListParams struct {
 
 // URLQuery serializes [UserListParams]'s query parameters as `url.Values`.
 func (r UserListParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type UserGetPreferencesParams struct {
-	// Tenant ID
-	Tenant param.Field[string] `query:"tenant"`
-}
-
-// URLQuery serializes [UserGetPreferencesParams]'s query parameters as
-// `url.Values`.
-func (r UserGetPreferencesParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
@@ -509,6 +461,8 @@ type UserListSubscriptionsParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before
 	Before param.Field[string] `query:"before"`
+	// Objects to filter by
+	Objects param.Field[[]UserListSubscriptionsParamsObjectUnion] `query:"objects"`
 	// The page size to fetch
 	PageSize param.Field[int64] `query:"page_size"`
 }
@@ -522,29 +476,38 @@ func (r UserListSubscriptionsParams) URLQuery() (v url.Values) {
 	})
 }
 
+// A reference to a recipient, either a user identifier (string) or an object
+// reference (id, collection).
+//
+// Satisfied by [shared.UnionString], [UserListSubscriptionsParamsObjectsObject].
+type UserListSubscriptionsParamsObjectUnion interface {
+	ImplementsUserListSubscriptionsParamsObjectUnion()
+}
+
+// An object reference to a recipient
+type UserListSubscriptionsParamsObjectsObject struct {
+	// An object identifier
+	ID param.Field[string] `query:"id,required"`
+	// The collection the object belongs to
+	Collection param.Field[string] `query:"collection,required"`
+}
+
+// URLQuery serializes [UserListSubscriptionsParamsObjectsObject]'s query
+// parameters as `url.Values`.
+func (r UserListSubscriptionsParamsObjectsObject) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+func (r UserListSubscriptionsParamsObjectsObject) ImplementsUserListSubscriptionsParamsObjectUnion() {
+}
+
 type UserMergeParams struct {
-	// The user ID to merge from
-	FromUserID param.Field[string] `json:"from_user_id,required"`
+	FromUserID param.Field[string] `json:"from_user_id"`
 }
 
 func (r UserMergeParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-type UserSetChannelDataParams struct {
-	// Set channel data for a type of channel
-	ChannelDataRequest ChannelDataRequestParam `json:"channel_data_request,required"`
-}
-
-func (r UserSetChannelDataParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.ChannelDataRequest)
-}
-
-type UserSetPreferencesParams struct {
-	// Set preferences for a recipient
-	PreferenceSetRequest PreferenceSetRequestParam `json:"preference_set_request,required"`
-}
-
-func (r UserSetPreferencesParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.PreferenceSetRequest)
 }

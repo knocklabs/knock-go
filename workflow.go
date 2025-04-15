@@ -33,9 +33,7 @@ func NewWorkflowService(opts ...option.RequestOption) (r *WorkflowService) {
 	return
 }
 
-// When invoked for a workflow using a specific workflow key and cancellation key,
-// will cancel any queued workflow runs associated with that key/cancellation key
-// pair. Can optionally be provided one or more recipients to scope the request to.
+// Issues a cancellation request to inflight workflow runs
 func (r *WorkflowService) Cancel(ctx context.Context, key string, body WorkflowCancelParams, opts ...option.RequestOption) (res *string, err error) {
 	opts = append(r.Options[:], opts...)
 	if key == "" {
@@ -47,9 +45,7 @@ func (r *WorkflowService) Cancel(ctx context.Context, key string, body WorkflowC
 	return
 }
 
-// Trigger a workflow specified by the key to run for the given recipients, using
-// the parameters provided. Returns an identifier for the workflow run request. All
-// workflow runs are executed asynchronously.
+// Triggers a workflow
 func (r *WorkflowService) Trigger(ctx context.Context, key string, body WorkflowTriggerParams, opts ...option.RequestOption) (res *WorkflowTriggerResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if key == "" {
@@ -109,9 +105,8 @@ type WorkflowTriggerParams struct {
 	CancellationKey param.Field[string] `json:"cancellation_key"`
 	// An optional map of data to be used in the workflow. This data will be available
 	// to the workflow as a map in the `data` field.
-	Data param.Field[map[string]interface{}] `json:"data"`
-	// The recipients to trigger the workflow for. Cannot exceed 1000 recipients in a
-	// single trigger.
+	Data param.Field[map[string]string] `json:"data"`
+	// The recipients to trigger the workflow for.
 	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients"`
 	// An inline tenant request
 	Tenant param.Field[InlineTenantRequestUnionParam] `json:"tenant"`

@@ -5,8 +5,9 @@ package knock
 import (
 	"context"
 	"net/http"
+	"net/url"
 
-	"github.com/stainless-sdks/knock-go/internal/apijson"
+	"github.com/stainless-sdks/knock-go/internal/apiquery"
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
@@ -31,7 +32,7 @@ func NewUserBulkService(opts ...option.RequestOption) (r *UserBulkService) {
 	return
 }
 
-// Bulk delete users
+// Bulk deletes a list of users
 func (r *UserBulkService) Delete(ctx context.Context, body UserBulkDeleteParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/users/bulk/delete"
@@ -39,44 +40,31 @@ func (r *UserBulkService) Delete(ctx context.Context, body UserBulkDeleteParams,
 	return
 }
 
-// Bulk identifies users
-func (r *UserBulkService) Identify(ctx context.Context, body UserBulkIdentifyParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
+// Bulk identifies a list of users
+func (r *UserBulkService) Identify(ctx context.Context, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/users/bulk/identify"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
 	return
 }
 
-// Bulk set preferences
-func (r *UserBulkService) SetPreferences(ctx context.Context, body UserBulkSetPreferencesParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
+// Bulk sets user preferences
+func (r *UserBulkService) SetPreferences(ctx context.Context, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/users/bulk/preferences"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
 	return
 }
 
 type UserBulkDeleteParams struct {
-	UserIDs param.Field[[]string] `json:"user_ids,required"`
+	// The IDs of the users to delete
+	UserIDs param.Field[[]string] `query:"user_ids,required"`
 }
 
-func (r UserBulkDeleteParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-type UserBulkIdentifyParams struct {
-	Users param.Field[[]InlineIdentifyUserRequestParam] `json:"users,required"`
-}
-
-func (r UserBulkIdentifyParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-type UserBulkSetPreferencesParams struct {
-	// Set preferences for a recipient
-	Preferences param.Field[PreferenceSetRequestParam] `json:"preferences,required"`
-	UserIDs     param.Field[[]string]                  `json:"user_ids,required"`
-}
-
-func (r UserBulkSetPreferencesParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+// URLQuery serializes [UserBulkDeleteParams]'s query parameters as `url.Values`.
+func (r UserBulkDeleteParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }

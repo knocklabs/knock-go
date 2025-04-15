@@ -52,7 +52,7 @@ func TestMessageBatchGetContent(t *testing.T) {
 		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Messages.Batch.GetContent(context.TODO(), knock.MessageBatchGetContentParams{
-		MessageIDs: knock.F([]string{"string"}),
+		MessageIDs: knock.F([]interface{}{map[string]interface{}{}}),
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -63,7 +63,7 @@ func TestMessageBatchGetContent(t *testing.T) {
 	}
 }
 
-func TestMessageBatchMarkAsInteractedWithOptionalParams(t *testing.T) {
+func TestMessageBatchMarkAsInteracted(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -76,12 +76,7 @@ func TestMessageBatchMarkAsInteractedWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithBearerToken("My Bearer Token"),
 	)
-	_, err := client.Messages.Batch.MarkAsInteracted(context.TODO(), knock.MessageBatchMarkAsInteractedParams{
-		MessageIDs: knock.F([]string{"1jNaXzB2RZX3LY8wVQnfCKyPnv7"}),
-		Metadata: knock.F(map[string]interface{}{
-			"key": "bar",
-		}),
-	})
+	_, err := client.Messages.Batch.MarkAsInteracted(context.TODO())
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {

@@ -45,9 +45,9 @@ type Recipient struct {
 	Avatar      string        `json:"avatar,nullable"`
 	Collection  string        `json:"collection"`
 	CreatedAt   time.Time     `json:"created_at,nullable" format:"date-time"`
-	Email       string        `json:"email,nullable"`
+	Email       string        `json:"email,nullable" format:"email"`
 	Name        string        `json:"name,nullable"`
-	PhoneNumber string        `json:"phone_number,nullable"`
+	PhoneNumber string        `json:"phone_number,nullable" format:"phone-number"`
 	Timezone    string        `json:"timezone,nullable"`
 	JSON        recipientJSON `json:"-"`
 	union       RecipientUnion

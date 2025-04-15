@@ -7,10 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/stainless-sdks/knock-go/internal/apijson"
-	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
 )
@@ -34,19 +32,19 @@ func NewAudienceService(opts ...option.RequestOption) (r *AudienceService) {
 	return
 }
 
-// Add members
-func (r *AudienceService) AddMembers(ctx context.Context, key string, body AudienceAddMembersParams, opts ...option.RequestOption) (res *string, err error) {
+// Add members to an audience
+func (r *AudienceService) AddMembers(ctx context.Context, key string, opts ...option.RequestOption) (res *string, err error) {
 	opts = append(r.Options[:], opts...)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/audiences/%s/members", key)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
 	return
 }
 
-// List members
+// List members of an audience
 func (r *AudienceService) ListMembers(ctx context.Context, key string, opts ...option.RequestOption) (res *AudienceListMembersResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if key == "" {
@@ -58,22 +56,22 @@ func (r *AudienceService) ListMembers(ctx context.Context, key string, opts ...o
 	return
 }
 
-// Remove members
-func (r *AudienceService) RemoveMembers(ctx context.Context, key string, body AudienceRemoveMembersParams, opts ...option.RequestOption) (res *string, err error) {
+// Remove members from an audience
+func (r *AudienceService) RemoveMembers(ctx context.Context, key string, opts ...option.RequestOption) (res *string, err error) {
 	opts = append(r.Options[:], opts...)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/audiences/%s/members", key)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
 	return
 }
 
 // A user belonging to an audience
 type AudienceMember struct {
-	Typename string    `json:"__typename,required"`
-	AddedAt  time.Time `json:"added_at,required" format:"date-time"`
+	Typename string `json:"__typename,required"`
+	AddedAt  string `json:"added_at,required" format:"date_time"`
 	// A user object
 	User   User               `json:"user,required"`
 	UserID string             `json:"user_id,required"`
@@ -151,48 +149,4 @@ func (r *AudienceListMembersResponsePageInfo) UnmarshalJSON(data []byte) (err er
 
 func (r audienceListMembersResponsePageInfoJSON) RawJSON() string {
 	return r.raw
-}
-
-type AudienceAddMembersParams struct {
-	Members param.Field[[]AudienceAddMembersParamsMember] `json:"members,required"`
-}
-
-func (r AudienceAddMembersParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// A request for an individual audience member
-type AudienceAddMembersParamsMember struct {
-	// A set of parameters to inline-identify a user with. Inline identifying the user
-	// will ensure that the user is available before the request is executed in Knock.
-	// It will perform an upsert against the user you're supplying, replacing any
-	// properties specified.
-	User   param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
-	Tenant param.Field[string]                         `json:"tenant"`
-}
-
-func (r AudienceAddMembersParamsMember) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-type AudienceRemoveMembersParams struct {
-	Members param.Field[[]AudienceRemoveMembersParamsMember] `json:"members,required"`
-}
-
-func (r AudienceRemoveMembersParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// A request for an individual audience member
-type AudienceRemoveMembersParamsMember struct {
-	// A set of parameters to inline-identify a user with. Inline identifying the user
-	// will ensure that the user is available before the request is executed in Knock.
-	// It will perform an upsert against the user you're supplying, replacing any
-	// properties specified.
-	User   param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
-	Tenant param.Field[string]                         `json:"tenant"`
-}
-
-func (r AudienceRemoveMembersParamsMember) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
 }

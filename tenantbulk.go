@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/stainless-sdks/knock-go/internal/apijson"
 	"github.com/stainless-sdks/knock-go/internal/apiquery"
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
@@ -33,7 +32,7 @@ func NewTenantBulkService(opts ...option.RequestOption) (r *TenantBulkService) {
 	return
 }
 
-// Bulk delete tenants
+// Deletes tenants in bulk
 func (r *TenantBulkService) Delete(ctx context.Context, body TenantBulkDeleteParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/tenants/bulk/delete"
@@ -41,11 +40,11 @@ func (r *TenantBulkService) Delete(ctx context.Context, body TenantBulkDeletePar
 	return
 }
 
-// Bulk set tenants
-func (r *TenantBulkService) Set(ctx context.Context, body TenantBulkSetParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
+// Sets tenants in bulk
+func (r *TenantBulkService) Set(ctx context.Context, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/tenants/bulk/set"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
 	return
 }
 
@@ -60,12 +59,4 @@ func (r TenantBulkDeleteParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
-}
-
-type TenantBulkSetParams struct {
-	Tenants param.Field[[]InlineTenantRequestUnionParam] `json:"tenants,required"`
-}
-
-func (r TenantBulkSetParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
 }

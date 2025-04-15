@@ -5,15 +5,13 @@ package shared
 type UnionString string
 
 func (UnionString) ImplementsRecipientRequestUnionParam()                  {}
+func (UnionString) ImplementsUserListSubscriptionsParamsObjectUnion()      {}
 func (UnionString) ImplementsObjectListSubscriptionsParamsObjectUnion()    {}
 func (UnionString) ImplementsObjectListSubscriptionsParamsRecipientUnion() {}
 func (UnionString) ImplementsInlineTenantRequestUnionParam()               {}
 func (UnionString) ImplementsMessageActorsUnion()                          {}
 func (UnionString) ImplementsMessageRecipientUnion()                       {}
-func (UnionString) ImplementsMessageDeliveryLogRequestBodyUnion()          {}
-func (UnionString) ImplementsMessageDeliveryLogResponseBodyUnion()         {}
 func (UnionString) ImplementsMessageEventRecipientUnion()                  {}
-func (UnionString) ImplementsScheduleNewParamsRecipientUnion()             {}
 func (UnionString) ImplementsScheduleListParamsRecipientUnion()            {}
 
 type UnionBool bool

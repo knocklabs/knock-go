@@ -36,18 +36,18 @@ func NewScheduleService(opts ...option.RequestOption) (r *ScheduleService) {
 }
 
 // Create schedules
-func (r *ScheduleService) New(ctx context.Context, body ScheduleNewParams, opts ...option.RequestOption) (res *[]Schedule, err error) {
+func (r *ScheduleService) New(ctx context.Context, opts ...option.RequestOption) (res *[]Schedule, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/schedules"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
 	return
 }
 
 // Update schedules
-func (r *ScheduleService) Update(ctx context.Context, body ScheduleUpdateParams, opts ...option.RequestOption) (res *[]Schedule, err error) {
+func (r *ScheduleService) Update(ctx context.Context, opts ...option.RequestOption) (res *[]Schedule, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/schedules"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, nil, &res, opts...)
 	return
 }
 
@@ -75,10 +75,10 @@ func (r *ScheduleService) ListAutoPaging(ctx context.Context, query ScheduleList
 }
 
 // Delete schedules
-func (r *ScheduleService) Delete(ctx context.Context, body ScheduleDeleteParams, opts ...option.RequestOption) (res *[]Schedule, err error) {
+func (r *ScheduleService) Delete(ctx context.Context, opts ...option.RequestOption) (res *[]Schedule, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/schedules"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
 	return
 }
 
@@ -93,12 +93,12 @@ type Schedule struct {
 	Workflow  string               `json:"workflow,required"`
 	Typename  string               `json:"__typename"`
 	// A recipient, which is either a user or an object
-	Actor            Recipient              `json:"actor,nullable"`
-	Data             map[string]interface{} `json:"data,nullable"`
-	LastOccurrenceAt time.Time              `json:"last_occurrence_at,nullable" format:"date-time"`
-	NextOccurrenceAt time.Time              `json:"next_occurrence_at,nullable" format:"date-time"`
-	Tenant           string                 `json:"tenant,nullable"`
-	JSON             scheduleJSON           `json:"-"`
+	Actor            Recipient    `json:"actor,nullable"`
+	Data             interface{}  `json:"data,nullable"`
+	LastOccurrenceAt time.Time    `json:"last_occurrence_at,nullable" format:"date-time"`
+	NextOccurrenceAt time.Time    `json:"next_occurrence_at,nullable" format:"date-time"`
+	Tenant           string       `json:"tenant,nullable"`
+	JSON             scheduleJSON `json:"-"`
 }
 
 // scheduleJSON contains the JSON metadata for the struct [Schedule]
@@ -198,76 +198,6 @@ func (r ScheduleRepeatRuleDay) IsKnown() bool {
 	return false
 }
 
-// A schedule repeat rule
-type ScheduleRepeatRuleParam struct {
-	Typename   param.Field[string]                      `json:"__typename,required"`
-	Frequency  param.Field[ScheduleRepeatRuleFrequency] `json:"frequency,required"`
-	DayOfMonth param.Field[int64]                       `json:"day_of_month"`
-	Days       param.Field[[]ScheduleRepeatRuleDay]     `json:"days"`
-	Hours      param.Field[int64]                       `json:"hours"`
-	Interval   param.Field[int64]                       `json:"interval"`
-	Minutes    param.Field[int64]                       `json:"minutes"`
-}
-
-func (r ScheduleRepeatRuleParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-type ScheduleNewParams struct {
-	Recipients  param.Field[[]ScheduleNewParamsRecipientUnion] `json:"recipients,required"`
-	Repeats     param.Field[[]ScheduleRepeatRuleParam]         `json:"repeats,required"`
-	Workflow    param.Field[string]                            `json:"workflow,required"`
-	Data        param.Field[map[string]interface{}]            `json:"data"`
-	EndingAt    param.Field[time.Time]                         `json:"ending_at" format:"date-time"`
-	ScheduledAt param.Field[time.Time]                         `json:"scheduled_at" format:"date-time"`
-	// An inline tenant request
-	Tenant param.Field[InlineTenantRequestUnionParam] `json:"tenant"`
-}
-
-func (r ScheduleNewParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// A reference to a recipient, either a user identifier (string) or an object
-// reference (id, collection).
-//
-// Satisfied by [shared.UnionString], [ScheduleNewParamsRecipientsObjectReference].
-type ScheduleNewParamsRecipientUnion interface {
-	ImplementsScheduleNewParamsRecipientUnion()
-}
-
-// An object reference to a recipient
-type ScheduleNewParamsRecipientsObjectReference struct {
-	// An object identifier
-	ID param.Field[string] `json:"id,required"`
-	// The collection the object belongs to
-	Collection param.Field[string] `json:"collection,required"`
-}
-
-func (r ScheduleNewParamsRecipientsObjectReference) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ScheduleNewParamsRecipientsObjectReference) ImplementsScheduleNewParamsRecipientUnion() {}
-
-type ScheduleUpdateParams struct {
-	ScheduleIDs param.Field[[]string] `json:"schedule_ids,required" format:"uuid"`
-	// Specifies a recipient in a request. This can either be a user identifier
-	// (string), an inline user request (object), or an inline object request, which is
-	// determined by the presence of a `collection` property.
-	Actor       param.Field[RecipientRequestUnionParam] `json:"actor"`
-	Data        param.Field[map[string]interface{}]     `json:"data"`
-	EndingAt    param.Field[time.Time]                  `json:"ending_at" format:"date-time"`
-	Repeats     param.Field[[]ScheduleRepeatRuleParam]  `json:"repeats"`
-	ScheduledAt param.Field[time.Time]                  `json:"scheduled_at" format:"date-time"`
-	// An inline tenant request
-	Tenant param.Field[InlineTenantRequestUnionParam] `json:"tenant"`
-}
-
-func (r ScheduleUpdateParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
 type ScheduleListParams struct {
 	// Filter by workflow
 	Workflow param.Field[string] `query:"workflow,required"`
@@ -294,35 +224,26 @@ func (r ScheduleListParams) URLQuery() (v url.Values) {
 // A reference to a recipient, either a user identifier (string) or an object
 // reference (id, collection).
 //
-// Satisfied by [shared.UnionString],
-// [ScheduleListParamsRecipientsObjectReference].
+// Satisfied by [shared.UnionString], [ScheduleListParamsRecipientsObject].
 type ScheduleListParamsRecipientUnion interface {
 	ImplementsScheduleListParamsRecipientUnion()
 }
 
 // An object reference to a recipient
-type ScheduleListParamsRecipientsObjectReference struct {
+type ScheduleListParamsRecipientsObject struct {
 	// An object identifier
 	ID param.Field[string] `query:"id,required"`
 	// The collection the object belongs to
 	Collection param.Field[string] `query:"collection,required"`
 }
 
-// URLQuery serializes [ScheduleListParamsRecipientsObjectReference]'s query
-// parameters as `url.Values`.
-func (r ScheduleListParamsRecipientsObjectReference) URLQuery() (v url.Values) {
+// URLQuery serializes [ScheduleListParamsRecipientsObject]'s query parameters as
+// `url.Values`.
+func (r ScheduleListParamsRecipientsObject) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
 
-func (r ScheduleListParamsRecipientsObjectReference) ImplementsScheduleListParamsRecipientUnion() {}
-
-type ScheduleDeleteParams struct {
-	ScheduleIDs param.Field[[]string] `json:"schedule_ids,required"`
-}
-
-func (r ScheduleDeleteParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
+func (r ScheduleListParamsRecipientsObject) ImplementsScheduleListParamsRecipientUnion() {}

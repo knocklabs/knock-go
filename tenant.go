@@ -4,8 +4,6 @@ package knock
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -59,42 +57,6 @@ func (r *TenantService) List(ctx context.Context, query TenantListParams, opts .
 // List tenants
 func (r *TenantService) ListAutoPaging(ctx context.Context, query TenantListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Tenant] {
 	return pagination.NewEntriesCursorAutoPager(r.List(ctx, query, opts...))
-}
-
-// Delete a tenant
-func (r *TenantService) Delete(ctx context.Context, tenantID string, opts ...option.RequestOption) (res *string, err error) {
-	opts = append(r.Options[:], opts...)
-	if tenantID == "" {
-		err = errors.New("missing required tenant_id parameter")
-		return
-	}
-	path := fmt.Sprintf("v1/tenants/%s", tenantID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
-	return
-}
-
-// Get a tenant
-func (r *TenantService) Get(ctx context.Context, tenantID string, opts ...option.RequestOption) (res *Tenant, err error) {
-	opts = append(r.Options[:], opts...)
-	if tenantID == "" {
-		err = errors.New("missing required tenant_id parameter")
-		return
-	}
-	path := fmt.Sprintf("v1/tenants/%s", tenantID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
-}
-
-// Set a tenant
-func (r *TenantService) Set(ctx context.Context, tenantID string, body TenantSetParams, opts ...option.RequestOption) (res *Tenant, err error) {
-	opts = append(r.Options[:], opts...)
-	if tenantID == "" {
-		err = errors.New("missing required tenant_id parameter")
-		return
-	}
-	path := fmt.Sprintf("v1/tenants/%s", tenantID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
 }
 
 // An inline tenant request
@@ -181,37 +143,4 @@ func (r TenantListParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
-}
-
-type TenantSetParams struct {
-	// Allows inline setting channel data for a recipient
-	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
-	Settings    param.Field[TenantSetParamsSettings]         `json:"settings"`
-}
-
-func (r TenantSetParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-type TenantSetParamsSettings struct {
-	Branding param.Field[TenantSetParamsSettingsBranding] `json:"branding"`
-	// Set preferences for a recipient
-	PreferenceSet param.Field[PreferenceSetRequestParam] `json:"preference_set"`
-}
-
-func (r TenantSetParamsSettings) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-type TenantSetParamsSettingsBranding struct {
-	IconURL              param.Field[string] `json:"icon_url"`
-	LogoURL              param.Field[string] `json:"logo_url"`
-	PrimaryColor         param.Field[string] `json:"primary_color"`
-	PrimaryColorContrast param.Field[string] `json:"primary_color_contrast"`
-}
-
-func (r TenantSetParamsSettingsBranding) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
 }
