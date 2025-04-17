@@ -358,11 +358,11 @@ func (r *ObjectService) UnsetChannelData(ctx context.Context, collection string,
 // A custom object entity which belongs to a collection.
 type InlineObjectRequestParam struct {
 	// Unique identifier for the object.
-	ID param.Field[string] `json:"id,required"`
-	// The collection this object belongs to.
-	Collection param.Field[string] `json:"collection,required"`
+	ID param.Field[string] `json:"id"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// The collection this object belongs to.
+	Collection param.Field[string] `json:"collection"`
 	// Timestamp when the resource was created.
 	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
 	// Inline set preferences for a recipient, where the key is the preference set name
