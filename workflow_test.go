@@ -33,7 +33,6 @@ func TestWorkflowCancelWithOptionalParams(t *testing.T) {
 		knock.WorkflowCancelParams{
 			CancellationKey: knock.F("cancel-workflow-123"),
 			Recipients:      knock.F([]string{"jhammond"}),
-			Tenant:          knock.F("prk_1"),
 		},
 	)
 	if err != nil {

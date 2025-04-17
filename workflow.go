@@ -93,8 +93,6 @@ type WorkflowCancelParams struct {
 	// A list of recipients to cancel the notification for. If omitted, cancels for all
 	// recipients associated with the cancellation key.
 	Recipients param.Field[[]string] `json:"recipients"`
-	// The unique identifier for the tenant.
-	Tenant param.Field[string] `json:"tenant"`
 }
 
 func (r WorkflowCancelParams) MarshalJSON() (data []byte, err error) {
@@ -102,8 +100,8 @@ func (r WorkflowCancelParams) MarshalJSON() (data []byte, err error) {
 }
 
 type WorkflowTriggerParams struct {
-	// The recipients to trigger the workflow for. Cannot exceed 1000 recipients in a
-	// single trigger.
+	// The recipients to trigger the workflow for. Can inline identify users, objects,
+	// or use a list of user ids. Cannot exceed 1000 recipients in a single trigger.
 	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
 	// Specifies a recipient in a request. This can either be a user identifier
 	// (string), an inline user request (object), or an inline object request, which is
