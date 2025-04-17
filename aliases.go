@@ -9,11 +9,13 @@ import (
 
 type Error = apierror.Error
 
-// A condition to be evaluated
+// A condition to be evaluated.
 //
 // This is an alias to an internal type.
 type Condition = shared.Condition
 
+// The operator to use in the condition evaluation.
+//
 // This is an alias to an internal type.
 type ConditionOperator = shared.ConditionOperator
 
@@ -68,7 +70,10 @@ const ConditionOperatorIsTimestampBetween = shared.ConditionOperatorIsTimestampB
 // This is an alias to an internal value.
 const ConditionOperatorIsAudienceMember = shared.ConditionOperatorIsAudienceMember
 
-// A condition to be evaluated
+// This is an alias to an internal value.
+const ConditionOperatorIsNotAudienceMember = shared.ConditionOperatorIsNotAudienceMember
+
+// A condition to be evaluated.
 //
 // This is an alias to an internal type.
 type ConditionParam = shared.ConditionParam

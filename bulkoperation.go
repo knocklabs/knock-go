@@ -45,24 +45,37 @@ func (r *BulkOperationService) Get(ctx context.Context, id string, opts ...optio
 	return
 }
 
-// A bulk operation entity
+// A bulk operation entity.
 type BulkOperation struct {
-	ID                 string              `json:"id,required" format:"uuid"`
-	Typename           string              `json:"__typename,required"`
-	EstimatedTotalRows int64               `json:"estimated_total_rows,required"`
-	InsertedAt         time.Time           `json:"inserted_at,required" format:"date-time"`
-	Name               string              `json:"name,required"`
-	ProcessedRows      int64               `json:"processed_rows,required"`
-	Status             BulkOperationStatus `json:"status,required"`
-	SuccessCount       int64               `json:"success_count,required"`
-	UpdatedAt          time.Time           `json:"updated_at,required" format:"date-time"`
-	CompletedAt        time.Time           `json:"completed_at,nullable" format:"date-time"`
-	ErrorCount         int64               `json:"error_count"`
-	// A list of items that failed to be processed
+	// Unique identifier for the bulk operation.
+	ID string `json:"id,required" format:"uuid"`
+	// The type name of the schema.
+	Typename string `json:"__typename,required"`
+	// The estimated total number of rows to process.
+	EstimatedTotalRows int64 `json:"estimated_total_rows,required"`
+	// Timestamp when the resource was created.
+	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
+	// The name of the bulk operation.
+	Name string `json:"name,required"`
+	// The number of rows processed so far.
+	ProcessedRows int64 `json:"processed_rows,required"`
+	// The status of the bulk operation. One of: queued, processing, completed, failed.
+	Status BulkOperationStatus `json:"status,required"`
+	// The number of successful operations.
+	SuccessCount int64 `json:"success_count,required"`
+	// The timestamp when the resource was last updated.
+	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
+	// Timestamp when the bulk operation was completed.
+	CompletedAt time.Time `json:"completed_at,nullable" format:"date-time"`
+	// The number of failed operations.
+	ErrorCount int64 `json:"error_count"`
+	// A list of items that failed to be processed.
 	ErrorItems []BulkOperationErrorItem `json:"error_items"`
-	FailedAt   time.Time                `json:"failed_at,nullable" format:"date-time"`
-	StartedAt  time.Time                `json:"started_at,nullable" format:"date-time"`
-	JSON       bulkOperationJSON        `json:"-"`
+	// Timestamp when the bulk operation failed.
+	FailedAt time.Time `json:"failed_at,nullable" format:"date-time"`
+	// Timestamp when the bulk operation was started.
+	StartedAt time.Time         `json:"started_at,nullable" format:"date-time"`
+	JSON      bulkOperationJSON `json:"-"`
 }
 
 // bulkOperationJSON contains the JSON metadata for the struct [BulkOperation]
@@ -93,6 +106,7 @@ func (r bulkOperationJSON) RawJSON() string {
 	return r.raw
 }
 
+// The status of the bulk operation. One of: queued, processing, completed, failed.
 type BulkOperationStatus string
 
 const (
@@ -111,7 +125,9 @@ func (r BulkOperationStatus) IsKnown() bool {
 }
 
 type BulkOperationErrorItem struct {
-	ID         string                     `json:"id,required"`
+	// Unique identifier for the object.
+	ID string `json:"id,required"`
+	// The collection this object belongs to.
 	Collection string                     `json:"collection,nullable"`
 	JSON       bulkOperationErrorItemJSON `json:"-"`
 }

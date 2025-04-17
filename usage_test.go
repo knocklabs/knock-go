@@ -29,7 +29,7 @@ func TestUsage(t *testing.T) {
 		context.TODO(),
 		"dinosaurs-loose",
 		knock.WorkflowTriggerParams{
-			Data: knock.F(map[string]string{
+			Data: knock.F(map[string]interface{}{
 				"dinosaur": "triceratops",
 			}),
 			Recipients: knock.F([]knock.RecipientRequestUnionParam{shared.UnionString("dnedry")}),

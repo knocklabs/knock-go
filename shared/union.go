@@ -11,8 +11,10 @@ func (UnionString) ImplementsObjectListSubscriptionsParamsRecipientUnion() {}
 func (UnionString) ImplementsInlineTenantRequestUnionParam()               {}
 func (UnionString) ImplementsMessageActorsUnion()                          {}
 func (UnionString) ImplementsMessageRecipientUnion()                       {}
+func (UnionString) ImplementsMessageDeliveryLogRequestBodyUnion()          {}
+func (UnionString) ImplementsMessageDeliveryLogResponseBodyUnion()         {}
 func (UnionString) ImplementsMessageEventRecipientUnion()                  {}
-func (UnionString) ImplementsScheduleListParamsRecipientUnion()            {}
+func (UnionString) ImplementsScheduleNewParamsRecipientUnion()             {}
 
 type UnionBool bool
 

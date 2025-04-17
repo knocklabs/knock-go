@@ -37,20 +37,30 @@ func NewRecipientService(opts ...option.RequestOption) (r *RecipientService) {
 	return
 }
 
-// A recipient, which is either a user or an object
+// A recipient, which is either a user or an object.
 type Recipient struct {
-	ID          string        `json:"id,required"`
-	Typename    string        `json:"__typename,required"`
-	UpdatedAt   time.Time     `json:"updated_at,required" format:"date-time"`
-	Avatar      string        `json:"avatar,nullable"`
-	Collection  string        `json:"collection"`
-	CreatedAt   time.Time     `json:"created_at,nullable" format:"date-time"`
-	Email       string        `json:"email,nullable" format:"email"`
-	Name        string        `json:"name,nullable"`
-	PhoneNumber string        `json:"phone_number,nullable" format:"phone-number"`
-	Timezone    string        `json:"timezone,nullable"`
-	JSON        recipientJSON `json:"-"`
-	union       RecipientUnion
+	// The unique identifier for the user.
+	ID string `json:"id,required"`
+	// The type name of the schema.
+	Typename string `json:"__typename,required"`
+	// The timestamp when the resource was last updated.
+	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
+	// URL to the user's avatar image.
+	Avatar string `json:"avatar,nullable"`
+	// The collection this object belongs to.
+	Collection string `json:"collection"`
+	// Timestamp when the resource was created.
+	CreatedAt time.Time `json:"created_at,nullable" format:"date-time"`
+	// The email address of the user.
+	Email string `json:"email,nullable"`
+	// Display name of the user.
+	Name string `json:"name,nullable"`
+	// Phone number of the user.
+	PhoneNumber string `json:"phone_number,nullable"`
+	// Timezone of the user.
+	Timezone string        `json:"timezone,nullable"`
+	JSON     recipientJSON `json:"-"`
+	union    RecipientUnion
 }
 
 // recipientJSON contains the JSON metadata for the struct [Recipient]
@@ -90,7 +100,7 @@ func (r Recipient) AsUnion() RecipientUnion {
 	return r.union
 }
 
-// A recipient, which is either a user or an object
+// A recipient, which is either a user or an object.
 //
 // Union satisfied by [User] or [Object].
 type RecipientUnion interface {
@@ -116,11 +126,12 @@ func init() {
 // (string), an inline user request (object), or an inline object request, which is
 // determined by the presence of a `collection` property.
 type RecipientRequestParam struct {
-	// The ID of the user to identify. This is an ID that you supply.
+	// The unique identifier for the user.
 	ID param.Field[string] `json:"id,required"`
-	// Allows inline setting channel data for a recipient
+	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
-	Collection  param.Field[string]                        `json:"collection"`
+	// The collection this object belongs to.
+	Collection param.Field[string] `json:"collection"`
 	// The creation date of the user from your system.
 	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
 	// Inline set preferences for a recipient, where the key is the preference set name

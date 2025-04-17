@@ -7,8 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/stainless-sdks/knock-go/internal/apijson"
+	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
 )
@@ -32,19 +34,19 @@ func NewAudienceService(opts ...option.RequestOption) (r *AudienceService) {
 	return
 }
 
-// Add members to an audience
-func (r *AudienceService) AddMembers(ctx context.Context, key string, opts ...option.RequestOption) (res *string, err error) {
+// Adds one or more members to the specified audience.
+func (r *AudienceService) AddMembers(ctx context.Context, key string, body AudienceAddMembersParams, opts ...option.RequestOption) (res *string, err error) {
 	opts = append(r.Options[:], opts...)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/audiences/%s/members", key)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
 
-// List members of an audience
+// Returns a paginated list of members for the specified audience.
 func (r *AudienceService) ListMembers(ctx context.Context, key string, opts ...option.RequestOption) (res *AudienceListMembersResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if key == "" {
@@ -56,25 +58,29 @@ func (r *AudienceService) ListMembers(ctx context.Context, key string, opts ...o
 	return
 }
 
-// Remove members from an audience
-func (r *AudienceService) RemoveMembers(ctx context.Context, key string, opts ...option.RequestOption) (res *string, err error) {
+// Removes one or more members from the specified audience.
+func (r *AudienceService) RemoveMembers(ctx context.Context, key string, body AudienceRemoveMembersParams, opts ...option.RequestOption) (res *string, err error) {
 	opts = append(r.Options[:], opts...)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/audiences/%s/members", key)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
 	return
 }
 
-// A user belonging to an audience
+// An audience member.
 type AudienceMember struct {
+	// The type name of the schema.
 	Typename string `json:"__typename,required"`
-	AddedAt  string `json:"added_at,required" format:"date_time"`
-	// A user object
-	User   User               `json:"user,required"`
-	UserID string             `json:"user_id,required"`
+	// Timestamp when the resource was created.
+	AddedAt time.Time `json:"added_at,required" format:"date-time"`
+	// A user object.
+	User User `json:"user,required"`
+	// The unique identifier for the user.
+	UserID string `json:"user_id,required"`
+	// The unique identifier for the tenant.
 	Tenant string             `json:"tenant,nullable"`
 	JSON   audienceMemberJSON `json:"-"`
 }
@@ -98,10 +104,11 @@ func (r audienceMemberJSON) RawJSON() string {
 	return r.raw
 }
 
-// A response containing a list of audience members
+// A paginated list of audience members.
 type AudienceListMembersResponse struct {
+	// A list of audience members.
 	Entries []AudienceMember `json:"entries,required"`
-	// The information about a paginated result
+	// Pagination information for a list of resources.
 	PageInfo AudienceListMembersResponsePageInfo `json:"page_info,required"`
 	JSON     audienceListMembersResponseJSON     `json:"-"`
 }
@@ -123,13 +130,17 @@ func (r audienceListMembersResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-// The information about a paginated result
+// Pagination information for a list of resources.
 type AudienceListMembersResponsePageInfo struct {
-	Typename string                                  `json:"__typename,required"`
-	PageSize int64                                   `json:"page_size,required"`
-	After    string                                  `json:"after,nullable"`
-	Before   string                                  `json:"before,nullable"`
-	JSON     audienceListMembersResponsePageInfoJSON `json:"-"`
+	// The type name of the schema.
+	Typename string `json:"__typename,required"`
+	// The number of items per page.
+	PageSize int64 `json:"page_size,required"`
+	// The cursor to fetch entries after.
+	After string `json:"after,nullable"`
+	// The cursor to fetch entries before.
+	Before string                                  `json:"before,nullable"`
+	JSON   audienceListMembersResponsePageInfoJSON `json:"-"`
 }
 
 // audienceListMembersResponsePageInfoJSON contains the JSON metadata for the
@@ -149,4 +160,52 @@ func (r *AudienceListMembersResponsePageInfo) UnmarshalJSON(data []byte) (err er
 
 func (r audienceListMembersResponsePageInfoJSON) RawJSON() string {
 	return r.raw
+}
+
+type AudienceAddMembersParams struct {
+	// A list of audience members to add.
+	Members param.Field[[]AudienceAddMembersParamsMember] `json:"members,required"`
+}
+
+func (r AudienceAddMembersParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// An audience member.
+type AudienceAddMembersParamsMember struct {
+	// A set of parameters to inline-identify a user with. Inline identifying the user
+	// will ensure that the user is available before the request is executed in Knock.
+	// It will perform an upsert against the user you're supplying, replacing any
+	// properties specified.
+	User param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
+	// The unique identifier for the tenant.
+	Tenant param.Field[string] `json:"tenant"`
+}
+
+func (r AudienceAddMembersParamsMember) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type AudienceRemoveMembersParams struct {
+	// A list of audience members to remove.
+	Members param.Field[[]AudienceRemoveMembersParamsMember] `json:"members,required"`
+}
+
+func (r AudienceRemoveMembersParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// An audience member.
+type AudienceRemoveMembersParamsMember struct {
+	// A set of parameters to inline-identify a user with. Inline identifying the user
+	// will ensure that the user is available before the request is executed in Knock.
+	// It will perform an upsert against the user you're supplying, replacing any
+	// properties specified.
+	User param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
+	// The unique identifier for the tenant.
+	Tenant param.Field[string] `json:"tenant"`
+}
+
+func (r AudienceRemoveMembersParamsMember) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }

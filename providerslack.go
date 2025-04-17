@@ -14,6 +14,7 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
+	"github.com/stainless-sdks/knock-go/packages/pagination"
 )
 
 // ProviderSlackService contains methods and other services that help with
@@ -35,7 +36,7 @@ func NewProviderSlackService(opts ...option.RequestOption) (r *ProviderSlackServ
 	return
 }
 
-// Check if a Slack channel is authenticated
+// Check if a Slack channel is authenticated.
 func (r *ProviderSlackService) CheckAuth(ctx context.Context, channelID string, query ProviderSlackCheckAuthParams, opts ...option.RequestOption) (res *ProviderSlackCheckAuthResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if channelID == "" {
@@ -47,19 +48,34 @@ func (r *ProviderSlackService) CheckAuth(ctx context.Context, channelID string, 
 	return
 }
 
-// Get Slack channels from a Slack workspace
-func (r *ProviderSlackService) ListChannels(ctx context.Context, channelID string, query ProviderSlackListChannelsParams, opts ...option.RequestOption) (res *ProviderSlackListChannelsResponse, err error) {
+// List Slack channels for a Slack workspace.
+func (r *ProviderSlackService) ListChannels(ctx context.Context, channelID string, query ProviderSlackListChannelsParams, opts ...option.RequestOption) (res *pagination.SlackChannelsCursor[ProviderSlackListChannelsResponse], err error) {
+	var raw *http.Response
 	opts = append(r.Options[:], opts...)
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/providers/slack/%s/channels", channelID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
 }
 
-// Revoke access for a Slack channel
+// List Slack channels for a Slack workspace.
+func (r *ProviderSlackService) ListChannelsAutoPaging(ctx context.Context, channelID string, query ProviderSlackListChannelsParams, opts ...option.RequestOption) *pagination.SlackChannelsCursorAutoPager[ProviderSlackListChannelsResponse] {
+	return pagination.NewSlackChannelsCursorAutoPager(r.ListChannels(ctx, channelID, query, opts...))
+}
+
+// Revoke access for a Slack channel.
 func (r *ProviderSlackService) RevokeAccess(ctx context.Context, channelID string, body ProviderSlackRevokeAccessParams, opts ...option.RequestOption) (res *string, err error) {
 	opts = append(r.Options[:], opts...)
 	if channelID == "" {
@@ -71,8 +87,9 @@ func (r *ProviderSlackService) RevokeAccess(ctx context.Context, channelID strin
 	return
 }
 
-// The response from a Slack auth check request
+// The response from a Slack auth check request.
 type ProviderSlackCheckAuthResponse struct {
+	// A Slack connection object.
 	Connection ProviderSlackCheckAuthResponseConnection `json:"connection,required"`
 	JSON       providerSlackCheckAuthResponseJSON       `json:"-"`
 }
@@ -93,8 +110,11 @@ func (r providerSlackCheckAuthResponseJSON) RawJSON() string {
 	return r.raw
 }
 
+// A Slack connection object.
 type ProviderSlackCheckAuthResponseConnection struct {
-	Ok     bool                                         `json:"ok,required"`
+	// Whether the Slack connection is valid.
+	Ok bool `json:"ok,required"`
+	// The reason for the Slack connection if it is not valid.
 	Reason string                                       `json:"reason,nullable"`
 	JSON   providerSlackCheckAuthResponseConnectionJSON `json:"-"`
 }
@@ -116,18 +136,29 @@ func (r providerSlackCheckAuthResponseConnectionJSON) RawJSON() string {
 	return r.raw
 }
 
-// The response from a Slack channels for provider request
+// A Slack channel.
 type ProviderSlackListChannelsResponse struct {
-	NextCursor    string                                          `json:"next_cursor,required,nullable"`
-	SlackChannels []ProviderSlackListChannelsResponseSlackChannel `json:"slack_channels,required"`
-	JSON          providerSlackListChannelsResponseJSON           `json:"-"`
+	// A Slack channel ID from the Slack provider.
+	ID string `json:"id,required"`
+	// The team ID that the Slack channel belongs to.
+	ContextTeamID string `json:"context_team_id,required"`
+	// Whether the Slack channel is an IM channel.
+	IsIm bool `json:"is_im,required"`
+	// Whether the Slack channel is private.
+	IsPrivate bool `json:"is_private,required"`
+	// Slack channel name.
+	Name string                                `json:"name,required"`
+	JSON providerSlackListChannelsResponseJSON `json:"-"`
 }
 
 // providerSlackListChannelsResponseJSON contains the JSON metadata for the struct
 // [ProviderSlackListChannelsResponse]
 type providerSlackListChannelsResponseJSON struct {
-	NextCursor    apijson.Field
-	SlackChannels apijson.Field
+	ID            apijson.Field
+	ContextTeamID apijson.Field
+	IsIm          apijson.Field
+	IsPrivate     apijson.Field
+	Name          apijson.Field
 	raw           string
 	ExtraFields   map[string]apijson.Field
 }
@@ -140,37 +171,8 @@ func (r providerSlackListChannelsResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-type ProviderSlackListChannelsResponseSlackChannel struct {
-	ID            string                                            `json:"id,required"`
-	ContextTeamID string                                            `json:"context_team_id,required"`
-	IsIm          bool                                              `json:"is_im,required"`
-	IsPrivate     bool                                              `json:"is_private,required"`
-	Name          string                                            `json:"name,required"`
-	JSON          providerSlackListChannelsResponseSlackChannelJSON `json:"-"`
-}
-
-// providerSlackListChannelsResponseSlackChannelJSON contains the JSON metadata for
-// the struct [ProviderSlackListChannelsResponseSlackChannel]
-type providerSlackListChannelsResponseSlackChannelJSON struct {
-	ID            apijson.Field
-	ContextTeamID apijson.Field
-	IsIm          apijson.Field
-	IsPrivate     apijson.Field
-	Name          apijson.Field
-	raw           string
-	ExtraFields   map[string]apijson.Field
-}
-
-func (r *ProviderSlackListChannelsResponseSlackChannel) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r providerSlackListChannelsResponseSlackChannelJSON) RawJSON() string {
-	return r.raw
-}
-
 type ProviderSlackCheckAuthParams struct {
-	// A JSON encoded string containing the access token object reference
+	// A JSON encoded string containing the access token object reference.
 	AccessTokenObject param.Field[string] `query:"access_token_object,required"`
 }
 
@@ -184,7 +186,7 @@ func (r ProviderSlackCheckAuthParams) URLQuery() (v url.Values) {
 }
 
 type ProviderSlackListChannelsParams struct {
-	// A JSON encoded string containing the access token object reference
+	// A JSON encoded string containing the access token object reference.
 	AccessTokenObject param.Field[string]                                      `query:"access_token_object,required"`
 	QueryOptions      param.Field[ProviderSlackListChannelsParamsQueryOptions] `query:"query_options"`
 }
@@ -199,15 +201,18 @@ func (r ProviderSlackListChannelsParams) URLQuery() (v url.Values) {
 }
 
 type ProviderSlackListChannelsParamsQueryOptions struct {
-	// A cursor to paginate through the channels
+	// Paginate through collections of data by setting the cursor parameter to a
+	// next_cursor attribute returned by a previous request's response_metadata.
+	// Default value fetches the first "page" of the collection.
 	Cursor param.Field[string] `query:"cursor"`
-	// Whether to exclude archived channels
-	ExcludeArchived param.Field[string] `query:"exclude_archived"`
-	// The number of channels to return
-	Limit param.Field[string] `query:"limit"`
-	// The ID of the Slack team to get channels for
+	// Set to true to exclude archived channels from the list.
+	ExcludeArchived param.Field[bool] `query:"exclude_archived"`
+	// The maximum number of channels to return.
+	Limit param.Field[int64] `query:"limit"`
+	// Encoded team ID (T1234) to list channels in, required if org token is used.
 	TeamID param.Field[string] `query:"team_id"`
-	// The types of channels to return
+	// Mix and match channel types by providing a comma-separated list of any
+	// combination of public_channel, private_channel, mpim, im.
 	Types param.Field[string] `query:"types"`
 }
 
@@ -221,7 +226,7 @@ func (r ProviderSlackListChannelsParamsQueryOptions) URLQuery() (v url.Values) {
 }
 
 type ProviderSlackRevokeAccessParams struct {
-	// A JSON encoded string containing the access token object reference
+	// A JSON encoded string containing the access token object reference.
 	AccessTokenObject param.Field[string] `query:"access_token_object,required"`
 }
 

@@ -7,12 +7,15 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/param"
 )
 
-// A condition to be evaluated
+// A condition to be evaluated.
 type Condition struct {
-	Argument string            `json:"argument,required,nullable"`
+	// The argument value to compare against in the condition.
+	Argument string `json:"argument,required,nullable"`
+	// The operator to use in the condition evaluation.
 	Operator ConditionOperator `json:"operator,required"`
-	Variable string            `json:"variable,required"`
-	JSON     conditionJSON     `json:"-"`
+	// The variable to be evaluated in the condition.
+	Variable string        `json:"variable,required"`
+	JSON     conditionJSON `json:"-"`
 }
 
 // conditionJSON contains the JSON metadata for the struct [Condition]
@@ -32,6 +35,7 @@ func (r conditionJSON) RawJSON() string {
 	return r.raw
 }
 
+// The operator to use in the condition evaluation.
 type ConditionOperator string
 
 const (
@@ -52,21 +56,25 @@ const (
 	ConditionOperatorIsTimestampBefore    ConditionOperator = "is_timestamp_before"
 	ConditionOperatorIsTimestampBetween   ConditionOperator = "is_timestamp_between"
 	ConditionOperatorIsAudienceMember     ConditionOperator = "is_audience_member"
+	ConditionOperatorIsNotAudienceMember  ConditionOperator = "is_not_audience_member"
 )
 
 func (r ConditionOperator) IsKnown() bool {
 	switch r {
-	case ConditionOperatorEqualTo, ConditionOperatorNotEqualTo, ConditionOperatorGreaterThan, ConditionOperatorLessThan, ConditionOperatorGreaterThanOrEqualTo, ConditionOperatorLessThanOrEqualTo, ConditionOperatorContains, ConditionOperatorNotContains, ConditionOperatorEmpty, ConditionOperatorNotEmpty, ConditionOperatorContainsAll, ConditionOperatorIsTimestamp, ConditionOperatorIsNotTimestamp, ConditionOperatorIsTimestampAfter, ConditionOperatorIsTimestampBefore, ConditionOperatorIsTimestampBetween, ConditionOperatorIsAudienceMember:
+	case ConditionOperatorEqualTo, ConditionOperatorNotEqualTo, ConditionOperatorGreaterThan, ConditionOperatorLessThan, ConditionOperatorGreaterThanOrEqualTo, ConditionOperatorLessThanOrEqualTo, ConditionOperatorContains, ConditionOperatorNotContains, ConditionOperatorEmpty, ConditionOperatorNotEmpty, ConditionOperatorContainsAll, ConditionOperatorIsTimestamp, ConditionOperatorIsNotTimestamp, ConditionOperatorIsTimestampAfter, ConditionOperatorIsTimestampBefore, ConditionOperatorIsTimestampBetween, ConditionOperatorIsAudienceMember, ConditionOperatorIsNotAudienceMember:
 		return true
 	}
 	return false
 }
 
-// A condition to be evaluated
+// A condition to be evaluated.
 type ConditionParam struct {
-	Argument param.Field[string]            `json:"argument,required"`
+	// The argument value to compare against in the condition.
+	Argument param.Field[string] `json:"argument,required"`
+	// The operator to use in the condition evaluation.
 	Operator param.Field[ConditionOperator] `json:"operator,required"`
-	Variable param.Field[string]            `json:"variable,required"`
+	// The variable to be evaluated in the condition.
+	Variable param.Field[string] `json:"variable,required"`
 }
 
 func (r ConditionParam) MarshalJSON() (data []byte, err error) {

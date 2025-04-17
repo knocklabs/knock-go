@@ -39,7 +39,8 @@ func NewObjectService(opts ...option.RequestOption) (r *ObjectService) {
 	return
 }
 
-// List objects in a collection
+// Returns a paginated list of objects from the specified collection. Optionally
+// includes preference data for the objects.
 func (r *ObjectService) List(ctx context.Context, collection string, query ObjectListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Object], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -61,12 +62,31 @@ func (r *ObjectService) List(ctx context.Context, collection string, query Objec
 	return res, nil
 }
 
-// List objects in a collection
+// Returns a paginated list of objects from the specified collection. Optionally
+// includes preference data for the objects.
 func (r *ObjectService) ListAutoPaging(ctx context.Context, collection string, query ObjectListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Object] {
 	return pagination.NewEntriesCursorAutoPager(r.List(ctx, collection, query, opts...))
 }
 
-// Upsert subscriptions for an object
+// Permanently removes an object from the specified collection. This operation
+// cannot be undone.
+func (r *ObjectService) Delete(ctx context.Context, collection string, objectID string, opts ...option.RequestOption) (res *string, err error) {
+	opts = append(r.Options[:], opts...)
+	if collection == "" {
+		err = errors.New("missing required collection parameter")
+		return
+	}
+	if objectID == "" {
+		err = errors.New("missing required object_id parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/objects/%s/%s", collection, objectID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
+	return
+}
+
+// Add subscriptions for an object. If a subscription already exists, it will be
+// updated.
 func (r *ObjectService) AddSubscriptions(ctx context.Context, collection string, objectID string, body ObjectAddSubscriptionsParams, opts ...option.RequestOption) (res *[]Subscription, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
@@ -82,7 +102,8 @@ func (r *ObjectService) AddSubscriptions(ctx context.Context, collection string,
 	return
 }
 
-// Delete subscriptions for an object
+// Delete subscriptions for the specified recipients from an object. Returns the
+// list of deleted subscriptions.
 func (r *ObjectService) DeleteSubscriptions(ctx context.Context, collection string, objectID string, body ObjectDeleteSubscriptionsParams, opts ...option.RequestOption) (res *[]Subscription, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
@@ -98,7 +119,24 @@ func (r *ObjectService) DeleteSubscriptions(ctx context.Context, collection stri
 	return
 }
 
-// Get channel data for an object
+// Retrieves a specific object by its ID from the specified collection. Returns the
+// object with all its properties.
+func (r *ObjectService) Get(ctx context.Context, collection string, objectID string, opts ...option.RequestOption) (res *Object, err error) {
+	opts = append(r.Options[:], opts...)
+	if collection == "" {
+		err = errors.New("missing required collection parameter")
+		return
+	}
+	if objectID == "" {
+		err = errors.New("missing required object_id parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/objects/%s/%s", collection, objectID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	return
+}
+
+// Returns the channel data for the specified object and channel.
 func (r *ObjectService) GetChannelData(ctx context.Context, collection string, objectID string, channelID string, opts ...option.RequestOption) (res *ChannelData, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
@@ -116,6 +154,92 @@ func (r *ObjectService) GetChannelData(ctx context.Context, collection string, o
 	path := fmt.Sprintf("v1/objects/%s/%s/channel_data/%s", collection, objectID, channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
 	return
+}
+
+// Returns the preference set for the specified object.
+func (r *ObjectService) GetPreferences(ctx context.Context, collection string, objectID string, preferenceSetID string, query ObjectGetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
+	opts = append(r.Options[:], opts...)
+	if collection == "" {
+		err = errors.New("missing required collection parameter")
+		return
+	}
+	if objectID == "" {
+		err = errors.New("missing required object_id parameter")
+		return
+	}
+	if preferenceSetID == "" {
+		err = errors.New("missing required preference_set_id parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/objects/%s/%s/preferences/%s", collection, objectID, preferenceSetID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// Returns a paginated list of messages for a specific object in the given
+// collection. Allows filtering by message status and provides various sorting
+// options.
+func (r *ObjectService) ListMessages(ctx context.Context, collection string, objectID string, query ObjectListMessagesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Message], err error) {
+	var raw *http.Response
+	opts = append(r.Options[:], opts...)
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
+	if collection == "" {
+		err = errors.New("missing required collection parameter")
+		return
+	}
+	if objectID == "" {
+		err = errors.New("missing required object_id parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/objects/%s/%s/messages", collection, objectID)
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// Returns a paginated list of messages for a specific object in the given
+// collection. Allows filtering by message status and provides various sorting
+// options.
+func (r *ObjectService) ListMessagesAutoPaging(ctx context.Context, collection string, objectID string, query ObjectListMessagesParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Message] {
+	return pagination.NewEntriesCursorAutoPager(r.ListMessages(ctx, collection, objectID, query, opts...))
+}
+
+// Returns a paginated list of schedules for an object.
+func (r *ObjectService) ListSchedules(ctx context.Context, collection string, objectID string, query ObjectListSchedulesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Schedule], err error) {
+	var raw *http.Response
+	opts = append(r.Options[:], opts...)
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
+	if collection == "" {
+		err = errors.New("missing required collection parameter")
+		return
+	}
+	if objectID == "" {
+		err = errors.New("missing required object_id parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/objects/%s/%s/schedules", collection, objectID)
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// Returns a paginated list of schedules for an object.
+func (r *ObjectService) ListSchedulesAutoPaging(ctx context.Context, collection string, objectID string, query ObjectListSchedulesParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Schedule] {
+	return pagination.NewEntriesCursorAutoPager(r.ListSchedules(ctx, collection, objectID, query, opts...))
 }
 
 // List subscriptions for an object. Either list all subscriptions that belong to
@@ -153,8 +277,26 @@ func (r *ObjectService) ListSubscriptionsAutoPaging(ctx context.Context, collect
 	return pagination.NewEntriesCursorAutoPager(r.ListSubscriptions(ctx, collection, objectID, query, opts...))
 }
 
-// Set channel data for an object
-func (r *ObjectService) SetChannelData(ctx context.Context, collection string, objectID string, channelID string, opts ...option.RequestOption) (res *ChannelData, err error) {
+// Creates a new object or updates an existing one in the specified collection.
+// This operation is used to identify objects with their properties and channel
+// data.
+func (r *ObjectService) Set(ctx context.Context, collection string, objectID string, body ObjectSetParams, opts ...option.RequestOption) (res *Object, err error) {
+	opts = append(r.Options[:], opts...)
+	if collection == "" {
+		err = errors.New("missing required collection parameter")
+		return
+	}
+	if objectID == "" {
+		err = errors.New("missing required object_id parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/objects/%s/%s", collection, objectID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
+	return
+}
+
+// Sets the channel data for the specified object and channel.
+func (r *ObjectService) SetChannelData(ctx context.Context, collection string, objectID string, channelID string, body ObjectSetChannelDataParams, opts ...option.RequestOption) (res *ChannelData, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -169,11 +311,31 @@ func (r *ObjectService) SetChannelData(ctx context.Context, collection string, o
 		return
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/channel_data/%s", collection, objectID, channelID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
 	return
 }
 
-// Unset channel data for an object
+// Updates the preference set for the specified object.
+func (r *ObjectService) SetPreferences(ctx context.Context, collection string, objectID string, preferenceSetID string, body ObjectSetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
+	opts = append(r.Options[:], opts...)
+	if collection == "" {
+		err = errors.New("missing required collection parameter")
+		return
+	}
+	if objectID == "" {
+		err = errors.New("missing required object_id parameter")
+		return
+	}
+	if preferenceSetID == "" {
+		err = errors.New("missing required preference_set_id parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/objects/%s/%s/preferences/%s", collection, objectID, preferenceSetID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
+	return
+}
+
+// Unsets the channel data for the specified object and channel.
 func (r *ObjectService) UnsetChannelData(ctx context.Context, collection string, objectID string, channelID string, opts ...option.RequestOption) (res *string, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
@@ -193,13 +355,16 @@ func (r *ObjectService) UnsetChannelData(ctx context.Context, collection string,
 	return
 }
 
-// Inline identifies a custom object belonging to a collection
+// A custom object entity which belongs to a collection.
 type InlineObjectRequestParam struct {
-	ID         param.Field[string] `json:"id,required"`
+	// Unique identifier for the object.
+	ID param.Field[string] `json:"id,required"`
+	// The collection this object belongs to.
 	Collection param.Field[string] `json:"collection,required"`
-	// Allows inline setting channel data for a recipient
+	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
-	CreatedAt   param.Field[time.Time]                     `json:"created_at" format:"date-time"`
+	// Timestamp when the resource was created.
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
 	// Inline set preferences for a recipient, where the key is the preference set name
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
 	ExtraFields map[string]interface{}                       `json:"-,extras"`
@@ -211,12 +376,17 @@ func (r InlineObjectRequestParam) MarshalJSON() (data []byte, err error) {
 
 func (r InlineObjectRequestParam) ImplementsRecipientRequestUnionParam() {}
 
-// A custom-object entity which belongs to a collection.
+// A custom object entity which belongs to a collection.
 type Object struct {
-	ID          string                 `json:"id,required"`
-	Typename    string                 `json:"__typename,required"`
-	Collection  string                 `json:"collection,required"`
-	UpdatedAt   time.Time              `json:"updated_at,required" format:"date-time"`
+	// Unique identifier for the object.
+	ID string `json:"id,required"`
+	// The type name of the schema.
+	Typename string `json:"__typename,required"`
+	// The collection this object belongs to.
+	Collection string `json:"collection,required"`
+	// The timestamp when the resource was last updated.
+	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
+	// Timestamp when the resource was created.
 	CreatedAt   time.Time              `json:"created_at,nullable" format:"date-time"`
 	ExtraFields map[string]interface{} `json:"-,extras"`
 	JSON        objectJSON             `json:"-"`
@@ -244,11 +414,13 @@ func (r objectJSON) RawJSON() string {
 func (r Object) implementsRecipient() {}
 
 type ObjectListParams struct {
-	// The cursor to fetch entries after
+	// The cursor to fetch entries after.
 	After param.Field[string] `query:"after"`
-	// The cursor to fetch entries before
+	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// The page size to fetch
+	// Includes preferences of the objects in the response.
+	Include param.Field[[]ObjectListParamsInclude] `query:"include"`
+	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
 }
 
@@ -260,10 +432,24 @@ func (r ObjectListParams) URLQuery() (v url.Values) {
 	})
 }
 
+type ObjectListParamsInclude string
+
+const (
+	ObjectListParamsIncludePreferences ObjectListParamsInclude = "preferences"
+)
+
+func (r ObjectListParamsInclude) IsKnown() bool {
+	switch r {
+	case ObjectListParamsIncludePreferences:
+		return true
+	}
+	return false
+}
+
 type ObjectAddSubscriptionsParams struct {
-	// The recipients to subscribe to the object
+	// The recipients of the subscription.
 	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
-	// The custom properties associated with the subscription
+	// The custom properties associated with the recipients of the subscription.
 	Properties param.Field[map[string]interface{}] `json:"properties"`
 }
 
@@ -272,6 +458,7 @@ func (r ObjectAddSubscriptionsParams) MarshalJSON() (data []byte, err error) {
 }
 
 type ObjectDeleteSubscriptionsParams struct {
+	// The recipients of the subscription.
 	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
 }
 
@@ -279,18 +466,132 @@ func (r ObjectDeleteSubscriptionsParams) MarshalJSON() (data []byte, err error) 
 	return apijson.MarshalRoot(r)
 }
 
-type ObjectListSubscriptionsParams struct {
-	// The cursor to fetch entries after
+type ObjectGetPreferencesParams struct {
+	// The unique identifier for the tenant.
+	Tenant param.Field[string] `query:"tenant"`
+}
+
+// URLQuery serializes [ObjectGetPreferencesParams]'s query parameters as
+// `url.Values`.
+func (r ObjectGetPreferencesParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ObjectListMessagesParams struct {
+	// The cursor to fetch entries after.
 	After param.Field[string] `query:"after"`
-	// The cursor to fetch entries before
+	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// Mode of the request
-	Mode param.Field[ObjectListSubscriptionsParamsMode] `query:"mode"`
-	// Objects to filter by (only used if mode is `recipient`)
-	Objects param.Field[[]ObjectListSubscriptionsParamsObjectUnion] `query:"objects"`
-	// The page size to fetch
+	// The unique identifier for the channel.
+	ChannelID param.Field[string] `query:"channel_id"`
+	// The engagement status to filter messages by.
+	EngagementStatus param.Field[[]ObjectListMessagesParamsEngagementStatus] `query:"engagement_status"`
+	// The message IDs to filter messages by.
+	MessageIDs param.Field[[]string] `query:"message_ids"`
+	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// Recipients to filter by (only used if mode is `object`)
+	// The source of the message (workflow key).
+	Source param.Field[string] `query:"source"`
+	// The delivery status to filter messages by.
+	Status param.Field[[]ObjectListMessagesParamsStatus] `query:"status"`
+	// The unique identifier for the tenant.
+	Tenant param.Field[string] `query:"tenant"`
+	// The trigger data to filter messages by. Must be a valid JSON object.
+	TriggerData param.Field[string] `query:"trigger_data"`
+	// The workflow categories to filter messages by.
+	WorkflowCategories param.Field[[]string] `query:"workflow_categories"`
+	// The workflow recipient run ID to filter messages by.
+	WorkflowRecipientRunID param.Field[string] `query:"workflow_recipient_run_id" format:"uuid"`
+	// The workflow run ID to filter messages by.
+	WorkflowRunID param.Field[string] `query:"workflow_run_id" format:"uuid"`
+}
+
+// URLQuery serializes [ObjectListMessagesParams]'s query parameters as
+// `url.Values`.
+func (r ObjectListMessagesParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ObjectListMessagesParamsEngagementStatus string
+
+const (
+	ObjectListMessagesParamsEngagementStatusSeen        ObjectListMessagesParamsEngagementStatus = "seen"
+	ObjectListMessagesParamsEngagementStatusRead        ObjectListMessagesParamsEngagementStatus = "read"
+	ObjectListMessagesParamsEngagementStatusInteracted  ObjectListMessagesParamsEngagementStatus = "interacted"
+	ObjectListMessagesParamsEngagementStatusLinkClicked ObjectListMessagesParamsEngagementStatus = "link_clicked"
+	ObjectListMessagesParamsEngagementStatusArchived    ObjectListMessagesParamsEngagementStatus = "archived"
+)
+
+func (r ObjectListMessagesParamsEngagementStatus) IsKnown() bool {
+	switch r {
+	case ObjectListMessagesParamsEngagementStatusSeen, ObjectListMessagesParamsEngagementStatusRead, ObjectListMessagesParamsEngagementStatusInteracted, ObjectListMessagesParamsEngagementStatusLinkClicked, ObjectListMessagesParamsEngagementStatusArchived:
+		return true
+	}
+	return false
+}
+
+type ObjectListMessagesParamsStatus string
+
+const (
+	ObjectListMessagesParamsStatusQueued            ObjectListMessagesParamsStatus = "queued"
+	ObjectListMessagesParamsStatusSent              ObjectListMessagesParamsStatus = "sent"
+	ObjectListMessagesParamsStatusDelivered         ObjectListMessagesParamsStatus = "delivered"
+	ObjectListMessagesParamsStatusDeliveryAttempted ObjectListMessagesParamsStatus = "delivery_attempted"
+	ObjectListMessagesParamsStatusUndelivered       ObjectListMessagesParamsStatus = "undelivered"
+	ObjectListMessagesParamsStatusNotSent           ObjectListMessagesParamsStatus = "not_sent"
+	ObjectListMessagesParamsStatusBounced           ObjectListMessagesParamsStatus = "bounced"
+)
+
+func (r ObjectListMessagesParamsStatus) IsKnown() bool {
+	switch r {
+	case ObjectListMessagesParamsStatusQueued, ObjectListMessagesParamsStatusSent, ObjectListMessagesParamsStatusDelivered, ObjectListMessagesParamsStatusDeliveryAttempted, ObjectListMessagesParamsStatusUndelivered, ObjectListMessagesParamsStatusNotSent, ObjectListMessagesParamsStatusBounced:
+		return true
+	}
+	return false
+}
+
+type ObjectListSchedulesParams struct {
+	// The cursor to fetch entries after.
+	After param.Field[string] `query:"after"`
+	// The cursor to fetch entries before.
+	Before param.Field[string] `query:"before"`
+	// The number of items per page.
+	PageSize param.Field[int64] `query:"page_size"`
+	// The ID of the tenant to list schedules for.
+	Tenant param.Field[string] `query:"tenant"`
+	// The ID of the workflow to list schedules for.
+	Workflow param.Field[string] `query:"workflow"`
+}
+
+// URLQuery serializes [ObjectListSchedulesParams]'s query parameters as
+// `url.Values`.
+func (r ObjectListSchedulesParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ObjectListSubscriptionsParams struct {
+	// The cursor to fetch entries after.
+	After param.Field[string] `query:"after"`
+	// The cursor to fetch entries before.
+	Before param.Field[string] `query:"before"`
+	// Includes preferences of the recipient subscribers in the response.
+	Include param.Field[[]ObjectListSubscriptionsParamsInclude] `query:"include"`
+	// Mode of the request.
+	Mode param.Field[ObjectListSubscriptionsParamsMode] `query:"mode"`
+	// Objects to filter by (only used if mode is `recipient`).
+	Objects param.Field[[]ObjectListSubscriptionsParamsObjectUnion] `query:"objects"`
+	// The number of items per page.
+	PageSize param.Field[int64] `query:"page_size"`
+	// Recipients to filter by (only used if mode is `object`).
 	Recipients param.Field[[]ObjectListSubscriptionsParamsRecipientUnion] `query:"recipients"`
 }
 
@@ -303,7 +604,21 @@ func (r ObjectListSubscriptionsParams) URLQuery() (v url.Values) {
 	})
 }
 
-// Mode of the request
+type ObjectListSubscriptionsParamsInclude string
+
+const (
+	ObjectListSubscriptionsParamsIncludePreferences ObjectListSubscriptionsParamsInclude = "preferences"
+)
+
+func (r ObjectListSubscriptionsParamsInclude) IsKnown() bool {
+	switch r {
+	case ObjectListSubscriptionsParamsIncludePreferences:
+		return true
+	}
+	return false
+}
+
+// Mode of the request.
 type ObjectListSubscriptionsParamsMode string
 
 const (
@@ -322,56 +637,86 @@ func (r ObjectListSubscriptionsParamsMode) IsKnown() bool {
 // A reference to a recipient, either a user identifier (string) or an object
 // reference (id, collection).
 //
-// Satisfied by [shared.UnionString], [ObjectListSubscriptionsParamsObjectsObject].
+// Satisfied by [shared.UnionString],
+// [ObjectListSubscriptionsParamsObjectsObjectReference].
 type ObjectListSubscriptionsParamsObjectUnion interface {
 	ImplementsObjectListSubscriptionsParamsObjectUnion()
 }
 
-// An object reference to a recipient
-type ObjectListSubscriptionsParamsObjectsObject struct {
-	// An object identifier
+// An object reference to a recipient.
+type ObjectListSubscriptionsParamsObjectsObjectReference struct {
+	// An identifier for the recipient object.
 	ID param.Field[string] `query:"id,required"`
-	// The collection the object belongs to
+	// The collection the recipient object belongs to.
 	Collection param.Field[string] `query:"collection,required"`
 }
 
-// URLQuery serializes [ObjectListSubscriptionsParamsObjectsObject]'s query
-// parameters as `url.Values`.
-func (r ObjectListSubscriptionsParamsObjectsObject) URLQuery() (v url.Values) {
+// URLQuery serializes [ObjectListSubscriptionsParamsObjectsObjectReference]'s
+// query parameters as `url.Values`.
+func (r ObjectListSubscriptionsParamsObjectsObjectReference) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
 
-func (r ObjectListSubscriptionsParamsObjectsObject) ImplementsObjectListSubscriptionsParamsObjectUnion() {
+func (r ObjectListSubscriptionsParamsObjectsObjectReference) ImplementsObjectListSubscriptionsParamsObjectUnion() {
 }
 
 // A reference to a recipient, either a user identifier (string) or an object
 // reference (id, collection).
 //
 // Satisfied by [shared.UnionString],
-// [ObjectListSubscriptionsParamsRecipientsObject].
+// [ObjectListSubscriptionsParamsRecipientsObjectReference].
 type ObjectListSubscriptionsParamsRecipientUnion interface {
 	ImplementsObjectListSubscriptionsParamsRecipientUnion()
 }
 
-// An object reference to a recipient
-type ObjectListSubscriptionsParamsRecipientsObject struct {
-	// An object identifier
+// An object reference to a recipient.
+type ObjectListSubscriptionsParamsRecipientsObjectReference struct {
+	// An identifier for the recipient object.
 	ID param.Field[string] `query:"id,required"`
-	// The collection the object belongs to
+	// The collection the recipient object belongs to.
 	Collection param.Field[string] `query:"collection,required"`
 }
 
-// URLQuery serializes [ObjectListSubscriptionsParamsRecipientsObject]'s query
-// parameters as `url.Values`.
-func (r ObjectListSubscriptionsParamsRecipientsObject) URLQuery() (v url.Values) {
+// URLQuery serializes [ObjectListSubscriptionsParamsRecipientsObjectReference]'s
+// query parameters as `url.Values`.
+func (r ObjectListSubscriptionsParamsRecipientsObjectReference) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
 
-func (r ObjectListSubscriptionsParamsRecipientsObject) ImplementsObjectListSubscriptionsParamsRecipientUnion() {
+func (r ObjectListSubscriptionsParamsRecipientsObjectReference) ImplementsObjectListSubscriptionsParamsRecipientUnion() {
+}
+
+type ObjectSetParams struct {
+	// A request to set channel data for a type of channel inline.
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+}
+
+func (r ObjectSetParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type ObjectSetChannelDataParams struct {
+	// A request to set channel data for a type of channel.
+	ChannelDataRequest ChannelDataRequestParam `json:"channel_data_request,required"`
+}
+
+func (r ObjectSetChannelDataParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r.ChannelDataRequest)
+}
+
+type ObjectSetPreferencesParams struct {
+	// A request to set a preference set for a recipient.
+	PreferenceSetRequest PreferenceSetRequestParam `json:"preference_set_request,required"`
+}
+
+func (r ObjectSetPreferencesParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r.PreferenceSetRequest)
 }

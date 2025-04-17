@@ -42,7 +42,7 @@ func NewMessageService(opts ...option.RequestOption) (r *MessageService) {
 	return
 }
 
-// Returns a paginated list of messages
+// Returns a paginated list of messages for the current environment.
 func (r *MessageService) List(ctx context.Context, query MessageListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Message], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -60,12 +60,13 @@ func (r *MessageService) List(ctx context.Context, query MessageListParams, opts
 	return res, nil
 }
 
-// Returns a paginated list of messages
+// Returns a paginated list of messages for the current environment.
 func (r *MessageService) ListAutoPaging(ctx context.Context, query MessageListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Message] {
 	return pagination.NewEntriesCursorAutoPager(r.List(ctx, query, opts...))
 }
 
-// Archives a message
+// Archives a message for the current user. Archived messages are hidden from the
+// default message list but can still be accessed and unarchived later.
 func (r *MessageService) Archive(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -77,7 +78,7 @@ func (r *MessageService) Archive(ctx context.Context, messageID string, opts ...
 	return
 }
 
-// Retrieves a single message
+// Retrieves a specific message by its ID.
 func (r *MessageService) Get(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -89,7 +90,8 @@ func (r *MessageService) Get(ctx context.Context, messageID string, opts ...opti
 	return
 }
 
-// Get the contents of a message
+// Returns the fully rendered contents of a message, where the response depends on
+// which channel the message was sent through.
 func (r *MessageService) GetContent(ctx context.Context, messageID string, opts ...option.RequestOption) (res *MessageGetContentResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -101,8 +103,8 @@ func (r *MessageService) GetContent(ctx context.Context, messageID string, opts 
 	return
 }
 
-// Get activities for a message
-func (r *MessageService) ListActivities(ctx context.Context, messageID string, query MessageListActivitiesParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[Activity], err error) {
+// Returns a paginated list of activities for the specified message.
+func (r *MessageService) ListActivities(ctx context.Context, messageID string, query MessageListActivitiesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Activity], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -123,12 +125,12 @@ func (r *MessageService) ListActivities(ctx context.Context, messageID string, q
 	return res, nil
 }
 
-// Get activities for a message
-func (r *MessageService) ListActivitiesAutoPaging(ctx context.Context, messageID string, query MessageListActivitiesParams, opts ...option.RequestOption) *pagination.ItemsCursorAutoPager[Activity] {
-	return pagination.NewItemsCursorAutoPager(r.ListActivities(ctx, messageID, query, opts...))
+// Returns a paginated list of activities for the specified message.
+func (r *MessageService) ListActivitiesAutoPaging(ctx context.Context, messageID string, query MessageListActivitiesParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Activity] {
+	return pagination.NewEntriesCursorAutoPager(r.ListActivities(ctx, messageID, query, opts...))
 }
 
-// Get delivery logs for a message
+// Returns a paginated list of delivery logs for the specified message.
 func (r *MessageService) ListDeliveryLogs(ctx context.Context, messageID string, query MessageListDeliveryLogsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[MessageDeliveryLog], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -150,12 +152,12 @@ func (r *MessageService) ListDeliveryLogs(ctx context.Context, messageID string,
 	return res, nil
 }
 
-// Get delivery logs for a message
+// Returns a paginated list of delivery logs for the specified message.
 func (r *MessageService) ListDeliveryLogsAutoPaging(ctx context.Context, messageID string, query MessageListDeliveryLogsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[MessageDeliveryLog] {
 	return pagination.NewEntriesCursorAutoPager(r.ListDeliveryLogs(ctx, messageID, query, opts...))
 }
 
-// Get events for a message
+// Returns a paginated list of events for the specified message.
 func (r *MessageService) ListEvents(ctx context.Context, messageID string, query MessageListEventsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[MessageEvent], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -177,12 +179,14 @@ func (r *MessageService) ListEvents(ctx context.Context, messageID string, query
 	return res, nil
 }
 
-// Get events for a message
+// Returns a paginated list of events for the specified message.
 func (r *MessageService) ListEventsAutoPaging(ctx context.Context, messageID string, query MessageListEventsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[MessageEvent] {
 	return pagination.NewEntriesCursorAutoPager(r.ListEvents(ctx, messageID, query, opts...))
 }
 
-// Marks a message as interacted with
+// Marks a message as interacted with by the current user. This can include any
+// user action on the message, with optional metadata about the specific
+// interaction.
 func (r *MessageService) MarkAsInteracted(ctx context.Context, messageID string, body MessageMarkAsInteractedParams, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -194,7 +198,8 @@ func (r *MessageService) MarkAsInteracted(ctx context.Context, messageID string,
 	return
 }
 
-// Marks a message as read
+// Marks a message as read for the current user. This indicates that the user has
+// read the message content.
 func (r *MessageService) MarkAsRead(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -206,7 +211,8 @@ func (r *MessageService) MarkAsRead(ctx context.Context, messageID string, opts 
 	return
 }
 
-// Marks a message as seen
+// Marks a message as seen for the current user. This indicates that the user has
+// viewed the message in their feed or inbox.
 func (r *MessageService) MarkAsSeen(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -218,7 +224,7 @@ func (r *MessageService) MarkAsSeen(ctx context.Context, messageID string, opts 
 	return
 }
 
-// Marks a message as unread
+// Marks a message as unread for the current user, reversing the read state.
 func (r *MessageService) MarkAsUnread(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -230,7 +236,7 @@ func (r *MessageService) MarkAsUnread(ctx context.Context, messageID string, opt
 	return
 }
 
-// Marks a message as unseen
+// Marks a message as unseen for the current user, reversing the seen state.
 func (r *MessageService) MarkAsUnseen(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -242,7 +248,8 @@ func (r *MessageService) MarkAsUnseen(ctx context.Context, messageID string, opt
 	return
 }
 
-// Unarchives a message
+// Removes a message from the archived state, making it visible in the default
+// message list again.
 func (r *MessageService) Unarchive(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -254,17 +261,21 @@ func (r *MessageService) Unarchive(ctx context.Context, messageID string, opts .
 	return
 }
 
-// An activity associated with a workflow run
+// An activity associated with a workflow run.
 type Activity struct {
-	ID       string `json:"id"`
+	// Unique identifier for the activity.
+	ID string `json:"id"`
+	// The type name of the schema.
 	Typename string `json:"__typename"`
-	// A recipient, which is either a user or an object
+	// A recipient, which is either a user or an object.
 	Actor Recipient `json:"actor,nullable"`
-	// The data associated with the activity
-	Data       interface{} `json:"data,nullable"`
-	InsertedAt time.Time   `json:"inserted_at" format:"date-time"`
-	// A recipient, which is either a user or an object
-	Recipient Recipient    `json:"recipient"`
+	// The data associated with the activity.
+	Data map[string]interface{} `json:"data,nullable"`
+	// Timestamp when the resource was created.
+	InsertedAt time.Time `json:"inserted_at" format:"date-time"`
+	// A recipient, which is either a user or an object.
+	Recipient Recipient `json:"recipient"`
+	// The timestamp when the resource was last updated.
 	UpdatedAt time.Time    `json:"updated_at" format:"date-time"`
 	JSON      activityJSON `json:"-"`
 }
@@ -293,47 +304,49 @@ func (r activityJSON) RawJSON() string {
 // Represents a single message that was generated by a workflow for a given
 // channel.
 type Message struct {
-	// The message ID
-	ID       string `json:"id"`
+	// The unique identifier for the message.
+	ID string `json:"id"`
+	// The type name of the schema.
 	Typename string `json:"__typename"`
-	// A list of actor representations associated with the message (up to 10)
+	// A list of messages.
 	Actors []MessageActorsUnion `json:"actors"`
-	// Timestamp when message was archived
+	// Timestamp when the message was archived.
 	ArchivedAt time.Time `json:"archived_at,nullable" format:"date-time"`
-	// Channel ID associated with the message
+	// The id for the channel the message was sent through.
 	ChannelID string `json:"channel_id" format:"uuid"`
-	// Timestamp when message was clicked
+	// Timestamp when the message was clicked.
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
-	// Additional message data
-	Data interface{} `json:"data,nullable"`
-	// List of engagement statuses
+	// The data associated with the message.
+	Data map[string]interface{} `json:"data,nullable"`
+	// A list of engagement statuses.
 	EngagementStatuses []MessageEngagementStatus `json:"engagement_statuses"`
-	// Timestamp of creation
+	// Timestamp when the resource was created.
 	InsertedAt time.Time `json:"inserted_at" format:"date-time"`
-	// Timestamp when message was interacted with
+	// Timestamp when the message was interacted with.
 	InteractedAt time.Time `json:"interacted_at,nullable" format:"date-time"`
-	// Timestamp when a link in the message was clicked
+	// Timestamp when a link in the message was clicked.
 	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
-	// Message metadata
-	Metadata interface{} `json:"metadata,nullable"`
-	// Timestamp when message was read
+	// The metadata associated with the message.
+	Metadata map[string]interface{} `json:"metadata,nullable"`
+	// Timestamp when the message was read.
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
 	// reference (id, collection).
 	Recipient MessageRecipientUnion `json:"recipient"`
-	// Timestamp when message was scheduled for
+	// Timestamp when the message was scheduled to be sent.
 	ScheduledAt time.Time `json:"scheduled_at,nullable" format:"date-time"`
-	// Timestamp when message was seen
+	// Timestamp when the message was seen.
 	SeenAt time.Time `json:"seen_at,nullable" format:"date-time"`
-	// Source information
+	// The source that triggered the message.
 	Source MessageSource `json:"source"`
-	// Message delivery status
+	// The message delivery status. Can be one of: queued, sent, delivered,
+	// delivery_attempted, undelivered, not_sent, bounced.
 	Status MessageStatus `json:"status"`
-	// Tenant ID that the message belongs to
+	// The id for the tenant set for the message.
 	Tenant string `json:"tenant,nullable"`
-	// Timestamp of last update
+	// The timestamp when the resource was last updated.
 	UpdatedAt time.Time `json:"updated_at" format:"date-time"`
-	// Workflow key used to create the message
+	// The key of the worklfow that generated the message.
 	//
 	// Deprecated: deprecated
 	Workflow string      `json:"workflow,nullable"`
@@ -378,7 +391,7 @@ func (r messageJSON) RawJSON() string {
 // A reference to a recipient, either a user identifier (string) or an object
 // reference (id, collection).
 //
-// Union satisfied by [shared.UnionString] or [MessageActorsObject].
+// Union satisfied by [shared.UnionString] or [MessageActorsObjectReference].
 type MessageActorsUnion interface {
 	ImplementsMessageActorsUnion()
 }
@@ -393,39 +406,41 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageActorsObject{}),
+			Type:       reflect.TypeOf(MessageActorsObjectReference{}),
 		},
 	)
 }
 
-// An object reference to a recipient
-type MessageActorsObject struct {
-	// An object identifier
+// An object reference to a recipient.
+type MessageActorsObjectReference struct {
+	// An identifier for the recipient object.
 	ID string `json:"id,required"`
-	// The collection the object belongs to
-	Collection string                  `json:"collection,required"`
-	JSON       messageActorsObjectJSON `json:"-"`
+	// The collection the recipient object belongs to.
+	Collection string                           `json:"collection,required"`
+	JSON       messageActorsObjectReferenceJSON `json:"-"`
 }
 
-// messageActorsObjectJSON contains the JSON metadata for the struct
-// [MessageActorsObject]
-type messageActorsObjectJSON struct {
+// messageActorsObjectReferenceJSON contains the JSON metadata for the struct
+// [MessageActorsObjectReference]
+type messageActorsObjectReferenceJSON struct {
 	ID          apijson.Field
 	Collection  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageActorsObject) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageActorsObjectReference) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageActorsObjectJSON) RawJSON() string {
+func (r messageActorsObjectReferenceJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MessageActorsObject) ImplementsMessageActorsUnion() {}
+func (r MessageActorsObjectReference) ImplementsMessageActorsUnion() {}
 
+// An engagement status for a message. Can be one of: read, seen, interacted,
+// link_clicked, archived.
 type MessageEngagementStatus string
 
 const (
@@ -447,7 +462,7 @@ func (r MessageEngagementStatus) IsKnown() bool {
 // A reference to a recipient, either a user identifier (string) or an object
 // reference (id, collection).
 //
-// Union satisfied by [shared.UnionString] or [MessageRecipientObject].
+// Union satisfied by [shared.UnionString] or [MessageRecipientObjectReference].
 type MessageRecipientUnion interface {
 	ImplementsMessageRecipientUnion()
 }
@@ -462,47 +477,47 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageRecipientObject{}),
+			Type:       reflect.TypeOf(MessageRecipientObjectReference{}),
 		},
 	)
 }
 
-// An object reference to a recipient
-type MessageRecipientObject struct {
-	// An object identifier
+// An object reference to a recipient.
+type MessageRecipientObjectReference struct {
+	// An identifier for the recipient object.
 	ID string `json:"id,required"`
-	// The collection the object belongs to
-	Collection string                     `json:"collection,required"`
-	JSON       messageRecipientObjectJSON `json:"-"`
+	// The collection the recipient object belongs to.
+	Collection string                              `json:"collection,required"`
+	JSON       messageRecipientObjectReferenceJSON `json:"-"`
 }
 
-// messageRecipientObjectJSON contains the JSON metadata for the struct
-// [MessageRecipientObject]
-type messageRecipientObjectJSON struct {
+// messageRecipientObjectReferenceJSON contains the JSON metadata for the struct
+// [MessageRecipientObjectReference]
+type messageRecipientObjectReferenceJSON struct {
 	ID          apijson.Field
 	Collection  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageRecipientObject) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageRecipientObjectReference) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageRecipientObjectJSON) RawJSON() string {
+func (r messageRecipientObjectReferenceJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MessageRecipientObject) ImplementsMessageRecipientUnion() {}
+func (r MessageRecipientObjectReference) ImplementsMessageRecipientUnion() {}
 
-// Source information
+// The source that triggered the message.
 type MessageSource struct {
 	Typename string `json:"__typename,required"`
-	// The workflow categories
+	// The categories associated with the message.
 	Categories []string `json:"categories,required"`
-	// The workflow key
+	// The key of the source that triggered the message.
 	Key string `json:"key,required"`
-	// The source version ID
+	// The id of the version of the source that triggered the message.
 	VersionID string            `json:"version_id,required" format:"uuid"`
 	JSON      messageSourceJSON `json:"-"`
 }
@@ -525,7 +540,8 @@ func (r messageSourceJSON) RawJSON() string {
 	return r.raw
 }
 
-// Message delivery status
+// The message delivery status. Can be one of: queued, sent, delivered,
+// delivery_attempted, undelivered, not_sent, bounced.
 type MessageStatus string
 
 const (
@@ -546,18 +562,23 @@ func (r MessageStatus) IsKnown() bool {
 	return false
 }
 
-// A message delivery log
+// A message delivery log.
 type MessageDeliveryLog struct {
-	ID            string `json:"id,required"`
-	Typename      string `json:"__typename,required"`
+	// The unique identifier for the message delivery log.
+	ID string `json:"id,required"`
+	// The type name of the schema.
+	Typename string `json:"__typename,required"`
+	// The ID of the environment in which the message delivery occurred.
 	EnvironmentID string `json:"environment_id,required" format:"uuid"`
-	InsertedAt    string `json:"inserted_at,required"`
-	// A message delivery log request
+	// Timestamp when the message delivery log was created.
+	InsertedAt string `json:"inserted_at,required"`
+	// A message delivery log request.
 	Request MessageDeliveryLogRequest `json:"request,required"`
-	// A message delivery log response
-	Response    MessageDeliveryLogResponse `json:"response,required"`
-	ServiceName string                     `json:"service_name,required"`
-	JSON        messageDeliveryLogJSON     `json:"-"`
+	// A message delivery log response.
+	Response MessageDeliveryLogResponse `json:"response,required"`
+	// The name of the service that processed the delivery.
+	ServiceName string                 `json:"service_name,required"`
+	JSON        messageDeliveryLogJSON `json:"-"`
 }
 
 // messageDeliveryLogJSON contains the JSON metadata for the struct
@@ -582,15 +603,21 @@ func (r messageDeliveryLogJSON) RawJSON() string {
 	return r.raw
 }
 
-// A message delivery log request
+// A message delivery log request.
 type MessageDeliveryLogRequest struct {
-	Body    interface{}                     `json:"body"`
-	Headers interface{}                     `json:"headers,nullable"`
-	Host    string                          `json:"host"`
-	Method  MessageDeliveryLogRequestMethod `json:"method"`
-	Path    string                          `json:"path"`
-	Query   string                          `json:"query,nullable"`
-	JSON    messageDeliveryLogRequestJSON   `json:"-"`
+	// The body content that was sent with the request.
+	Body MessageDeliveryLogRequestBodyUnion `json:"body"`
+	// The headers that were sent with the request.
+	Headers map[string]interface{} `json:"headers,nullable"`
+	// The host to which the request was sent.
+	Host string `json:"host"`
+	// The HTTP method used for the request.
+	Method MessageDeliveryLogRequestMethod `json:"method"`
+	// The path of the URL that was requested.
+	Path string `json:"path"`
+	// The query string of the URL that was requested.
+	Query string                        `json:"query,nullable"`
+	JSON  messageDeliveryLogRequestJSON `json:"-"`
 }
 
 // messageDeliveryLogRequestJSON contains the JSON metadata for the struct
@@ -614,6 +641,29 @@ func (r messageDeliveryLogRequestJSON) RawJSON() string {
 	return r.raw
 }
 
+// The body content that was sent with the request.
+//
+// Union satisfied by [shared.UnionString] or [MessageDeliveryLogRequestBodyMap].
+type MessageDeliveryLogRequestBodyUnion interface {
+	ImplementsMessageDeliveryLogRequestBodyUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*MessageDeliveryLogRequestBodyUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(shared.UnionString("")),
+		},
+	)
+}
+
+type MessageDeliveryLogRequestBodyMap map[string]interface{}
+
+func (r MessageDeliveryLogRequestBodyMap) ImplementsMessageDeliveryLogRequestBodyUnion() {}
+
+// The HTTP method used for the request.
 type MessageDeliveryLogRequestMethod string
 
 const (
@@ -632,12 +682,15 @@ func (r MessageDeliveryLogRequestMethod) IsKnown() bool {
 	return false
 }
 
-// A message delivery log response
+// A message delivery log response.
 type MessageDeliveryLogResponse struct {
-	Body    interface{}                    `json:"body"`
-	Headers interface{}                    `json:"headers,nullable"`
-	Status  int64                          `json:"status"`
-	JSON    messageDeliveryLogResponseJSON `json:"-"`
+	// The body content that was received with the response.
+	Body MessageDeliveryLogResponseBodyUnion `json:"body"`
+	// The headers that were received with the response.
+	Headers map[string]interface{} `json:"headers,nullable"`
+	// The HTTP status code of the response.
+	Status int64                          `json:"status"`
+	JSON   messageDeliveryLogResponseJSON `json:"-"`
 }
 
 // messageDeliveryLogResponseJSON contains the JSON metadata for the struct
@@ -658,18 +711,44 @@ func (r messageDeliveryLogResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-// A single event that occurred for a message
+// The body content that was received with the response.
+//
+// Union satisfied by [shared.UnionString] or [MessageDeliveryLogResponseBodyMap].
+type MessageDeliveryLogResponseBodyUnion interface {
+	ImplementsMessageDeliveryLogResponseBodyUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*MessageDeliveryLogResponseBodyUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(shared.UnionString("")),
+		},
+	)
+}
+
+type MessageDeliveryLogResponseBodyMap map[string]interface{}
+
+func (r MessageDeliveryLogResponseBodyMap) ImplementsMessageDeliveryLogResponseBodyUnion() {}
+
+// A message event.
 type MessageEvent struct {
-	ID         string    `json:"id,required"`
-	Typename   string    `json:"__typename,required"`
+	// The unique identifier for the message event.
+	ID string `json:"id,required"`
+	// The type name of the schema.
+	Typename string `json:"__typename,required"`
+	// Timestamp when the event was created.
 	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
 	// reference (id, collection).
 	Recipient MessageEventRecipientUnion `json:"recipient,required"`
-	Type      MessageEventType           `json:"type,required"`
-	// The data associated with the event. Only present for some event types
-	Data interface{}      `json:"data,nullable"`
-	JSON messageEventJSON `json:"-"`
+	// The type of event that occurred.
+	Type MessageEventType `json:"type,required"`
+	// The data associated with the message event. Only present for some event types.
+	Data map[string]interface{} `json:"data,nullable"`
+	JSON messageEventJSON       `json:"-"`
 }
 
 // messageEventJSON contains the JSON metadata for the struct [MessageEvent]
@@ -695,7 +774,8 @@ func (r messageEventJSON) RawJSON() string {
 // A reference to a recipient, either a user identifier (string) or an object
 // reference (id, collection).
 //
-// Union satisfied by [shared.UnionString] or [MessageEventRecipientObject].
+// Union satisfied by [shared.UnionString] or
+// [MessageEventRecipientObjectReference].
 type MessageEventRecipientUnion interface {
 	ImplementsMessageEventRecipientUnion()
 }
@@ -710,73 +790,79 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageEventRecipientObject{}),
+			Type:       reflect.TypeOf(MessageEventRecipientObjectReference{}),
 		},
 	)
 }
 
-// An object reference to a recipient
-type MessageEventRecipientObject struct {
-	// An object identifier
+// An object reference to a recipient.
+type MessageEventRecipientObjectReference struct {
+	// An identifier for the recipient object.
 	ID string `json:"id,required"`
-	// The collection the object belongs to
-	Collection string                          `json:"collection,required"`
-	JSON       messageEventRecipientObjectJSON `json:"-"`
+	// The collection the recipient object belongs to.
+	Collection string                                   `json:"collection,required"`
+	JSON       messageEventRecipientObjectReferenceJSON `json:"-"`
 }
 
-// messageEventRecipientObjectJSON contains the JSON metadata for the struct
-// [MessageEventRecipientObject]
-type messageEventRecipientObjectJSON struct {
+// messageEventRecipientObjectReferenceJSON contains the JSON metadata for the
+// struct [MessageEventRecipientObjectReference]
+type messageEventRecipientObjectReferenceJSON struct {
 	ID          apijson.Field
 	Collection  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageEventRecipientObject) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageEventRecipientObjectReference) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageEventRecipientObjectJSON) RawJSON() string {
+func (r messageEventRecipientObjectReferenceJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MessageEventRecipientObject) ImplementsMessageEventRecipientUnion() {}
+func (r MessageEventRecipientObjectReference) ImplementsMessageEventRecipientUnion() {}
 
+// The type of event that occurred.
 type MessageEventType string
 
 const (
-	MessageEventTypeMessageQueued      MessageEventType = "message.queued"
-	MessageEventTypeMessageSent        MessageEventType = "message.sent"
-	MessageEventTypeMessageDelivered   MessageEventType = "message.delivered"
-	MessageEventTypeMessageUndelivered MessageEventType = "message.undelivered"
-	MessageEventTypeMessageBounced     MessageEventType = "message.bounced"
-	MessageEventTypeMessageRead        MessageEventType = "message.read"
-	MessageEventTypeMessageUnread      MessageEventType = "message.unread"
-	MessageEventTypeMessageLinkClicked MessageEventType = "message.link_clicked"
-	MessageEventTypeMessageInteracted  MessageEventType = "message.interacted"
-	MessageEventTypeMessageSeen        MessageEventType = "message.seen"
-	MessageEventTypeMessageUnseen      MessageEventType = "message.unseen"
-	MessageEventTypeMessageArchived    MessageEventType = "message.archived"
-	MessageEventTypeMessageUnarchived  MessageEventType = "message.unarchived"
+	MessageEventTypeMessageArchived          MessageEventType = "message.archived"
+	MessageEventTypeMessageBounced           MessageEventType = "message.bounced"
+	MessageEventTypeMessageDelivered         MessageEventType = "message.delivered"
+	MessageEventTypeMessageDeliveryAttempted MessageEventType = "message.delivery_attempted"
+	MessageEventTypeMessageInteracted        MessageEventType = "message.interacted"
+	MessageEventTypeMessageLinkClicked       MessageEventType = "message.link_clicked"
+	MessageEventTypeMessageNotSent           MessageEventType = "message.not_sent"
+	MessageEventTypeMessageQueued            MessageEventType = "message.queued"
+	MessageEventTypeMessageRead              MessageEventType = "message.read"
+	MessageEventTypeMessageSeen              MessageEventType = "message.seen"
+	MessageEventTypeMessageSent              MessageEventType = "message.sent"
+	MessageEventTypeMessageUnarchived        MessageEventType = "message.unarchived"
+	MessageEventTypeMessageUndelivered       MessageEventType = "message.undelivered"
+	MessageEventTypeMessageUnread            MessageEventType = "message.unread"
+	MessageEventTypeMessageUnseen            MessageEventType = "message.unseen"
 )
 
 func (r MessageEventType) IsKnown() bool {
 	switch r {
-	case MessageEventTypeMessageQueued, MessageEventTypeMessageSent, MessageEventTypeMessageDelivered, MessageEventTypeMessageUndelivered, MessageEventTypeMessageBounced, MessageEventTypeMessageRead, MessageEventTypeMessageUnread, MessageEventTypeMessageLinkClicked, MessageEventTypeMessageInteracted, MessageEventTypeMessageSeen, MessageEventTypeMessageUnseen, MessageEventTypeMessageArchived, MessageEventTypeMessageUnarchived:
+	case MessageEventTypeMessageArchived, MessageEventTypeMessageBounced, MessageEventTypeMessageDelivered, MessageEventTypeMessageDeliveryAttempted, MessageEventTypeMessageInteracted, MessageEventTypeMessageLinkClicked, MessageEventTypeMessageNotSent, MessageEventTypeMessageQueued, MessageEventTypeMessageRead, MessageEventTypeMessageSeen, MessageEventTypeMessageSent, MessageEventTypeMessageUnarchived, MessageEventTypeMessageUndelivered, MessageEventTypeMessageUnread, MessageEventTypeMessageUnseen:
 		return true
 	}
 	return false
 }
 
-// The contents of a message
+// The content of a message.
 type MessageGetContentResponse struct {
+	// The type name of the schema.
 	Typename string `json:"__typename,required"`
-	// The contents of an email message
-	Data       MessageGetContentResponseData `json:"data,required"`
-	InsertedAt time.Time                     `json:"inserted_at,required" format:"date-time"`
-	MessageID  string                        `json:"message_id,required"`
-	JSON       messageGetContentResponseJSON `json:"-"`
+	// Content data specific to the channel type.
+	Data MessageGetContentResponseData `json:"data,required"`
+	// Timestamp when the message content was created.
+	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
+	// The unique identifier for the message content.
+	MessageID string                        `json:"message_id,required"`
+	JSON      messageGetContentResponseJSON `json:"-"`
 }
 
 // messageGetContentResponseJSON contains the JSON metadata for the struct
@@ -798,34 +884,46 @@ func (r messageGetContentResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-// The contents of an email message
+// Content data specific to the channel type.
 type MessageGetContentResponseData struct {
+	// The type name of the schema.
 	Typename string `json:"__typename,required"`
-	Token    string `json:"token"`
-	Bcc      string `json:"bcc,nullable"`
+	// The device token to send the push notification to.
+	Token string `json:"token"`
+	// The BCC email addresses.
+	Bcc string `json:"bcc,nullable"`
 	// This field can have the runtime type of
 	// [[]MessageGetContentResponseDataMessageInAppFeedContentBlock].
 	Blocks interface{} `json:"blocks"`
-	Body   string      `json:"body"`
-	Cc     string      `json:"cc,nullable"`
-	// This field can have the runtime type of [interface{}].
+	// The content body of the SMS message.
+	Body string `json:"body"`
+	// The CC email addresses.
+	Cc string `json:"cc,nullable"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Connection interface{} `json:"connection"`
-	// This field can have the runtime type of [interface{}].
-	Data     interface{} `json:"data"`
-	From     string      `json:"from"`
-	HTMLBody string      `json:"html_body"`
-	// This field can have the runtime type of [interface{}].
-	Metadata    interface{} `json:"metadata"`
-	ReplyTo     string      `json:"reply_to,nullable"`
-	SubjectLine string      `json:"subject_line"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Data interface{} `json:"data"`
+	// The sender's email address.
+	From string `json:"from"`
+	// The HTML body of the email message.
+	HTMLBody string `json:"html_body"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{} `json:"metadata"`
+	// The reply-to email address.
+	ReplyTo string `json:"reply_to,nullable"`
+	// The subject line of the email message.
+	SubjectLine string `json:"subject_line"`
 	// This field can have the runtime type of
 	// [MessageGetContentResponseDataMessageChatContentTemplate].
-	Template interface{}                       `json:"template"`
-	TextBody string                            `json:"text_body"`
-	Title    string                            `json:"title"`
-	To       string                            `json:"to"`
-	JSON     messageGetContentResponseDataJSON `json:"-"`
-	union    MessageGetContentResponseDataUnion
+	Template interface{} `json:"template"`
+	// The text body of the email message.
+	TextBody string `json:"text_body"`
+	// The title of the push notification.
+	Title string `json:"title"`
+	// The recipient's email address.
+	To    string                            `json:"to"`
+	JSON  messageGetContentResponseDataJSON `json:"-"`
+	union MessageGetContentResponseDataUnion
 }
 
 // messageGetContentResponseDataJSON contains the JSON metadata for the struct
@@ -878,7 +976,7 @@ func (r MessageGetContentResponseData) AsUnion() MessageGetContentResponseDataUn
 	return r.union
 }
 
-// The contents of an email message
+// Content data specific to the channel type.
 //
 // Union satisfied by [MessageGetContentResponseDataMessageEmailContent],
 // [MessageGetContentResponseDataMessageSMSContent],
@@ -916,18 +1014,27 @@ func init() {
 	)
 }
 
-// The contents of an email message
+// The content of an email message.
 type MessageGetContentResponseDataMessageEmailContent struct {
-	Typename    string                                               `json:"__typename,required"`
-	From        string                                               `json:"from,required"`
-	HTMLBody    string                                               `json:"html_body,required"`
-	SubjectLine string                                               `json:"subject_line,required"`
-	TextBody    string                                               `json:"text_body,required"`
-	To          string                                               `json:"to,required"`
-	Bcc         string                                               `json:"bcc,nullable"`
-	Cc          string                                               `json:"cc,nullable"`
-	ReplyTo     string                                               `json:"reply_to,nullable"`
-	JSON        messageGetContentResponseDataMessageEmailContentJSON `json:"-"`
+	// The type name of the schema.
+	Typename string `json:"__typename,required"`
+	// The sender's email address.
+	From string `json:"from,required"`
+	// The HTML body of the email message.
+	HTMLBody string `json:"html_body,required"`
+	// The subject line of the email message.
+	SubjectLine string `json:"subject_line,required"`
+	// The text body of the email message.
+	TextBody string `json:"text_body,required"`
+	// The recipient's email address.
+	To string `json:"to,required"`
+	// The BCC email addresses.
+	Bcc string `json:"bcc,nullable"`
+	// The CC email addresses.
+	Cc string `json:"cc,nullable"`
+	// The reply-to email address.
+	ReplyTo string                                               `json:"reply_to,nullable"`
+	JSON    messageGetContentResponseDataMessageEmailContentJSON `json:"-"`
 }
 
 // messageGetContentResponseDataMessageEmailContentJSON contains the JSON metadata
@@ -956,12 +1063,15 @@ func (r messageGetContentResponseDataMessageEmailContentJSON) RawJSON() string {
 
 func (r MessageGetContentResponseDataMessageEmailContent) implementsMessageGetContentResponseData() {}
 
-// The contents of an SMS message
+// The content of an SMS message.
 type MessageGetContentResponseDataMessageSMSContent struct {
-	Typename string                                             `json:"__typename,required"`
-	Body     string                                             `json:"body,required"`
-	To       string                                             `json:"to,required"`
-	JSON     messageGetContentResponseDataMessageSMSContentJSON `json:"-"`
+	// The type name of the schema.
+	Typename string `json:"__typename,required"`
+	// The content body of the SMS message.
+	Body string `json:"body,required"`
+	// The phone number the SMS was sent to.
+	To   string                                             `json:"to,required"`
+	JSON messageGetContentResponseDataMessageSMSContentJSON `json:"-"`
 }
 
 // messageGetContentResponseDataMessageSMSContentJSON contains the JSON metadata
@@ -984,14 +1094,19 @@ func (r messageGetContentResponseDataMessageSMSContentJSON) RawJSON() string {
 
 func (r MessageGetContentResponseDataMessageSMSContent) implementsMessageGetContentResponseData() {}
 
-// The contents of a push message
+// The content of a push notification.
 type MessageGetContentResponseDataMessagePushContent struct {
-	Token    string                                              `json:"token,required"`
-	Typename string                                              `json:"__typename,required"`
-	Body     string                                              `json:"body,required"`
-	Title    string                                              `json:"title,required"`
-	Data     interface{}                                         `json:"data,nullable"`
-	JSON     messageGetContentResponseDataMessagePushContentJSON `json:"-"`
+	// The device token to send the push notification to.
+	Token string `json:"token,required"`
+	// The type name of the schema.
+	Typename string `json:"__typename,required"`
+	// The content body of the push notification.
+	Body string `json:"body,required"`
+	// The title of the push notification.
+	Title string `json:"title,required"`
+	// Additional data payload for the push notification.
+	Data map[string]interface{}                              `json:"data,nullable"`
+	JSON messageGetContentResponseDataMessagePushContentJSON `json:"-"`
 }
 
 // messageGetContentResponseDataMessagePushContentJSON contains the JSON metadata
@@ -1016,14 +1131,17 @@ func (r messageGetContentResponseDataMessagePushContentJSON) RawJSON() string {
 
 func (r MessageGetContentResponseDataMessagePushContent) implementsMessageGetContentResponseData() {}
 
-// The contents of a chat message
+// The content of a chat message.
 type MessageGetContentResponseDataMessageChatContent struct {
+	// The type name of the schema.
 	Typename string `json:"__typename,required"`
-	// The channel data connection from the recipient to the underlying provider
-	Connection interface{}                                             `json:"connection,required"`
-	Template   MessageGetContentResponseDataMessageChatContentTemplate `json:"template,required"`
-	Metadata   interface{}                                             `json:"metadata,nullable"`
-	JSON       messageGetContentResponseDataMessageChatContentJSON     `json:"-"`
+	// The channel data connection from the recipient to the underlying provider.
+	Connection map[string]interface{} `json:"connection,required"`
+	// The template structure for the chat message.
+	Template MessageGetContentResponseDataMessageChatContentTemplate `json:"template,required"`
+	// Additional metadata associated with the chat message.
+	Metadata map[string]interface{}                              `json:"metadata,nullable"`
+	JSON     messageGetContentResponseDataMessageChatContentJSON `json:"-"`
 }
 
 // messageGetContentResponseDataMessageChatContentJSON contains the JSON metadata
@@ -1047,13 +1165,15 @@ func (r messageGetContentResponseDataMessageChatContentJSON) RawJSON() string {
 
 func (r MessageGetContentResponseDataMessageChatContent) implementsMessageGetContentResponseData() {}
 
+// The template structure for the chat message.
 type MessageGetContentResponseDataMessageChatContentTemplate struct {
-	// The structured blocks of the message
+	// The blocks of the message in a chat.
 	Blocks []MessageGetContentResponseDataMessageChatContentTemplateBlock `json:"blocks,nullable"`
-	// The JSON content of the message
-	JsonContent interface{}                                                 `json:"json_content,nullable"`
-	Summary     string                                                      `json:"summary,nullable"`
-	JSON        messageGetContentResponseDataMessageChatContentTemplateJSON `json:"-"`
+	// The JSON content of the message.
+	JsonContent map[string]interface{} `json:"json_content,nullable"`
+	// The summary of the chat message.
+	Summary string                                                      `json:"summary,nullable"`
+	JSON    messageGetContentResponseDataMessageChatContentTemplateJSON `json:"-"`
 }
 
 // messageGetContentResponseDataMessageChatContentTemplateJSON contains the JSON
@@ -1075,12 +1195,15 @@ func (r messageGetContentResponseDataMessageChatContentTemplateJSON) RawJSON() s
 	return r.raw
 }
 
-// A block in a chat message
+// A block in a message in a chat.
 type MessageGetContentResponseDataMessageChatContentTemplateBlock struct {
-	Content string                                                            `json:"content,required"`
-	Name    string                                                            `json:"name,required"`
-	Type    MessageGetContentResponseDataMessageChatContentTemplateBlocksType `json:"type,required"`
-	JSON    messageGetContentResponseDataMessageChatContentTemplateBlockJSON  `json:"-"`
+	// The actual content of the block.
+	Content string `json:"content,required"`
+	// The name of the block for identification.
+	Name string `json:"name,required"`
+	// The type of block in a message in a chat (text or markdown).
+	Type MessageGetContentResponseDataMessageChatContentTemplateBlocksType `json:"type,required"`
+	JSON messageGetContentResponseDataMessageChatContentTemplateBlockJSON  `json:"-"`
 }
 
 // messageGetContentResponseDataMessageChatContentTemplateBlockJSON contains the
@@ -1102,6 +1225,7 @@ func (r messageGetContentResponseDataMessageChatContentTemplateBlockJSON) RawJSO
 	return r.raw
 }
 
+// The type of block in a message in a chat (text or markdown).
 type MessageGetContentResponseDataMessageChatContentTemplateBlocksType string
 
 const (
@@ -1117,10 +1241,11 @@ func (r MessageGetContentResponseDataMessageChatContentTemplateBlocksType) IsKno
 	return false
 }
 
-// The contents of a message in an app feed
+// The content of an in-app feed message.
 type MessageGetContentResponseDataMessageInAppFeedContent struct {
+	// The type name of the schema.
 	Typename string `json:"__typename,required"`
-	// The blocks of the message
+	// The blocks of the message in an app feed.
 	Blocks []MessageGetContentResponseDataMessageInAppFeedContentBlock `json:"blocks,required"`
 	JSON   messageGetContentResponseDataMessageInAppFeedContentJSON    `json:"-"`
 }
@@ -1145,14 +1270,18 @@ func (r messageGetContentResponseDataMessageInAppFeedContentJSON) RawJSON() stri
 func (r MessageGetContentResponseDataMessageInAppFeedContent) implementsMessageGetContentResponseData() {
 }
 
-// A content (text or markdown) block in a message in an app feed
+// A block in a message in an app feed.
 type MessageGetContentResponseDataMessageInAppFeedContentBlock struct {
-	Name string                                                         `json:"name,required"`
+	// The name of the block in a message in an app feed.
+	Name string `json:"name,required"`
+	// The type of block in a message in an app feed.
 	Type MessageGetContentResponseDataMessageInAppFeedContentBlocksType `json:"type,required"`
 	// This field can have the runtime type of
-	// [[]MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockButton].
-	Buttons  interface{}                                                   `json:"buttons"`
-	Content  string                                                        `json:"content"`
+	// [[]MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton].
+	Buttons interface{} `json:"buttons"`
+	// The content of the block in a message in an app feed.
+	Content string `json:"content"`
+	// The rendered HTML version of the content.
 	Rendered string                                                        `json:"rendered"`
 	JSON     messageGetContentResponseDataMessageInAppFeedContentBlockJSON `json:"-"`
 	union    MessageGetContentResponseDataMessageInAppFeedContentBlocksUnion
@@ -1189,17 +1318,18 @@ func (r *MessageGetContentResponseDataMessageInAppFeedContentBlock) UnmarshalJSO
 // which you can cast to the specific types for more type safety.
 //
 // Possible runtime types of the union are
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlock],
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlock].
+// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock],
+// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock].
 func (r MessageGetContentResponseDataMessageInAppFeedContentBlock) AsUnion() MessageGetContentResponseDataMessageInAppFeedContentBlocksUnion {
 	return r.union
 }
 
-// A content (text or markdown) block in a message in an app feed
+// A block in a message in an app feed.
 //
 // Union satisfied by
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlock] or
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlock].
+// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock]
+// or
+// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock].
 type MessageGetContentResponseDataMessageInAppFeedContentBlocksUnion interface {
 	implementsMessageGetContentResponseDataMessageInAppFeedContentBlock()
 }
@@ -1210,28 +1340,32 @@ func init() {
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlock{}),
+			Type:       reflect.TypeOf(MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlock{}),
+			Type:       reflect.TypeOf(MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock{}),
 		},
 	)
 }
 
-// A content (text or markdown) block in a message in an app feed
-type MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlock struct {
-	Content  string                                                                     `json:"content,required"`
-	Name     string                                                                     `json:"name,required"`
-	Rendered string                                                                     `json:"rendered,required"`
-	Type     MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockType `json:"type,required"`
-	JSON     messageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockJSON `json:"-"`
+// A block in a message in an app feed.
+type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock struct {
+	// The content of the block in a message in an app feed.
+	Content string `json:"content,required"`
+	// The name of the block in a message in an app feed.
+	Name string `json:"name,required"`
+	// The rendered HTML version of the content.
+	Rendered string `json:"rendered,required"`
+	// The type of block in a message in an app feed.
+	Type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockType `json:"type,required"`
+	JSON messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockJSON `json:"-"`
 }
 
-// messageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockJSON
+// messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockJSON
 // contains the JSON metadata for the struct
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlock]
-type messageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockJSON struct {
+// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock]
+type messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockJSON struct {
 	Content     apijson.Field
 	Name        apijson.Field
 	Rendered    apijson.Field
@@ -1240,44 +1374,48 @@ type messageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockJSON 
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlock) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockJSON) RawJSON() string {
+func (r messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlock) implementsMessageGetContentResponseDataMessageInAppFeedContentBlock() {
+func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock) implementsMessageGetContentResponseDataMessageInAppFeedContentBlock() {
 }
 
-type MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockType string
+// The type of block in a message in an app feed.
+type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockType string
 
 const (
-	MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockTypeMarkdown MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockType = "markdown"
-	MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockTypeText     MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockType = "text"
+	MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockTypeMarkdown MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockType = "markdown"
+	MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockTypeText     MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockType = "text"
 )
 
-func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockType) IsKnown() bool {
+func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockType) IsKnown() bool {
 	switch r {
-	case MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockTypeMarkdown, MessageGetContentResponseDataMessageInAppFeedContentBlocksContentBlockTypeText:
+	case MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockTypeMarkdown, MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockTypeText:
 		return true
 	}
 	return false
 }
 
-// A set of buttons in a message in an app feed
-type MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlock struct {
-	Buttons []MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockButton `json:"buttons,required"`
-	Name    string                                                                           `json:"name,required"`
-	Type    MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockType     `json:"type,required"`
-	JSON    messageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockJSON     `json:"-"`
+// A button set block in a message in an app feed.
+type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock struct {
+	// A list of buttons in an in app feed message.
+	Buttons []MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton `json:"buttons,required"`
+	// The name of the button set in a message in an app feed.
+	Name string `json:"name,required"`
+	// The type of block in a message in an app feed.
+	Type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockType `json:"type,required"`
+	JSON messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockJSON `json:"-"`
 }
 
-// messageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockJSON
+// messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockJSON
 // contains the JSON metadata for the struct
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlock]
-type messageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockJSON struct {
+// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock]
+type messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockJSON struct {
 	Buttons     apijson.Field
 	Name        apijson.Field
 	Type        apijson.Field
@@ -1285,29 +1423,32 @@ type messageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockJSO
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlock) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockJSON) RawJSON() string {
+func (r messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlock) implementsMessageGetContentResponseDataMessageInAppFeedContentBlock() {
+func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock) implementsMessageGetContentResponseDataMessageInAppFeedContentBlock() {
 }
 
-// A button in a set of buttons
-type MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockButton struct {
-	Action string                                                                             `json:"action,required"`
-	Label  string                                                                             `json:"label,required"`
-	Name   string                                                                             `json:"name,required"`
-	JSON   messageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockButtonJSON `json:"-"`
+// A button in an in app feed message.
+type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton struct {
+	// The action to take when the button is clicked.
+	Action string `json:"action,required"`
+	// The label of the button.
+	Label string `json:"label,required"`
+	// The name of the button.
+	Name string                                                                                             `json:"name,required"`
+	JSON messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButtonJSON `json:"-"`
 }
 
-// messageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockButtonJSON
+// messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButtonJSON
 // contains the JSON metadata for the struct
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockButton]
-type messageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockButtonJSON struct {
+// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton]
+type messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButtonJSON struct {
 	Action      apijson.Field
 	Label       apijson.Field
 	Name        apijson.Field
@@ -1315,28 +1456,30 @@ type messageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockBut
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockButton) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockButtonJSON) RawJSON() string {
+func (r messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButtonJSON) RawJSON() string {
 	return r.raw
 }
 
-type MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockType string
+// The type of block in a message in an app feed.
+type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockType string
 
 const (
-	MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockTypeButtonSet MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockType = "button_set"
+	MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockTypeButtonSet MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockType = "button_set"
 )
 
-func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockType) IsKnown() bool {
+func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockType) IsKnown() bool {
 	switch r {
-	case MessageGetContentResponseDataMessageInAppFeedContentBlocksButtonSetBlockTypeButtonSet:
+	case MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockTypeButtonSet:
 		return true
 	}
 	return false
 }
 
+// The type of block in a message in an app feed.
 type MessageGetContentResponseDataMessageInAppFeedContentBlocksType string
 
 const (
@@ -1354,31 +1497,31 @@ func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksType) IsKnown(
 }
 
 type MessageListParams struct {
-	// The cursor to fetch entries after
+	// The cursor to fetch entries after.
 	After param.Field[string] `query:"after"`
-	// The cursor to fetch entries before
+	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// The channel ID
+	// The unique identifier for the channel.
 	ChannelID param.Field[string] `query:"channel_id"`
-	// The engagement status of the message
+	// The engagement status to filter messages by.
 	EngagementStatus param.Field[[]MessageListParamsEngagementStatus] `query:"engagement_status"`
-	// The message IDs to filter messages by
+	// The message IDs to filter messages by.
 	MessageIDs param.Field[[]string] `query:"message_ids"`
-	// The page size to fetch
+	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// The source of the message (workflow key)
+	// The source of the message (workflow key).
 	Source param.Field[string] `query:"source"`
-	// The status of the message
+	// The delivery status to filter messages by.
 	Status param.Field[[]MessageListParamsStatus] `query:"status"`
-	// The tenant ID
+	// The unique identifier for the tenant.
 	Tenant param.Field[string] `query:"tenant"`
 	// The trigger data to filter messages by. Must be a valid JSON object.
 	TriggerData param.Field[string] `query:"trigger_data"`
-	// The workflow categories to filter messages by
+	// The workflow categories to filter messages by.
 	WorkflowCategories param.Field[[]string] `query:"workflow_categories"`
-	// The workflow recipient run ID to filter messages by
+	// The workflow recipient run ID to filter messages by.
 	WorkflowRecipientRunID param.Field[string] `query:"workflow_recipient_run_id" format:"uuid"`
-	// The workflow run ID to filter messages by
+	// The workflow run ID to filter messages by.
 	WorkflowRunID param.Field[string] `query:"workflow_run_id" format:"uuid"`
 }
 
@@ -1429,13 +1572,13 @@ func (r MessageListParamsStatus) IsKnown() bool {
 }
 
 type MessageListActivitiesParams struct {
-	// The cursor to fetch entries after
+	// The cursor to fetch entries after.
 	After param.Field[string] `query:"after"`
-	// The cursor to fetch entries before
+	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// The page size to fetch
+	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// The trigger data to filter activities by
+	// The trigger data to filter activities by.
 	TriggerData param.Field[string] `query:"trigger_data"`
 }
 
@@ -1449,11 +1592,11 @@ func (r MessageListActivitiesParams) URLQuery() (v url.Values) {
 }
 
 type MessageListDeliveryLogsParams struct {
-	// The cursor to fetch entries after
+	// The cursor to fetch entries after.
 	After param.Field[string] `query:"after"`
-	// The cursor to fetch entries before
+	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// The page size to fetch
+	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
 }
 
@@ -1467,11 +1610,11 @@ func (r MessageListDeliveryLogsParams) URLQuery() (v url.Values) {
 }
 
 type MessageListEventsParams struct {
-	// The cursor to fetch entries after
+	// The cursor to fetch entries after.
 	After param.Field[string] `query:"after"`
-	// The cursor to fetch entries before
+	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// The page size to fetch
+	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
 }
 
@@ -1485,7 +1628,7 @@ func (r MessageListEventsParams) URLQuery() (v url.Values) {
 }
 
 type MessageMarkAsInteractedParams struct {
-	// Metadata about the interaction
+	// Metadata about the interaction.
 	Metadata param.Field[map[string]interface{}] `json:"metadata"`
 }
 

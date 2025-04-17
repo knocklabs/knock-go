@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/stainless-sdks/knock-go/internal/apijson"
 	"github.com/stainless-sdks/knock-go/internal/apiquery"
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
@@ -32,7 +33,7 @@ func NewTenantBulkService(opts ...option.RequestOption) (r *TenantBulkService) {
 	return
 }
 
-// Deletes tenants in bulk
+// Delete multiple tenants in a single operation. This operation cannot be undone.
 func (r *TenantBulkService) Delete(ctx context.Context, body TenantBulkDeleteParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/tenants/bulk/delete"
@@ -40,16 +41,17 @@ func (r *TenantBulkService) Delete(ctx context.Context, body TenantBulkDeletePar
 	return
 }
 
-// Sets tenants in bulk
-func (r *TenantBulkService) Set(ctx context.Context, opts ...option.RequestOption) (res *BulkOperation, err error) {
+// Set or update multiple tenants in a single operation. This operation allows you
+// to create or update multiple tenants with their properties and settings.
+func (r *TenantBulkService) Set(ctx context.Context, body TenantBulkSetParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/tenants/bulk/set"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
 
 type TenantBulkDeleteParams struct {
-	// The IDs of the tenants to delete
+	// The IDs of the tenants to delete.
 	TenantIDs param.Field[[]string] `query:"tenant_ids,required"`
 }
 
@@ -59,4 +61,13 @@ func (r TenantBulkDeleteParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+type TenantBulkSetParams struct {
+	// The tenants to be upserted.
+	Tenants param.Field[[]InlineTenantRequestUnionParam] `json:"tenants,required"`
+}
+
+func (r TenantBulkSetParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }

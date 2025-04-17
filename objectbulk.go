@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/stainless-sdks/knock-go/internal/apijson"
 	"github.com/stainless-sdks/knock-go/internal/apiquery"
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
@@ -34,7 +35,7 @@ func NewObjectBulkService(opts ...option.RequestOption) (r *ObjectBulkService) {
 	return
 }
 
-// Deletes objects in bulk for a given collection
+// Bulk deletes objects from the specified collection.
 func (r *ObjectBulkService) Delete(ctx context.Context, collection string, body ObjectBulkDeleteParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
@@ -46,32 +47,33 @@ func (r *ObjectBulkService) Delete(ctx context.Context, collection string, body 
 	return
 }
 
-// Bulk upserts subscriptions for a set of objects in a single collection
-func (r *ObjectBulkService) AddSubscriptions(ctx context.Context, collection string, opts ...option.RequestOption) (res *BulkOperation, err error) {
+// Add subscriptions for a set of objects in a single collection. If a subscription
+// already exists, it will be updated.
+func (r *ObjectBulkService) AddSubscriptions(ctx context.Context, collection string, body ObjectBulkAddSubscriptionsParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/objects/%s/bulk/subscriptions/add", collection)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
 
-// Sets objects in bulk for a given collection
-func (r *ObjectBulkService) Set(ctx context.Context, collection string, opts ...option.RequestOption) (res *BulkOperation, err error) {
+// Bulk sets objects in the specified collection.
+func (r *ObjectBulkService) Set(ctx context.Context, collection string, body ObjectBulkSetParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/objects/%s/bulk/set", collection)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
 
 type ObjectBulkDeleteParams struct {
-	// The IDs of the objects to delete
+	// A list of object IDs.
 	ObjectIDs param.Field[[]string] `query:"object_ids,required"`
 }
 
@@ -81,4 +83,35 @@ func (r ObjectBulkDeleteParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+type ObjectBulkAddSubscriptionsParams struct {
+	// A list of subscriptions.
+	Subscriptions param.Field[[]ObjectBulkAddSubscriptionsParamsSubscription] `json:"subscriptions,required"`
+}
+
+func (r ObjectBulkAddSubscriptionsParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type ObjectBulkAddSubscriptionsParamsSubscription struct {
+	// Unique identifier for the subscription.
+	ID param.Field[string] `json:"id,required"`
+	// The recipients of the subscription.
+	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
+	// The custom properties associated with the recipients of the subscription.
+	Properties param.Field[map[string]interface{}] `json:"properties"`
+}
+
+func (r ObjectBulkAddSubscriptionsParamsSubscription) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type ObjectBulkSetParams struct {
+	// A list of objects.
+	Objects param.Field[[]InlineObjectRequestParam] `json:"objects,required"`
+}
+
+func (r ObjectBulkSetParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }

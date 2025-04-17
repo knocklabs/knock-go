@@ -30,11 +30,13 @@ func NewRecipientChannelDataService(opts ...option.RequestOption) (r *RecipientC
 	return
 }
 
-// Channel data for various channel types
+// Channel data for a given channel type.
 type ChannelData struct {
-	Typename  string `json:"__typename,required"`
+	// The type name of the schema.
+	Typename string `json:"__typename,required"`
+	// The unique identifier for the channel.
 	ChannelID string `json:"channel_id,required" format:"uuid"`
-	// Channel data for push providers
+	// Channel data for a given channel type.
 	Data ChannelDataData `json:"data,required"`
 	JSON channelDataJSON `json:"-"`
 }
@@ -56,14 +58,14 @@ func (r channelDataJSON) RawJSON() string {
 	return r.raw
 }
 
-// Channel data for push providers
+// Channel data for a given channel type.
 type ChannelDataData struct {
 	// This field can have the runtime type of [SlackChannelDataToken].
 	Token interface{} `json:"token"`
 	// This field can have the runtime type of [[]SlackChannelDataConnection],
 	// [[]MsTeamsChannelDataConnection], [[]DiscordChannelDataConnection].
 	Connections interface{} `json:"connections"`
-	// The Microsoft Teams tenant ID
+	// Microsoft Teams tenant ID.
 	MsTeamsTenantID string `json:"ms_teams_tenant_id,nullable" format:"uuid"`
 	// This field can have the runtime type of [[]string].
 	PlayerIDs interface{} `json:"player_ids"`
@@ -106,7 +108,7 @@ func (r ChannelDataData) AsUnion() ChannelDataDataUnion {
 	return r.union
 }
 
-// Channel data for push providers
+// Channel data for a given channel type.
 //
 // Union satisfied by [PushChannelData], [SlackChannelData], [MsTeamsChannelData],
 // [DiscordChannelData] or [OneSignalChannelData].
@@ -141,9 +143,9 @@ func init() {
 	)
 }
 
-// Set channel data for a type of channel
+// A request to set channel data for a type of channel.
 type ChannelDataRequestParam struct {
-	// Channel data for push providers
+	// Channel data for a given channel type.
 	Data param.Field[ChannelDataRequestDataUnionParam] `json:"data,required"`
 }
 
@@ -151,11 +153,11 @@ func (r ChannelDataRequestParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// Channel data for push providers
+// Channel data for a given channel type.
 type ChannelDataRequestDataParam struct {
 	Token       param.Field[interface{}] `json:"token"`
 	Connections param.Field[interface{}] `json:"connections"`
-	// The Microsoft Teams tenant ID
+	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
 	PlayerIDs       param.Field[interface{}] `json:"player_ids"`
 	Tokens          param.Field[interface{}] `json:"tokens"`
@@ -167,7 +169,7 @@ func (r ChannelDataRequestDataParam) MarshalJSON() (data []byte, err error) {
 
 func (r ChannelDataRequestDataParam) implementsChannelDataRequestDataUnionParam() {}
 
-// Channel data for push providers
+// Channel data for a given channel type.
 //
 // Satisfied by [PushChannelDataParam], [OneSignalChannelDataParam],
 // [SlackChannelDataParam], [MsTeamsChannelDataParam], [DiscordChannelDataParam],
@@ -176,8 +178,9 @@ type ChannelDataRequestDataUnionParam interface {
 	implementsChannelDataRequestDataUnionParam()
 }
 
-// Discord channel data
+// Discord channel data.
 type DiscordChannelData struct {
+	// List of Discord channel connections.
 	Connections []DiscordChannelDataConnection `json:"connections,required"`
 	JSON        discordChannelDataJSON         `json:"-"`
 }
@@ -200,22 +203,25 @@ func (r discordChannelDataJSON) RawJSON() string {
 
 func (r DiscordChannelData) implementsChannelDataData() {}
 
-// Discord channel connection
+// Discord channel connection, either a channel connection or an incoming webhook
+// connection.
 type DiscordChannelDataConnection struct {
-	// The Discord channel ID
-	ChannelID string                           `json:"channel_id"`
-	URL       string                           `json:"url"`
-	JSON      discordChannelDataConnectionJSON `json:"-"`
-	union     DiscordChannelDataConnectionsUnion
+	// Discord channel ID.
+	ChannelID string `json:"channel_id"`
+	// This field can have the runtime type of
+	// [DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhook].
+	IncomingWebhook interface{}                      `json:"incoming_webhook"`
+	JSON            discordChannelDataConnectionJSON `json:"-"`
+	union           DiscordChannelDataConnectionsUnion
 }
 
 // discordChannelDataConnectionJSON contains the JSON metadata for the struct
 // [DiscordChannelDataConnection]
 type discordChannelDataConnectionJSON struct {
-	ChannelID   apijson.Field
-	URL         apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	ChannelID       apijson.Field
+	IncomingWebhook apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
 }
 
 func (r discordChannelDataConnectionJSON) RawJSON() string {
@@ -235,16 +241,17 @@ func (r *DiscordChannelDataConnection) UnmarshalJSON(data []byte) (err error) {
 // cast to the specific types for more type safety.
 //
 // Possible runtime types of the union are
-// [DiscordChannelDataConnectionsChannelConnection],
-// [DiscordChannelDataConnectionsIncomingWebhookConnection].
+// [DiscordChannelDataConnectionsDiscordChannelConnection],
+// [DiscordChannelDataConnectionsDiscordIncomingWebhookConnection].
 func (r DiscordChannelDataConnection) AsUnion() DiscordChannelDataConnectionsUnion {
 	return r.union
 }
 
-// Discord channel connection
+// Discord channel connection, either a channel connection or an incoming webhook
+// connection.
 //
-// Union satisfied by [DiscordChannelDataConnectionsChannelConnection] or
-// [DiscordChannelDataConnectionsIncomingWebhookConnection].
+// Union satisfied by [DiscordChannelDataConnectionsDiscordChannelConnection] or
+// [DiscordChannelDataConnectionsDiscordIncomingWebhookConnection].
 type DiscordChannelDataConnectionsUnion interface {
 	implementsDiscordChannelDataConnection()
 }
@@ -255,67 +262,95 @@ func init() {
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(DiscordChannelDataConnectionsChannelConnection{}),
+			Type:       reflect.TypeOf(DiscordChannelDataConnectionsDiscordChannelConnection{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(DiscordChannelDataConnectionsIncomingWebhookConnection{}),
+			Type:       reflect.TypeOf(DiscordChannelDataConnectionsDiscordIncomingWebhookConnection{}),
 		},
 	)
 }
 
-// Discord channel connection
-type DiscordChannelDataConnectionsChannelConnection struct {
-	// The Discord channel ID
-	ChannelID string                                             `json:"channel_id,required"`
-	JSON      discordChannelDataConnectionsChannelConnectionJSON `json:"-"`
+// Discord channel connection.
+type DiscordChannelDataConnectionsDiscordChannelConnection struct {
+	// Discord channel ID.
+	ChannelID string                                                    `json:"channel_id,required"`
+	JSON      discordChannelDataConnectionsDiscordChannelConnectionJSON `json:"-"`
 }
 
-// discordChannelDataConnectionsChannelConnectionJSON contains the JSON metadata
-// for the struct [DiscordChannelDataConnectionsChannelConnection]
-type discordChannelDataConnectionsChannelConnectionJSON struct {
+// discordChannelDataConnectionsDiscordChannelConnectionJSON contains the JSON
+// metadata for the struct [DiscordChannelDataConnectionsDiscordChannelConnection]
+type discordChannelDataConnectionsDiscordChannelConnectionJSON struct {
 	ChannelID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *DiscordChannelDataConnectionsChannelConnection) UnmarshalJSON(data []byte) (err error) {
+func (r *DiscordChannelDataConnectionsDiscordChannelConnection) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r discordChannelDataConnectionsChannelConnectionJSON) RawJSON() string {
+func (r discordChannelDataConnectionsDiscordChannelConnectionJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r DiscordChannelDataConnectionsChannelConnection) implementsDiscordChannelDataConnection() {}
-
-// An incoming webhook Slack connection
-type DiscordChannelDataConnectionsIncomingWebhookConnection struct {
-	URL  string                                                     `json:"url,required"`
-	JSON discordChannelDataConnectionsIncomingWebhookConnectionJSON `json:"-"`
+func (r DiscordChannelDataConnectionsDiscordChannelConnection) implementsDiscordChannelDataConnection() {
 }
 
-// discordChannelDataConnectionsIncomingWebhookConnectionJSON contains the JSON
-// metadata for the struct [DiscordChannelDataConnectionsIncomingWebhookConnection]
-type discordChannelDataConnectionsIncomingWebhookConnectionJSON struct {
+// Discord incoming webhook connection.
+type DiscordChannelDataConnectionsDiscordIncomingWebhookConnection struct {
+	// Discord incoming webhook object.
+	IncomingWebhook DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhook `json:"incoming_webhook,required"`
+	JSON            discordChannelDataConnectionsDiscordIncomingWebhookConnectionJSON            `json:"-"`
+}
+
+// discordChannelDataConnectionsDiscordIncomingWebhookConnectionJSON contains the
+// JSON metadata for the struct
+// [DiscordChannelDataConnectionsDiscordIncomingWebhookConnection]
+type discordChannelDataConnectionsDiscordIncomingWebhookConnectionJSON struct {
+	IncomingWebhook apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *DiscordChannelDataConnectionsDiscordIncomingWebhookConnection) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r discordChannelDataConnectionsDiscordIncomingWebhookConnectionJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r DiscordChannelDataConnectionsDiscordIncomingWebhookConnection) implementsDiscordChannelDataConnection() {
+}
+
+// Discord incoming webhook object.
+type DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhook struct {
+	// Incoming webhook URL.
+	URL  string                                                                           `json:"url,required"`
+	JSON discordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookJSON `json:"-"`
+}
+
+// discordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookJSON
+// contains the JSON metadata for the struct
+// [DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhook]
+type discordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookJSON struct {
 	URL         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *DiscordChannelDataConnectionsIncomingWebhookConnection) UnmarshalJSON(data []byte) (err error) {
+func (r *DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhook) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r discordChannelDataConnectionsIncomingWebhookConnectionJSON) RawJSON() string {
+func (r discordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r DiscordChannelDataConnectionsIncomingWebhookConnection) implementsDiscordChannelDataConnection() {
-}
-
-// Discord channel data
+// Discord channel data.
 type DiscordChannelDataParam struct {
+	// List of Discord channel connections.
 	Connections param.Field[[]DiscordChannelDataConnectionsUnionParam] `json:"connections,required"`
 }
 
@@ -325,11 +360,12 @@ func (r DiscordChannelDataParam) MarshalJSON() (data []byte, err error) {
 
 func (r DiscordChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
-// Discord channel connection
+// Discord channel connection, either a channel connection or an incoming webhook
+// connection.
 type DiscordChannelDataConnectionParam struct {
-	// The Discord channel ID
-	ChannelID param.Field[string] `json:"channel_id"`
-	URL       param.Field[string] `json:"url"`
+	// Discord channel ID.
+	ChannelID       param.Field[string]      `json:"channel_id"`
+	IncomingWebhook param.Field[interface{}] `json:"incoming_webhook"`
 }
 
 func (r DiscordChannelDataConnectionParam) MarshalJSON() (data []byte, err error) {
@@ -338,46 +374,59 @@ func (r DiscordChannelDataConnectionParam) MarshalJSON() (data []byte, err error
 
 func (r DiscordChannelDataConnectionParam) implementsDiscordChannelDataConnectionsUnionParam() {}
 
-// Discord channel connection
+// Discord channel connection, either a channel connection or an incoming webhook
+// connection.
 //
-// Satisfied by [DiscordChannelDataConnectionsChannelConnectionParam],
-// [DiscordChannelDataConnectionsIncomingWebhookConnectionParam],
+// Satisfied by [DiscordChannelDataConnectionsDiscordChannelConnectionParam],
+// [DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionParam],
 // [DiscordChannelDataConnectionParam].
 type DiscordChannelDataConnectionsUnionParam interface {
 	implementsDiscordChannelDataConnectionsUnionParam()
 }
 
-// Discord channel connection
-type DiscordChannelDataConnectionsChannelConnectionParam struct {
-	// The Discord channel ID
+// Discord channel connection.
+type DiscordChannelDataConnectionsDiscordChannelConnectionParam struct {
+	// Discord channel ID.
 	ChannelID param.Field[string] `json:"channel_id,required"`
 }
 
-func (r DiscordChannelDataConnectionsChannelConnectionParam) MarshalJSON() (data []byte, err error) {
+func (r DiscordChannelDataConnectionsDiscordChannelConnectionParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r DiscordChannelDataConnectionsChannelConnectionParam) implementsDiscordChannelDataConnectionsUnionParam() {
+func (r DiscordChannelDataConnectionsDiscordChannelConnectionParam) implementsDiscordChannelDataConnectionsUnionParam() {
 }
 
-// An incoming webhook Slack connection
-type DiscordChannelDataConnectionsIncomingWebhookConnectionParam struct {
+// Discord incoming webhook connection.
+type DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionParam struct {
+	// Discord incoming webhook object.
+	IncomingWebhook param.Field[DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookParam] `json:"incoming_webhook,required"`
+}
+
+func (r DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionParam) implementsDiscordChannelDataConnectionsUnionParam() {
+}
+
+// Discord incoming webhook object.
+type DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookParam struct {
+	// Incoming webhook URL.
 	URL param.Field[string] `json:"url,required"`
 }
 
-func (r DiscordChannelDataConnectionsIncomingWebhookConnectionParam) MarshalJSON() (data []byte, err error) {
+func (r DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-func (r DiscordChannelDataConnectionsIncomingWebhookConnectionParam) implementsDiscordChannelDataConnectionsUnionParam() {
 }
 
 type InlineChannelDataRequestParam map[string]ChannelDataRequestParam
 
-// Microsoft Teams channel data
+// Microsoft Teams channel connection.
 type MsTeamsChannelData struct {
+	// List of Microsoft Teams connections.
 	Connections []MsTeamsChannelDataConnection `json:"connections,required"`
-	// The Microsoft Teams tenant ID
+	// Microsoft Teams tenant ID.
 	MsTeamsTenantID string                 `json:"ms_teams_tenant_id,nullable" format:"uuid"`
 	JSON            msTeamsChannelDataJSON `json:"-"`
 }
@@ -401,25 +450,33 @@ func (r msTeamsChannelDataJSON) RawJSON() string {
 
 func (r MsTeamsChannelData) implementsChannelDataData() {}
 
-// A Slack connection, which either includes a channel_id or a user_id
+// Microsoft Teams token connection.
 type MsTeamsChannelDataConnection struct {
-	AccessToken string                           `json:"access_token,nullable"`
-	ChannelID   string                           `json:"channel_id,nullable"`
-	URL         string                           `json:"url"`
-	UserID      string                           `json:"user_id,nullable"`
-	JSON        msTeamsChannelDataConnectionJSON `json:"-"`
-	union       MsTeamsChannelDataConnectionsUnion
+	// This field can have the runtime type of
+	// [MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook].
+	IncomingWebhook interface{} `json:"incoming_webhook"`
+	// Microsoft Teams channel ID.
+	MsTeamsChannelID string `json:"ms_teams_channel_id,nullable" format:"uuid"`
+	// Microsoft Teams team ID.
+	MsTeamsTeamID string `json:"ms_teams_team_id,nullable" format:"uuid"`
+	// Microsoft Teams tenant ID.
+	MsTeamsTenantID string `json:"ms_teams_tenant_id,nullable" format:"uuid"`
+	// Microsoft Teams user ID.
+	MsTeamsUserID string                           `json:"ms_teams_user_id,nullable" format:"uuid"`
+	JSON          msTeamsChannelDataConnectionJSON `json:"-"`
+	union         MsTeamsChannelDataConnectionsUnion
 }
 
 // msTeamsChannelDataConnectionJSON contains the JSON metadata for the struct
 // [MsTeamsChannelDataConnection]
 type msTeamsChannelDataConnectionJSON struct {
-	AccessToken apijson.Field
-	ChannelID   apijson.Field
-	URL         apijson.Field
-	UserID      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	IncomingWebhook  apijson.Field
+	MsTeamsChannelID apijson.Field
+	MsTeamsTeamID    apijson.Field
+	MsTeamsTenantID  apijson.Field
+	MsTeamsUserID    apijson.Field
+	raw              string
+	ExtraFields      map[string]apijson.Field
 }
 
 func (r msTeamsChannelDataConnectionJSON) RawJSON() string {
@@ -439,16 +496,16 @@ func (r *MsTeamsChannelDataConnection) UnmarshalJSON(data []byte) (err error) {
 // cast to the specific types for more type safety.
 //
 // Possible runtime types of the union are
-// [MsTeamsChannelDataConnectionsTokenConnection],
-// [MsTeamsChannelDataConnectionsIncomingWebhookConnection].
+// [MsTeamsChannelDataConnectionsMsTeamsTokenConnection],
+// [MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection].
 func (r MsTeamsChannelDataConnection) AsUnion() MsTeamsChannelDataConnectionsUnion {
 	return r.union
 }
 
-// A Slack connection, which either includes a channel_id or a user_id
+// Microsoft Teams token connection.
 //
-// Union satisfied by [MsTeamsChannelDataConnectionsTokenConnection] or
-// [MsTeamsChannelDataConnectionsIncomingWebhookConnection].
+// Union satisfied by [MsTeamsChannelDataConnectionsMsTeamsTokenConnection] or
+// [MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection].
 type MsTeamsChannelDataConnectionsUnion interface {
 	implementsMsTeamsChannelDataConnection()
 }
@@ -459,72 +516,106 @@ func init() {
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MsTeamsChannelDataConnectionsTokenConnection{}),
+			Type:       reflect.TypeOf(MsTeamsChannelDataConnectionsMsTeamsTokenConnection{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MsTeamsChannelDataConnectionsIncomingWebhookConnection{}),
+			Type:       reflect.TypeOf(MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection{}),
 		},
 	)
 }
 
-// A Slack connection, which either includes a channel_id or a user_id
-type MsTeamsChannelDataConnectionsTokenConnection struct {
-	AccessToken string                                           `json:"access_token,nullable"`
-	ChannelID   string                                           `json:"channel_id,nullable"`
-	UserID      string                                           `json:"user_id,nullable"`
-	JSON        msTeamsChannelDataConnectionsTokenConnectionJSON `json:"-"`
+// Microsoft Teams token connection.
+type MsTeamsChannelDataConnectionsMsTeamsTokenConnection struct {
+	// Microsoft Teams channel ID.
+	MsTeamsChannelID string `json:"ms_teams_channel_id,nullable" format:"uuid"`
+	// Microsoft Teams team ID.
+	MsTeamsTeamID string `json:"ms_teams_team_id,nullable" format:"uuid"`
+	// Microsoft Teams tenant ID.
+	MsTeamsTenantID string `json:"ms_teams_tenant_id,nullable" format:"uuid"`
+	// Microsoft Teams user ID.
+	MsTeamsUserID string                                                  `json:"ms_teams_user_id,nullable" format:"uuid"`
+	JSON          msTeamsChannelDataConnectionsMsTeamsTokenConnectionJSON `json:"-"`
 }
 
-// msTeamsChannelDataConnectionsTokenConnectionJSON contains the JSON metadata for
-// the struct [MsTeamsChannelDataConnectionsTokenConnection]
-type msTeamsChannelDataConnectionsTokenConnectionJSON struct {
-	AccessToken apijson.Field
-	ChannelID   apijson.Field
-	UserID      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+// msTeamsChannelDataConnectionsMsTeamsTokenConnectionJSON contains the JSON
+// metadata for the struct [MsTeamsChannelDataConnectionsMsTeamsTokenConnection]
+type msTeamsChannelDataConnectionsMsTeamsTokenConnectionJSON struct {
+	MsTeamsChannelID apijson.Field
+	MsTeamsTeamID    apijson.Field
+	MsTeamsTenantID  apijson.Field
+	MsTeamsUserID    apijson.Field
+	raw              string
+	ExtraFields      map[string]apijson.Field
 }
 
-func (r *MsTeamsChannelDataConnectionsTokenConnection) UnmarshalJSON(data []byte) (err error) {
+func (r *MsTeamsChannelDataConnectionsMsTeamsTokenConnection) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r msTeamsChannelDataConnectionsTokenConnectionJSON) RawJSON() string {
+func (r msTeamsChannelDataConnectionsMsTeamsTokenConnectionJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MsTeamsChannelDataConnectionsTokenConnection) implementsMsTeamsChannelDataConnection() {}
-
-// An incoming webhook Slack connection
-type MsTeamsChannelDataConnectionsIncomingWebhookConnection struct {
-	URL  string                                                     `json:"url,required"`
-	JSON msTeamsChannelDataConnectionsIncomingWebhookConnectionJSON `json:"-"`
+func (r MsTeamsChannelDataConnectionsMsTeamsTokenConnection) implementsMsTeamsChannelDataConnection() {
 }
 
-// msTeamsChannelDataConnectionsIncomingWebhookConnectionJSON contains the JSON
-// metadata for the struct [MsTeamsChannelDataConnectionsIncomingWebhookConnection]
-type msTeamsChannelDataConnectionsIncomingWebhookConnectionJSON struct {
+// Microsoft Teams incoming webhook connection.
+type MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection struct {
+	// Microsoft Teams incoming webhook.
+	IncomingWebhook MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook `json:"incoming_webhook,required"`
+	JSON            msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionJSON            `json:"-"`
+}
+
+// msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionJSON contains the
+// JSON metadata for the struct
+// [MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection]
+type msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionJSON struct {
+	IncomingWebhook apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection) implementsMsTeamsChannelDataConnection() {
+}
+
+// Microsoft Teams incoming webhook.
+type MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook struct {
+	// Microsoft Teams incoming webhook URL.
+	URL  string                                                                           `json:"url,required"`
+	JSON msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookJSON `json:"-"`
+}
+
+// msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookJSON
+// contains the JSON metadata for the struct
+// [MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook]
+type msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookJSON struct {
 	URL         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MsTeamsChannelDataConnectionsIncomingWebhookConnection) UnmarshalJSON(data []byte) (err error) {
+func (r *MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r msTeamsChannelDataConnectionsIncomingWebhookConnectionJSON) RawJSON() string {
+func (r msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MsTeamsChannelDataConnectionsIncomingWebhookConnection) implementsMsTeamsChannelDataConnection() {
-}
-
-// Microsoft Teams channel data
+// Microsoft Teams channel connection.
 type MsTeamsChannelDataParam struct {
+	// List of Microsoft Teams connections.
 	Connections param.Field[[]MsTeamsChannelDataConnectionsUnionParam] `json:"connections,required"`
-	// The Microsoft Teams tenant ID
+	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string] `json:"ms_teams_tenant_id" format:"uuid"`
 }
 
@@ -534,12 +625,17 @@ func (r MsTeamsChannelDataParam) MarshalJSON() (data []byte, err error) {
 
 func (r MsTeamsChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
-// A Slack connection, which either includes a channel_id or a user_id
+// Microsoft Teams token connection.
 type MsTeamsChannelDataConnectionParam struct {
-	AccessToken param.Field[string] `json:"access_token"`
-	ChannelID   param.Field[string] `json:"channel_id"`
-	URL         param.Field[string] `json:"url"`
-	UserID      param.Field[string] `json:"user_id"`
+	IncomingWebhook param.Field[interface{}] `json:"incoming_webhook"`
+	// Microsoft Teams channel ID.
+	MsTeamsChannelID param.Field[string] `json:"ms_teams_channel_id" format:"uuid"`
+	// Microsoft Teams team ID.
+	MsTeamsTeamID param.Field[string] `json:"ms_teams_team_id" format:"uuid"`
+	// Microsoft Teams tenant ID.
+	MsTeamsTenantID param.Field[string] `json:"ms_teams_tenant_id" format:"uuid"`
+	// Microsoft Teams user ID.
+	MsTeamsUserID param.Field[string] `json:"ms_teams_user_id" format:"uuid"`
 }
 
 func (r MsTeamsChannelDataConnectionParam) MarshalJSON() (data []byte, err error) {
@@ -548,44 +644,60 @@ func (r MsTeamsChannelDataConnectionParam) MarshalJSON() (data []byte, err error
 
 func (r MsTeamsChannelDataConnectionParam) implementsMsTeamsChannelDataConnectionsUnionParam() {}
 
-// A Slack connection, which either includes a channel_id or a user_id
+// Microsoft Teams token connection.
 //
-// Satisfied by [MsTeamsChannelDataConnectionsTokenConnectionParam],
-// [MsTeamsChannelDataConnectionsIncomingWebhookConnectionParam],
+// Satisfied by [MsTeamsChannelDataConnectionsMsTeamsTokenConnectionParam],
+// [MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionParam],
 // [MsTeamsChannelDataConnectionParam].
 type MsTeamsChannelDataConnectionsUnionParam interface {
 	implementsMsTeamsChannelDataConnectionsUnionParam()
 }
 
-// A Slack connection, which either includes a channel_id or a user_id
-type MsTeamsChannelDataConnectionsTokenConnectionParam struct {
-	AccessToken param.Field[string] `json:"access_token"`
-	ChannelID   param.Field[string] `json:"channel_id"`
-	UserID      param.Field[string] `json:"user_id"`
+// Microsoft Teams token connection.
+type MsTeamsChannelDataConnectionsMsTeamsTokenConnectionParam struct {
+	// Microsoft Teams channel ID.
+	MsTeamsChannelID param.Field[string] `json:"ms_teams_channel_id" format:"uuid"`
+	// Microsoft Teams team ID.
+	MsTeamsTeamID param.Field[string] `json:"ms_teams_team_id" format:"uuid"`
+	// Microsoft Teams tenant ID.
+	MsTeamsTenantID param.Field[string] `json:"ms_teams_tenant_id" format:"uuid"`
+	// Microsoft Teams user ID.
+	MsTeamsUserID param.Field[string] `json:"ms_teams_user_id" format:"uuid"`
 }
 
-func (r MsTeamsChannelDataConnectionsTokenConnectionParam) MarshalJSON() (data []byte, err error) {
+func (r MsTeamsChannelDataConnectionsMsTeamsTokenConnectionParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r MsTeamsChannelDataConnectionsTokenConnectionParam) implementsMsTeamsChannelDataConnectionsUnionParam() {
+func (r MsTeamsChannelDataConnectionsMsTeamsTokenConnectionParam) implementsMsTeamsChannelDataConnectionsUnionParam() {
 }
 
-// An incoming webhook Slack connection
-type MsTeamsChannelDataConnectionsIncomingWebhookConnectionParam struct {
+// Microsoft Teams incoming webhook connection.
+type MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionParam struct {
+	// Microsoft Teams incoming webhook.
+	IncomingWebhook param.Field[MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookParam] `json:"incoming_webhook,required"`
+}
+
+func (r MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionParam) implementsMsTeamsChannelDataConnectionsUnionParam() {
+}
+
+// Microsoft Teams incoming webhook.
+type MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookParam struct {
+	// Microsoft Teams incoming webhook URL.
 	URL param.Field[string] `json:"url,required"`
 }
 
-func (r MsTeamsChannelDataConnectionsIncomingWebhookConnectionParam) MarshalJSON() (data []byte, err error) {
+func (r MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r MsTeamsChannelDataConnectionsIncomingWebhookConnectionParam) implementsMsTeamsChannelDataConnectionsUnionParam() {
-}
-
-// OneSignal channel data
+// OneSignal channel data.
 type OneSignalChannelData struct {
-	// The OneSignal player IDs
+	// A list of OneSignal player IDs.
 	PlayerIDs []string                 `json:"player_ids,required" format:"uuid"`
 	JSON      oneSignalChannelDataJSON `json:"-"`
 }
@@ -608,9 +720,9 @@ func (r oneSignalChannelDataJSON) RawJSON() string {
 
 func (r OneSignalChannelData) implementsChannelDataData() {}
 
-// OneSignal channel data
+// OneSignal channel data.
 type OneSignalChannelDataParam struct {
-	// The OneSignal player IDs
+	// A list of OneSignal player IDs.
 	PlayerIDs param.Field[[]string] `json:"player_ids,required" format:"uuid"`
 }
 
@@ -620,8 +732,9 @@ func (r OneSignalChannelDataParam) MarshalJSON() (data []byte, err error) {
 
 func (r OneSignalChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
-// Channel data for push providers
+// The content of a push notification.
 type PushChannelData struct {
+	// A list of push channel tokens.
 	Tokens []string            `json:"tokens,required"`
 	JSON   pushChannelDataJSON `json:"-"`
 }
@@ -643,8 +756,9 @@ func (r pushChannelDataJSON) RawJSON() string {
 
 func (r PushChannelData) implementsChannelDataData() {}
 
-// Channel data for push providers
+// The content of a push notification.
 type PushChannelDataParam struct {
+	// A list of push channel tokens.
 	Tokens param.Field[[]string] `json:"tokens,required"`
 }
 
@@ -656,9 +770,11 @@ func (r PushChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
 // Slack channel data
 type SlackChannelData struct {
+	// List of Slack channel connections.
 	Connections []SlackChannelDataConnection `json:"connections,required"`
-	Token       SlackChannelDataToken        `json:"token,nullable"`
-	JSON        slackChannelDataJSON         `json:"-"`
+	// A Slack connection token.
+	Token SlackChannelDataToken `json:"token,nullable"`
+	JSON  slackChannelDataJSON  `json:"-"`
 }
 
 // slackChannelDataJSON contains the JSON metadata for the struct
@@ -680,14 +796,18 @@ func (r slackChannelDataJSON) RawJSON() string {
 
 func (r SlackChannelData) implementsChannelDataData() {}
 
-// A Slack connection, which either includes a channel_id or a user_id
+// A Slack connection, either an access token or an incoming webhook
 type SlackChannelDataConnection struct {
-	AccessToken string                         `json:"access_token,nullable"`
-	ChannelID   string                         `json:"channel_id,nullable"`
-	URL         string                         `json:"url"`
-	UserID      string                         `json:"user_id,nullable"`
-	JSON        slackChannelDataConnectionJSON `json:"-"`
-	union       SlackChannelDataConnectionsUnion
+	// A Slack access token.
+	AccessToken string `json:"access_token,nullable"`
+	// A Slack channel ID from the Slack provider.
+	ChannelID string `json:"channel_id,nullable"`
+	// The URL of the incoming webhook for a Slack connection.
+	URL string `json:"url"`
+	// A Slack user ID from the Slack provider.
+	UserID string                         `json:"user_id,nullable"`
+	JSON   slackChannelDataConnectionJSON `json:"-"`
+	union  SlackChannelDataConnectionsUnion
 }
 
 // slackChannelDataConnectionJSON contains the JSON metadata for the struct
@@ -718,16 +838,16 @@ func (r *SlackChannelDataConnection) UnmarshalJSON(data []byte) (err error) {
 // cast to the specific types for more type safety.
 //
 // Possible runtime types of the union are
-// [SlackChannelDataConnectionsTokenConnection],
-// [SlackChannelDataConnectionsIncomingWebhookConnection].
+// [SlackChannelDataConnectionsSlackTokenConnection],
+// [SlackChannelDataConnectionsSlackIncomingWebhookConnection].
 func (r SlackChannelDataConnection) AsUnion() SlackChannelDataConnectionsUnion {
 	return r.union
 }
 
-// A Slack connection, which either includes a channel_id or a user_id
+// A Slack connection, either an access token or an incoming webhook
 //
-// Union satisfied by [SlackChannelDataConnectionsTokenConnection] or
-// [SlackChannelDataConnectionsIncomingWebhookConnection].
+// Union satisfied by [SlackChannelDataConnectionsSlackTokenConnection] or
+// [SlackChannelDataConnectionsSlackIncomingWebhookConnection].
 type SlackChannelDataConnectionsUnion interface {
 	implementsSlackChannelDataConnection()
 }
@@ -738,26 +858,29 @@ func init() {
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SlackChannelDataConnectionsTokenConnection{}),
+			Type:       reflect.TypeOf(SlackChannelDataConnectionsSlackTokenConnection{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SlackChannelDataConnectionsIncomingWebhookConnection{}),
+			Type:       reflect.TypeOf(SlackChannelDataConnectionsSlackIncomingWebhookConnection{}),
 		},
 	)
 }
 
-// A Slack connection, which either includes a channel_id or a user_id
-type SlackChannelDataConnectionsTokenConnection struct {
-	AccessToken string                                         `json:"access_token,nullable"`
-	ChannelID   string                                         `json:"channel_id,nullable"`
-	UserID      string                                         `json:"user_id,nullable"`
-	JSON        slackChannelDataConnectionsTokenConnectionJSON `json:"-"`
+// A Slack connection token.
+type SlackChannelDataConnectionsSlackTokenConnection struct {
+	// A Slack access token.
+	AccessToken string `json:"access_token,nullable"`
+	// A Slack channel ID from the Slack provider.
+	ChannelID string `json:"channel_id,nullable"`
+	// A Slack user ID from the Slack provider.
+	UserID string                                              `json:"user_id,nullable"`
+	JSON   slackChannelDataConnectionsSlackTokenConnectionJSON `json:"-"`
 }
 
-// slackChannelDataConnectionsTokenConnectionJSON contains the JSON metadata for
-// the struct [SlackChannelDataConnectionsTokenConnection]
-type slackChannelDataConnectionsTokenConnectionJSON struct {
+// slackChannelDataConnectionsSlackTokenConnectionJSON contains the JSON metadata
+// for the struct [SlackChannelDataConnectionsSlackTokenConnection]
+type slackChannelDataConnectionsSlackTokenConnectionJSON struct {
 	AccessToken apijson.Field
 	ChannelID   apijson.Field
 	UserID      apijson.Field
@@ -765,42 +888,46 @@ type slackChannelDataConnectionsTokenConnectionJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *SlackChannelDataConnectionsTokenConnection) UnmarshalJSON(data []byte) (err error) {
+func (r *SlackChannelDataConnectionsSlackTokenConnection) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r slackChannelDataConnectionsTokenConnectionJSON) RawJSON() string {
+func (r slackChannelDataConnectionsSlackTokenConnectionJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r SlackChannelDataConnectionsTokenConnection) implementsSlackChannelDataConnection() {}
+func (r SlackChannelDataConnectionsSlackTokenConnection) implementsSlackChannelDataConnection() {}
 
-// An incoming webhook Slack connection
-type SlackChannelDataConnectionsIncomingWebhookConnection struct {
-	URL  string                                                   `json:"url,required"`
-	JSON slackChannelDataConnectionsIncomingWebhookConnectionJSON `json:"-"`
+// A Slack connection incoming webhook.
+type SlackChannelDataConnectionsSlackIncomingWebhookConnection struct {
+	// The URL of the incoming webhook for a Slack connection.
+	URL  string                                                        `json:"url,required"`
+	JSON slackChannelDataConnectionsSlackIncomingWebhookConnectionJSON `json:"-"`
 }
 
-// slackChannelDataConnectionsIncomingWebhookConnectionJSON contains the JSON
-// metadata for the struct [SlackChannelDataConnectionsIncomingWebhookConnection]
-type slackChannelDataConnectionsIncomingWebhookConnectionJSON struct {
+// slackChannelDataConnectionsSlackIncomingWebhookConnectionJSON contains the JSON
+// metadata for the struct
+// [SlackChannelDataConnectionsSlackIncomingWebhookConnection]
+type slackChannelDataConnectionsSlackIncomingWebhookConnectionJSON struct {
 	URL         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *SlackChannelDataConnectionsIncomingWebhookConnection) UnmarshalJSON(data []byte) (err error) {
+func (r *SlackChannelDataConnectionsSlackIncomingWebhookConnection) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r slackChannelDataConnectionsIncomingWebhookConnectionJSON) RawJSON() string {
+func (r slackChannelDataConnectionsSlackIncomingWebhookConnectionJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r SlackChannelDataConnectionsIncomingWebhookConnection) implementsSlackChannelDataConnection() {
+func (r SlackChannelDataConnectionsSlackIncomingWebhookConnection) implementsSlackChannelDataConnection() {
 }
 
+// A Slack connection token.
 type SlackChannelDataToken struct {
+	// A Slack access token.
 	AccessToken string                    `json:"access_token,required,nullable"`
 	JSON        slackChannelDataTokenJSON `json:"-"`
 }
@@ -823,8 +950,10 @@ func (r slackChannelDataTokenJSON) RawJSON() string {
 
 // Slack channel data
 type SlackChannelDataParam struct {
+	// List of Slack channel connections.
 	Connections param.Field[[]SlackChannelDataConnectionsUnionParam] `json:"connections,required"`
-	Token       param.Field[SlackChannelDataTokenParam]              `json:"token"`
+	// A Slack connection token.
+	Token param.Field[SlackChannelDataTokenParam] `json:"token"`
 }
 
 func (r SlackChannelDataParam) MarshalJSON() (data []byte, err error) {
@@ -833,12 +962,16 @@ func (r SlackChannelDataParam) MarshalJSON() (data []byte, err error) {
 
 func (r SlackChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
-// A Slack connection, which either includes a channel_id or a user_id
+// A Slack connection, either an access token or an incoming webhook
 type SlackChannelDataConnectionParam struct {
+	// A Slack access token.
 	AccessToken param.Field[string] `json:"access_token"`
-	ChannelID   param.Field[string] `json:"channel_id"`
-	URL         param.Field[string] `json:"url"`
-	UserID      param.Field[string] `json:"user_id"`
+	// A Slack channel ID from the Slack provider.
+	ChannelID param.Field[string] `json:"channel_id"`
+	// The URL of the incoming webhook for a Slack connection.
+	URL param.Field[string] `json:"url"`
+	// A Slack user ID from the Slack provider.
+	UserID param.Field[string] `json:"user_id"`
 }
 
 func (r SlackChannelDataConnectionParam) MarshalJSON() (data []byte, err error) {
@@ -847,42 +980,48 @@ func (r SlackChannelDataConnectionParam) MarshalJSON() (data []byte, err error) 
 
 func (r SlackChannelDataConnectionParam) implementsSlackChannelDataConnectionsUnionParam() {}
 
-// A Slack connection, which either includes a channel_id or a user_id
+// A Slack connection, either an access token or an incoming webhook
 //
-// Satisfied by [SlackChannelDataConnectionsTokenConnectionParam],
-// [SlackChannelDataConnectionsIncomingWebhookConnectionParam],
+// Satisfied by [SlackChannelDataConnectionsSlackTokenConnectionParam],
+// [SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam],
 // [SlackChannelDataConnectionParam].
 type SlackChannelDataConnectionsUnionParam interface {
 	implementsSlackChannelDataConnectionsUnionParam()
 }
 
-// A Slack connection, which either includes a channel_id or a user_id
-type SlackChannelDataConnectionsTokenConnectionParam struct {
+// A Slack connection token.
+type SlackChannelDataConnectionsSlackTokenConnectionParam struct {
+	// A Slack access token.
 	AccessToken param.Field[string] `json:"access_token"`
-	ChannelID   param.Field[string] `json:"channel_id"`
-	UserID      param.Field[string] `json:"user_id"`
+	// A Slack channel ID from the Slack provider.
+	ChannelID param.Field[string] `json:"channel_id"`
+	// A Slack user ID from the Slack provider.
+	UserID param.Field[string] `json:"user_id"`
 }
 
-func (r SlackChannelDataConnectionsTokenConnectionParam) MarshalJSON() (data []byte, err error) {
+func (r SlackChannelDataConnectionsSlackTokenConnectionParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r SlackChannelDataConnectionsTokenConnectionParam) implementsSlackChannelDataConnectionsUnionParam() {
+func (r SlackChannelDataConnectionsSlackTokenConnectionParam) implementsSlackChannelDataConnectionsUnionParam() {
 }
 
-// An incoming webhook Slack connection
-type SlackChannelDataConnectionsIncomingWebhookConnectionParam struct {
+// A Slack connection incoming webhook.
+type SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam struct {
+	// The URL of the incoming webhook for a Slack connection.
 	URL param.Field[string] `json:"url,required"`
 }
 
-func (r SlackChannelDataConnectionsIncomingWebhookConnectionParam) MarshalJSON() (data []byte, err error) {
+func (r SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r SlackChannelDataConnectionsIncomingWebhookConnectionParam) implementsSlackChannelDataConnectionsUnionParam() {
+func (r SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam) implementsSlackChannelDataConnectionsUnionParam() {
 }
 
+// A Slack connection token.
 type SlackChannelDataTokenParam struct {
+	// A Slack access token.
 	AccessToken param.Field[string] `json:"access_token,required"`
 }
 

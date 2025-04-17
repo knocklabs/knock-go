@@ -35,13 +35,19 @@ type InlinePreferenceSetRequestParam map[string]PreferenceSetRequestParam
 
 // A preference set object.
 type PreferenceSet struct {
-	ID         string                                  `json:"id,required"`
-	Typename   string                                  `json:"__typename,required"`
+	// Unique identifier for the preference set.
+	ID string `json:"id,required"`
+	// The type name of the schema.
+	Typename string `json:"__typename,required"`
+	// A setting for a preference set, where the key in the object is the category, and
+	// the values are the preference settings for that category.
 	Categories map[string]PreferenceSetCategoriesUnion `json:"categories,nullable"`
-	// Channel type preferences
-	ChannelTypes PreferenceSetChannelTypes              `json:"channel_types,nullable"`
-	Workflows    map[string]PreferenceSetWorkflowsUnion `json:"workflows,nullable"`
-	JSON         preferenceSetJSON                      `json:"-"`
+	// Channel type preferences.
+	ChannelTypes PreferenceSetChannelTypes `json:"channel_types,nullable"`
+	// A setting for a preference set, where the key in the object is the workflow key,
+	// and the values are the preference settings for that workflow.
+	Workflows map[string]PreferenceSetWorkflowsUnion `json:"workflows,nullable"`
+	JSON      preferenceSetJSON                      `json:"-"`
 }
 
 // preferenceSetJSON contains the JSON metadata for the struct [PreferenceSet]
@@ -65,7 +71,8 @@ func (r preferenceSetJSON) RawJSON() string {
 
 // Workflow or category preferences within a preference set
 //
-// Union satisfied by [shared.UnionBool] or [PreferenceSetCategoriesObject].
+// Union satisfied by [shared.UnionBool] or
+// [PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject].
 type PreferenceSetCategoriesUnion interface {
 	ImplementsPreferenceSetCategoriesUnion()
 }
@@ -84,40 +91,46 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PreferenceSetCategoriesObject{}),
+			Type:       reflect.TypeOf(PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject{}),
 		},
 	)
 }
 
-type PreferenceSetCategoriesObject struct {
-	// Channel type preferences
-	ChannelTypes PreferenceSetChannelTypes         `json:"channel_types,nullable"`
-	Conditions   []shared.Condition                `json:"conditions"`
-	JSON         preferenceSetCategoriesObjectJSON `json:"-"`
+// The settings object for a workflow or category, where you can specify channel
+// types or conditions.
+type PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject struct {
+	// Channel type preferences.
+	ChannelTypes PreferenceSetChannelTypes `json:"channel_types,nullable"`
+	// A list of conditions to apply to a channel type.
+	Conditions []shared.Condition                                                    `json:"conditions,nullable"`
+	JSON       preferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectJSON `json:"-"`
 }
 
-// preferenceSetCategoriesObjectJSON contains the JSON metadata for the struct
-// [PreferenceSetCategoriesObject]
-type preferenceSetCategoriesObjectJSON struct {
+// preferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectJSON contains
+// the JSON metadata for the struct
+// [PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject]
+type preferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectJSON struct {
 	ChannelTypes apijson.Field
 	Conditions   apijson.Field
 	raw          string
 	ExtraFields  map[string]apijson.Field
 }
 
-func (r *PreferenceSetCategoriesObject) UnmarshalJSON(data []byte) (err error) {
+func (r *PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r preferenceSetCategoriesObjectJSON) RawJSON() string {
+func (r preferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r PreferenceSetCategoriesObject) ImplementsPreferenceSetCategoriesUnion() {}
+func (r PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject) ImplementsPreferenceSetCategoriesUnion() {
+}
 
 // Workflow or category preferences within a preference set
 //
-// Union satisfied by [shared.UnionBool] or [PreferenceSetWorkflowsObject].
+// Union satisfied by [shared.UnionBool] or
+// [PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject].
 type PreferenceSetWorkflowsUnion interface {
 	ImplementsPreferenceSetWorkflowsUnion()
 }
@@ -136,46 +149,117 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PreferenceSetWorkflowsObject{}),
+			Type:       reflect.TypeOf(PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject{}),
 		},
 	)
 }
 
-type PreferenceSetWorkflowsObject struct {
-	// Channel type preferences
-	ChannelTypes PreferenceSetChannelTypes        `json:"channel_types,nullable"`
-	Conditions   []shared.Condition               `json:"conditions"`
-	JSON         preferenceSetWorkflowsObjectJSON `json:"-"`
+// The settings object for a workflow or category, where you can specify channel
+// types or conditions.
+type PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject struct {
+	// Channel type preferences.
+	ChannelTypes PreferenceSetChannelTypes `json:"channel_types,nullable"`
+	// A list of conditions to apply to a channel type.
+	Conditions []shared.Condition                                                   `json:"conditions,nullable"`
+	JSON       preferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectJSON `json:"-"`
 }
 
-// preferenceSetWorkflowsObjectJSON contains the JSON metadata for the struct
-// [PreferenceSetWorkflowsObject]
-type preferenceSetWorkflowsObjectJSON struct {
+// preferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectJSON contains
+// the JSON metadata for the struct
+// [PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject]
+type preferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectJSON struct {
 	ChannelTypes apijson.Field
 	Conditions   apijson.Field
 	raw          string
 	ExtraFields  map[string]apijson.Field
 }
 
-func (r *PreferenceSetWorkflowsObject) UnmarshalJSON(data []byte) (err error) {
+func (r *PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r preferenceSetWorkflowsObjectJSON) RawJSON() string {
+func (r preferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r PreferenceSetWorkflowsObject) ImplementsPreferenceSetWorkflowsUnion() {}
+func (r PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject) ImplementsPreferenceSetWorkflowsUnion() {
+}
 
-// Channel type preferences
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type PreferenceSetChannelTypeSetting struct {
+	// A list of conditions to apply to a channel type.
+	Conditions []shared.Condition                  `json:"conditions,required"`
+	JSON       preferenceSetChannelTypeSettingJSON `json:"-"`
+}
+
+// preferenceSetChannelTypeSettingJSON contains the JSON metadata for the struct
+// [PreferenceSetChannelTypeSetting]
+type preferenceSetChannelTypeSettingJSON struct {
+	Conditions  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PreferenceSetChannelTypeSetting) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r preferenceSetChannelTypeSettingJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r PreferenceSetChannelTypeSetting) ImplementsPreferenceSetChannelTypesChatUnion() {}
+
+func (r PreferenceSetChannelTypeSetting) ImplementsPreferenceSetChannelTypesEmailUnion() {}
+
+func (r PreferenceSetChannelTypeSetting) ImplementsPreferenceSetChannelTypesHTTPUnion() {}
+
+func (r PreferenceSetChannelTypeSetting) ImplementsPreferenceSetChannelTypesInAppFeedUnion() {}
+
+func (r PreferenceSetChannelTypeSetting) ImplementsPreferenceSetChannelTypesPushUnion() {}
+
+func (r PreferenceSetChannelTypeSetting) ImplementsPreferenceSetChannelTypesSMSUnion() {}
+
+// A set of settings for a channel type. Currently, this can only be a list of
+// conditions to apply.
+type PreferenceSetChannelTypeSettingParam struct {
+	// A list of conditions to apply to a channel type.
+	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
+}
+
+func (r PreferenceSetChannelTypeSettingParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r PreferenceSetChannelTypeSettingParam) ImplementsPreferenceSetChannelTypesChatUnionParam() {}
+
+func (r PreferenceSetChannelTypeSettingParam) ImplementsPreferenceSetChannelTypesEmailUnionParam() {}
+
+func (r PreferenceSetChannelTypeSettingParam) ImplementsPreferenceSetChannelTypesHTTPUnionParam() {}
+
+func (r PreferenceSetChannelTypeSettingParam) ImplementsPreferenceSetChannelTypesInAppFeedUnionParam() {
+}
+
+func (r PreferenceSetChannelTypeSettingParam) ImplementsPreferenceSetChannelTypesPushUnionParam() {}
+
+func (r PreferenceSetChannelTypeSettingParam) ImplementsPreferenceSetChannelTypesSMSUnionParam() {}
+
+// Channel type preferences.
 type PreferenceSetChannelTypes struct {
-	Chat      PreferenceSetChannelTypesChatUnion      `json:"chat"`
-	Email     PreferenceSetChannelTypesEmailUnion     `json:"email"`
-	HTTP      PreferenceSetChannelTypesHTTPUnion      `json:"http"`
+	// Whether the channel type is enabled for the preference set.
+	Chat PreferenceSetChannelTypesChatUnion `json:"chat"`
+	// Whether the channel type is enabled for the preference set.
+	Email PreferenceSetChannelTypesEmailUnion `json:"email"`
+	// Whether the channel type is enabled for the preference set.
+	HTTP PreferenceSetChannelTypesHTTPUnion `json:"http"`
+	// Whether the channel type is enabled for the preference set.
 	InAppFeed PreferenceSetChannelTypesInAppFeedUnion `json:"in_app_feed"`
-	Push      PreferenceSetChannelTypesPushUnion      `json:"push"`
-	SMS       PreferenceSetChannelTypesSMSUnion       `json:"sms"`
-	JSON      preferenceSetChannelTypesJSON           `json:"-"`
+	// Whether the channel type is enabled for the preference set.
+	Push PreferenceSetChannelTypesPushUnion `json:"push"`
+	// Whether the channel type is enabled for the preference set.
+	SMS  PreferenceSetChannelTypesSMSUnion `json:"sms"`
+	JSON preferenceSetChannelTypesJSON     `json:"-"`
 }
 
 // preferenceSetChannelTypesJSON contains the JSON metadata for the struct
@@ -199,8 +283,9 @@ func (r preferenceSetChannelTypesJSON) RawJSON() string {
 	return r.raw
 }
 
-// Union satisfied by [shared.UnionBool] or
-// [PreferenceSetChannelTypesChatConditions].
+// Whether the channel type is enabled for the preference set.
+//
+// Union satisfied by [shared.UnionBool] or [PreferenceSetChannelTypeSetting].
 type PreferenceSetChannelTypesChatUnion interface {
 	ImplementsPreferenceSetChannelTypesChatUnion()
 }
@@ -219,36 +304,14 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PreferenceSetChannelTypesChatConditions{}),
+			Type:       reflect.TypeOf(PreferenceSetChannelTypeSetting{}),
 		},
 	)
 }
 
-type PreferenceSetChannelTypesChatConditions struct {
-	Conditions []shared.Condition                          `json:"conditions,required"`
-	JSON       preferenceSetChannelTypesChatConditionsJSON `json:"-"`
-}
-
-// preferenceSetChannelTypesChatConditionsJSON contains the JSON metadata for the
-// struct [PreferenceSetChannelTypesChatConditions]
-type preferenceSetChannelTypesChatConditionsJSON struct {
-	Conditions  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PreferenceSetChannelTypesChatConditions) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r preferenceSetChannelTypesChatConditionsJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r PreferenceSetChannelTypesChatConditions) ImplementsPreferenceSetChannelTypesChatUnion() {}
-
-// Union satisfied by [shared.UnionBool] or
-// [PreferenceSetChannelTypesEmailConditions].
+// Whether the channel type is enabled for the preference set.
+//
+// Union satisfied by [shared.UnionBool] or [PreferenceSetChannelTypeSetting].
 type PreferenceSetChannelTypesEmailUnion interface {
 	ImplementsPreferenceSetChannelTypesEmailUnion()
 }
@@ -267,36 +330,14 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PreferenceSetChannelTypesEmailConditions{}),
+			Type:       reflect.TypeOf(PreferenceSetChannelTypeSetting{}),
 		},
 	)
 }
 
-type PreferenceSetChannelTypesEmailConditions struct {
-	Conditions []shared.Condition                           `json:"conditions,required"`
-	JSON       preferenceSetChannelTypesEmailConditionsJSON `json:"-"`
-}
-
-// preferenceSetChannelTypesEmailConditionsJSON contains the JSON metadata for the
-// struct [PreferenceSetChannelTypesEmailConditions]
-type preferenceSetChannelTypesEmailConditionsJSON struct {
-	Conditions  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PreferenceSetChannelTypesEmailConditions) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r preferenceSetChannelTypesEmailConditionsJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r PreferenceSetChannelTypesEmailConditions) ImplementsPreferenceSetChannelTypesEmailUnion() {}
-
-// Union satisfied by [shared.UnionBool] or
-// [PreferenceSetChannelTypesHTTPConditions].
+// Whether the channel type is enabled for the preference set.
+//
+// Union satisfied by [shared.UnionBool] or [PreferenceSetChannelTypeSetting].
 type PreferenceSetChannelTypesHTTPUnion interface {
 	ImplementsPreferenceSetChannelTypesHTTPUnion()
 }
@@ -315,36 +356,14 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PreferenceSetChannelTypesHTTPConditions{}),
+			Type:       reflect.TypeOf(PreferenceSetChannelTypeSetting{}),
 		},
 	)
 }
 
-type PreferenceSetChannelTypesHTTPConditions struct {
-	Conditions []shared.Condition                          `json:"conditions,required"`
-	JSON       preferenceSetChannelTypesHTTPConditionsJSON `json:"-"`
-}
-
-// preferenceSetChannelTypesHTTPConditionsJSON contains the JSON metadata for the
-// struct [PreferenceSetChannelTypesHTTPConditions]
-type preferenceSetChannelTypesHTTPConditionsJSON struct {
-	Conditions  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PreferenceSetChannelTypesHTTPConditions) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r preferenceSetChannelTypesHTTPConditionsJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r PreferenceSetChannelTypesHTTPConditions) ImplementsPreferenceSetChannelTypesHTTPUnion() {}
-
-// Union satisfied by [shared.UnionBool] or
-// [PreferenceSetChannelTypesInAppFeedConditions].
+// Whether the channel type is enabled for the preference set.
+//
+// Union satisfied by [shared.UnionBool] or [PreferenceSetChannelTypeSetting].
 type PreferenceSetChannelTypesInAppFeedUnion interface {
 	ImplementsPreferenceSetChannelTypesInAppFeedUnion()
 }
@@ -363,37 +382,14 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PreferenceSetChannelTypesInAppFeedConditions{}),
+			Type:       reflect.TypeOf(PreferenceSetChannelTypeSetting{}),
 		},
 	)
 }
 
-type PreferenceSetChannelTypesInAppFeedConditions struct {
-	Conditions []shared.Condition                               `json:"conditions,required"`
-	JSON       preferenceSetChannelTypesInAppFeedConditionsJSON `json:"-"`
-}
-
-// preferenceSetChannelTypesInAppFeedConditionsJSON contains the JSON metadata for
-// the struct [PreferenceSetChannelTypesInAppFeedConditions]
-type preferenceSetChannelTypesInAppFeedConditionsJSON struct {
-	Conditions  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PreferenceSetChannelTypesInAppFeedConditions) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r preferenceSetChannelTypesInAppFeedConditionsJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r PreferenceSetChannelTypesInAppFeedConditions) ImplementsPreferenceSetChannelTypesInAppFeedUnion() {
-}
-
-// Union satisfied by [shared.UnionBool] or
-// [PreferenceSetChannelTypesPushConditions].
+// Whether the channel type is enabled for the preference set.
+//
+// Union satisfied by [shared.UnionBool] or [PreferenceSetChannelTypeSetting].
 type PreferenceSetChannelTypesPushUnion interface {
 	ImplementsPreferenceSetChannelTypesPushUnion()
 }
@@ -412,36 +408,14 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PreferenceSetChannelTypesPushConditions{}),
+			Type:       reflect.TypeOf(PreferenceSetChannelTypeSetting{}),
 		},
 	)
 }
 
-type PreferenceSetChannelTypesPushConditions struct {
-	Conditions []shared.Condition                          `json:"conditions,required"`
-	JSON       preferenceSetChannelTypesPushConditionsJSON `json:"-"`
-}
-
-// preferenceSetChannelTypesPushConditionsJSON contains the JSON metadata for the
-// struct [PreferenceSetChannelTypesPushConditions]
-type preferenceSetChannelTypesPushConditionsJSON struct {
-	Conditions  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PreferenceSetChannelTypesPushConditions) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r preferenceSetChannelTypesPushConditionsJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r PreferenceSetChannelTypesPushConditions) ImplementsPreferenceSetChannelTypesPushUnion() {}
-
-// Union satisfied by [shared.UnionBool] or
-// [PreferenceSetChannelTypesSMSConditions].
+// Whether the channel type is enabled for the preference set.
+//
+// Union satisfied by [shared.UnionBool] or [PreferenceSetChannelTypeSetting].
 type PreferenceSetChannelTypesSMSUnion interface {
 	ImplementsPreferenceSetChannelTypesSMSUnion()
 }
@@ -460,152 +434,83 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PreferenceSetChannelTypesSMSConditions{}),
+			Type:       reflect.TypeOf(PreferenceSetChannelTypeSetting{}),
 		},
 	)
 }
 
-type PreferenceSetChannelTypesSMSConditions struct {
-	Conditions []shared.Condition                         `json:"conditions,required"`
-	JSON       preferenceSetChannelTypesSMSConditionsJSON `json:"-"`
-}
-
-// preferenceSetChannelTypesSMSConditionsJSON contains the JSON metadata for the
-// struct [PreferenceSetChannelTypesSMSConditions]
-type preferenceSetChannelTypesSMSConditionsJSON struct {
-	Conditions  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PreferenceSetChannelTypesSMSConditions) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r preferenceSetChannelTypesSMSConditionsJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r PreferenceSetChannelTypesSMSConditions) ImplementsPreferenceSetChannelTypesSMSUnion() {}
-
-// Channel type preferences
+// Channel type preferences.
 type PreferenceSetChannelTypesParam struct {
-	Chat      param.Field[PreferenceSetChannelTypesChatUnionParam]      `json:"chat"`
-	Email     param.Field[PreferenceSetChannelTypesEmailUnionParam]     `json:"email"`
-	HTTP      param.Field[PreferenceSetChannelTypesHTTPUnionParam]      `json:"http"`
+	// Whether the channel type is enabled for the preference set.
+	Chat param.Field[PreferenceSetChannelTypesChatUnionParam] `json:"chat"`
+	// Whether the channel type is enabled for the preference set.
+	Email param.Field[PreferenceSetChannelTypesEmailUnionParam] `json:"email"`
+	// Whether the channel type is enabled for the preference set.
+	HTTP param.Field[PreferenceSetChannelTypesHTTPUnionParam] `json:"http"`
+	// Whether the channel type is enabled for the preference set.
 	InAppFeed param.Field[PreferenceSetChannelTypesInAppFeedUnionParam] `json:"in_app_feed"`
-	Push      param.Field[PreferenceSetChannelTypesPushUnionParam]      `json:"push"`
-	SMS       param.Field[PreferenceSetChannelTypesSMSUnionParam]       `json:"sms"`
+	// Whether the channel type is enabled for the preference set.
+	Push param.Field[PreferenceSetChannelTypesPushUnionParam] `json:"push"`
+	// Whether the channel type is enabled for the preference set.
+	SMS param.Field[PreferenceSetChannelTypesSMSUnionParam] `json:"sms"`
 }
 
 func (r PreferenceSetChannelTypesParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// Satisfied by [shared.UnionBool], [PreferenceSetChannelTypesChatConditionsParam].
+// Whether the channel type is enabled for the preference set.
+//
+// Satisfied by [shared.UnionBool], [PreferenceSetChannelTypeSettingParam].
 type PreferenceSetChannelTypesChatUnionParam interface {
 	ImplementsPreferenceSetChannelTypesChatUnionParam()
 }
 
-type PreferenceSetChannelTypesChatConditionsParam struct {
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
-}
-
-func (r PreferenceSetChannelTypesChatConditionsParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r PreferenceSetChannelTypesChatConditionsParam) ImplementsPreferenceSetChannelTypesChatUnionParam() {
-}
-
-// Satisfied by [shared.UnionBool],
-// [PreferenceSetChannelTypesEmailConditionsParam].
+// Whether the channel type is enabled for the preference set.
+//
+// Satisfied by [shared.UnionBool], [PreferenceSetChannelTypeSettingParam].
 type PreferenceSetChannelTypesEmailUnionParam interface {
 	ImplementsPreferenceSetChannelTypesEmailUnionParam()
 }
 
-type PreferenceSetChannelTypesEmailConditionsParam struct {
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
-}
-
-func (r PreferenceSetChannelTypesEmailConditionsParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r PreferenceSetChannelTypesEmailConditionsParam) ImplementsPreferenceSetChannelTypesEmailUnionParam() {
-}
-
-// Satisfied by [shared.UnionBool], [PreferenceSetChannelTypesHTTPConditionsParam].
+// Whether the channel type is enabled for the preference set.
+//
+// Satisfied by [shared.UnionBool], [PreferenceSetChannelTypeSettingParam].
 type PreferenceSetChannelTypesHTTPUnionParam interface {
 	ImplementsPreferenceSetChannelTypesHTTPUnionParam()
 }
 
-type PreferenceSetChannelTypesHTTPConditionsParam struct {
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
-}
-
-func (r PreferenceSetChannelTypesHTTPConditionsParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r PreferenceSetChannelTypesHTTPConditionsParam) ImplementsPreferenceSetChannelTypesHTTPUnionParam() {
-}
-
-// Satisfied by [shared.UnionBool],
-// [PreferenceSetChannelTypesInAppFeedConditionsParam].
+// Whether the channel type is enabled for the preference set.
+//
+// Satisfied by [shared.UnionBool], [PreferenceSetChannelTypeSettingParam].
 type PreferenceSetChannelTypesInAppFeedUnionParam interface {
 	ImplementsPreferenceSetChannelTypesInAppFeedUnionParam()
 }
 
-type PreferenceSetChannelTypesInAppFeedConditionsParam struct {
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
-}
-
-func (r PreferenceSetChannelTypesInAppFeedConditionsParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r PreferenceSetChannelTypesInAppFeedConditionsParam) ImplementsPreferenceSetChannelTypesInAppFeedUnionParam() {
-}
-
-// Satisfied by [shared.UnionBool], [PreferenceSetChannelTypesPushConditionsParam].
+// Whether the channel type is enabled for the preference set.
+//
+// Satisfied by [shared.UnionBool], [PreferenceSetChannelTypeSettingParam].
 type PreferenceSetChannelTypesPushUnionParam interface {
 	ImplementsPreferenceSetChannelTypesPushUnionParam()
 }
 
-type PreferenceSetChannelTypesPushConditionsParam struct {
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
-}
-
-func (r PreferenceSetChannelTypesPushConditionsParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r PreferenceSetChannelTypesPushConditionsParam) ImplementsPreferenceSetChannelTypesPushUnionParam() {
-}
-
-// Satisfied by [shared.UnionBool], [PreferenceSetChannelTypesSMSConditionsParam].
+// Whether the channel type is enabled for the preference set.
+//
+// Satisfied by [shared.UnionBool], [PreferenceSetChannelTypeSettingParam].
 type PreferenceSetChannelTypesSMSUnionParam interface {
 	ImplementsPreferenceSetChannelTypesSMSUnionParam()
 }
 
-type PreferenceSetChannelTypesSMSConditionsParam struct {
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
-}
-
-func (r PreferenceSetChannelTypesSMSConditionsParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r PreferenceSetChannelTypesSMSConditionsParam) ImplementsPreferenceSetChannelTypesSMSUnionParam() {
-}
-
-// Set preferences for a recipient
+// A request to set a preference set for a recipient.
 type PreferenceSetRequestParam struct {
+	// A setting for a preference set, where the key in the object is the category, and
+	// the values are the preference settings for that category.
 	Categories param.Field[map[string]PreferenceSetRequestCategoriesUnionParam] `json:"categories"`
-	// Channel type preferences
-	ChannelTypes param.Field[PreferenceSetChannelTypesParam]                     `json:"channel_types"`
-	Workflows    param.Field[map[string]PreferenceSetRequestWorkflowsUnionParam] `json:"workflows"`
+	// Channel type preferences.
+	ChannelTypes param.Field[PreferenceSetChannelTypesParam] `json:"channel_types"`
+	// A setting for a preference set, where the key in the object is the workflow key,
+	// and the values are the preference settings for that workflow.
+	Workflows param.Field[map[string]PreferenceSetRequestWorkflowsUnionParam] `json:"workflows"`
 }
 
 func (r PreferenceSetRequestParam) MarshalJSON() (data []byte, err error) {
@@ -614,40 +519,48 @@ func (r PreferenceSetRequestParam) MarshalJSON() (data []byte, err error) {
 
 // Workflow or category preferences within a preference set
 //
-// Satisfied by [shared.UnionBool], [PreferenceSetRequestCategoriesObjectParam].
+// Satisfied by [shared.UnionBool],
+// [PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam].
 type PreferenceSetRequestCategoriesUnionParam interface {
 	ImplementsPreferenceSetRequestCategoriesUnionParam()
 }
 
-type PreferenceSetRequestCategoriesObjectParam struct {
-	// Channel type preferences
+// The settings object for a workflow or category, where you can specify channel
+// types or conditions.
+type PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam struct {
+	// Channel type preferences.
 	ChannelTypes param.Field[PreferenceSetChannelTypesParam] `json:"channel_types"`
-	Conditions   param.Field[[]shared.ConditionParam]        `json:"conditions"`
+	// A list of conditions to apply to a channel type.
+	Conditions param.Field[[]shared.ConditionParam] `json:"conditions"`
 }
 
-func (r PreferenceSetRequestCategoriesObjectParam) MarshalJSON() (data []byte, err error) {
+func (r PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PreferenceSetRequestCategoriesObjectParam) ImplementsPreferenceSetRequestCategoriesUnionParam() {
+func (r PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam) ImplementsPreferenceSetRequestCategoriesUnionParam() {
 }
 
 // Workflow or category preferences within a preference set
 //
-// Satisfied by [shared.UnionBool], [PreferenceSetRequestWorkflowsObjectParam].
+// Satisfied by [shared.UnionBool],
+// [PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam].
 type PreferenceSetRequestWorkflowsUnionParam interface {
 	ImplementsPreferenceSetRequestWorkflowsUnionParam()
 }
 
-type PreferenceSetRequestWorkflowsObjectParam struct {
-	// Channel type preferences
+// The settings object for a workflow or category, where you can specify channel
+// types or conditions.
+type PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam struct {
+	// Channel type preferences.
 	ChannelTypes param.Field[PreferenceSetChannelTypesParam] `json:"channel_types"`
-	Conditions   param.Field[[]shared.ConditionParam]        `json:"conditions"`
+	// A list of conditions to apply to a channel type.
+	Conditions param.Field[[]shared.ConditionParam] `json:"conditions"`
 }
 
-func (r PreferenceSetRequestWorkflowsObjectParam) MarshalJSON() (data []byte, err error) {
+func (r PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PreferenceSetRequestWorkflowsObjectParam) ImplementsPreferenceSetRequestWorkflowsUnionParam() {
+func (r PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam) ImplementsPreferenceSetRequestWorkflowsUnionParam() {
 }
