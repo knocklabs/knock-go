@@ -445,27 +445,32 @@ type UserListMessagesParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// The unique identifier for the channel.
+	// Limits the results to items with the corresponding channel id.
 	ChannelID param.Field[string] `query:"channel_id"`
-	// The engagement status to filter messages by.
+	// One or more of `read`, `seen`, `interacted`, `link_clicked`, `archived`. Limits
+	// results to messages with the given engagement status(es).
 	EngagementStatus param.Field[[]UserListMessagesParamsEngagementStatus] `query:"engagement_status"`
-	// The message IDs to filter messages by.
+	// Limits the results to only the message ids given (max 50). Note: when using this
+	// option, the results will be subject to any other filters applied to the query.
 	MessageIDs param.Field[[]string] `query:"message_ids"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// The source of the message (workflow key).
+	// Limits the results to only items of the source workflow.
 	Source param.Field[string] `query:"source"`
-	// The delivery status to filter messages by.
+	// One or more of `queued`, `sent`, `delivered`, `delivery_attempted`,
+	// `undelivered`, `bounced`, `not_sent`. Limits results to messages with the given
+	// delivery status(es).
 	Status param.Field[[]UserListMessagesParamsStatus] `query:"status"`
-	// The unique identifier for the tenant.
+	// Limits the results to items with the corresponding tenant, or where the tenant
+	// is empty.
 	Tenant param.Field[string] `query:"tenant"`
-	// The trigger data to filter messages by. Must be a valid JSON object.
+	// Limits the results to only items that were generated with the given data.
 	TriggerData param.Field[string] `query:"trigger_data"`
-	// The workflow categories to filter messages by.
+	// Limits the results to only items related to any of the provided categories.
 	WorkflowCategories param.Field[[]string] `query:"workflow_categories"`
-	// The workflow recipient run ID to filter messages by.
+	// Limits the results to messages for a specific recipient's workflow run.
 	WorkflowRecipientRunID param.Field[string] `query:"workflow_recipient_run_id" format:"uuid"`
-	// The workflow run ID to filter messages by.
+	// Limits the results to messages triggered by the top-level workflow run ID.
 	WorkflowRunID param.Field[string] `query:"workflow_run_id" format:"uuid"`
 }
 
@@ -577,30 +582,29 @@ func (r UserListSubscriptionsParamsInclude) IsKnown() bool {
 // reference (id, collection).
 //
 // Satisfied by [shared.UnionString],
-// [UserListSubscriptionsParamsObjectsRecipientReference].
+// [UserListSubscriptionsParamsObjectsObjectReference].
 type UserListSubscriptionsParamsObjectUnion interface {
 	ImplementsUserListSubscriptionsParamsObjectUnion()
 }
 
-// A reference to a recipient, either a user identifier (string) or an object
-// reference (id, collection).
-type UserListSubscriptionsParamsObjectsRecipientReference struct {
+// A reference to a recipient object.
+type UserListSubscriptionsParamsObjectsObjectReference struct {
 	// An identifier for the recipient object.
 	ID param.Field[string] `query:"id"`
 	// The collection the recipient object belongs to.
 	Collection param.Field[string] `query:"collection"`
 }
 
-// URLQuery serializes [UserListSubscriptionsParamsObjectsRecipientReference]'s
-// query parameters as `url.Values`.
-func (r UserListSubscriptionsParamsObjectsRecipientReference) URLQuery() (v url.Values) {
+// URLQuery serializes [UserListSubscriptionsParamsObjectsObjectReference]'s query
+// parameters as `url.Values`.
+func (r UserListSubscriptionsParamsObjectsObjectReference) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
 
-func (r UserListSubscriptionsParamsObjectsRecipientReference) ImplementsUserListSubscriptionsParamsObjectUnion() {
+func (r UserListSubscriptionsParamsObjectsObjectReference) ImplementsUserListSubscriptionsParamsObjectUnion() {
 }
 
 type UserMergeParams struct {

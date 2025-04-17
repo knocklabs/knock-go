@@ -308,7 +308,8 @@ type Message struct {
 	ID string `json:"id"`
 	// The type name of the schema.
 	Typename string `json:"__typename"`
-	// A list of messages.
+	// One or more actors that are associated with this message. Note: this is a list
+	// that can contain up to 10 actors if the message is produced from a batch.
 	Actors []MessageActorsUnion `json:"actors"`
 	// Timestamp when the message was archived.
 	ArchivedAt time.Time `json:"archived_at,nullable" format:"date-time"`
@@ -391,7 +392,7 @@ func (r messageJSON) RawJSON() string {
 // A reference to a recipient, either a user identifier (string) or an object
 // reference (id, collection).
 //
-// Union satisfied by [shared.UnionString] or [MessageActorsRecipientReference].
+// Union satisfied by [shared.UnionString] or [MessageActorsObjectReference].
 type MessageActorsUnion interface {
 	ImplementsMessageActorsUnion()
 }
@@ -406,39 +407,38 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageActorsRecipientReference{}),
+			Type:       reflect.TypeOf(MessageActorsObjectReference{}),
 		},
 	)
 }
 
-// A reference to a recipient, either a user identifier (string) or an object
-// reference (id, collection).
-type MessageActorsRecipientReference struct {
+// A reference to a recipient object.
+type MessageActorsObjectReference struct {
 	// An identifier for the recipient object.
 	ID string `json:"id"`
 	// The collection the recipient object belongs to.
-	Collection string                              `json:"collection"`
-	JSON       messageActorsRecipientReferenceJSON `json:"-"`
+	Collection string                           `json:"collection"`
+	JSON       messageActorsObjectReferenceJSON `json:"-"`
 }
 
-// messageActorsRecipientReferenceJSON contains the JSON metadata for the struct
-// [MessageActorsRecipientReference]
-type messageActorsRecipientReferenceJSON struct {
+// messageActorsObjectReferenceJSON contains the JSON metadata for the struct
+// [MessageActorsObjectReference]
+type messageActorsObjectReferenceJSON struct {
 	ID          apijson.Field
 	Collection  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageActorsRecipientReference) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageActorsObjectReference) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageActorsRecipientReferenceJSON) RawJSON() string {
+func (r messageActorsObjectReferenceJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MessageActorsRecipientReference) ImplementsMessageActorsUnion() {}
+func (r MessageActorsObjectReference) ImplementsMessageActorsUnion() {}
 
 // An engagement status for a message. Can be one of: read, seen, interacted,
 // link_clicked, archived.
@@ -463,7 +463,7 @@ func (r MessageEngagementStatus) IsKnown() bool {
 // A reference to a recipient, either a user identifier (string) or an object
 // reference (id, collection).
 //
-// Union satisfied by [shared.UnionString] or [MessageRecipientRecipientReference].
+// Union satisfied by [shared.UnionString] or [MessageRecipientObjectReference].
 type MessageRecipientUnion interface {
 	ImplementsMessageRecipientUnion()
 }
@@ -478,39 +478,38 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageRecipientRecipientReference{}),
+			Type:       reflect.TypeOf(MessageRecipientObjectReference{}),
 		},
 	)
 }
 
-// A reference to a recipient, either a user identifier (string) or an object
-// reference (id, collection).
-type MessageRecipientRecipientReference struct {
+// A reference to a recipient object.
+type MessageRecipientObjectReference struct {
 	// An identifier for the recipient object.
 	ID string `json:"id"`
 	// The collection the recipient object belongs to.
-	Collection string                                 `json:"collection"`
-	JSON       messageRecipientRecipientReferenceJSON `json:"-"`
+	Collection string                              `json:"collection"`
+	JSON       messageRecipientObjectReferenceJSON `json:"-"`
 }
 
-// messageRecipientRecipientReferenceJSON contains the JSON metadata for the struct
-// [MessageRecipientRecipientReference]
-type messageRecipientRecipientReferenceJSON struct {
+// messageRecipientObjectReferenceJSON contains the JSON metadata for the struct
+// [MessageRecipientObjectReference]
+type messageRecipientObjectReferenceJSON struct {
 	ID          apijson.Field
 	Collection  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageRecipientRecipientReference) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageRecipientObjectReference) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageRecipientRecipientReferenceJSON) RawJSON() string {
+func (r messageRecipientObjectReferenceJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MessageRecipientRecipientReference) ImplementsMessageRecipientUnion() {}
+func (r MessageRecipientObjectReference) ImplementsMessageRecipientUnion() {}
 
 // The source that triggered the message.
 type MessageSource struct {
@@ -777,7 +776,7 @@ func (r messageEventJSON) RawJSON() string {
 // reference (id, collection).
 //
 // Union satisfied by [shared.UnionString] or
-// [MessageEventRecipientRecipientReference].
+// [MessageEventRecipientObjectReference].
 type MessageEventRecipientUnion interface {
 	ImplementsMessageEventRecipientUnion()
 }
@@ -792,39 +791,38 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageEventRecipientRecipientReference{}),
+			Type:       reflect.TypeOf(MessageEventRecipientObjectReference{}),
 		},
 	)
 }
 
-// A reference to a recipient, either a user identifier (string) or an object
-// reference (id, collection).
-type MessageEventRecipientRecipientReference struct {
+// A reference to a recipient object.
+type MessageEventRecipientObjectReference struct {
 	// An identifier for the recipient object.
 	ID string `json:"id"`
 	// The collection the recipient object belongs to.
-	Collection string                                      `json:"collection"`
-	JSON       messageEventRecipientRecipientReferenceJSON `json:"-"`
+	Collection string                                   `json:"collection"`
+	JSON       messageEventRecipientObjectReferenceJSON `json:"-"`
 }
 
-// messageEventRecipientRecipientReferenceJSON contains the JSON metadata for the
-// struct [MessageEventRecipientRecipientReference]
-type messageEventRecipientRecipientReferenceJSON struct {
+// messageEventRecipientObjectReferenceJSON contains the JSON metadata for the
+// struct [MessageEventRecipientObjectReference]
+type messageEventRecipientObjectReferenceJSON struct {
 	ID          apijson.Field
 	Collection  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageEventRecipientRecipientReference) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageEventRecipientObjectReference) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageEventRecipientRecipientReferenceJSON) RawJSON() string {
+func (r messageEventRecipientObjectReferenceJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MessageEventRecipientRecipientReference) ImplementsMessageEventRecipientUnion() {}
+func (r MessageEventRecipientObjectReference) ImplementsMessageEventRecipientUnion() {}
 
 // The type of event that occurred.
 type MessageEventType string
@@ -1504,27 +1502,32 @@ type MessageListParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// The unique identifier for the channel.
+	// Limits the results to items with the corresponding channel id.
 	ChannelID param.Field[string] `query:"channel_id"`
-	// The engagement status to filter messages by.
+	// One or more of `read`, `seen`, `interacted`, `link_clicked`, `archived`. Limits
+	// results to messages with the given engagement status(es).
 	EngagementStatus param.Field[[]MessageListParamsEngagementStatus] `query:"engagement_status"`
-	// The message IDs to filter messages by.
+	// Limits the results to only the message ids given (max 50). Note: when using this
+	// option, the results will be subject to any other filters applied to the query.
 	MessageIDs param.Field[[]string] `query:"message_ids"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// The source of the message (workflow key).
+	// Limits the results to only items of the source workflow.
 	Source param.Field[string] `query:"source"`
-	// The delivery status to filter messages by.
+	// One or more of `queued`, `sent`, `delivered`, `delivery_attempted`,
+	// `undelivered`, `bounced`, `not_sent`. Limits results to messages with the given
+	// delivery status(es).
 	Status param.Field[[]MessageListParamsStatus] `query:"status"`
-	// The unique identifier for the tenant.
+	// Limits the results to items with the corresponding tenant, or where the tenant
+	// is empty.
 	Tenant param.Field[string] `query:"tenant"`
-	// The trigger data to filter messages by. Must be a valid JSON object.
+	// Limits the results to only items that were generated with the given data.
 	TriggerData param.Field[string] `query:"trigger_data"`
-	// The workflow categories to filter messages by.
+	// Limits the results to only items related to any of the provided categories.
 	WorkflowCategories param.Field[[]string] `query:"workflow_categories"`
-	// The workflow recipient run ID to filter messages by.
+	// Limits the results to messages for a specific recipient's workflow run.
 	WorkflowRecipientRunID param.Field[string] `query:"workflow_recipient_run_id" format:"uuid"`
-	// The workflow run ID to filter messages by.
+	// Limits the results to messages triggered by the top-level workflow run ID.
 	WorkflowRunID param.Field[string] `query:"workflow_run_id" format:"uuid"`
 }
 
