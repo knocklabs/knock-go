@@ -391,7 +391,7 @@ func (r messageJSON) RawJSON() string {
 // A reference to a recipient, either a user identifier (string) or an object
 // reference (id, collection).
 //
-// Union satisfied by [shared.UnionString] or [MessageActorsObjectReference].
+// Union satisfied by [shared.UnionString] or [MessageActorsRecipientReference].
 type MessageActorsUnion interface {
 	ImplementsMessageActorsUnion()
 }
@@ -406,38 +406,39 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageActorsObjectReference{}),
+			Type:       reflect.TypeOf(MessageActorsRecipientReference{}),
 		},
 	)
 }
 
-// An object reference to a recipient.
-type MessageActorsObjectReference struct {
+// A reference to a recipient, either a user identifier (string) or an object
+// reference (id, collection).
+type MessageActorsRecipientReference struct {
 	// An identifier for the recipient object.
-	ID string `json:"id,required"`
+	ID string `json:"id"`
 	// The collection the recipient object belongs to.
-	Collection string                           `json:"collection,required"`
-	JSON       messageActorsObjectReferenceJSON `json:"-"`
+	Collection string                              `json:"collection"`
+	JSON       messageActorsRecipientReferenceJSON `json:"-"`
 }
 
-// messageActorsObjectReferenceJSON contains the JSON metadata for the struct
-// [MessageActorsObjectReference]
-type messageActorsObjectReferenceJSON struct {
+// messageActorsRecipientReferenceJSON contains the JSON metadata for the struct
+// [MessageActorsRecipientReference]
+type messageActorsRecipientReferenceJSON struct {
 	ID          apijson.Field
 	Collection  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageActorsObjectReference) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageActorsRecipientReference) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageActorsObjectReferenceJSON) RawJSON() string {
+func (r messageActorsRecipientReferenceJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MessageActorsObjectReference) ImplementsMessageActorsUnion() {}
+func (r MessageActorsRecipientReference) ImplementsMessageActorsUnion() {}
 
 // An engagement status for a message. Can be one of: read, seen, interacted,
 // link_clicked, archived.
@@ -462,7 +463,7 @@ func (r MessageEngagementStatus) IsKnown() bool {
 // A reference to a recipient, either a user identifier (string) or an object
 // reference (id, collection).
 //
-// Union satisfied by [shared.UnionString] or [MessageRecipientObjectReference].
+// Union satisfied by [shared.UnionString] or [MessageRecipientRecipientReference].
 type MessageRecipientUnion interface {
 	ImplementsMessageRecipientUnion()
 }
@@ -477,38 +478,39 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageRecipientObjectReference{}),
+			Type:       reflect.TypeOf(MessageRecipientRecipientReference{}),
 		},
 	)
 }
 
-// An object reference to a recipient.
-type MessageRecipientObjectReference struct {
+// A reference to a recipient, either a user identifier (string) or an object
+// reference (id, collection).
+type MessageRecipientRecipientReference struct {
 	// An identifier for the recipient object.
-	ID string `json:"id,required"`
+	ID string `json:"id"`
 	// The collection the recipient object belongs to.
-	Collection string                              `json:"collection,required"`
-	JSON       messageRecipientObjectReferenceJSON `json:"-"`
+	Collection string                                 `json:"collection"`
+	JSON       messageRecipientRecipientReferenceJSON `json:"-"`
 }
 
-// messageRecipientObjectReferenceJSON contains the JSON metadata for the struct
-// [MessageRecipientObjectReference]
-type messageRecipientObjectReferenceJSON struct {
+// messageRecipientRecipientReferenceJSON contains the JSON metadata for the struct
+// [MessageRecipientRecipientReference]
+type messageRecipientRecipientReferenceJSON struct {
 	ID          apijson.Field
 	Collection  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageRecipientObjectReference) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageRecipientRecipientReference) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageRecipientObjectReferenceJSON) RawJSON() string {
+func (r messageRecipientRecipientReferenceJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MessageRecipientObjectReference) ImplementsMessageRecipientUnion() {}
+func (r MessageRecipientRecipientReference) ImplementsMessageRecipientUnion() {}
 
 // The source that triggered the message.
 type MessageSource struct {
@@ -775,7 +777,7 @@ func (r messageEventJSON) RawJSON() string {
 // reference (id, collection).
 //
 // Union satisfied by [shared.UnionString] or
-// [MessageEventRecipientObjectReference].
+// [MessageEventRecipientRecipientReference].
 type MessageEventRecipientUnion interface {
 	ImplementsMessageEventRecipientUnion()
 }
@@ -790,38 +792,39 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageEventRecipientObjectReference{}),
+			Type:       reflect.TypeOf(MessageEventRecipientRecipientReference{}),
 		},
 	)
 }
 
-// An object reference to a recipient.
-type MessageEventRecipientObjectReference struct {
+// A reference to a recipient, either a user identifier (string) or an object
+// reference (id, collection).
+type MessageEventRecipientRecipientReference struct {
 	// An identifier for the recipient object.
-	ID string `json:"id,required"`
+	ID string `json:"id"`
 	// The collection the recipient object belongs to.
-	Collection string                                   `json:"collection,required"`
-	JSON       messageEventRecipientObjectReferenceJSON `json:"-"`
+	Collection string                                      `json:"collection"`
+	JSON       messageEventRecipientRecipientReferenceJSON `json:"-"`
 }
 
-// messageEventRecipientObjectReferenceJSON contains the JSON metadata for the
-// struct [MessageEventRecipientObjectReference]
-type messageEventRecipientObjectReferenceJSON struct {
+// messageEventRecipientRecipientReferenceJSON contains the JSON metadata for the
+// struct [MessageEventRecipientRecipientReference]
+type messageEventRecipientRecipientReferenceJSON struct {
 	ID          apijson.Field
 	Collection  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageEventRecipientObjectReference) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageEventRecipientRecipientReference) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageEventRecipientObjectReferenceJSON) RawJSON() string {
+func (r messageEventRecipientRecipientReferenceJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MessageEventRecipientObjectReference) ImplementsMessageEventRecipientUnion() {}
+func (r MessageEventRecipientRecipientReference) ImplementsMessageEventRecipientUnion() {}
 
 // The type of event that occurred.
 type MessageEventType string

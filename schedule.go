@@ -271,24 +271,26 @@ func (r ScheduleNewParams) MarshalJSON() (data []byte, err error) {
 // A reference to a recipient, either a user identifier (string) or an object
 // reference (id, collection).
 //
-// Satisfied by [shared.UnionString], [ScheduleNewParamsRecipientsObjectReference].
+// Satisfied by [shared.UnionString],
+// [ScheduleNewParamsRecipientsRecipientReference].
 type ScheduleNewParamsRecipientUnion interface {
 	ImplementsScheduleNewParamsRecipientUnion()
 }
 
-// An object reference to a recipient.
-type ScheduleNewParamsRecipientsObjectReference struct {
+// A reference to a recipient, either a user identifier (string) or an object
+// reference (id, collection).
+type ScheduleNewParamsRecipientsRecipientReference struct {
 	// An identifier for the recipient object.
-	ID param.Field[string] `json:"id,required"`
+	ID param.Field[string] `json:"id"`
 	// The collection the recipient object belongs to.
-	Collection param.Field[string] `json:"collection,required"`
+	Collection param.Field[string] `json:"collection"`
 }
 
-func (r ScheduleNewParamsRecipientsObjectReference) MarshalJSON() (data []byte, err error) {
+func (r ScheduleNewParamsRecipientsRecipientReference) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r ScheduleNewParamsRecipientsObjectReference) ImplementsScheduleNewParamsRecipientUnion() {}
+func (r ScheduleNewParamsRecipientsRecipientReference) ImplementsScheduleNewParamsRecipientUnion() {}
 
 type ScheduleUpdateParams struct {
 	// A list of schedule IDs.

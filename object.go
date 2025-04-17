@@ -638,58 +638,61 @@ func (r ObjectListSubscriptionsParamsMode) IsKnown() bool {
 // reference (id, collection).
 //
 // Satisfied by [shared.UnionString],
-// [ObjectListSubscriptionsParamsObjectsObjectReference].
+// [ObjectListSubscriptionsParamsObjectsRecipientReference].
 type ObjectListSubscriptionsParamsObjectUnion interface {
 	ImplementsObjectListSubscriptionsParamsObjectUnion()
 }
 
-// An object reference to a recipient.
-type ObjectListSubscriptionsParamsObjectsObjectReference struct {
+// A reference to a recipient, either a user identifier (string) or an object
+// reference (id, collection).
+type ObjectListSubscriptionsParamsObjectsRecipientReference struct {
 	// An identifier for the recipient object.
-	ID param.Field[string] `query:"id,required"`
+	ID param.Field[string] `query:"id"`
 	// The collection the recipient object belongs to.
-	Collection param.Field[string] `query:"collection,required"`
+	Collection param.Field[string] `query:"collection"`
 }
 
-// URLQuery serializes [ObjectListSubscriptionsParamsObjectsObjectReference]'s
+// URLQuery serializes [ObjectListSubscriptionsParamsObjectsRecipientReference]'s
 // query parameters as `url.Values`.
-func (r ObjectListSubscriptionsParamsObjectsObjectReference) URLQuery() (v url.Values) {
+func (r ObjectListSubscriptionsParamsObjectsRecipientReference) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
 
-func (r ObjectListSubscriptionsParamsObjectsObjectReference) ImplementsObjectListSubscriptionsParamsObjectUnion() {
+func (r ObjectListSubscriptionsParamsObjectsRecipientReference) ImplementsObjectListSubscriptionsParamsObjectUnion() {
 }
 
 // A reference to a recipient, either a user identifier (string) or an object
 // reference (id, collection).
 //
 // Satisfied by [shared.UnionString],
-// [ObjectListSubscriptionsParamsRecipientsObjectReference].
+// [ObjectListSubscriptionsParamsRecipientsRecipientReference].
 type ObjectListSubscriptionsParamsRecipientUnion interface {
 	ImplementsObjectListSubscriptionsParamsRecipientUnion()
 }
 
-// An object reference to a recipient.
-type ObjectListSubscriptionsParamsRecipientsObjectReference struct {
+// A reference to a recipient, either a user identifier (string) or an object
+// reference (id, collection).
+type ObjectListSubscriptionsParamsRecipientsRecipientReference struct {
 	// An identifier for the recipient object.
-	ID param.Field[string] `query:"id,required"`
+	ID param.Field[string] `query:"id"`
 	// The collection the recipient object belongs to.
-	Collection param.Field[string] `query:"collection,required"`
+	Collection param.Field[string] `query:"collection"`
 }
 
-// URLQuery serializes [ObjectListSubscriptionsParamsRecipientsObjectReference]'s
-// query parameters as `url.Values`.
-func (r ObjectListSubscriptionsParamsRecipientsObjectReference) URLQuery() (v url.Values) {
+// URLQuery serializes
+// [ObjectListSubscriptionsParamsRecipientsRecipientReference]'s query parameters
+// as `url.Values`.
+func (r ObjectListSubscriptionsParamsRecipientsRecipientReference) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
 
-func (r ObjectListSubscriptionsParamsRecipientsObjectReference) ImplementsObjectListSubscriptionsParamsRecipientUnion() {
+func (r ObjectListSubscriptionsParamsRecipientsRecipientReference) ImplementsObjectListSubscriptionsParamsRecipientUnion() {
 }
 
 type ObjectSetParams struct {
