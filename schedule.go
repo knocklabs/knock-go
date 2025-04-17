@@ -87,13 +87,13 @@ func (r *ScheduleService) Delete(ctx context.Context, body ScheduleDeleteParams,
 	return
 }
 
-// A schedule that represents a recurring workflow execution.
+// A schedule represents a recurring workflow execution.
 type Schedule struct {
 	// Unique identifier for the schedule.
 	ID string `json:"id,required" format:"uuid"`
 	// Timestamp when the resource was created.
 	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
-	// A recipient, which is either a user or an object.
+	// A recipient of a notification, which is either a user or an object.
 	Recipient Recipient `json:"recipient,required"`
 	// The repeat rule for the schedule.
 	Repeats []ScheduleRepeatRule `json:"repeats,required"`
@@ -101,9 +101,9 @@ type Schedule struct {
 	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
 	// The workflow the schedule is applied to.
 	Workflow string `json:"workflow,required"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename"`
-	// A recipient, which is either a user or an object.
+	// A recipient of a notification, which is either a user or an object.
 	Actor Recipient `json:"actor,nullable"`
 	// An optional map of data to pass into the workflow execution.
 	Data map[string]interface{} `json:"data,nullable"`
@@ -146,7 +146,7 @@ func (r scheduleJSON) RawJSON() string {
 
 // The repeat rule for the schedule.
 type ScheduleRepeatRule struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The frequency of the schedule.
 	Frequency ScheduleRepeatRuleFrequency `json:"frequency,required"`
@@ -226,7 +226,7 @@ func (r ScheduleRepeatRuleDay) IsKnown() bool {
 
 // The repeat rule for the schedule.
 type ScheduleRepeatRuleParam struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename param.Field[string] `json:"__typename,required"`
 	// The frequency of the schedule.
 	Frequency param.Field[ScheduleRepeatRuleFrequency] `json:"frequency,required"`

@@ -109,7 +109,7 @@ type InlineTenantRequestUnionParam interface {
 type Tenant struct {
 	// The unique identifier for the tenant.
 	ID string `json:"id,required"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename    string                 `json:"__typename,required"`
 	ExtraFields map[string]interface{} `json:"-,extras"`
 	JSON        tenantJSON             `json:"-"`
@@ -131,7 +131,8 @@ func (r tenantJSON) RawJSON() string {
 	return r.raw
 }
 
-// A request to get a tenant.
+// A tenant to be set in the system. You can supply any additional properties on
+// the tenant object.
 type TenantRequestParam struct {
 	// The unique identifier for the tenant.
 	ID param.Field[string] `json:"id,required"`

@@ -265,15 +265,15 @@ func (r *MessageService) Unarchive(ctx context.Context, messageID string, opts .
 type Activity struct {
 	// Unique identifier for the activity.
 	ID string `json:"id"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename"`
-	// A recipient, which is either a user or an object.
+	// A recipient of a notification, which is either a user or an object.
 	Actor Recipient `json:"actor,nullable"`
 	// The data associated with the activity.
 	Data map[string]interface{} `json:"data,nullable"`
 	// Timestamp when the resource was created.
 	InsertedAt time.Time `json:"inserted_at" format:"date-time"`
-	// A recipient, which is either a user or an object.
+	// A recipient of a notification, which is either a user or an object.
 	Recipient Recipient `json:"recipient"`
 	// The timestamp when the resource was last updated.
 	UpdatedAt time.Time    `json:"updated_at" format:"date-time"`
@@ -306,7 +306,7 @@ func (r activityJSON) RawJSON() string {
 type Message struct {
 	// The unique identifier for the message.
 	ID string `json:"id"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename"`
 	// One or more actors that are associated with this message. Note: this is a list
 	// that can contain up to 10 actors if the message is produced from a batch.
@@ -317,7 +317,7 @@ type Message struct {
 	ChannelID string `json:"channel_id" format:"uuid"`
 	// Timestamp when the message was clicked.
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
-	// The data associated with the message.
+	// Data from the activities linked to the message
 	Data map[string]interface{} `json:"data,nullable"`
 	// A list of engagement statuses.
 	EngagementStatuses []MessageEngagementStatus `json:"engagement_statuses"`
@@ -340,8 +340,7 @@ type Message struct {
 	SeenAt time.Time `json:"seen_at,nullable" format:"date-time"`
 	// The source that triggered the message.
 	Source MessageSource `json:"source"`
-	// The message delivery status. Can be one of: queued, sent, delivered,
-	// delivery_attempted, undelivered, not_sent, bounced.
+	// The message delivery status.
 	Status MessageStatus `json:"status"`
 	// The id for the tenant set for the message.
 	Tenant string `json:"tenant,nullable"`
@@ -541,8 +540,7 @@ func (r messageSourceJSON) RawJSON() string {
 	return r.raw
 }
 
-// The message delivery status. Can be one of: queued, sent, delivered,
-// delivery_attempted, undelivered, not_sent, bounced.
+// The message delivery status.
 type MessageStatus string
 
 const (
@@ -567,7 +565,7 @@ func (r MessageStatus) IsKnown() bool {
 type MessageDeliveryLog struct {
 	// The unique identifier for the message delivery log.
 	ID string `json:"id,required"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The ID of the environment in which the message delivery occurred.
 	EnvironmentID string `json:"environment_id,required" format:"uuid"`
@@ -738,7 +736,7 @@ func (r MessageDeliveryLogResponseBodyMap) ImplementsMessageDeliveryLogResponseB
 type MessageEvent struct {
 	// The unique identifier for the message event.
 	ID string `json:"id,required"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// Timestamp when the event was created.
 	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
@@ -855,7 +853,7 @@ func (r MessageEventType) IsKnown() bool {
 
 // The content of a message.
 type MessageGetContentResponse struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// Content data specific to the channel type.
 	Data MessageGetContentResponseData `json:"data,required"`
@@ -887,7 +885,7 @@ func (r messageGetContentResponseJSON) RawJSON() string {
 
 // Content data specific to the channel type.
 type MessageGetContentResponseData struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The device token to send the push notification to.
 	Token string `json:"token"`
@@ -1017,7 +1015,7 @@ func init() {
 
 // The content of an email message.
 type MessageGetContentResponseDataMessageEmailContent struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The sender's email address.
 	From string `json:"from,required"`
@@ -1066,7 +1064,7 @@ func (r MessageGetContentResponseDataMessageEmailContent) implementsMessageGetCo
 
 // The content of an SMS message.
 type MessageGetContentResponseDataMessageSMSContent struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The content body of the SMS message.
 	Body string `json:"body,required"`
@@ -1099,7 +1097,7 @@ func (r MessageGetContentResponseDataMessageSMSContent) implementsMessageGetCont
 type MessageGetContentResponseDataMessagePushContent struct {
 	// The device token to send the push notification to.
 	Token string `json:"token,required"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The content body of the push notification.
 	Body string `json:"body,required"`
@@ -1134,7 +1132,7 @@ func (r MessageGetContentResponseDataMessagePushContent) implementsMessageGetCon
 
 // The content of a chat message.
 type MessageGetContentResponseDataMessageChatContent struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The channel data connection from the recipient to the underlying provider.
 	Connection map[string]interface{} `json:"connection,required"`
@@ -1244,7 +1242,7 @@ func (r MessageGetContentResponseDataMessageChatContentTemplateBlocksType) IsKno
 
 // The content of an in-app feed message.
 type MessageGetContentResponseDataMessageInAppFeedContent struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The blocks of the message in an app feed.
 	Blocks []MessageGetContentResponseDataMessageInAppFeedContentBlock `json:"blocks,required"`
@@ -1504,8 +1502,8 @@ type MessageListParams struct {
 	Before param.Field[string] `query:"before"`
 	// Limits the results to items with the corresponding channel id.
 	ChannelID param.Field[string] `query:"channel_id"`
-	// One or more of `read`, `seen`, `interacted`, `link_clicked`, `archived`. Limits
-	// results to messages with the given engagement status(es).
+	// One or more engagement statuses. Limits results to messages with the given
+	// engagement status(es).
 	EngagementStatus param.Field[[]MessageListParamsEngagementStatus] `query:"engagement_status"`
 	// Limits the results to only the message ids given (max 50). Note: when using this
 	// option, the results will be subject to any other filters applied to the query.
@@ -1514,8 +1512,7 @@ type MessageListParams struct {
 	PageSize param.Field[int64] `query:"page_size"`
 	// Limits the results to only items of the source workflow.
 	Source param.Field[string] `query:"source"`
-	// One or more of `queued`, `sent`, `delivered`, `delivery_attempted`,
-	// `undelivered`, `bounced`, `not_sent`. Limits results to messages with the given
+	// One or more delivery statuses. Limits results to messages with the given
 	// delivery status(es).
 	Status param.Field[[]MessageListParamsStatus] `query:"status"`
 	// Limits the results to items with the corresponding tenant, or where the tenant

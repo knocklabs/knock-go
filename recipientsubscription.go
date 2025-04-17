@@ -30,13 +30,13 @@ func NewRecipientSubscriptionService(opts ...option.RequestOption) (r *Recipient
 
 // A subscription object.
 type Subscription struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// Timestamp when the resource was created.
 	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
 	// A custom object entity which belongs to a collection.
 	Object Object `json:"object,required"`
-	// A recipient, which is either a user or an object.
+	// A recipient of a notification, which is either a user or an object.
 	Recipient Recipient `json:"recipient,required"`
 	// The timestamp when the resource was last updated.
 	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`

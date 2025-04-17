@@ -72,13 +72,14 @@ func (r *AudienceService) RemoveMembers(ctx context.Context, key string, body Au
 
 // An audience member.
 type AudienceMember struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// Timestamp when the resource was created.
 	AddedAt time.Time `json:"added_at,required" format:"date-time"`
-	// A user object.
+	// A user who can receive notifications in Knock. They are always referenced by
+	// your internal identifier.
 	User User `json:"user,required"`
-	// The unique identifier for the user.
+	// The ID for the user that you set when identifying them in Knock.
 	UserID string `json:"user_id,required"`
 	// The unique identifier for the tenant.
 	Tenant string             `json:"tenant,nullable"`
@@ -132,7 +133,7 @@ func (r audienceListMembersResponseJSON) RawJSON() string {
 
 // Pagination information for a list of resources.
 type AudienceListMembersResponsePageInfo struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The number of items per page.
 	PageSize int64 `json:"page_size,required"`
@@ -175,7 +176,7 @@ func (r AudienceAddMembersParams) MarshalJSON() (data []byte, err error) {
 type AudienceAddMembersParamsMember struct {
 	// A set of parameters to inline-identify a user with. Inline identifying the user
 	// will ensure that the user is available before the request is executed in Knock.
-	// It will perform an upsert against the user you're supplying, replacing any
+	// It will perform an upsert for the user you're supplying, replacing any
 	// properties specified.
 	User param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
 	// The unique identifier for the tenant.
@@ -199,7 +200,7 @@ func (r AudienceRemoveMembersParams) MarshalJSON() (data []byte, err error) {
 type AudienceRemoveMembersParamsMember struct {
 	// A set of parameters to inline-identify a user with. Inline identifying the user
 	// will ensure that the user is available before the request is executed in Knock.
-	// It will perform an upsert against the user you're supplying, replacing any
+	// It will perform an upsert for the user you're supplying, replacing any
 	// properties specified.
 	User param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
 	// The unique identifier for the tenant.

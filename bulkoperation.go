@@ -49,7 +49,7 @@ func (r *BulkOperationService) Get(ctx context.Context, id string, opts ...optio
 type BulkOperation struct {
 	// Unique identifier for the bulk operation.
 	ID string `json:"id,required" format:"uuid"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The estimated total number of rows to process.
 	EstimatedTotalRows int64 `json:"estimated_total_rows,required"`
@@ -59,7 +59,7 @@ type BulkOperation struct {
 	Name string `json:"name,required"`
 	// The number of rows processed so far.
 	ProcessedRows int64 `json:"processed_rows,required"`
-	// The status of the bulk operation. One of: queued, processing, completed, failed.
+	// The status of the bulk operation.
 	Status BulkOperationStatus `json:"status,required"`
 	// The number of successful operations.
 	SuccessCount int64 `json:"success_count,required"`
@@ -106,7 +106,7 @@ func (r bulkOperationJSON) RawJSON() string {
 	return r.raw
 }
 
-// The status of the bulk operation. One of: queued, processing, completed, failed.
+// The status of the bulk operation.
 type BulkOperationStatus string
 
 const (

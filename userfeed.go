@@ -137,7 +137,7 @@ func (r userFeedGetSettingsResponseFeaturesJSON) RawJSON() string {
 type UserFeedListItemsResponse struct {
 	// Unique identifier for the feed.
 	ID string `json:"id,required"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// List of activities associated with this feed item.
 	Activities []Activity `json:"activities,required"`
@@ -431,7 +431,7 @@ func (r UserFeedListItemsResponseBlocksType) IsKnown() bool {
 
 // Source information for the feed item.
 type UserFeedListItemsResponseSource struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// Categories this workflow belongs to.
 	Categories []string `json:"categories,required"`
@@ -464,7 +464,7 @@ func (r userFeedListItemsResponseSourceJSON) RawJSON() string {
 type UserFeedListItemsParams struct {
 	// The cursor to fetch entries after.
 	After param.Field[string] `query:"after"`
-	// The archived status of the feed items to return.
+	// The archived status of the feed items.
 	Archived param.Field[UserFeedListItemsParamsArchived] `query:"archived"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
@@ -472,15 +472,15 @@ type UserFeedListItemsParams struct {
 	HasTenant param.Field[bool] `query:"has_tenant"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// The source of the feed items to return.
+	// The source of the feed items.
 	Source param.Field[string] `query:"source"`
-	// The status of the feed items to return.
+	// The status of the feed items.
 	Status param.Field[UserFeedListItemsParamsStatus] `query:"status"`
-	// The tenant of the feed items to return.
+	// The tenant associated with the feed items.
 	Tenant param.Field[string] `query:"tenant"`
-	// The trigger data of the feed items to return (as a JSON string).
+	// The trigger data of the feed items (as a JSON string).
 	TriggerData param.Field[string] `query:"trigger_data"`
-	// The workflow categories of the feed items to return.
+	// The workflow categories of the feed items.
 	WorkflowCategories param.Field[[]string] `query:"workflow_categories"`
 }
 
@@ -493,7 +493,7 @@ func (r UserFeedListItemsParams) URLQuery() (v url.Values) {
 	})
 }
 
-// The archived status of the feed items to return.
+// The archived status of the feed items.
 type UserFeedListItemsParamsArchived string
 
 const (
@@ -510,7 +510,7 @@ func (r UserFeedListItemsParamsArchived) IsKnown() bool {
 	return false
 }
 
-// The status of the feed items to return.
+// The status of the feed items.
 type UserFeedListItemsParamsStatus string
 
 const (

@@ -102,7 +102,7 @@ func (r *MessageBatchService) Unarchive(ctx context.Context, body MessageBatchUn
 
 // The content of a message.
 type MessageBatchGetContentResponse struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// Content data specific to the channel type.
 	Data MessageBatchGetContentResponseData `json:"data,required"`
@@ -134,7 +134,7 @@ func (r messageBatchGetContentResponseJSON) RawJSON() string {
 
 // Content data specific to the channel type.
 type MessageBatchGetContentResponseData struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The device token to send the push notification to.
 	Token string `json:"token"`
@@ -264,7 +264,7 @@ func init() {
 
 // The content of an email message.
 type MessageBatchGetContentResponseDataMessageEmailContent struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The sender's email address.
 	From string `json:"from,required"`
@@ -314,7 +314,7 @@ func (r MessageBatchGetContentResponseDataMessageEmailContent) implementsMessage
 
 // The content of an SMS message.
 type MessageBatchGetContentResponseDataMessageSMSContent struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The content body of the SMS message.
 	Body string `json:"body,required"`
@@ -348,7 +348,7 @@ func (r MessageBatchGetContentResponseDataMessageSMSContent) implementsMessageBa
 type MessageBatchGetContentResponseDataMessagePushContent struct {
 	// The device token to send the push notification to.
 	Token string `json:"token,required"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The content body of the push notification.
 	Body string `json:"body,required"`
@@ -384,7 +384,7 @@ func (r MessageBatchGetContentResponseDataMessagePushContent) implementsMessageB
 
 // The content of a chat message.
 type MessageBatchGetContentResponseDataMessageChatContent struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The channel data connection from the recipient to the underlying provider.
 	Connection map[string]interface{} `json:"connection,required"`
@@ -495,7 +495,7 @@ func (r MessageBatchGetContentResponseDataMessageChatContentTemplateBlocksType) 
 
 // The content of an in-app feed message.
 type MessageBatchGetContentResponseDataMessageInAppFeedContent struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The blocks of the message in an app feed.
 	Blocks []MessageBatchGetContentResponseDataMessageInAppFeedContentBlock `json:"blocks,required"`

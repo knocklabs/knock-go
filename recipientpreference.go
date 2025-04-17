@@ -33,19 +33,21 @@ func NewRecipientPreferenceService(opts ...option.RequestOption) (r *RecipientPr
 
 type InlinePreferenceSetRequestParam map[string]PreferenceSetRequestParam
 
-// A preference set object.
+// A preference set determines whether a recipient should receive a particular type
+// of notification. By default all preferences are opted in unless a preference
+// explicitly opts the recipient out of the notification
 type PreferenceSet struct {
 	// Unique identifier for the preference set.
 	ID string `json:"id,required"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
-	// A setting for a preference set, where the key in the object is the category, and
-	// the values are the preference settings for that category.
+	// An object where the key is the category and the values are the preference
+	// settings for that category.
 	Categories map[string]PreferenceSetCategoriesUnion `json:"categories,nullable"`
 	// Channel type preferences.
 	ChannelTypes PreferenceSetChannelTypes `json:"channel_types,nullable"`
-	// A setting for a preference set, where the key in the object is the workflow key,
-	// and the values are the preference settings for that workflow.
+	// An object where the key is the workflow key and the values are the preference
+	// settings for that workflow.
 	Workflows map[string]PreferenceSetWorkflowsUnion `json:"workflows,nullable"`
 	JSON      preferenceSetJSON                      `json:"-"`
 }
@@ -503,13 +505,13 @@ type PreferenceSetChannelTypesSMSUnionParam interface {
 
 // A request to set a preference set for a recipient.
 type PreferenceSetRequestParam struct {
-	// A setting for a preference set, where the key in the object is the category, and
-	// the values are the preference settings for that category.
+	// An object where the key is the category and the values are the preference
+	// settings for that category.
 	Categories param.Field[map[string]PreferenceSetRequestCategoriesUnionParam] `json:"categories"`
 	// Channel type preferences.
 	ChannelTypes param.Field[PreferenceSetChannelTypesParam] `json:"channel_types"`
-	// A setting for a preference set, where the key in the object is the workflow key,
-	// and the values are the preference settings for that workflow.
+	// An object where the key is the workflow key and the values are the preference
+	// settings for that workflow.
 	Workflows param.Field[map[string]PreferenceSetRequestWorkflowsUnionParam] `json:"workflows"`
 }
 

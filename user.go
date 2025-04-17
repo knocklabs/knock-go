@@ -296,7 +296,7 @@ func (r *UserService) UnsetChannelData(ctx context.Context, userID string, chann
 
 // A set of parameters to identify a user with. Does not include the user ID, as
 // that's specified elsewhere in the request. You can supply any additional
-// properties you'd like to upsert against the user.
+// properties you'd like to upsert for the user.
 type IdentifyUserRequestParam struct {
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
@@ -313,10 +313,10 @@ func (r IdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
 
 // A set of parameters to inline-identify a user with. Inline identifying the user
 // will ensure that the user is available before the request is executed in Knock.
-// It will perform an upsert against the user you're supplying, replacing any
+// It will perform an upsert for the user you're supplying, replacing any
 // properties specified.
 type InlineIdentifyUserRequestParam struct {
-	// The unique identifier for the user.
+	// The ID for the user that you set when identifying them in Knock.
 	ID param.Field[string] `json:"id,required"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
@@ -333,17 +333,18 @@ func (r InlineIdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
 
 func (r InlineIdentifyUserRequestParam) ImplementsRecipientRequestUnionParam() {}
 
-// A user object.
+// A user who can receive notifications in Knock. They are always referenced by
+// your internal identifier.
 type User struct {
-	// The unique identifier for the user.
+	// The ID for the user that you set when identifying them in Knock.
 	ID string `json:"id,required"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The timestamp when the resource was last updated.
 	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
 	// URL to the user's avatar image.
 	Avatar string `json:"avatar,nullable"`
-	// Timestamp when the resource was created.
+	// The creation date of the user from your system.
 	CreatedAt time.Time `json:"created_at,nullable" format:"date-time"`
 	// The email address of the user.
 	Email string `json:"email,nullable"`
@@ -385,7 +386,7 @@ func (r User) implementsRecipient() {}
 type UserUpdateParams struct {
 	// A set of parameters to identify a user with. Does not include the user ID, as
 	// that's specified elsewhere in the request. You can supply any additional
-	// properties you'd like to upsert against the user.
+	// properties you'd like to upsert for the user.
 	IdentifyUserRequest IdentifyUserRequestParam `json:"identify_user_request,required"`
 }
 
@@ -394,13 +395,13 @@ func (r UserUpdateParams) MarshalJSON() (data []byte, err error) {
 }
 
 type UserListParams struct {
-	// The cursor to fetch entries after..
+	// The cursor to fetch entries after.
 	After param.Field[string] `query:"after"`
-	// The cursor to fetch entries before..
+	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// Includes preferences of the users in the response.
+	// Associated resources to include in the response.
 	Include param.Field[[]UserListParamsInclude] `query:"include"`
-	// The number of items per page..
+	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
 }
 
@@ -447,8 +448,8 @@ type UserListMessagesParams struct {
 	Before param.Field[string] `query:"before"`
 	// Limits the results to items with the corresponding channel id.
 	ChannelID param.Field[string] `query:"channel_id"`
-	// One or more of `read`, `seen`, `interacted`, `link_clicked`, `archived`. Limits
-	// results to messages with the given engagement status(es).
+	// One or more engagement statuses. Limits results to messages with the given
+	// engagement status(es).
 	EngagementStatus param.Field[[]UserListMessagesParamsEngagementStatus] `query:"engagement_status"`
 	// Limits the results to only the message ids given (max 50). Note: when using this
 	// option, the results will be subject to any other filters applied to the query.
@@ -457,8 +458,7 @@ type UserListMessagesParams struct {
 	PageSize param.Field[int64] `query:"page_size"`
 	// Limits the results to only items of the source workflow.
 	Source param.Field[string] `query:"source"`
-	// One or more of `queued`, `sent`, `delivered`, `delivery_attempted`,
-	// `undelivered`, `bounced`, `not_sent`. Limits results to messages with the given
+	// One or more delivery statuses. Limits results to messages with the given
 	// delivery status(es).
 	Status param.Field[[]UserListMessagesParamsStatus] `query:"status"`
 	// Limits the results to items with the corresponding tenant, or where the tenant
@@ -547,9 +547,9 @@ type UserListSubscriptionsParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// Includes preferences of the recipient subscribers in the response.
+	// Associated resources to include in the response.
 	Include param.Field[[]UserListSubscriptionsParamsInclude] `query:"include"`
-	// Objects to filter by.
+	// Only return subscriptions for the given recipients.
 	Objects param.Field[[]UserListSubscriptionsParamsObjectUnion] `query:"objects"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`

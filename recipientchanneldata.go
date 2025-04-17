@@ -32,7 +32,7 @@ func NewRecipientChannelDataService(opts ...option.RequestOption) (r *RecipientC
 
 // Channel data for a given channel type.
 type ChannelData struct {
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The unique identifier for the channel.
 	ChannelID string `json:"channel_id,required" format:"uuid"`

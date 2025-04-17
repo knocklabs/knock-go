@@ -380,7 +380,7 @@ func (r InlineObjectRequestParam) ImplementsRecipientRequestUnionParam() {}
 type Object struct {
 	// Unique identifier for the object.
 	ID string `json:"id,required"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The collection this object belongs to.
 	Collection string `json:"collection,required"`
@@ -487,8 +487,8 @@ type ObjectListMessagesParams struct {
 	Before param.Field[string] `query:"before"`
 	// Limits the results to items with the corresponding channel id.
 	ChannelID param.Field[string] `query:"channel_id"`
-	// One or more of `read`, `seen`, `interacted`, `link_clicked`, `archived`. Limits
-	// results to messages with the given engagement status(es).
+	// One or more engagement statuses. Limits results to messages with the given
+	// engagement status(es).
 	EngagementStatus param.Field[[]ObjectListMessagesParamsEngagementStatus] `query:"engagement_status"`
 	// Limits the results to only the message ids given (max 50). Note: when using this
 	// option, the results will be subject to any other filters applied to the query.
@@ -497,8 +497,7 @@ type ObjectListMessagesParams struct {
 	PageSize param.Field[int64] `query:"page_size"`
 	// Limits the results to only items of the source workflow.
 	Source param.Field[string] `query:"source"`
-	// One or more of `queued`, `sent`, `delivered`, `delivery_attempted`,
-	// `undelivered`, `bounced`, `not_sent`. Limits results to messages with the given
+	// One or more delivery statuses. Limits results to messages with the given
 	// delivery status(es).
 	Status param.Field[[]ObjectListMessagesParamsStatus] `query:"status"`
 	// Limits the results to items with the corresponding tenant, or where the tenant

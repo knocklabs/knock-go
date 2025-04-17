@@ -37,11 +37,11 @@ func NewRecipientService(opts ...option.RequestOption) (r *RecipientService) {
 	return
 }
 
-// A recipient, which is either a user or an object.
+// A recipient of a notification, which is either a user or an object.
 type Recipient struct {
-	// The unique identifier for the user.
+	// The ID for the user that you set when identifying them in Knock.
 	ID string `json:"id,required"`
-	// The type name of the schema.
+	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The timestamp when the resource was last updated.
 	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
@@ -49,7 +49,7 @@ type Recipient struct {
 	Avatar string `json:"avatar,nullable"`
 	// The collection this object belongs to.
 	Collection string `json:"collection"`
-	// Timestamp when the resource was created.
+	// The creation date of the user from your system.
 	CreatedAt time.Time `json:"created_at,nullable" format:"date-time"`
 	// The email address of the user.
 	Email string `json:"email,nullable"`
@@ -100,7 +100,7 @@ func (r Recipient) AsUnion() RecipientUnion {
 	return r.union
 }
 
-// A recipient, which is either a user or an object.
+// A recipient of a notification, which is either a user or an object.
 //
 // Union satisfied by [User] or [Object].
 type RecipientUnion interface {
@@ -126,7 +126,7 @@ func init() {
 // (string), an inline user request (object), or an inline object request, which is
 // determined by the presence of a `collection` property.
 type RecipientRequestParam struct {
-	// The unique identifier for the user.
+	// The ID for the user that you set when identifying them in Knock.
 	ID param.Field[string] `json:"id,required"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
