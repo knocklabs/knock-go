@@ -153,7 +153,8 @@ func TestObjectBulkSet(t *testing.T) {
 		"collection",
 		knock.ObjectBulkSetParams{
 			Objects: knock.F([]knock.InlineObjectRequestParam{{
-				ID: knock.F("project_1"),
+				ID:         knock.F("project_1"),
+				Collection: knock.F("projects"),
 				ChannelData: knock.F(knock.InlineChannelDataRequestParam{
 					"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.ChannelDataRequestParam{
 						Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
@@ -161,8 +162,7 @@ func TestObjectBulkSet(t *testing.T) {
 						}),
 					},
 				}),
-				Collection: knock.F("projects"),
-				CreatedAt:  knock.F(time.Now()),
+				CreatedAt: knock.F(time.Now()),
 				Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
 					"default": knock.PreferenceSetRequestParam{
 						Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{

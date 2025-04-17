@@ -317,7 +317,7 @@ func (r IdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
 // properties specified.
 type InlineIdentifyUserRequestParam struct {
 	// The unique identifier for the user.
-	ID param.Field[string] `json:"id"`
+	ID param.Field[string] `json:"id,required"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// The creation date of the user from your system.

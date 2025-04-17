@@ -49,10 +49,10 @@ func main() {
 		context.TODO(),
 		"dinosaurs-loose",
 		knock.WorkflowTriggerParams{
+			Recipients: knock.F([]knock.RecipientRequestUnionParam{shared.UnionString("dnedry")}),
 			Data: knock.F(map[string]interface{}{
 				"dinosaur": "triceratops",
 			}),
-			Recipients: knock.F([]knock.RecipientRequestUnionParam{shared.UnionString("dnedry")}),
 		},
 	)
 	if err != nil {

@@ -102,6 +102,9 @@ func (r WorkflowCancelParams) MarshalJSON() (data []byte, err error) {
 }
 
 type WorkflowTriggerParams struct {
+	// The recipients to trigger the workflow for. Cannot exceed 1000 recipients in a
+	// single trigger.
+	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
 	// Specifies a recipient in a request. This can either be a user identifier
 	// (string), an inline user request (object), or an inline object request, which is
 	// determined by the presence of a `collection` property.
@@ -112,9 +115,6 @@ type WorkflowTriggerParams struct {
 	CancellationKey param.Field[string] `json:"cancellation_key"`
 	// An optional map of data to pass into the workflow execution.
 	Data param.Field[map[string]interface{}] `json:"data"`
-	// The recipients to trigger the workflow for. Cannot exceed 1000 recipients in a
-	// single trigger.
-	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients"`
 	// An request to set a tenant inline.
 	Tenant param.Field[InlineTenantRequestUnionParam] `json:"tenant"`
 }

@@ -127,7 +127,7 @@ func init() {
 // determined by the presence of a `collection` property.
 type RecipientRequestParam struct {
 	// The unique identifier for the user.
-	ID param.Field[string] `json:"id"`
+	ID param.Field[string] `json:"id,required"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// The collection this object belongs to.
