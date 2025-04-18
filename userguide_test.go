@@ -67,11 +67,18 @@ func TestUserGuideMarkMessageAsArchivedWithOptionalParams(t *testing.T) {
 			GuideID:      knock.F("323e4567-e89b-12d3-a456-426614174000"),
 			GuideKey:     knock.F("guide_12345"),
 			GuideStepRef: knock.F("step_12345"),
-			Content:      knock.F[any]("content_12345"),
-			Data:         knock.F[any]("data_12345"),
-			IsFinal:      knock.F(true),
-			Metadata:     knock.F[any]("metadata_12345"),
-			Tenant:       knock.F("tenant_12345"),
+			Content: knock.F[any](map[string]interface{}{
+				"body":  "Guide content body",
+				"title": "Guide Title",
+			}),
+			Data: knock.F[any](map[string]interface{}{
+				"product_id": "product_123",
+			}),
+			IsFinal: knock.F(true),
+			Metadata: knock.F[any](map[string]interface{}{
+				"source": "onboarding",
+			}),
+			Tenant: knock.F("tenant_12345"),
 		},
 	)
 	if err != nil {
@@ -105,11 +112,18 @@ func TestUserGuideMarkMessageAsInteractedWithOptionalParams(t *testing.T) {
 			GuideID:      knock.F("323e4567-e89b-12d3-a456-426614174000"),
 			GuideKey:     knock.F("guide_12345"),
 			GuideStepRef: knock.F("step_12345"),
-			Content:      knock.F[any]("content_12345"),
-			Data:         knock.F[any]("data_12345"),
-			IsFinal:      knock.F(true),
-			Metadata:     knock.F[any]("metadata_12345"),
-			Tenant:       knock.F("tenant_12345"),
+			Content: knock.F[any](map[string]interface{}{
+				"body":  "Guide content body",
+				"title": "Guide Title",
+			}),
+			Data: knock.F[any](map[string]interface{}{
+				"product_id": "product_123",
+			}),
+			IsFinal: knock.F(true),
+			Metadata: knock.F[any](map[string]interface{}{
+				"source": "onboarding",
+			}),
+			Tenant: knock.F("tenant_12345"),
 		},
 	)
 	if err != nil {
@@ -143,11 +157,18 @@ func TestUserGuideMarkMessageAsSeenWithOptionalParams(t *testing.T) {
 			GuideID:      knock.F("323e4567-e89b-12d3-a456-426614174000"),
 			GuideKey:     knock.F("guide_12345"),
 			GuideStepRef: knock.F("step_12345"),
-			Content:      knock.F[any]("content_12345"),
-			Data:         knock.F[any]("data_12345"),
-			IsFinal:      knock.F(true),
-			Metadata:     knock.F[any]("metadata_12345"),
-			Tenant:       knock.F("tenant_12345"),
+			Content: knock.F[any](map[string]interface{}{
+				"body":  "Guide content body",
+				"title": "Guide Title",
+			}),
+			Data: knock.F[any](map[string]interface{}{
+				"product_id": "product_123",
+			}),
+			IsFinal: knock.F(true),
+			Metadata: knock.F[any](map[string]interface{}{
+				"source": "onboarding",
+			}),
+			Tenant: knock.F("tenant_12345"),
 		},
 	)
 	if err != nil {

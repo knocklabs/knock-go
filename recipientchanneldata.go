@@ -395,6 +395,8 @@ func (r DiscordChannelDataParam) MarshalJSON() (data []byte, err error) {
 
 func (r DiscordChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
+func (r DiscordChannelDataParam) implementsInlineChannelDataRequestItemDataUnionParam() {}
+
 // Discord channel connection, either a channel connection or an incoming webhook
 // connection.
 type DiscordChannelDataConnectionParam struct {
@@ -455,7 +457,62 @@ func (r DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWeb
 	return apijson.MarshalRoot(r)
 }
 
-type InlineChannelDataRequestParam map[string]ChannelDataRequestParam
+type InlineChannelDataRequestParam []InlineChannelDataRequestItemParam
+
+// A request to set channel data for a type of channel inline.
+type InlineChannelDataRequestItemParam struct {
+	// The ID of the channel to associate data with
+	ChannelID param.Field[string] `json:"channel_id,required" format:"uuid"`
+	// Channel data for a given channel type.
+	Data param.Field[InlineChannelDataRequestItemDataUnionParam] `json:"data,required"`
+}
+
+func (r InlineChannelDataRequestItemParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Channel data for a given channel type.
+type InlineChannelDataRequestItemDataParam struct {
+	Token param.Field[interface{}] `json:"token"`
+	// The typename of the schema.
+	Typename    param.Field[InlineChannelDataRequestItemDataTypename] `json:"__typename"`
+	Connections param.Field[interface{}]                              `json:"connections"`
+	// Microsoft Teams tenant ID.
+	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
+	PlayerIDs       param.Field[interface{}] `json:"player_ids"`
+	Tokens          param.Field[interface{}] `json:"tokens"`
+}
+
+func (r InlineChannelDataRequestItemDataParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r InlineChannelDataRequestItemDataParam) implementsInlineChannelDataRequestItemDataUnionParam() {
+}
+
+// Channel data for a given channel type.
+//
+// Satisfied by [PushChannelDataParam], [OneSignalChannelDataParam],
+// [SlackChannelDataParam], [MsTeamsChannelDataParam], [DiscordChannelDataParam],
+// [InlineChannelDataRequestItemDataParam].
+type InlineChannelDataRequestItemDataUnionParam interface {
+	implementsInlineChannelDataRequestItemDataUnionParam()
+}
+
+// The typename of the schema.
+type InlineChannelDataRequestItemDataTypename string
+
+const (
+	InlineChannelDataRequestItemDataTypenamePushChannelData InlineChannelDataRequestItemDataTypename = "PushChannelData"
+)
+
+func (r InlineChannelDataRequestItemDataTypename) IsKnown() bool {
+	switch r {
+	case InlineChannelDataRequestItemDataTypenamePushChannelData:
+		return true
+	}
+	return false
+}
 
 // Microsoft Teams channel connection.
 type MsTeamsChannelData struct {
@@ -660,6 +717,8 @@ func (r MsTeamsChannelDataParam) MarshalJSON() (data []byte, err error) {
 
 func (r MsTeamsChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
+func (r MsTeamsChannelDataParam) implementsInlineChannelDataRequestItemDataUnionParam() {}
+
 // Microsoft Teams token connection.
 type MsTeamsChannelDataConnectionParam struct {
 	IncomingWebhook param.Field[interface{}] `json:"incoming_webhook"`
@@ -767,6 +826,8 @@ func (r OneSignalChannelDataParam) MarshalJSON() (data []byte, err error) {
 
 func (r OneSignalChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
+func (r OneSignalChannelDataParam) implementsInlineChannelDataRequestItemDataUnionParam() {}
+
 // The content of a push notification.
 type PushChannelData struct {
 	// The typename of the schema.
@@ -822,6 +883,8 @@ func (r PushChannelDataParam) MarshalJSON() (data []byte, err error) {
 }
 
 func (r PushChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
+
+func (r PushChannelDataParam) implementsInlineChannelDataRequestItemDataUnionParam() {}
 
 // Slack channel data
 type SlackChannelData struct {
@@ -1016,6 +1079,8 @@ func (r SlackChannelDataParam) MarshalJSON() (data []byte, err error) {
 }
 
 func (r SlackChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
+
+func (r SlackChannelDataParam) implementsInlineChannelDataRequestItemDataUnionParam() {}
 
 // A Slack connection token.
 type SlackChannelDataTokenParam struct {
