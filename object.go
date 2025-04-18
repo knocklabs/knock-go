@@ -211,6 +211,22 @@ func (r *ObjectService) ListMessagesAutoPaging(ctx context.Context, collection s
 	return pagination.NewEntriesCursorAutoPager(r.ListMessages(ctx, collection, objectID, query, opts...))
 }
 
+// Returns a paginated list of preference sets for the specified object.
+func (r *ObjectService) ListPreferences(ctx context.Context, collection string, objectID string, opts ...option.RequestOption) (res *[]PreferenceSet, err error) {
+	opts = append(r.Options[:], opts...)
+	if collection == "" {
+		err = errors.New("missing required collection parameter")
+		return
+	}
+	if objectID == "" {
+		err = errors.New("missing required object_id parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/objects/%s/%s/preferences", collection, objectID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	return
+}
+
 // Returns a paginated list of schedules for an object.
 func (r *ObjectService) ListSchedules(ctx context.Context, collection string, objectID string, query ObjectListSchedulesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Schedule], err error) {
 	var raw *http.Response

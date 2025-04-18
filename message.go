@@ -231,7 +231,7 @@ func (r *MessageService) MarkAsUnread(ctx context.Context, messageID string, opt
 		err = errors.New("missing required message_id parameter")
 		return
 	}
-	path := fmt.Sprintf("v1/messages/%s/unread", messageID)
+	path := fmt.Sprintf("v1/messages/%s/read", messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
 	return
 }
@@ -243,7 +243,7 @@ func (r *MessageService) MarkAsUnseen(ctx context.Context, messageID string, opt
 		err = errors.New("missing required message_id parameter")
 		return
 	}
-	path := fmt.Sprintf("v1/messages/%s/unseen", messageID)
+	path := fmt.Sprintf("v1/messages/%s/seen", messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
 	return
 }
@@ -256,7 +256,7 @@ func (r *MessageService) Unarchive(ctx context.Context, messageID string, opts .
 		err = errors.New("missing required message_id parameter")
 		return
 	}
-	path := fmt.Sprintf("v1/messages/%s/unarchived", messageID)
+	path := fmt.Sprintf("v1/messages/%s/archived", messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
 	return
 }

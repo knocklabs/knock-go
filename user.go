@@ -27,6 +27,7 @@ import (
 type UserService struct {
 	Options []option.RequestOption
 	Feeds   *UserFeedService
+	Guides  *UserGuideService
 	Bulk    *UserBulkService
 }
 
@@ -37,6 +38,7 @@ func NewUserService(opts ...option.RequestOption) (r *UserService) {
 	r = &UserService{}
 	r.Options = opts
 	r.Feeds = NewUserFeedService(opts...)
+	r.Guides = NewUserGuideService(opts...)
 	r.Bulk = NewUserBulkService(opts...)
 	return
 }

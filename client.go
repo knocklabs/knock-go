@@ -23,6 +23,7 @@ type Client struct {
 	BulkOperations *BulkOperationService
 	Messages       *MessageService
 	Providers      *ProviderService
+	Integrations   *IntegrationService
 	Workflows      *WorkflowService
 	Schedules      *ScheduleService
 	Channels       *ChannelService
@@ -58,6 +59,7 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.BulkOperations = NewBulkOperationService(opts...)
 	r.Messages = NewMessageService(opts...)
 	r.Providers = NewProviderService(opts...)
+	r.Integrations = NewIntegrationService(opts...)
 	r.Workflows = NewWorkflowService(opts...)
 	r.Schedules = NewScheduleService(opts...)
 	r.Channels = NewChannelService(opts...)

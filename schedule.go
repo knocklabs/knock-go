@@ -24,6 +24,7 @@ import (
 // the [NewScheduleService] method instead.
 type ScheduleService struct {
 	Options []option.RequestOption
+	Bulk    *ScheduleBulkService
 }
 
 // NewScheduleService generates a new service that applies the given options to
@@ -32,6 +33,7 @@ type ScheduleService struct {
 func NewScheduleService(opts ...option.RequestOption) (r *ScheduleService) {
 	r = &ScheduleService{}
 	r.Options = opts
+	r.Bulk = NewScheduleBulkService(opts...)
 	return
 }
 
