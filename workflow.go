@@ -61,7 +61,7 @@ func (r *WorkflowService) Trigger(ctx context.Context, key string, body Workflow
 	return
 }
 
-// The response from triggering a workflow
+// The response from triggering a workflow.
 type WorkflowTriggerResponse struct {
 	// The ID of the workflow trigger. This value allows you to track individual
 	// workflow runs associated with this trigger request.

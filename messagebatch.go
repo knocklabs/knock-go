@@ -750,7 +750,12 @@ func (r MessageBatchGetContentResponseDataMessageInAppFeedContentBlocksType) IsK
 }
 
 type MessageBatchArchiveParams struct {
+	// The message IDs to update the status of.
 	MessageIDs param.Field[[]string] `json:"message_ids,required" format:"uuid"`
+}
+
+func (r MessageBatchArchiveParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type MessageBatchGetContentParams struct {
@@ -779,21 +784,46 @@ func (r MessageBatchMarkAsInteractedParams) MarshalJSON() (data []byte, err erro
 }
 
 type MessageBatchMarkAsReadParams struct {
+	// The message IDs to update the status of.
 	MessageIDs param.Field[[]string] `json:"message_ids,required" format:"uuid"`
+}
+
+func (r MessageBatchMarkAsReadParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type MessageBatchMarkAsSeenParams struct {
+	// The message IDs to update the status of.
 	MessageIDs param.Field[[]string] `json:"message_ids,required" format:"uuid"`
+}
+
+func (r MessageBatchMarkAsSeenParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type MessageBatchMarkAsUnreadParams struct {
+	// The message IDs to update the status of.
 	MessageIDs param.Field[[]string] `json:"message_ids,required" format:"uuid"`
+}
+
+func (r MessageBatchMarkAsUnreadParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type MessageBatchMarkAsUnseenParams struct {
+	// The message IDs to update the status of.
 	MessageIDs param.Field[[]string] `json:"message_ids,required" format:"uuid"`
 }
 
+func (r MessageBatchMarkAsUnseenParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 type MessageBatchUnarchiveParams struct {
+	// The message IDs to update the status of.
 	MessageIDs param.Field[[]string] `json:"message_ids,required" format:"uuid"`
+}
+
+func (r MessageBatchUnarchiveParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
