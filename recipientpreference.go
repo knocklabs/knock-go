@@ -37,9 +37,8 @@ type InlinePreferenceSetRequestParam []InlinePreferenceSetRequestItemParam
 type InlinePreferenceSetRequestItemParam struct {
 	// The ID of the preference set
 	ID param.Field[string] `json:"id,required"`
-	// An object where the key is the category and the values are the preference
-	// settings for that category.
-	Categories param.Field[map[string]InlinePreferenceSetRequestItemCategoriesUnionParam] `json:"categories"`
+	// Workflow or category preferences within a preference set
+	Categories param.Field[InlinePreferenceSetRequestItemCategoriesUnionParam] `json:"categories"`
 	// Channel type preferences.
 	ChannelTypes param.Field[PreferenceSetChannelTypesParam] `json:"channel_types"`
 	// An object where the key is the workflow key and the values are the preference
