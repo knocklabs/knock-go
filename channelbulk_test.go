@@ -38,6 +38,7 @@ func TestChannelBulkUpdateMessageStatusWithOptionalParams(t *testing.T) {
 			HasTenant:        knock.F(true),
 			NewerThan:        knock.F(time.Now()),
 			OlderThan:        knock.F(time.Now()),
+			RecipientGids:    knock.F([]string{"string"}),
 			RecipientIDs:     knock.F([]string{"recipient1", "recipient2"}),
 			Tenants:          knock.F([]string{"tenant1", "tenant2"}),
 			TriggerData:      knock.F(`{"key":"value"}`),

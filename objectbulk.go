@@ -48,7 +48,7 @@ func (r *ObjectBulkService) Delete(ctx context.Context, collection string, body 
 }
 
 // Add subscriptions for all objects in a single collection. If a subscription for
-// an object in the collectionalready exists, it will be updated.
+// an object in the collection already exists, it will be updated.
 func (r *ObjectBulkService) AddSubscriptions(ctx context.Context, collection string, body ObjectBulkAddSubscriptionsParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {

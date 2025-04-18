@@ -130,7 +130,8 @@ func TestObjectDeleteSubscriptions(t *testing.T) {
 				ChannelData: knock.F(knock.InlineChannelDataRequestParam{
 					"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.ChannelDataRequestParam{
 						Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
-							Tokens: knock.F([]string{"push_token_xxx"}),
+							Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
+							Tokens:   knock.F([]string{"push_token_xxx"}),
 						}),
 					},
 				}),
@@ -248,7 +249,7 @@ func TestObjectGetChannelData(t *testing.T) {
 	}
 }
 
-func TestObjectGetPreferencesWithOptionalParams(t *testing.T) {
+func TestObjectGetPreferences(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -266,9 +267,6 @@ func TestObjectGetPreferencesWithOptionalParams(t *testing.T) {
 		"collection",
 		"object_id",
 		"default",
-		knock.ObjectGetPreferencesParams{
-			Tenant: knock.F("tenant"),
-		},
 	)
 	if err != nil {
 		var apierr *knock.Error
@@ -412,7 +410,8 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 			ChannelData: knock.F(knock.InlineChannelDataRequestParam{
 				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.ChannelDataRequestParam{
 					Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
-						Tokens: knock.F([]string{"push_token_xxx"}),
+						Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
+						Tokens:   knock.F([]string{"push_token_xxx"}),
 					}),
 				},
 			}),
@@ -494,7 +493,8 @@ func TestObjectSetChannelData(t *testing.T) {
 		knock.ObjectSetChannelDataParams{
 			ChannelDataRequest: knock.ChannelDataRequestParam{
 				Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
-					Tokens: knock.F([]string{"push_token_1"}),
+					Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
+					Tokens:   knock.F([]string{"push_token_1"}),
 				}),
 			},
 		},

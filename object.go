@@ -157,7 +157,7 @@ func (r *ObjectService) GetChannelData(ctx context.Context, collection string, o
 }
 
 // Returns the preference set for the specified object.
-func (r *ObjectService) GetPreferences(ctx context.Context, collection string, objectID string, preferenceSetID string, query ObjectGetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
+func (r *ObjectService) GetPreferences(ctx context.Context, collection string, objectID string, preferenceSetID string, opts ...option.RequestOption) (res *PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -172,7 +172,7 @@ func (r *ObjectService) GetPreferences(ctx context.Context, collection string, o
 		return
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/preferences/%s", collection, objectID, preferenceSetID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
 	return
 }
 
@@ -466,20 +466,6 @@ func (r ObjectDeleteSubscriptionsParams) MarshalJSON() (data []byte, err error) 
 	return apijson.MarshalRoot(r)
 }
 
-type ObjectGetPreferencesParams struct {
-	// The unique identifier for the tenant.
-	Tenant param.Field[string] `query:"tenant"`
-}
-
-// URLQuery serializes [ObjectGetPreferencesParams]'s query parameters as
-// `url.Values`.
-func (r ObjectGetPreferencesParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
 type ObjectListMessagesParams struct {
 	// The cursor to fetch entries after.
 	After param.Field[string] `query:"after"`
@@ -495,7 +481,7 @@ type ObjectListMessagesParams struct {
 	MessageIDs param.Field[[]string] `query:"message_ids"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// Limits the results to only items of the source workflow.
+	// Key of the source that triggered the message to limit results to.
 	Source param.Field[string] `query:"source"`
 	// One or more delivery statuses. Limits results to messages with the given
 	// delivery status(es).
@@ -567,9 +553,9 @@ type ObjectListSchedulesParams struct {
 	Before param.Field[string] `query:"before"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// The ID of the tenant to list schedules for.
+	// Filter schedules by tenant id.
 	Tenant param.Field[string] `query:"tenant"`
-	// The ID of the workflow to list schedules for.
+	// Filter schedules by workflow id.
 	Workflow param.Field[string] `query:"workflow"`
 }
 
@@ -587,7 +573,7 @@ type ObjectListSubscriptionsParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// Includes preferences of the recipient subscribers in the response.
+	// Additional fields to include in the response.
 	Include param.Field[[]ObjectListSubscriptionsParamsInclude] `query:"include"`
 	// Mode of the request.
 	Mode param.Field[ObjectListSubscriptionsParamsMode] `query:"mode"`

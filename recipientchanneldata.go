@@ -62,6 +62,8 @@ func (r channelDataJSON) RawJSON() string {
 type ChannelDataData struct {
 	// This field can have the runtime type of [SlackChannelDataToken].
 	Token interface{} `json:"token"`
+	// The typename of the schema.
+	Typename ChannelDataDataTypename `json:"__typename"`
 	// This field can have the runtime type of [[]SlackChannelDataConnection],
 	// [[]MsTeamsChannelDataConnection], [[]DiscordChannelDataConnection].
 	Connections interface{} `json:"connections"`
@@ -78,6 +80,7 @@ type ChannelDataData struct {
 // channelDataDataJSON contains the JSON metadata for the struct [ChannelDataData]
 type channelDataDataJSON struct {
 	Token           apijson.Field
+	Typename        apijson.Field
 	Connections     apijson.Field
 	MsTeamsTenantID apijson.Field
 	PlayerIDs       apijson.Field
@@ -143,6 +146,21 @@ func init() {
 	)
 }
 
+// The typename of the schema.
+type ChannelDataDataTypename string
+
+const (
+	ChannelDataDataTypenamePushChannelData ChannelDataDataTypename = "PushChannelData"
+)
+
+func (r ChannelDataDataTypename) IsKnown() bool {
+	switch r {
+	case ChannelDataDataTypenamePushChannelData:
+		return true
+	}
+	return false
+}
+
 // A request to set channel data for a type of channel.
 type ChannelDataRequestParam struct {
 	// Channel data for a given channel type.
@@ -155,8 +173,10 @@ func (r ChannelDataRequestParam) MarshalJSON() (data []byte, err error) {
 
 // Channel data for a given channel type.
 type ChannelDataRequestDataParam struct {
-	Token       param.Field[interface{}] `json:"token"`
-	Connections param.Field[interface{}] `json:"connections"`
+	Token param.Field[interface{}] `json:"token"`
+	// The typename of the schema.
+	Typename    param.Field[ChannelDataRequestDataTypename] `json:"__typename"`
+	Connections param.Field[interface{}]                    `json:"connections"`
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
 	PlayerIDs       param.Field[interface{}] `json:"player_ids"`
@@ -176,6 +196,21 @@ func (r ChannelDataRequestDataParam) implementsChannelDataRequestDataUnionParam(
 // [ChannelDataRequestDataParam].
 type ChannelDataRequestDataUnionParam interface {
 	implementsChannelDataRequestDataUnionParam()
+}
+
+// The typename of the schema.
+type ChannelDataRequestDataTypename string
+
+const (
+	ChannelDataRequestDataTypenamePushChannelData ChannelDataRequestDataTypename = "PushChannelData"
+)
+
+func (r ChannelDataRequestDataTypename) IsKnown() bool {
+	switch r {
+	case ChannelDataRequestDataTypenamePushChannelData:
+		return true
+	}
+	return false
 }
 
 // Discord channel data.
@@ -734,6 +769,8 @@ func (r OneSignalChannelDataParam) implementsChannelDataRequestDataUnionParam() 
 
 // The content of a push notification.
 type PushChannelData struct {
+	// The typename of the schema.
+	Typename PushChannelData_Typename `json:"__typename,required"`
 	// A list of push channel tokens.
 	Tokens []string            `json:"tokens,required"`
 	JSON   pushChannelDataJSON `json:"-"`
@@ -741,6 +778,7 @@ type PushChannelData struct {
 
 // pushChannelDataJSON contains the JSON metadata for the struct [PushChannelData]
 type pushChannelDataJSON struct {
+	Typename    apijson.Field
 	Tokens      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -756,8 +794,25 @@ func (r pushChannelDataJSON) RawJSON() string {
 
 func (r PushChannelData) implementsChannelDataData() {}
 
+// The typename of the schema.
+type PushChannelData_Typename string
+
+const (
+	PushChannelData_TypenamePushChannelData PushChannelData_Typename = "PushChannelData"
+)
+
+func (r PushChannelData_Typename) IsKnown() bool {
+	switch r {
+	case PushChannelData_TypenamePushChannelData:
+		return true
+	}
+	return false
+}
+
 // The content of a push notification.
 type PushChannelDataParam struct {
+	// The typename of the schema.
+	Typename param.Field[PushChannelData_Typename] `json:"__typename,required"`
 	// A list of push channel tokens.
 	Tokens param.Field[[]string] `json:"tokens,required"`
 }
@@ -770,18 +825,18 @@ func (r PushChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
 // Slack channel data
 type SlackChannelData struct {
-	// List of Slack channel connections.
-	Connections []SlackChannelDataConnection `json:"connections,required"`
 	// A Slack connection token.
 	Token SlackChannelDataToken `json:"token,nullable"`
-	JSON  slackChannelDataJSON  `json:"-"`
+	// List of Slack channel connections.
+	Connections []SlackChannelDataConnection `json:"connections"`
+	JSON        slackChannelDataJSON         `json:"-"`
 }
 
 // slackChannelDataJSON contains the JSON metadata for the struct
 // [SlackChannelData]
 type slackChannelDataJSON struct {
-	Connections apijson.Field
 	Token       apijson.Field
+	Connections apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -795,6 +850,29 @@ func (r slackChannelDataJSON) RawJSON() string {
 }
 
 func (r SlackChannelData) implementsChannelDataData() {}
+
+// A Slack connection token.
+type SlackChannelDataToken struct {
+	// A Slack access token.
+	AccessToken string                    `json:"access_token,required,nullable"`
+	JSON        slackChannelDataTokenJSON `json:"-"`
+}
+
+// slackChannelDataTokenJSON contains the JSON metadata for the struct
+// [SlackChannelDataToken]
+type slackChannelDataTokenJSON struct {
+	AccessToken apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SlackChannelDataToken) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r slackChannelDataTokenJSON) RawJSON() string {
+	return r.raw
+}
 
 // A Slack connection, either an access token or an incoming webhook
 type SlackChannelDataConnection struct {
@@ -925,35 +1003,12 @@ func (r slackChannelDataConnectionsSlackIncomingWebhookConnectionJSON) RawJSON()
 func (r SlackChannelDataConnectionsSlackIncomingWebhookConnection) implementsSlackChannelDataConnection() {
 }
 
-// A Slack connection token.
-type SlackChannelDataToken struct {
-	// A Slack access token.
-	AccessToken string                    `json:"access_token,required,nullable"`
-	JSON        slackChannelDataTokenJSON `json:"-"`
-}
-
-// slackChannelDataTokenJSON contains the JSON metadata for the struct
-// [SlackChannelDataToken]
-type slackChannelDataTokenJSON struct {
-	AccessToken apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SlackChannelDataToken) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r slackChannelDataTokenJSON) RawJSON() string {
-	return r.raw
-}
-
 // Slack channel data
 type SlackChannelDataParam struct {
-	// List of Slack channel connections.
-	Connections param.Field[[]SlackChannelDataConnectionsUnionParam] `json:"connections,required"`
 	// A Slack connection token.
 	Token param.Field[SlackChannelDataTokenParam] `json:"token"`
+	// List of Slack channel connections.
+	Connections param.Field[[]SlackChannelDataConnectionsUnionParam] `json:"connections"`
 }
 
 func (r SlackChannelDataParam) MarshalJSON() (data []byte, err error) {
@@ -961,6 +1016,16 @@ func (r SlackChannelDataParam) MarshalJSON() (data []byte, err error) {
 }
 
 func (r SlackChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
+
+// A Slack connection token.
+type SlackChannelDataTokenParam struct {
+	// A Slack access token.
+	AccessToken param.Field[string] `json:"access_token,required"`
+}
+
+func (r SlackChannelDataTokenParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
 
 // A Slack connection, either an access token or an incoming webhook
 type SlackChannelDataConnectionParam struct {
@@ -1017,14 +1082,4 @@ func (r SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam) MarshalJ
 }
 
 func (r SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam) implementsSlackChannelDataConnectionsUnionParam() {
-}
-
-// A Slack connection token.
-type SlackChannelDataTokenParam struct {
-	// A Slack access token.
-	AccessToken param.Field[string] `json:"access_token,required"`
-}
-
-func (r SlackChannelDataTokenParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
 }

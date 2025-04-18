@@ -456,7 +456,7 @@ type UserListMessagesParams struct {
 	MessageIDs param.Field[[]string] `query:"message_ids"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// Limits the results to only items of the source workflow.
+	// Key of the source that triggered the message to limit results to.
 	Source param.Field[string] `query:"source"`
 	// One or more delivery statuses. Limits results to messages with the given
 	// delivery status(es).

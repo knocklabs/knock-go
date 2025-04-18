@@ -64,6 +64,8 @@ type ChannelBulkUpdateMessageStatusParams struct {
 	// The timestamp to filter messages by. Only include messages created before this
 	// timestamp.
 	OlderThan param.Field[time.Time] `json:"older_than" format:"date-time"`
+	// The recipient GIDs to filter messages by.
+	RecipientGids param.Field[[]string] `json:"recipient_gids"`
 	// The recipient IDs to filter messages by.
 	RecipientIDs param.Field[[]string] `json:"recipient_ids"`
 	// The tenant IDs to filter messages by.

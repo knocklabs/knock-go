@@ -317,7 +317,7 @@ type Message struct {
 	ChannelID string `json:"channel_id" format:"uuid"`
 	// Timestamp when the message was clicked.
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
-	// Data from the activities linked to the message
+	// Data from the activities linked to the message.
 	Data map[string]interface{} `json:"data,nullable"`
 	// A list of engagement statuses.
 	EngagementStatuses []MessageEngagementStatus `json:"engagement_statuses"`
@@ -346,7 +346,7 @@ type Message struct {
 	Tenant string `json:"tenant,nullable"`
 	// The timestamp when the resource was last updated.
 	UpdatedAt time.Time `json:"updated_at" format:"date-time"`
-	// The key of the worklfow that generated the message.
+	// The key of the workflow that generated the message.
 	//
 	// Deprecated: deprecated
 	Workflow string      `json:"workflow,nullable"`
@@ -1510,7 +1510,7 @@ type MessageListParams struct {
 	MessageIDs param.Field[[]string] `query:"message_ids"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// Limits the results to only items of the source workflow.
+	// Key of the source that triggered the message to limit results to.
 	Source param.Field[string] `query:"source"`
 	// One or more delivery statuses. Limits results to messages with the given
 	// delivery status(es).

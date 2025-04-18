@@ -68,7 +68,8 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 					ChannelData: knock.F(knock.InlineChannelDataRequestParam{
 						"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.ChannelDataRequestParam{
 							Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
-								Tokens: knock.F([]string{"push_token_xxx"}),
+								Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
+								Tokens:   knock.F([]string{"push_token_xxx"}),
 							}),
 						},
 					}),
@@ -158,7 +159,8 @@ func TestObjectBulkSet(t *testing.T) {
 				ChannelData: knock.F(knock.InlineChannelDataRequestParam{
 					"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.ChannelDataRequestParam{
 						Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
-							Tokens: knock.F([]string{"push_token_xxx"}),
+							Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
+							Tokens:   knock.F([]string{"push_token_xxx"}),
 						}),
 					},
 				}),
