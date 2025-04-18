@@ -258,9 +258,9 @@ func (r *ObjectService) ListSchedulesAutoPaging(ctx context.Context, collection 
 	return pagination.NewEntriesCursorAutoPager(r.ListSchedules(ctx, collection, objectID, query, opts...))
 }
 
-// List subscriptions for an object. Either list all subscriptions that belong to
-// the object, or all subscriptions that this object has. Determined by the `mode`
-// query parameter.
+// List subscriptions for an object. Eitherlist the recipients that subscribe to
+// the provided object, or list the objects that the provided object is subscribed
+// to. Determined by the `mode` query parameter.
 func (r *ObjectService) ListSubscriptions(ctx context.Context, collection string, objectID string, query ObjectListSubscriptionsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Subscription], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -286,9 +286,9 @@ func (r *ObjectService) ListSubscriptions(ctx context.Context, collection string
 	return res, nil
 }
 
-// List subscriptions for an object. Either list all subscriptions that belong to
-// the object, or all subscriptions that this object has. Determined by the `mode`
-// query parameter.
+// List subscriptions for an object. Eitherlist the recipients that subscribe to
+// the provided object, or list the objects that the provided object is subscribed
+// to. Determined by the `mode` query parameter.
 func (r *ObjectService) ListSubscriptionsAutoPaging(ctx context.Context, collection string, objectID string, query ObjectListSubscriptionsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Subscription] {
 	return pagination.NewEntriesCursorAutoPager(r.ListSubscriptions(ctx, collection, objectID, query, opts...))
 }

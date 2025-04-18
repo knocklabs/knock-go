@@ -137,26 +137,22 @@ func TestObjectDeleteSubscriptions(t *testing.T) {
 				CreatedAt: knock.F(time.Now()),
 				Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
 					ID: knock.F("default"),
-					Categories: knock.F[knock.InlinePreferenceSetRequestItemCategoriesUnionParam](knock.InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
-						ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-							Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-							Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
-							HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-							InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-							Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-							SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
-								Conditions: knock.F([]shared.ConditionParam{{
-									Argument: knock.F("US"),
-									Operator: knock.F(shared.ConditionOperatorEqualTo),
-									Variable: knock.F("recipient.country_code"),
-								}}),
+					Categories: knock.F(map[string]knock.InlinePreferenceSetRequestItemCategoriesUnionParam{
+						"transactional": knock.InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
+							ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+								Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+								Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
+								HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+								Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+								SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
 							}),
-						}),
-						Conditions: knock.F([]shared.ConditionParam{{
-							Argument: knock.F("some_property"),
-							Operator: knock.F(shared.ConditionOperatorEqualTo),
-							Variable: knock.F("recipient.property"),
-						}}),
+							Conditions: knock.F([]shared.ConditionParam{{
+								Argument: knock.F("some_property"),
+								Operator: knock.F(shared.ConditionOperatorEqualTo),
+								Variable: knock.F("recipient.property"),
+							}}),
+						},
 					}),
 					ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
 						Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
@@ -445,26 +441,22 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 			}}),
 			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
 				ID: knock.F("default"),
-				Categories: knock.F[knock.InlinePreferenceSetRequestItemCategoriesUnionParam](knock.InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
-					ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-						Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-						Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
-						HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-						InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-						Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-						SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
-							Conditions: knock.F([]shared.ConditionParam{{
-								Argument: knock.F("US"),
-								Operator: knock.F(shared.ConditionOperatorEqualTo),
-								Variable: knock.F("recipient.country_code"),
-							}}),
+				Categories: knock.F(map[string]knock.InlinePreferenceSetRequestItemCategoriesUnionParam{
+					"transactional": knock.InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
+						ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+							Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+							Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
+							HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+							InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+							Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+							SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
 						}),
-					}),
-					Conditions: knock.F([]shared.ConditionParam{{
-						Argument: knock.F("some_property"),
-						Operator: knock.F(shared.ConditionOperatorEqualTo),
-						Variable: knock.F("recipient.property"),
-					}}),
+						Conditions: knock.F([]shared.ConditionParam{{
+							Argument: knock.F("some_property"),
+							Operator: knock.F(shared.ConditionOperatorEqualTo),
+							Variable: knock.F("recipient.property"),
+						}}),
+					},
 				}),
 				ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
 					Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
