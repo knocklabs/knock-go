@@ -332,7 +332,7 @@ type Message struct {
 	// Timestamp when the message was read.
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
-	// reference (id, collection).
+	// reference (ID, collection).
 	Recipient MessageRecipientUnion `json:"recipient"`
 	// Timestamp when the message was scheduled to be sent.
 	ScheduledAt time.Time `json:"scheduled_at,nullable" format:"date-time"`
@@ -389,7 +389,7 @@ func (r messageJSON) RawJSON() string {
 }
 
 // A reference to a recipient, either a user identifier (string) or an object
-// reference (id, collection).
+// reference (ID, collection).
 //
 // Union satisfied by [shared.UnionString] or [MessageActorsObjectReference].
 type MessageActorsUnion interface {
@@ -460,7 +460,7 @@ func (r MessageEngagementStatus) IsKnown() bool {
 }
 
 // A reference to a recipient, either a user identifier (string) or an object
-// reference (id, collection).
+// reference (ID, collection).
 //
 // Union satisfied by [shared.UnionString] or [MessageRecipientObjectReference].
 type MessageRecipientUnion interface {
@@ -517,7 +517,7 @@ type MessageSource struct {
 	Categories []string `json:"categories,required"`
 	// The key of the source that triggered the message.
 	Key string `json:"key,required"`
-	// The id of the version of the source that triggered the message.
+	// The ID of the version of the source that triggered the message.
 	VersionID string            `json:"version_id,required" format:"uuid"`
 	JSON      messageSourceJSON `json:"-"`
 }
@@ -741,7 +741,7 @@ type MessageEvent struct {
 	// Timestamp when the event was created.
 	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
-	// reference (id, collection).
+	// reference (ID, collection).
 	Recipient MessageEventRecipientUnion `json:"recipient,required"`
 	// The type of event that occurred.
 	Type MessageEventType `json:"type,required"`
@@ -771,7 +771,7 @@ func (r messageEventJSON) RawJSON() string {
 }
 
 // A reference to a recipient, either a user identifier (string) or an object
-// reference (id, collection).
+// reference (ID, collection).
 //
 // Union satisfied by [shared.UnionString] or
 // [MessageEventRecipientObjectReference].
@@ -1500,7 +1500,7 @@ type MessageListParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// Limits the results to items with the corresponding channel id.
+	// Limits the results to items with the corresponding channel ID.
 	ChannelID param.Field[string] `query:"channel_id"`
 	// One or more engagement statuses. Limits results to messages with the given
 	// engagement status(es).

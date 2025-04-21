@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/stainless-sdks/knock-go/internal/apijson"
 	"github.com/stainless-sdks/knock-go/internal/param"
@@ -47,7 +48,7 @@ func (r *WorkflowService) Cancel(ctx context.Context, key string, body WorkflowC
 	return
 }
 
-// Trigger a workflow specified by the key to run for the given recipients, using
+// Trigger a workflow (specified by the key) to run for the given recipients, using
 // the parameters provided. Returns an identifier for the workflow run request. All
 // workflow runs are executed asynchronously.
 func (r *WorkflowService) Trigger(ctx context.Context, key string, body WorkflowTriggerParams, opts ...option.RequestOption) (res *WorkflowTriggerResponse, err error) {
@@ -63,8 +64,8 @@ func (r *WorkflowService) Trigger(ctx context.Context, key string, body Workflow
 
 // The response from triggering a workflow.
 type WorkflowTriggerResponse struct {
-	// The ID of the workflow trigger. This value allows you to track individual
-	// workflow runs associated with this trigger request.
+	// This value allows you to track individual messages associated with this trigger
+	// request.
 	WorkflowRunID string                      `json:"workflow_run_id,required" format:"uuid"`
 	JSON          workflowTriggerResponseJSON `json:"-"`
 }
@@ -86,30 +87,66 @@ func (r workflowTriggerResponseJSON) RawJSON() string {
 }
 
 type WorkflowCancelParams struct {
-	// The cancellation key provided during the initial notify call. If used in a
-	// cancel request, will cancel the notification for the recipients specified in the
-	// cancel request.
+	// An optional key that is used to reference a specific workflow trigger request
+	// when issuing a [workflow cancellation](/send-notifications/canceling-workflows)
+	// request. Must be provided while triggering a workflow in order to enable
+	// subsequent cancellation. Should be unique across trigger requests to avoid
+	// unintentional cancellations.
 	CancellationKey param.Field[string] `json:"cancellation_key,required"`
 	// A list of recipients to cancel the notification for. If omitted, cancels for all
 	// recipients associated with the cancellation key.
-	Recipients param.Field[[]string] `json:"recipients"`
+	Recipients param.Field[[]WorkflowCancelParamsRecipientUnion] `json:"recipients"`
 }
 
 func (r WorkflowCancelParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+type WorkflowCancelParamsRecipient struct {
+	// The ID for the user that you set when identifying them in Knock.
+	ID param.Field[string] `json:"id,required"`
+	// A request to set channel data for a type of channel inline.
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// The collection this object belongs to.
+	Collection param.Field[string] `json:"collection"`
+	// The creation date of the user from your system.
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+}
+
+func (r WorkflowCancelParamsRecipient) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r WorkflowCancelParamsRecipient) ImplementsWorkflowCancelParamsRecipientUnion() {}
+
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+//
+// Satisfied by [shared.UnionString], [InlineIdentifyUserRequestParam],
+// [InlineObjectRequestParam], [WorkflowCancelParamsRecipient].
+type WorkflowCancelParamsRecipientUnion interface {
+	ImplementsWorkflowCancelParamsRecipientUnion()
+}
+
 type WorkflowTriggerParams struct {
 	// The recipients to trigger the workflow for. Can inline identify users, objects,
-	// or use a list of user ids. Cannot exceed 1000 recipients in a single trigger.
-	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
+	// or use a list of user IDs. Limited to 1,000 recipients in a single trigger.
+	Recipients param.Field[[]WorkflowTriggerParamsRecipientUnion] `json:"recipients,required"`
 	// Specifies a recipient in a request. This can either be a user identifier
 	// (string), an inline user request (object), or an inline object request, which is
 	// determined by the presence of a `collection` property.
-	Actor param.Field[RecipientRequestUnionParam] `json:"actor"`
-	// The cancellation key provided during the initial notify call. If used in a
-	// cancel request, will cancel the notification for the recipients specified in the
-	// cancel request.
+	Actor param.Field[WorkflowTriggerParamsActorUnion] `json:"actor"`
+	// An optional key that is used to reference a specific workflow trigger request
+	// when issuing a [workflow cancellation](/send-notifications/canceling-workflows)
+	// request. Must be provided while triggering a workflow in order to enable
+	// subsequent cancellation. Should be unique across trigger requests to avoid
+	// unintentional cancellations.
 	CancellationKey param.Field[string] `json:"cancellation_key"`
 	// An optional map of data to pass into the workflow execution.
 	Data param.Field[map[string]interface{}] `json:"data"`
@@ -119,4 +156,68 @@ type WorkflowTriggerParams struct {
 
 func (r WorkflowTriggerParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+type WorkflowTriggerParamsRecipient struct {
+	// The ID for the user that you set when identifying them in Knock.
+	ID param.Field[string] `json:"id,required"`
+	// A request to set channel data for a type of channel inline.
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// The collection this object belongs to.
+	Collection param.Field[string] `json:"collection"`
+	// The creation date of the user from your system.
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+}
+
+func (r WorkflowTriggerParamsRecipient) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r WorkflowTriggerParamsRecipient) ImplementsWorkflowTriggerParamsRecipientUnion() {}
+
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+//
+// Satisfied by [shared.UnionString], [InlineIdentifyUserRequestParam],
+// [InlineObjectRequestParam], [WorkflowTriggerParamsRecipient].
+type WorkflowTriggerParamsRecipientUnion interface {
+	ImplementsWorkflowTriggerParamsRecipientUnion()
+}
+
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+type WorkflowTriggerParamsActor struct {
+	// The ID for the user that you set when identifying them in Knock.
+	ID param.Field[string] `json:"id,required"`
+	// A request to set channel data for a type of channel inline.
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// The collection this object belongs to.
+	Collection param.Field[string] `json:"collection"`
+	// The creation date of the user from your system.
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+}
+
+func (r WorkflowTriggerParamsActor) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r WorkflowTriggerParamsActor) ImplementsWorkflowTriggerParamsActorUnion() {}
+
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+//
+// Satisfied by [shared.UnionString], [InlineIdentifyUserRequestParam],
+// [InlineObjectRequestParam], [WorkflowTriggerParamsActor].
+type WorkflowTriggerParamsActorUnion interface {
+	ImplementsWorkflowTriggerParamsActorUnion()
 }

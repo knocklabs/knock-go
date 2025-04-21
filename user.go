@@ -333,7 +333,20 @@ func (r InlineIdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r InlineIdentifyUserRequestParam) ImplementsRecipientRequestUnionParam() {}
+func (r InlineIdentifyUserRequestParam) ImplementsObjectAddSubscriptionsParamsRecipientUnion() {}
+
+func (r InlineIdentifyUserRequestParam) ImplementsObjectDeleteSubscriptionsParamsRecipientUnion() {}
+
+func (r InlineIdentifyUserRequestParam) ImplementsObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion() {
+}
+
+func (r InlineIdentifyUserRequestParam) ImplementsWorkflowCancelParamsRecipientUnion() {}
+
+func (r InlineIdentifyUserRequestParam) ImplementsWorkflowTriggerParamsRecipientUnion() {}
+
+func (r InlineIdentifyUserRequestParam) ImplementsWorkflowTriggerParamsActorUnion() {}
+
+func (r InlineIdentifyUserRequestParam) ImplementsScheduleUpdateParamsActorUnion() {}
 
 // A user who can receive notifications in Knock. They are always referenced by
 // your internal identifier.
@@ -448,7 +461,7 @@ type UserListMessagesParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// Limits the results to items with the corresponding channel id.
+	// Limits the results to items with the corresponding channel ID.
 	ChannelID param.Field[string] `query:"channel_id"`
 	// One or more engagement statuses. Limits results to messages with the given
 	// engagement status(es).
@@ -581,7 +594,7 @@ func (r UserListSubscriptionsParamsInclude) IsKnown() bool {
 }
 
 // A reference to a recipient, either a user identifier (string) or an object
-// reference (id, collection).
+// reference (ID, collection).
 //
 // Satisfied by [shared.UnionString],
 // [UserListSubscriptionsParamsObjectsObjectReference].

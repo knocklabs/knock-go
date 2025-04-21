@@ -32,7 +32,7 @@ func TestWorkflowCancelWithOptionalParams(t *testing.T) {
 		"key",
 		knock.WorkflowCancelParams{
 			CancellationKey: knock.F("cancel-workflow-123"),
-			Recipients:      knock.F([]string{"jhammond"}),
+			Recipients:      knock.F([]knock.WorkflowCancelParamsRecipientUnion{shared.UnionString("jhammond")}),
 		},
 	)
 	if err != nil {
@@ -61,8 +61,8 @@ func TestWorkflowTriggerWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"key",
 		knock.WorkflowTriggerParams{
-			Recipients:      knock.F([]knock.RecipientRequestUnionParam{shared.UnionString("jhammond")}),
-			Actor:           knock.F[knock.RecipientRequestUnionParam](shared.UnionString("string")),
+			Recipients:      knock.F([]knock.WorkflowTriggerParamsRecipientUnion{shared.UnionString("jhammond")}),
+			Actor:           knock.F[knock.WorkflowTriggerParamsActorUnion](shared.UnionString("string")),
 			CancellationKey: knock.Null[string](),
 			Data: knock.F(map[string]interface{}{
 				"dinosaur_names":  "bar",

@@ -390,7 +390,20 @@ func (r InlineObjectRequestParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r InlineObjectRequestParam) ImplementsRecipientRequestUnionParam() {}
+func (r InlineObjectRequestParam) ImplementsObjectAddSubscriptionsParamsRecipientUnion() {}
+
+func (r InlineObjectRequestParam) ImplementsObjectDeleteSubscriptionsParamsRecipientUnion() {}
+
+func (r InlineObjectRequestParam) ImplementsObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion() {
+}
+
+func (r InlineObjectRequestParam) ImplementsWorkflowCancelParamsRecipientUnion() {}
+
+func (r InlineObjectRequestParam) ImplementsWorkflowTriggerParamsRecipientUnion() {}
+
+func (r InlineObjectRequestParam) ImplementsWorkflowTriggerParamsActorUnion() {}
+
+func (r InlineObjectRequestParam) ImplementsScheduleUpdateParamsActorUnion() {}
 
 // A custom object entity which belongs to a collection.
 type Object struct {
@@ -464,7 +477,7 @@ func (r ObjectListParamsInclude) IsKnown() bool {
 
 type ObjectAddSubscriptionsParams struct {
 	// The recipients of the subscription.
-	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
+	Recipients param.Field[[]ObjectAddSubscriptionsParamsRecipientUnion] `json:"recipients,required"`
 	// The custom properties associated with the recipients of the subscription.
 	Properties param.Field[map[string]interface{}] `json:"properties"`
 }
@@ -473,13 +486,79 @@ func (r ObjectAddSubscriptionsParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+type ObjectAddSubscriptionsParamsRecipient struct {
+	// The ID for the user that you set when identifying them in Knock.
+	ID param.Field[string] `json:"id,required"`
+	// A request to set channel data for a type of channel inline.
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// The collection this object belongs to.
+	Collection param.Field[string] `json:"collection"`
+	// The creation date of the user from your system.
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+}
+
+func (r ObjectAddSubscriptionsParamsRecipient) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ObjectAddSubscriptionsParamsRecipient) ImplementsObjectAddSubscriptionsParamsRecipientUnion() {
+}
+
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+//
+// Satisfied by [shared.UnionString], [InlineIdentifyUserRequestParam],
+// [InlineObjectRequestParam], [ObjectAddSubscriptionsParamsRecipient].
+type ObjectAddSubscriptionsParamsRecipientUnion interface {
+	ImplementsObjectAddSubscriptionsParamsRecipientUnion()
+}
+
 type ObjectDeleteSubscriptionsParams struct {
 	// The recipients of the subscription.
-	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
+	Recipients param.Field[[]ObjectDeleteSubscriptionsParamsRecipientUnion] `json:"recipients,required"`
 }
 
 func (r ObjectDeleteSubscriptionsParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+type ObjectDeleteSubscriptionsParamsRecipient struct {
+	// The ID for the user that you set when identifying them in Knock.
+	ID param.Field[string] `json:"id,required"`
+	// A request to set channel data for a type of channel inline.
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// The collection this object belongs to.
+	Collection param.Field[string] `json:"collection"`
+	// The creation date of the user from your system.
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+}
+
+func (r ObjectDeleteSubscriptionsParamsRecipient) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ObjectDeleteSubscriptionsParamsRecipient) ImplementsObjectDeleteSubscriptionsParamsRecipientUnion() {
+}
+
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+//
+// Satisfied by [shared.UnionString], [InlineIdentifyUserRequestParam],
+// [InlineObjectRequestParam], [ObjectDeleteSubscriptionsParamsRecipient].
+type ObjectDeleteSubscriptionsParamsRecipientUnion interface {
+	ImplementsObjectDeleteSubscriptionsParamsRecipientUnion()
 }
 
 type ObjectListMessagesParams struct {
@@ -487,7 +566,7 @@ type ObjectListMessagesParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// Limits the results to items with the corresponding channel id.
+	// Limits the results to items with the corresponding channel ID.
 	ChannelID param.Field[string] `query:"channel_id"`
 	// One or more engagement statuses. Limits results to messages with the given
 	// engagement status(es).
@@ -641,7 +720,7 @@ func (r ObjectListSubscriptionsParamsMode) IsKnown() bool {
 }
 
 // A reference to a recipient, either a user identifier (string) or an object
-// reference (id, collection).
+// reference (ID, collection).
 //
 // Satisfied by [shared.UnionString],
 // [ObjectListSubscriptionsParamsObjectsObjectReference].
@@ -670,7 +749,7 @@ func (r ObjectListSubscriptionsParamsObjectsObjectReference) ImplementsObjectLis
 }
 
 // A reference to a recipient, either a user identifier (string) or an object
-// reference (id, collection).
+// reference (ID, collection).
 //
 // Satisfied by [shared.UnionString],
 // [ObjectListSubscriptionsParamsRecipientsObjectReference].

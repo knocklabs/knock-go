@@ -250,7 +250,7 @@ func (r ScheduleRepeatRuleParam) MarshalJSON() (data []byte, err error) {
 
 type ScheduleNewParams struct {
 	// The recipients to trigger the workflow for. Can inline identify users, objects,
-	// or use a list of user ids. Cannot exceed 1000 recipients in a single trigger.
+	// or use a list of user IDs. Limited to 1,000 recipients in a single trigger.
 	Recipients param.Field[[]ScheduleNewParamsRecipientUnion] `json:"recipients,required"`
 	// The repeat rule for the schedule.
 	Repeats param.Field[[]ScheduleRepeatRuleParam] `json:"repeats,required"`
@@ -271,7 +271,7 @@ func (r ScheduleNewParams) MarshalJSON() (data []byte, err error) {
 }
 
 // A reference to a recipient, either a user identifier (string) or an object
-// reference (id, collection).
+// reference (ID, collection).
 //
 // Satisfied by [shared.UnionString], [ScheduleNewParamsRecipientsObjectReference].
 type ScheduleNewParamsRecipientUnion interface {
@@ -298,7 +298,7 @@ type ScheduleUpdateParams struct {
 	// Specifies a recipient in a request. This can either be a user identifier
 	// (string), an inline user request (object), or an inline object request, which is
 	// determined by the presence of a `collection` property.
-	Actor param.Field[RecipientRequestUnionParam] `json:"actor"`
+	Actor param.Field[ScheduleUpdateParamsActorUnion] `json:"actor"`
 	// An optional map of data to pass into the workflow execution.
 	Data param.Field[map[string]interface{}] `json:"data"`
 	// The ending date and time for the schedule.
@@ -313,6 +313,38 @@ type ScheduleUpdateParams struct {
 
 func (r ScheduleUpdateParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+type ScheduleUpdateParamsActor struct {
+	// The ID for the user that you set when identifying them in Knock.
+	ID param.Field[string] `json:"id,required"`
+	// A request to set channel data for a type of channel inline.
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// The collection this object belongs to.
+	Collection param.Field[string] `json:"collection"`
+	// The creation date of the user from your system.
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+}
+
+func (r ScheduleUpdateParamsActor) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ScheduleUpdateParamsActor) ImplementsScheduleUpdateParamsActorUnion() {}
+
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+//
+// Satisfied by [shared.UnionString], [InlineIdentifyUserRequestParam],
+// [InlineObjectRequestParam], [ScheduleUpdateParamsActor].
+type ScheduleUpdateParamsActorUnion interface {
+	ImplementsScheduleUpdateParamsActorUnion()
 }
 
 type ScheduleListParams struct {

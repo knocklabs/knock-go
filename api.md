@@ -8,10 +8,6 @@
 
 # Recipients
 
-Params Types:
-
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#RecipientRequestUnionParam">RecipientRequestUnionParam</a>
-
 Response Types:
 
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#Recipient">Recipient</a>

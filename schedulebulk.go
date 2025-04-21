@@ -29,7 +29,7 @@ func NewScheduleBulkService(opts ...option.RequestOption) (r *ScheduleBulkServic
 	return
 }
 
-// Creates up to 1000 schedules in a single asynchronous bulk operation. The list
+// Creates up to 1,000 schedules in a single asynchronous bulk operation. The list
 // of schedules can include inline-identifications for each recipient, tenant, and
 // actor specified on a schedule.
 func (r *ScheduleBulkService) New(ctx context.Context, opts ...option.RequestOption) (res *BulkOperation, err error) {
