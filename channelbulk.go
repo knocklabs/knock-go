@@ -34,10 +34,10 @@ func NewChannelBulkService(opts ...option.RequestOption) (r *ChannelBulkService)
 	return
 }
 
-// Bulk update messages for a specific channel. The channel is specified by the
-// `channel_id` parameter. The action to perform is specified by the `action`
-// parameter, where the action is a status change action (e.g. `archive`,
-// `unarchive`).
+// Bulk update the status of messages for a specific channel. The channel is
+// specified by the `channel_id` parameter. The action to perform is specified by
+// the `action` parameter, where the action is a status change action (e.g.
+// `archive`, `unarchive`).
 func (r *ChannelBulkService) UpdateMessageStatus(ctx context.Context, channelID string, action ChannelBulkUpdateMessageStatusParamsAction, body ChannelBulkUpdateMessageStatusParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	if channelID == "" {
