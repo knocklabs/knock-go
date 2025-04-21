@@ -450,29 +450,29 @@ type UserListMessagesParams struct {
 	Before param.Field[string] `query:"before"`
 	// Limits the results to items with the corresponding channel ID.
 	ChannelID param.Field[string] `query:"channel_id"`
-	// One or more engagement statuses. Limits results to messages with the given
-	// engagement status(es).
+	// Limits the results to messages with the given engagement status.
 	EngagementStatus param.Field[[]UserListMessagesParamsEngagementStatus] `query:"engagement_status"`
 	// Limits the results to only the message ids given (max 50). Note: when using this
 	// option, the results will be subject to any other filters applied to the query.
 	MessageIDs param.Field[[]string] `query:"message_ids"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// Key of the source that triggered the message to limit results to.
+	// Limits the results to messages triggered by the given workflow key.
 	Source param.Field[string] `query:"source"`
-	// One or more delivery statuses. Limits results to messages with the given
-	// delivery status(es).
+	// Limits the results to messages with the given delivery status.
 	Status param.Field[[]UserListMessagesParamsStatus] `query:"status"`
-	// Limits the results to items with the corresponding tenant, or where the tenant
-	// is empty.
+	// Limits the results to items with the corresponding tenant.
 	Tenant param.Field[string] `query:"tenant"`
-	// Limits the results to only items that were generated with the given data.
+	// Limits the results to only messages that were generated with the given data. See
+	// [trigger data filtering](/api-reference/overview/trigger-data-filtering) for
+	// more information.
 	TriggerData param.Field[string] `query:"trigger_data"`
-	// Limits the results to only items related to any of the provided categories.
+	// Limits the results to messages related to any of the provided categories.
 	WorkflowCategories param.Field[[]string] `query:"workflow_categories"`
 	// Limits the results to messages for a specific recipient's workflow run.
 	WorkflowRecipientRunID param.Field[string] `query:"workflow_recipient_run_id" format:"uuid"`
-	// Limits the results to messages triggered by the top-level workflow run ID.
+	// Limits the results to messages associated with the top-level workflow run ID
+	// returned by the workflow trigger request.
 	WorkflowRunID param.Field[string] `query:"workflow_run_id" format:"uuid"`
 }
 

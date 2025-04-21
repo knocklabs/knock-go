@@ -36,7 +36,8 @@ func NewMessageBatchService(opts ...option.RequestOption) (r *MessageBatchServic
 	return
 }
 
-// Marks the given messages as archived.
+// Marks the given messages as archived. Archived messages are hidden from the
+// default message list in the feed but can still be accessed and unarchived later.
 func (r *MessageBatchService) Archive(ctx context.Context, body MessageBatchArchiveParams, opts ...option.RequestOption) (res *[]Message, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/messages/batch/archived"
@@ -52,7 +53,11 @@ func (r *MessageBatchService) GetContent(ctx context.Context, query MessageBatch
 	return
 }
 
-// Marks the given messages as interacted with.
+// Marks the given messages as interacted with by the user. This can include any
+// user action on the message, with optional metadata about the specific
+// interaction. Cannot include more than 5 key-value pairs, must not contain nested
+// data. Read more about message engagement statuses
+// [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageBatchService) MarkAsInteracted(ctx context.Context, body MessageBatchMarkAsInteractedParams, opts ...option.RequestOption) (res *[]Message, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/messages/batch/interacted"
@@ -60,7 +65,8 @@ func (r *MessageBatchService) MarkAsInteracted(ctx context.Context, body Message
 	return
 }
 
-// Marks the given messages as read.
+// Marks the given messages as `read`. Read more about message engagement statuses
+// [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageBatchService) MarkAsRead(ctx context.Context, body MessageBatchMarkAsReadParams, opts ...option.RequestOption) (res *[]Message, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/messages/batch/read"
@@ -68,7 +74,9 @@ func (r *MessageBatchService) MarkAsRead(ctx context.Context, body MessageBatchM
 	return
 }
 
-// Marks the given messages as seen.
+// Marks the given messages as `seen`. This indicates that the user has viewed the
+// message in their feed or inbox. Read more about message engagement statuses
+// [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageBatchService) MarkAsSeen(ctx context.Context, body MessageBatchMarkAsSeenParams, opts ...option.RequestOption) (res *[]Message, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/messages/batch/seen"
@@ -76,7 +84,9 @@ func (r *MessageBatchService) MarkAsSeen(ctx context.Context, body MessageBatchM
 	return
 }
 
-// Marks the given messages as unread.
+// Marks the given messages as `unread`. This reverses the `read` state. Read more
+// about message engagement statuses
+// [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageBatchService) MarkAsUnread(ctx context.Context, body MessageBatchMarkAsUnreadParams, opts ...option.RequestOption) (res *[]Message, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/messages/batch/unread"
@@ -84,7 +94,9 @@ func (r *MessageBatchService) MarkAsUnread(ctx context.Context, body MessageBatc
 	return
 }
 
-// Marks the given messages as unseen.
+// Marks the given messages as `unseen`. This reverses the `seen` state. Read more
+// about message engagement statuses
+// [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageBatchService) MarkAsUnseen(ctx context.Context, body MessageBatchMarkAsUnseenParams, opts ...option.RequestOption) (res *[]Message, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/messages/batch/unseen"
@@ -92,7 +104,9 @@ func (r *MessageBatchService) MarkAsUnseen(ctx context.Context, body MessageBatc
 	return
 }
 
-// Marks the given messages as unarchived.
+// Marks the given messages as unarchived. This reverses the `archived` state.
+// Archived messages are hidden from the default message list in the feed but can
+// still be accessed and unarchived later.
 func (r *MessageBatchService) Unarchive(ctx context.Context, body MessageBatchUnarchiveParams, opts ...option.RequestOption) (res *[]Message, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/messages/batch/unarchived"

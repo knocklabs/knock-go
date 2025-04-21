@@ -65,8 +65,8 @@ func (r *MessageService) ListAutoPaging(ctx context.Context, query MessageListPa
 	return pagination.NewEntriesCursorAutoPager(r.List(ctx, query, opts...))
 }
 
-// Archives a message for the current user. Archived messages are hidden from the
-// default message list but can still be accessed and unarchived later.
+// Archives a message for the user. Archived messages are hidden from the default
+// message list in the feed but can still be accessed and unarchived later.
 func (r *MessageService) Archive(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -184,9 +184,11 @@ func (r *MessageService) ListEventsAutoPaging(ctx context.Context, messageID str
 	return pagination.NewEntriesCursorAutoPager(r.ListEvents(ctx, messageID, query, opts...))
 }
 
-// Marks a message as interacted with by the current user. This can include any
-// user action on the message, with optional metadata about the specific
-// interaction.
+// Marks a message as `interacted` with by the user. This can include any user
+// action on the message, with optional metadata about the specific interaction.
+// Cannot include more than 5 key-value pairs, must not contain nested data. Read
+// more about message engagement statuses
+// [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageService) MarkAsInteracted(ctx context.Context, messageID string, body MessageMarkAsInteractedParams, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -198,8 +200,9 @@ func (r *MessageService) MarkAsInteracted(ctx context.Context, messageID string,
 	return
 }
 
-// Marks a message as read for the current user. This indicates that the user has
-// read the message content.
+// Marks a message as `read`. This indicates that the user has read the message
+// content. Read more about message engagement statuses
+// [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageService) MarkAsRead(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -211,8 +214,9 @@ func (r *MessageService) MarkAsRead(ctx context.Context, messageID string, opts 
 	return
 }
 
-// Marks a message as seen for the current user. This indicates that the user has
-// viewed the message in their feed or inbox.
+// Marks a message as `seen`. This indicates that the user has viewed the message
+// in their feed or inbox. Read more about message engagement statuses
+// [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageService) MarkAsSeen(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -224,7 +228,9 @@ func (r *MessageService) MarkAsSeen(ctx context.Context, messageID string, opts 
 	return
 }
 
-// Marks a message as unread for the current user, reversing the read state.
+// Marks a message as `unread`. This reverses the `read` state. Read more about
+// message engagement statuses
+// [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageService) MarkAsUnread(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -236,7 +242,9 @@ func (r *MessageService) MarkAsUnread(ctx context.Context, messageID string, opt
 	return
 }
 
-// Marks a message as unseen for the current user, reversing the seen state.
+// Marks a message as `unseen`. This reverses the `seen` state. Read more about
+// message engagement statuses
+// [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageService) MarkAsUnseen(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -249,7 +257,7 @@ func (r *MessageService) MarkAsUnseen(ctx context.Context, messageID string, opt
 }
 
 // Removes a message from the archived state, making it visible in the default
-// message list again.
+// message list in the feed again.
 func (r *MessageService) Unarchive(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
 	opts = append(r.Options[:], opts...)
 	if messageID == "" {
@@ -317,7 +325,11 @@ type Message struct {
 	ChannelID string `json:"channel_id" format:"uuid"`
 	// Timestamp when the message was clicked.
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
-	// Data from the activities linked to the message.
+	// Data associated with the message’s workflow run. Includes the workflow trigger
+	// request’s `data` payload merged with any additional data returned by a
+	// [fetch function](/designing-workflows/fetch-function). For messages produced
+	// after a [batch step](/designing-workflows/batch-function), includes the payload
+	// `data` from the most-recent trigger request (the final `activity` in the batch).
 	Data map[string]interface{} `json:"data,nullable"`
 	// A list of engagement statuses.
 	EngagementStatuses []MessageEngagementStatus `json:"engagement_statuses"`
@@ -338,7 +350,7 @@ type Message struct {
 	ScheduledAt time.Time `json:"scheduled_at,nullable" format:"date-time"`
 	// Timestamp when the message was seen.
 	SeenAt time.Time `json:"seen_at,nullable" format:"date-time"`
-	// The source that triggered the message.
+	// The workflow that triggered the message.
 	Source MessageSource `json:"source"`
 	// The message delivery status.
 	Status MessageStatus `json:"status"`
@@ -408,14 +420,14 @@ func (r MessageEngagementStatus) IsKnown() bool {
 	return false
 }
 
-// The source that triggered the message.
+// The workflow that triggered the message.
 type MessageSource struct {
 	Typename string `json:"__typename,required"`
 	// The categories associated with the message.
 	Categories []string `json:"categories,required"`
-	// The key of the source that triggered the message.
+	// The key of the workflow that triggered the message.
 	Key string `json:"key,required"`
-	// The ID of the version of the source that triggered the message.
+	// The ID of the version of the workflow that triggered the message.
 	VersionID string            `json:"version_id,required" format:"uuid"`
 	JSON      messageSourceJSON `json:"-"`
 }
@@ -1348,29 +1360,29 @@ type MessageListParams struct {
 	Before param.Field[string] `query:"before"`
 	// Limits the results to items with the corresponding channel ID.
 	ChannelID param.Field[string] `query:"channel_id"`
-	// One or more engagement statuses. Limits results to messages with the given
-	// engagement status(es).
+	// Limits the results to messages with the given engagement status.
 	EngagementStatus param.Field[[]MessageListParamsEngagementStatus] `query:"engagement_status"`
 	// Limits the results to only the message ids given (max 50). Note: when using this
 	// option, the results will be subject to any other filters applied to the query.
 	MessageIDs param.Field[[]string] `query:"message_ids"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// Key of the source that triggered the message to limit results to.
+	// Limits the results to messages triggered by the given workflow key.
 	Source param.Field[string] `query:"source"`
-	// One or more delivery statuses. Limits results to messages with the given
-	// delivery status(es).
+	// Limits the results to messages with the given delivery status.
 	Status param.Field[[]MessageListParamsStatus] `query:"status"`
-	// Limits the results to items with the corresponding tenant, or where the tenant
-	// is empty.
+	// Limits the results to items with the corresponding tenant.
 	Tenant param.Field[string] `query:"tenant"`
-	// Limits the results to only items that were generated with the given data.
+	// Limits the results to only messages that were generated with the given data. See
+	// [trigger data filtering](/api-reference/overview/trigger-data-filtering) for
+	// more information.
 	TriggerData param.Field[string] `query:"trigger_data"`
-	// Limits the results to only items related to any of the provided categories.
+	// Limits the results to messages related to any of the provided categories.
 	WorkflowCategories param.Field[[]string] `query:"workflow_categories"`
 	// Limits the results to messages for a specific recipient's workflow run.
 	WorkflowRecipientRunID param.Field[string] `query:"workflow_recipient_run_id" format:"uuid"`
-	// Limits the results to messages triggered by the top-level workflow run ID.
+	// Limits the results to messages associated with the top-level workflow run ID
+	// returned by the workflow trigger request.
 	WorkflowRunID param.Field[string] `query:"workflow_run_id" format:"uuid"`
 }
 

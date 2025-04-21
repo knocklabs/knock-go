@@ -252,9 +252,9 @@ func (r userGuideMarkMessageAsSeenResponseJSON) RawJSON() string {
 }
 
 type UserGuideGetChannelParams struct {
-	// The data to filter guides by.
+	// The data (JSON encoded object) to use for targeting and rendering guides.
 	Data param.Field[string] `query:"data"`
-	// The tenant ID to filter guides by.
+	// The tenant ID to use for targeting and rendering guides.
 	Tenant param.Field[string] `query:"tenant"`
 	// The type of guides to filter by.
 	Type param.Field[string] `query:"type"`

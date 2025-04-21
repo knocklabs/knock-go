@@ -50,29 +50,27 @@ func (r *ChannelBulkService) UpdateMessageStatus(ctx context.Context, channelID 
 }
 
 type ChannelBulkUpdateMessageStatusParams struct {
-	// The archived status to filter messages by.
+	// Limits the results to messages with the given archived status.
 	Archived param.Field[ChannelBulkUpdateMessageStatusParamsArchived] `json:"archived"`
-	// The delivery status to filter messages by.
+	// Limits the results to messages with the given delivery status.
 	DeliveryStatus param.Field[ChannelBulkUpdateMessageStatusParamsDeliveryStatus] `json:"delivery_status"`
-	// The engagement status to filter messages by.
+	// Limits the results to messages with the given engagement status.
 	EngagementStatus param.Field[ChannelBulkUpdateMessageStatusParamsEngagementStatus] `json:"engagement_status"`
-	// Whether to include only messages that have a tenant or not.
-	HasTenant param.Field[bool] `json:"has_tenant"`
-	// The timestamp to filter messages by. Only include messages created after this
-	// timestamp.
+	// Limits the results to messages that have a tenant or not.
+	HasTenant param.Field[bool]      `json:"has_tenant"`
 	NewerThan param.Field[time.Time] `json:"newer_than" format:"date-time"`
-	// The timestamp to filter messages by. Only include messages created before this
-	// timestamp.
 	OlderThan param.Field[time.Time] `json:"older_than" format:"date-time"`
-	// The recipient GIDs to filter messages by.
+	// Limits the results to messages with the given recipient GIDs.
 	RecipientGids param.Field[[]string] `json:"recipient_gids"`
-	// The recipient IDs to filter messages by.
+	// Limits the results to messages with the given recipient IDs.
 	RecipientIDs param.Field[[]string] `json:"recipient_ids"`
-	// The tenant IDs to filter messages by.
+	// Limits the results to messages with the given tenant IDs.
 	Tenants param.Field[[]string] `json:"tenants"`
-	// The trigger data to filter messages by. Must be a valid JSON object.
+	// Limits the results to only messages that were generated with the given data. See
+	// [trigger data filtering](/api-reference/overview/trigger-data-filtering) for
+	// more information.
 	TriggerData param.Field[string] `json:"trigger_data"`
-	// The workflow keys to filter messages by.
+	// Limits the results to messages with the given workflow keys.
 	Workflows param.Field[[]string] `json:"workflows"`
 }
 
@@ -103,7 +101,7 @@ func (r ChannelBulkUpdateMessageStatusParamsAction) IsKnown() bool {
 	return false
 }
 
-// The archived status to filter messages by.
+// Limits the results to messages with the given archived status.
 type ChannelBulkUpdateMessageStatusParamsArchived string
 
 const (
@@ -120,7 +118,7 @@ func (r ChannelBulkUpdateMessageStatusParamsArchived) IsKnown() bool {
 	return false
 }
 
-// The delivery status to filter messages by.
+// Limits the results to messages with the given delivery status.
 type ChannelBulkUpdateMessageStatusParamsDeliveryStatus string
 
 const (
@@ -141,7 +139,7 @@ func (r ChannelBulkUpdateMessageStatusParamsDeliveryStatus) IsKnown() bool {
 	return false
 }
 
-// The engagement status to filter messages by.
+// Limits the results to messages with the given engagement status.
 type ChannelBulkUpdateMessageStatusParamsEngagementStatus string
 
 const (
