@@ -42,20 +42,17 @@ func (r *ScheduleBulkService) New(ctx context.Context, body ScheduleBulkNewParam
 	return
 }
 
-// MERYL A request to bulk create schedules. Accepts a list of schedules to create.
-// Each schedule must have a single recipient. The recipients do not have to be
-// unique.
-type BulkCreateSchedulesRequestParam struct {
+type ScheduleBulkNewParams struct {
 	// A list of schedules.
-	Schedules param.Field[[]BulkCreateSchedulesRequestScheduleParam] `json:"schedules,required"`
+	Schedules param.Field[[]ScheduleBulkNewParamsSchedule] `json:"schedules,required"`
 }
 
-func (r BulkCreateSchedulesRequestParam) MarshalJSON() (data []byte, err error) {
+func (r ScheduleBulkNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
 // A schedule represents a recurring workflow execution.
-type BulkCreateSchedulesRequestScheduleParam struct {
+type ScheduleBulkNewParamsSchedule struct {
 	// The key of the workflow.
 	Workflow param.Field[string] `json:"workflow,required"`
 	// Specifies a recipient in a request. This can either be a user identifier
@@ -78,17 +75,6 @@ type BulkCreateSchedulesRequestScheduleParam struct {
 	Tenant param.Field[InlineTenantRequestUnionParam] `json:"tenant"`
 }
 
-func (r BulkCreateSchedulesRequestScheduleParam) MarshalJSON() (data []byte, err error) {
+func (r ScheduleBulkNewParamsSchedule) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-type ScheduleBulkNewParams struct {
-	// MERYL A request to bulk create schedules. Accepts a list of schedules to create.
-	// Each schedule must have a single recipient. The recipients do not have to be
-	// unique.
-	BulkCreateSchedulesRequest BulkCreateSchedulesRequestParam `json:"bulk_create_schedules_request,required"`
-}
-
-func (r ScheduleBulkNewParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.BulkCreateSchedulesRequest)
 }

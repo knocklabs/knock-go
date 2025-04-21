@@ -1,10 +1,12 @@
-# Shared Params Types
+# Shared
 
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared#ConditionParam">ConditionParam</a>
+Params Types:
 
-# Shared Response Types
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#ConditionParam">ConditionParam</a>
 
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go/shared#Condition">Condition</a>
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#Condition">Condition</a>
 
 # Recipients
 
@@ -320,10 +322,6 @@ Methods:
 - <code title="delete /v1/schedules">client.Schedules.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#ScheduleService.Delete">Delete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#ScheduleDeleteParams">ScheduleDeleteParams</a>) ([]<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#Schedule">Schedule</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
 ## Bulk
-
-Params Types:
-
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#BulkCreateSchedulesRequestParam">BulkCreateSchedulesRequestParam</a>
 
 Methods:
 

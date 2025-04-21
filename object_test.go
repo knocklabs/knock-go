@@ -395,9 +395,9 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 							Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
 							SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
 						}),
-						Conditions: knock.F([]shared.ConditionParam{{
+						Conditions: knock.F([]knock.ConditionParam{{
 							Argument: knock.F("some_property"),
-							Operator: knock.F(shared.ConditionOperatorEqualTo),
+							Operator: knock.F(knock.ConditionOperatorEqualTo),
 							Variable: knock.F("recipient.property"),
 						}}),
 					},
@@ -420,9 +420,9 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 							Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
 							SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
 						}),
-						Conditions: knock.F([]shared.ConditionParam{{
+						Conditions: knock.F([]knock.ConditionParam{{
 							Argument: knock.F("some_property"),
-							Operator: knock.F(shared.ConditionOperatorEqualTo),
+							Operator: knock.F(knock.ConditionOperatorEqualTo),
 							Variable: knock.F("recipient.property"),
 						}}),
 					},
@@ -506,9 +506,9 @@ func TestObjectSetPreferencesWithOptionalParams(t *testing.T) {
 							Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
 							SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
 						}),
-						Conditions: knock.F([]shared.ConditionParam{{
+						Conditions: knock.F([]knock.ConditionParam{{
 							Argument: knock.F("some_property"),
-							Operator: knock.F(shared.ConditionOperatorEqualTo),
+							Operator: knock.F(knock.ConditionOperatorEqualTo),
 							Variable: knock.F("recipient.property"),
 						}}),
 					},
@@ -531,9 +531,9 @@ func TestObjectSetPreferencesWithOptionalParams(t *testing.T) {
 							Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
 							SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
 						}),
-						Conditions: knock.F([]shared.ConditionParam{{
+						Conditions: knock.F([]knock.ConditionParam{{
 							Argument: knock.F("some_property"),
-							Operator: knock.F(shared.ConditionOperatorEqualTo),
+							Operator: knock.F(knock.ConditionOperatorEqualTo),
 							Variable: knock.F("recipient.property"),
 						}}),
 					},

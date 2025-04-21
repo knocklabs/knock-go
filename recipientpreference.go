@@ -65,7 +65,7 @@ type InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettin
 	// Channel type preferences.
 	ChannelTypes param.Field[PreferenceSetChannelTypesParam] `json:"channel_types"`
 	// A list of conditions to apply to a channel type.
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions"`
+	Conditions param.Field[[]ConditionParam] `json:"conditions"`
 }
 
 func (r InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam) MarshalJSON() (data []byte, err error) {
@@ -89,7 +89,7 @@ type InlinePreferenceSetRequestItemWorkflowsPreferenceSetWorkflowCategorySetting
 	// Channel type preferences.
 	ChannelTypes param.Field[PreferenceSetChannelTypesParam] `json:"channel_types"`
 	// A list of conditions to apply to a channel type.
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions"`
+	Conditions param.Field[[]ConditionParam] `json:"conditions"`
 }
 
 func (r InlinePreferenceSetRequestItemWorkflowsPreferenceSetWorkflowCategorySettingObjectParam) MarshalJSON() (data []byte, err error) {
@@ -170,7 +170,7 @@ type PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject struct {
 	// Channel type preferences.
 	ChannelTypes PreferenceSetChannelTypes `json:"channel_types,nullable"`
 	// A list of conditions to apply to a channel type.
-	Conditions []shared.Condition                                                    `json:"conditions,nullable"`
+	Conditions []Condition                                                           `json:"conditions,nullable"`
 	JSON       preferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectJSON `json:"-"`
 }
 
@@ -228,7 +228,7 @@ type PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject struct {
 	// Channel type preferences.
 	ChannelTypes PreferenceSetChannelTypes `json:"channel_types,nullable"`
 	// A list of conditions to apply to a channel type.
-	Conditions []shared.Condition                                                   `json:"conditions,nullable"`
+	Conditions []Condition                                                          `json:"conditions,nullable"`
 	JSON       preferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectJSON `json:"-"`
 }
 
@@ -257,7 +257,7 @@ func (r PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject) Implem
 // conditions to apply.
 type PreferenceSetChannelTypeSetting struct {
 	// A list of conditions to apply to a channel type.
-	Conditions []shared.Condition                  `json:"conditions,required"`
+	Conditions []Condition                         `json:"conditions,required"`
 	JSON       preferenceSetChannelTypeSettingJSON `json:"-"`
 }
 
@@ -293,7 +293,7 @@ func (r PreferenceSetChannelTypeSetting) ImplementsPreferenceSetChannelTypesSMSU
 // conditions to apply.
 type PreferenceSetChannelTypeSettingParam struct {
 	// A list of conditions to apply to a channel type.
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
+	Conditions param.Field[[]ConditionParam] `json:"conditions,required"`
 }
 
 func (r PreferenceSetChannelTypeSettingParam) MarshalJSON() (data []byte, err error) {
@@ -599,7 +599,7 @@ type PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectPar
 	// Channel type preferences.
 	ChannelTypes param.Field[PreferenceSetChannelTypesParam] `json:"channel_types"`
 	// A list of conditions to apply to a channel type.
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions"`
+	Conditions param.Field[[]ConditionParam] `json:"conditions"`
 }
 
 func (r PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam) MarshalJSON() (data []byte, err error) {
@@ -623,7 +623,7 @@ type PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectPara
 	// Channel type preferences.
 	ChannelTypes param.Field[PreferenceSetChannelTypesParam] `json:"channel_types"`
 	// A list of conditions to apply to a channel type.
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions"`
+	Conditions param.Field[[]ConditionParam] `json:"conditions"`
 }
 
 func (r PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam) MarshalJSON() (data []byte, err error) {
