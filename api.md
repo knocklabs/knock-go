@@ -321,9 +321,13 @@ Methods:
 
 ## Bulk
 
+Params Types:
+
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#BulkCreateSchedulesRequestParam">BulkCreateSchedulesRequestParam</a>
+
 Methods:
 
-- <code title="post /v1/schedules/bulk/create">client.Schedules.Bulk.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#ScheduleBulkService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#BulkOperation">BulkOperation</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="post /v1/schedules/bulk/create">client.Schedules.Bulk.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#ScheduleBulkService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#ScheduleBulkNewParams">ScheduleBulkNewParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#BulkOperation">BulkOperation</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
 # Channels
 
