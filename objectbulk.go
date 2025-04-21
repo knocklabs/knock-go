@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"time"
 
 	"github.com/stainless-sdks/knock-go/internal/apijson"
 	"github.com/stainless-sdks/knock-go/internal/apiquery"
@@ -99,47 +98,13 @@ type ObjectBulkAddSubscriptionsParamsSubscription struct {
 	// Unique identifier for the subscription.
 	ID param.Field[string] `json:"id,required"`
 	// The recipients of the subscription.
-	Recipients param.Field[[]ObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion] `json:"recipients,required"`
+	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
 	// The custom properties associated with the recipients of the subscription.
 	Properties param.Field[map[string]interface{}] `json:"properties"`
 }
 
 func (r ObjectBulkAddSubscriptionsParamsSubscription) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-// Specifies a recipient in a request. This can either be a user identifier
-// (string), an inline user request (object), or an inline object request, which is
-// determined by the presence of a `collection` property.
-type ObjectBulkAddSubscriptionsParamsSubscriptionsRecipient struct {
-	// The ID for the user that you set when identifying them in Knock.
-	ID param.Field[string] `json:"id,required"`
-	// A request to set channel data for a type of channel inline.
-	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
-	// The collection this object belongs to.
-	Collection param.Field[string] `json:"collection"`
-	// The creation date of the user from your system.
-	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
-}
-
-func (r ObjectBulkAddSubscriptionsParamsSubscriptionsRecipient) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ObjectBulkAddSubscriptionsParamsSubscriptionsRecipient) ImplementsObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion() {
-}
-
-// Specifies a recipient in a request. This can either be a user identifier
-// (string), an inline user request (object), or an inline object request, which is
-// determined by the presence of a `collection` property.
-//
-// Satisfied by [shared.UnionString], [InlineIdentifyUserRequestParam],
-// [InlineObjectRequestParam],
-// [ObjectBulkAddSubscriptionsParamsSubscriptionsRecipient].
-type ObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion interface {
-	ImplementsObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion()
 }
 
 type ObjectBulkSetParams struct {

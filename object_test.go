@@ -92,7 +92,7 @@ func TestObjectAddSubscriptionsWithOptionalParams(t *testing.T) {
 		"collection",
 		"object_id",
 		knock.ObjectAddSubscriptionsParams{
-			Recipients: knock.F([]knock.ObjectAddSubscriptionsParamsRecipientUnion{shared.UnionString("user_1"), shared.UnionString("user_2")}),
+			Recipients: knock.F([]knock.RecipientRequestUnionParam{shared.UnionString("user_1"), shared.UnionString("user_2")}),
 			Properties: knock.F(map[string]interface{}{
 				"key": "bar",
 			}),
@@ -125,7 +125,7 @@ func TestObjectDeleteSubscriptions(t *testing.T) {
 		"collection",
 		"object_id",
 		knock.ObjectDeleteSubscriptionsParams{
-			Recipients: knock.F([]knock.ObjectDeleteSubscriptionsParamsRecipientUnion{knock.InlineIdentifyUserRequestParam{
+			Recipients: knock.F([]knock.RecipientRequestUnionParam{knock.InlineIdentifyUserRequestParam{
 				ID: knock.F("user_1"),
 				ChannelData: knock.F(knock.InlineChannelDataRequestParam{knock.InlineChannelDataRequestItemParam{
 					ChannelID: knock.F("97c5837d-c65c-4d54-aa39-080eeb81c69d"),

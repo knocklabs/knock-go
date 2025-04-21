@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stainless-sdks/knock-go/internal/apijson"
+	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/option"
 	"github.com/tidwall/gjson"
 )
@@ -119,4 +120,36 @@ func init() {
 			Type:       reflect.TypeOf(Object{}),
 		},
 	)
+}
+
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+type RecipientRequestParam struct {
+	// The ID for the user that you set when identifying them in Knock.
+	ID param.Field[string] `json:"id,required"`
+	// A request to set channel data for a type of channel inline.
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// The collection this object belongs to.
+	Collection param.Field[string] `json:"collection"`
+	// The creation date of the user from your system.
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set name
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+}
+
+func (r RecipientRequestParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r RecipientRequestParam) ImplementsRecipientRequestUnionParam() {}
+
+// Specifies a recipient in a request. This can either be a user identifier
+// (string), an inline user request (object), or an inline object request, which is
+// determined by the presence of a `collection` property.
+//
+// Satisfied by [shared.UnionString], [InlineIdentifyUserRequestParam],
+// [InlineObjectRequestParam], [RecipientRequestParam].
+type RecipientRequestUnionParam interface {
+	ImplementsRecipientRequestUnionParam()
 }

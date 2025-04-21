@@ -333,20 +333,7 @@ func (r InlineIdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r InlineIdentifyUserRequestParam) ImplementsObjectAddSubscriptionsParamsRecipientUnion() {}
-
-func (r InlineIdentifyUserRequestParam) ImplementsObjectDeleteSubscriptionsParamsRecipientUnion() {}
-
-func (r InlineIdentifyUserRequestParam) ImplementsObjectBulkAddSubscriptionsParamsSubscriptionsRecipientUnion() {
-}
-
-func (r InlineIdentifyUserRequestParam) ImplementsWorkflowCancelParamsRecipientUnion() {}
-
-func (r InlineIdentifyUserRequestParam) ImplementsWorkflowTriggerParamsRecipientUnion() {}
-
-func (r InlineIdentifyUserRequestParam) ImplementsWorkflowTriggerParamsActorUnion() {}
-
-func (r InlineIdentifyUserRequestParam) ImplementsScheduleUpdateParamsActorUnion() {}
+func (r InlineIdentifyUserRequestParam) ImplementsRecipientRequestUnionParam() {}
 
 // A user who can receive notifications in Knock. They are always referenced by
 // your internal identifier.
