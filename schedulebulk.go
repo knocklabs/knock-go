@@ -29,9 +29,9 @@ func NewScheduleBulkService(opts ...option.RequestOption) (r *ScheduleBulkServic
 	return
 }
 
-// Creates up to 1,000 schedules in a single asynchronous bulk operation. The list
-// of schedules can include inline-identifications for each recipient, tenant, and
-// actor specified on a schedule.
+// Bulk creates up to 1,000 schedules at a time. This endpoint also handles
+// [inline identifications](/managing-recipients/identifying-recipients#inline-identifying-recipients)
+// for the `actor`, `recipient`, and `tenant` fields.
 func (r *ScheduleBulkService) New(ctx context.Context, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/schedules/bulk/create"

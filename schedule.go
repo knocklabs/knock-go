@@ -273,10 +273,9 @@ func (r ScheduleNewParams) MarshalJSON() (data []byte, err error) {
 type ScheduleUpdateParams struct {
 	// A list of schedule IDs.
 	ScheduleIDs param.Field[[]string] `json:"schedule_ids,required" format:"uuid"`
-	// Specifies a recipient in a request. This can either be a user identifier
-	// (string), an inline user request (object), or an inline object request, which is
-	// determined by the presence of a `collection` property.
-	Actor param.Field[RecipientRequestUnionParam] `json:"actor"`
+	// A reference to a recipient, either a user identifier (string) or an object
+	// reference (ID, collection).
+	Actor param.Field[RecipientReferenceUnionParam] `json:"actor"`
 	// An optional map of data to pass into the workflow execution.
 	Data param.Field[map[string]interface{}] `json:"data"`
 	// The ending date and time for the schedule.
