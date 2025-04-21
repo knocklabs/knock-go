@@ -400,9 +400,9 @@ func TestObjectListSubscriptionsWithOptionalParams(t *testing.T) {
 			Before:     knock.F("before"),
 			Include:    knock.F([]knock.ObjectListSubscriptionsParamsInclude{knock.ObjectListSubscriptionsParamsIncludePreferences}),
 			Mode:       knock.F(knock.ObjectListSubscriptionsParamsModeRecipient),
-			Objects:    knock.F([]knock.ObjectListSubscriptionsParamsObjectUnion{shared.UnionString("user_123")}),
+			Objects:    knock.F([]knock.RecipientReferenceUnionParam{shared.UnionString("user_123")}),
 			PageSize:   knock.F(int64(0)),
-			Recipients: knock.F([]knock.ObjectListSubscriptionsParamsRecipientUnion{shared.UnionString("user_123")}),
+			Recipients: knock.F([]knock.RecipientReferenceUnionParam{shared.UnionString("user_123")}),
 		},
 	)
 	if err != nil {

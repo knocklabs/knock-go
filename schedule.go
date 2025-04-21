@@ -251,7 +251,7 @@ func (r ScheduleRepeatRuleParam) MarshalJSON() (data []byte, err error) {
 type ScheduleNewParams struct {
 	// The recipients to trigger the workflow for. Can inline identify users, objects,
 	// or use a list of user IDs. Limited to 1,000 recipients in a single trigger.
-	Recipients param.Field[[]ScheduleNewParamsRecipientUnion] `json:"recipients,required"`
+	Recipients param.Field[[]RecipientReferenceUnionParam] `json:"recipients,required"`
 	// The repeat rule for the schedule.
 	Repeats param.Field[[]ScheduleRepeatRuleParam] `json:"repeats,required"`
 	// The key of the workflow.
@@ -269,28 +269,6 @@ type ScheduleNewParams struct {
 func (r ScheduleNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
-
-// A reference to a recipient, either a user identifier (string) or an object
-// reference (ID, collection).
-//
-// Satisfied by [shared.UnionString], [ScheduleNewParamsRecipientsObjectReference].
-type ScheduleNewParamsRecipientUnion interface {
-	ImplementsScheduleNewParamsRecipientUnion()
-}
-
-// A reference to a recipient object.
-type ScheduleNewParamsRecipientsObjectReference struct {
-	// An identifier for the recipient object.
-	ID param.Field[string] `json:"id"`
-	// The collection the recipient object belongs to.
-	Collection param.Field[string] `json:"collection"`
-}
-
-func (r ScheduleNewParamsRecipientsObjectReference) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ScheduleNewParamsRecipientsObjectReference) ImplementsScheduleNewParamsRecipientUnion() {}
 
 type ScheduleUpdateParams struct {
 	// A list of schedule IDs.

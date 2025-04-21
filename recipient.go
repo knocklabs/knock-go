@@ -9,6 +9,7 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/apijson"
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/option"
+	"github.com/stainless-sdks/knock-go/shared"
 	"github.com/tidwall/gjson"
 )
 
@@ -121,6 +122,79 @@ func init() {
 		},
 	)
 }
+
+// A reference to a recipient, either a user identifier (string) or an object
+// reference (ID, collection).
+//
+// Union satisfied by [shared.UnionString] or [RecipientReferenceObjectReference].
+type RecipientReferenceUnion interface {
+	ImplementsRecipientReferenceUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*RecipientReferenceUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(shared.UnionString("")),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(RecipientReferenceObjectReference{}),
+		},
+	)
+}
+
+// A reference to a recipient object.
+type RecipientReferenceObjectReference struct {
+	// An identifier for the recipient object.
+	ID string `json:"id"`
+	// The collection the recipient object belongs to.
+	Collection string                                `json:"collection"`
+	JSON       recipientReferenceObjectReferenceJSON `json:"-"`
+}
+
+// recipientReferenceObjectReferenceJSON contains the JSON metadata for the struct
+// [RecipientReferenceObjectReference]
+type recipientReferenceObjectReferenceJSON struct {
+	ID          apijson.Field
+	Collection  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *RecipientReferenceObjectReference) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r recipientReferenceObjectReferenceJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r RecipientReferenceObjectReference) ImplementsRecipientReferenceUnion() {}
+
+// A reference to a recipient, either a user identifier (string) or an object
+// reference (ID, collection).
+//
+// Satisfied by [shared.UnionString], [RecipientReferenceObjectReferenceParam].
+type RecipientReferenceUnionParam interface {
+	ImplementsRecipientReferenceUnionParam()
+}
+
+// A reference to a recipient object.
+type RecipientReferenceObjectReferenceParam struct {
+	// An identifier for the recipient object.
+	ID param.Field[string] `json:"id"`
+	// The collection the recipient object belongs to.
+	Collection param.Field[string] `json:"collection"`
+}
+
+func (r RecipientReferenceObjectReferenceParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r RecipientReferenceObjectReferenceParam) ImplementsRecipientReferenceUnionParam() {}
 
 // Specifies a recipient in a request. This can either be a user identifier
 // (string), an inline user request (object), or an inline object request, which is

@@ -29,7 +29,7 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Schedules.New(context.TODO(), knock.ScheduleNewParams{
-		Recipients: knock.F([]knock.ScheduleNewParamsRecipientUnion{shared.UnionString("user_123")}),
+		Recipients: knock.F([]knock.RecipientReferenceUnionParam{shared.UnionString("user_123")}),
 		Repeats: knock.F([]knock.ScheduleRepeatRuleParam{{
 			Typename:   knock.F("ScheduleRepeat"),
 			Frequency:  knock.F(knock.ScheduleRepeatRuleFrequencyDaily),

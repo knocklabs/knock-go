@@ -552,7 +552,7 @@ type UserListSubscriptionsParams struct {
 	// Associated resources to include in the response.
 	Include param.Field[[]UserListSubscriptionsParamsInclude] `query:"include"`
 	// Only return subscriptions for the given recipients.
-	Objects param.Field[[]UserListSubscriptionsParamsObjectUnion] `query:"objects"`
+	Objects param.Field[[]RecipientReferenceUnionParam] `query:"objects"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
 }
@@ -578,35 +578,6 @@ func (r UserListSubscriptionsParamsInclude) IsKnown() bool {
 		return true
 	}
 	return false
-}
-
-// A reference to a recipient, either a user identifier (string) or an object
-// reference (ID, collection).
-//
-// Satisfied by [shared.UnionString],
-// [UserListSubscriptionsParamsObjectsObjectReference].
-type UserListSubscriptionsParamsObjectUnion interface {
-	ImplementsUserListSubscriptionsParamsObjectUnion()
-}
-
-// A reference to a recipient object.
-type UserListSubscriptionsParamsObjectsObjectReference struct {
-	// An identifier for the recipient object.
-	ID param.Field[string] `query:"id"`
-	// The collection the recipient object belongs to.
-	Collection param.Field[string] `query:"collection"`
-}
-
-// URLQuery serializes [UserListSubscriptionsParamsObjectsObjectReference]'s query
-// parameters as `url.Values`.
-func (r UserListSubscriptionsParamsObjectsObjectReference) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-func (r UserListSubscriptionsParamsObjectsObjectReference) ImplementsUserListSubscriptionsParamsObjectUnion() {
 }
 
 type UserMergeParams struct {
