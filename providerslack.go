@@ -76,7 +76,7 @@ func (r *ProviderSlackService) ListChannelsAutoPaging(ctx context.Context, chann
 }
 
 // Revoke access for a Slack channel.
-func (r *ProviderSlackService) RevokeAccess(ctx context.Context, channelID string, body ProviderSlackRevokeAccessParams, opts ...option.RequestOption) (res *string, err error) {
+func (r *ProviderSlackService) RevokeAccess(ctx context.Context, channelID string, body ProviderSlackRevokeAccessParams, opts ...option.RequestOption) (res *ProviderSlackRevokeAccessResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
@@ -168,6 +168,29 @@ func (r *ProviderSlackListChannelsResponse) UnmarshalJSON(data []byte) (err erro
 }
 
 func (r providerSlackListChannelsResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// A response indicating the access was revoked.
+type ProviderSlackRevokeAccessResponse struct {
+	// OK response.
+	Ok   string                                `json:"ok"`
+	JSON providerSlackRevokeAccessResponseJSON `json:"-"`
+}
+
+// providerSlackRevokeAccessResponseJSON contains the JSON metadata for the struct
+// [ProviderSlackRevokeAccessResponse]
+type providerSlackRevokeAccessResponseJSON struct {
+	Ok          apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProviderSlackRevokeAccessResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r providerSlackRevokeAccessResponseJSON) RawJSON() string {
 	return r.raw
 }
 

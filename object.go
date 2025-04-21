@@ -88,7 +88,7 @@ func (r *ObjectService) Delete(ctx context.Context, collection string, objectID 
 // Add subscriptions for an object. If a subscription already exists, it will be
 // updated. This endpoint also handles
 // [inline identifications](/managing-recipients/identifying-recipients#inline-identifying-recipients)
-// for the `recipient`
+// for the `recipient`.
 func (r *ObjectService) AddSubscriptions(ctx context.Context, collection string, objectID string, body ObjectAddSubscriptionsParams, opts ...option.RequestOption) (res *[]Subscription, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
