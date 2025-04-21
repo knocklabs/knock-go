@@ -71,10 +71,21 @@ type ScheduleBulkNewParamsSchedule struct {
 	Repeats param.Field[[]ScheduleRepeatRuleParam] `json:"repeats"`
 	// The starting date and time for the schedule.
 	ScheduledAt param.Field[time.Time] `json:"scheduled_at" format:"date-time"`
-	// An request to set a tenant inline.
-	Tenant param.Field[InlineTenantRequestUnionParam] `json:"tenant"`
+	// The tenant to trigger the workflow for. Triggering with a tenant will use any
+	// tenant-level overrides associated with the tenant object, and all messages
+	// produced from workflow runs will be tagged with the tenant.
+	Tenant param.Field[ScheduleBulkNewParamsSchedulesTenantUnion] `json:"tenant"`
 }
 
 func (r ScheduleBulkNewParamsSchedule) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// The tenant to trigger the workflow for. Triggering with a tenant will use any
+// tenant-level overrides associated with the tenant object, and all messages
+// produced from workflow runs will be tagged with the tenant.
+//
+// Satisfied by [shared.UnionString], [TenantRequestParam].
+type ScheduleBulkNewParamsSchedulesTenantUnion interface {
+	ImplementsScheduleBulkNewParamsSchedulesTenantUnion()
 }

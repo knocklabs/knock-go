@@ -75,7 +75,7 @@ func (r *ProviderMsTeamService) ListTeams(ctx context.Context, channelID string,
 }
 
 // Remove a Microsoft Entra tenant ID from a Microsoft Teams tenant object.
-func (r *ProviderMsTeamService) RevokeAccess(ctx context.Context, channelID string, body ProviderMsTeamRevokeAccessParams, opts ...option.RequestOption) (res *string, err error) {
+func (r *ProviderMsTeamService) RevokeAccess(ctx context.Context, channelID string, body ProviderMsTeamRevokeAccessParams, opts ...option.RequestOption) (res *ProviderMsTeamRevokeAccessResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
@@ -249,6 +249,29 @@ func (r *ProviderMsTeamListTeamsResponseMsTeamsTeam) UnmarshalJSON(data []byte) 
 }
 
 func (r providerMsTeamListTeamsResponseMsTeamsTeamJSON) RawJSON() string {
+	return r.raw
+}
+
+// A response indicating the operation was successful.
+type ProviderMsTeamRevokeAccessResponse struct {
+	// OK response.
+	Ok   string                                 `json:"ok"`
+	JSON providerMsTeamRevokeAccessResponseJSON `json:"-"`
+}
+
+// providerMsTeamRevokeAccessResponseJSON contains the JSON metadata for the struct
+// [ProviderMsTeamRevokeAccessResponse]
+type providerMsTeamRevokeAccessResponseJSON struct {
+	Ok          apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProviderMsTeamRevokeAccessResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r providerMsTeamRevokeAccessResponseJSON) RawJSON() string {
 	return r.raw
 }
 

@@ -151,6 +151,8 @@ func (r TenantRequestParam) MarshalJSON() (data []byte, err error) {
 
 func (r TenantRequestParam) ImplementsInlineTenantRequestUnionParam() {}
 
+func (r TenantRequestParam) ImplementsScheduleBulkNewParamsSchedulesTenantUnion() {}
+
 // The settings for the tenant. Includes branding and preference set.
 type TenantRequestSettingsParam struct {
 	// The branding for the tenant.

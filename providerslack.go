@@ -171,7 +171,7 @@ func (r providerSlackListChannelsResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-// A response indicating the access was revoked.
+// A response indicating the operation was successful.
 type ProviderSlackRevokeAccessResponse struct {
 	// OK response.
 	Ok   string                                `json:"ok"`
