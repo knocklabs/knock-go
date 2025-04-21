@@ -27,7 +27,7 @@ func TestMessageBatchArchive(t *testing.T) {
 		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Messages.Batch.Archive(context.TODO(), knock.MessageBatchArchiveParams{
-		MessageIDs: knock.F([]string{"11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"}),
+		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -105,7 +105,7 @@ func TestMessageBatchMarkAsRead(t *testing.T) {
 		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Messages.Batch.MarkAsRead(context.TODO(), knock.MessageBatchMarkAsReadParams{
-		MessageIDs: knock.F([]string{"11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"}),
+		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -130,7 +130,7 @@ func TestMessageBatchMarkAsSeen(t *testing.T) {
 		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Messages.Batch.MarkAsSeen(context.TODO(), knock.MessageBatchMarkAsSeenParams{
-		MessageIDs: knock.F([]string{"11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"}),
+		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -155,7 +155,7 @@ func TestMessageBatchMarkAsUnread(t *testing.T) {
 		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Messages.Batch.MarkAsUnread(context.TODO(), knock.MessageBatchMarkAsUnreadParams{
-		MessageIDs: knock.F([]string{"11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"}),
+		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -180,7 +180,7 @@ func TestMessageBatchMarkAsUnseen(t *testing.T) {
 		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Messages.Batch.MarkAsUnseen(context.TODO(), knock.MessageBatchMarkAsUnseenParams{
-		MessageIDs: knock.F([]string{"11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"}),
+		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -205,7 +205,7 @@ func TestMessageBatchUnarchive(t *testing.T) {
 		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Messages.Batch.Unarchive(context.TODO(), knock.MessageBatchUnarchiveParams{
-		MessageIDs: knock.F([]string{"11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"}),
+		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
 	})
 	if err != nil {
 		var apierr *knock.Error
