@@ -38,7 +38,10 @@ func NewScheduleService(opts ...option.RequestOption) (r *ScheduleService) {
 }
 
 // Creates one or more schedules for a workflow with the specified recipients,
-// timing, and data. Schedules can be one-time or recurring.
+// timing, and data. Schedules can be one-time or recurring. This endpoint also
+// handles
+// [inline identifications](/managing-recipients/identifying-recipients#inline-identifying-recipients)
+// for the `actor`, `recipient`, and `tenant` fields.
 func (r *ScheduleService) New(ctx context.Context, body ScheduleNewParams, opts ...option.RequestOption) (res *[]Schedule, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/schedules"
@@ -48,6 +51,9 @@ func (r *ScheduleService) New(ctx context.Context, body ScheduleNewParams, opts 
 
 // Updates one or more existing schedules with new timing, data, or other
 // properties. All specified schedule IDs will be updated with the same values.
+// This endpoint also handles
+// [inline identifications](/managing-recipients/identifying-recipients#inline-identifying-recipients)
+// for the `actor`, `recipient`, and `tenant` fields.
 func (r *ScheduleService) Update(ctx context.Context, body ScheduleUpdateParams, opts ...option.RequestOption) (res *[]Schedule, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/schedules"
@@ -251,7 +257,7 @@ func (r ScheduleRepeatRuleParam) MarshalJSON() (data []byte, err error) {
 type ScheduleNewParams struct {
 	// The recipients to trigger the workflow for. Can inline identify users, objects,
 	// or use a list of user IDs. Limited to 1,000 recipients in a single trigger.
-	Recipients param.Field[[]RecipientReferenceUnionParam] `json:"recipients,required"`
+	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
 	// The repeat rule for the schedule.
 	Repeats param.Field[[]ScheduleRepeatRuleParam] `json:"repeats,required"`
 	// The key of the workflow.
