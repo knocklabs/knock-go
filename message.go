@@ -317,11 +317,12 @@ type Message struct {
 	// The typename of the schema.
 	Typename string `json:"__typename"`
 	// One or more actors that are associated with this message. Note: this is a list
-	// that can contain up to 10 actors if the message is produced from a batch.
+	// that can contain up to 10 actors if the message is produced from a
+	// [batch](/designing-workflows/batch-function).
 	Actors []RecipientReferenceUnion `json:"actors"`
 	// Timestamp when the message was archived.
 	ArchivedAt time.Time `json:"archived_at,nullable" format:"date-time"`
-	// The id for the channel the message was sent through.
+	// The ID for the channel the message was sent through.
 	ChannelID string `json:"channel_id" format:"uuid"`
 	// Timestamp when the message was clicked.
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
@@ -354,7 +355,8 @@ type Message struct {
 	Source MessageSource `json:"source"`
 	// The message delivery status.
 	Status MessageStatus `json:"status"`
-	// The id for the tenant set for the message.
+	// The ID of the `tenant` associated with the message. Only present when a `tenant`
+	// is provided on a workflow trigger request.
 	Tenant string `json:"tenant,nullable"`
 	// The timestamp when the resource was last updated.
 	UpdatedAt time.Time `json:"updated_at" format:"date-time"`
