@@ -94,7 +94,7 @@ type WorkflowCancelParams struct {
 	CancellationKey param.Field[string] `json:"cancellation_key,required"`
 	// A list of recipients to cancel the notification for. If omitted, cancels for all
 	// recipients associated with the cancellation key.
-	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients"`
+	Recipients param.Field[[]RecipientReferenceUnionParam] `json:"recipients"`
 }
 
 func (r WorkflowCancelParams) MarshalJSON() (data []byte, err error) {

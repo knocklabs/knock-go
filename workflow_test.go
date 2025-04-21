@@ -32,7 +32,7 @@ func TestWorkflowCancelWithOptionalParams(t *testing.T) {
 		"key",
 		knock.WorkflowCancelParams{
 			CancellationKey: knock.F("cancel-workflow-123"),
-			Recipients:      knock.F([]knock.RecipientRequestUnionParam{shared.UnionString("jhammond")}),
+			Recipients:      knock.F([]knock.RecipientReferenceUnionParam{shared.UnionString("jhammond")}),
 		},
 	)
 	if err != nil {

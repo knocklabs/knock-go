@@ -86,7 +86,7 @@ func (r *ObjectService) Delete(ctx context.Context, collection string, objectID 
 }
 
 // Add subscriptions for an object. If a subscription already exists, it will be
-// updated.
+// updated. Can accept inline-identifications for recipients.
 func (r *ObjectService) AddSubscriptions(ctx context.Context, collection string, objectID string, body ObjectAddSubscriptionsParams, opts ...option.RequestOption) (res *[]Subscription, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
@@ -258,7 +258,7 @@ func (r *ObjectService) ListSchedulesAutoPaging(ctx context.Context, collection 
 	return pagination.NewEntriesCursorAutoPager(r.ListSchedules(ctx, collection, objectID, query, opts...))
 }
 
-// List subscriptions for an object. Eitherlist the recipients that subscribe to
+// List subscriptions for an object. Either list the recipients that subscribe to
 // the provided object, or list the objects that the provided object is subscribed
 // to. Determined by the `mode` query parameter.
 func (r *ObjectService) ListSubscriptions(ctx context.Context, collection string, objectID string, query ObjectListSubscriptionsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Subscription], err error) {
@@ -286,7 +286,7 @@ func (r *ObjectService) ListSubscriptions(ctx context.Context, collection string
 	return res, nil
 }
 
-// List subscriptions for an object. Eitherlist the recipients that subscribe to
+// List subscriptions for an object. Either list the recipients that subscribe to
 // the provided object, or list the objects that the provided object is subscribed
 // to. Determined by the `mode` query parameter.
 func (r *ObjectService) ListSubscriptionsAutoPaging(ctx context.Context, collection string, objectID string, query ObjectListSubscriptionsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Subscription] {
@@ -475,7 +475,7 @@ func (r ObjectAddSubscriptionsParams) MarshalJSON() (data []byte, err error) {
 
 type ObjectDeleteSubscriptionsParams struct {
 	// The recipients of the subscription.
-	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
+	Recipients param.Field[[]RecipientReferenceUnionParam] `json:"recipients,required"`
 }
 
 func (r ObjectDeleteSubscriptionsParams) MarshalJSON() (data []byte, err error) {
