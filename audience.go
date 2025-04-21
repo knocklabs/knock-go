@@ -110,8 +110,8 @@ type AudienceListMembersResponse struct {
 	// A list of audience members.
 	Entries []AudienceMember `json:"entries,required"`
 	// Pagination information for a list of resources.
-	PageInfo AudienceListMembersResponsePageInfo `json:"page_info,required"`
-	JSON     audienceListMembersResponseJSON     `json:"-"`
+	PageInfo PageInfo                        `json:"page_info,required"`
+	JSON     audienceListMembersResponseJSON `json:"-"`
 }
 
 // audienceListMembersResponseJSON contains the JSON metadata for the struct
@@ -128,38 +128,6 @@ func (r *AudienceListMembersResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r audienceListMembersResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// Pagination information for a list of resources.
-type AudienceListMembersResponsePageInfo struct {
-	// The typename of the schema.
-	Typename string `json:"__typename,required"`
-	// The number of items per page.
-	PageSize int64 `json:"page_size,required"`
-	// The cursor to fetch entries after.
-	After string `json:"after,nullable"`
-	// The cursor to fetch entries before.
-	Before string                                  `json:"before,nullable"`
-	JSON   audienceListMembersResponsePageInfoJSON `json:"-"`
-}
-
-// audienceListMembersResponsePageInfoJSON contains the JSON metadata for the
-// struct [AudienceListMembersResponsePageInfo]
-type audienceListMembersResponsePageInfoJSON struct {
-	Typename    apijson.Field
-	PageSize    apijson.Field
-	After       apijson.Field
-	Before      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *AudienceListMembersResponsePageInfo) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r audienceListMembersResponsePageInfoJSON) RawJSON() string {
 	return r.raw
 }
 

@@ -100,3 +100,34 @@ type ConditionParam struct {
 func (r ConditionParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
+
+// Pagination information for a list of resources.
+type PageInfo struct {
+	// The typename of the schema.
+	Typename string `json:"__typename,required"`
+	// The number of items per page.
+	PageSize int64 `json:"page_size,required"`
+	// The cursor to fetch entries after.
+	After string `json:"after,nullable"`
+	// The cursor to fetch entries before.
+	Before string       `json:"before,nullable"`
+	JSON   pageInfoJSON `json:"-"`
+}
+
+// pageInfoJSON contains the JSON metadata for the struct [PageInfo]
+type pageInfoJSON struct {
+	Typename    apijson.Field
+	PageSize    apijson.Field
+	After       apijson.Field
+	Before      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PageInfo) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r pageInfoJSON) RawJSON() string {
+	return r.raw
+}

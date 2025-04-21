@@ -7,6 +7,7 @@ Params Types:
 Response Types:
 
 - <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#Condition">Condition</a>
+- <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#PageInfo">PageInfo</a>
 
 # Recipients
 
