@@ -340,6 +340,10 @@ Methods:
 
 ## Bulk
 
+Methods:
+
+- <code title="post /v1/channels/{channel_id}/messages/bulk/{status}">client.Channels.Bulk.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#ChannelBulkService.UpdateMessageStatus">UpdateMessageStatus</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, channelID <a href="https://pkg.go.dev/builtin#string">string</a>, status <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#ChannelBulkUpdateMessageStatusParamsStatus">ChannelBulkUpdateMessageStatusParamsStatus</a>, body <a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#ChannelBulkUpdateMessageStatusParams">ChannelBulkUpdateMessageStatusParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/knock-go#BulkOperation">BulkOperation</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
 # Audiences
 
 Response Types:
