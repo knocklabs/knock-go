@@ -60,10 +60,10 @@ func (r channelDataJSON) RawJSON() string {
 
 // Channel data for a given channel type.
 type ChannelDataData struct {
+	// The typename of the schema.
+	Typename ChannelDataDataTypename `json:"__typename,required"`
 	// This field can have the runtime type of [SlackChannelDataToken].
 	Token interface{} `json:"token"`
-	// The typename of the schema.
-	Typename ChannelDataDataTypename `json:"__typename"`
 	// This field can have the runtime type of [[]SlackChannelDataConnection],
 	// [[]MsTeamsChannelDataConnection], [[]DiscordChannelDataConnection].
 	Connections interface{} `json:"connections"`
@@ -79,8 +79,8 @@ type ChannelDataData struct {
 
 // channelDataDataJSON contains the JSON metadata for the struct [ChannelDataData]
 type channelDataDataJSON struct {
-	Token           apijson.Field
 	Typename        apijson.Field
+	Token           apijson.Field
 	Connections     apijson.Field
 	MsTeamsTenantID apijson.Field
 	PlayerIDs       apijson.Field
@@ -122,26 +122,31 @@ type ChannelDataDataUnion interface {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*ChannelDataDataUnion)(nil)).Elem(),
-		"",
+		"__typename",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PushChannelData{}),
+			TypeFilter:         gjson.JSON,
+			Type:               reflect.TypeOf(PushChannelData{}),
+			DiscriminatorValue: "PushChannelData",
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SlackChannelData{}),
+			TypeFilter:         gjson.JSON,
+			Type:               reflect.TypeOf(SlackChannelData{}),
+			DiscriminatorValue: "SlackChannelData",
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MsTeamsChannelData{}),
+			TypeFilter:         gjson.JSON,
+			Type:               reflect.TypeOf(MsTeamsChannelData{}),
+			DiscriminatorValue: "MsTeamsChannelData",
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(DiscordChannelData{}),
+			TypeFilter:         gjson.JSON,
+			Type:               reflect.TypeOf(DiscordChannelData{}),
+			DiscriminatorValue: "DiscordChannelData",
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(OneSignalChannelData{}),
+			TypeFilter:         gjson.JSON,
+			Type:               reflect.TypeOf(OneSignalChannelData{}),
+			DiscriminatorValue: "OneSignalChannelData",
 		},
 	)
 }
@@ -150,12 +155,16 @@ func init() {
 type ChannelDataDataTypename string
 
 const (
-	ChannelDataDataTypenamePushChannelData ChannelDataDataTypename = "PushChannelData"
+	ChannelDataDataTypenamePushChannelData      ChannelDataDataTypename = "PushChannelData"
+	ChannelDataDataTypenameSlackChannelData     ChannelDataDataTypename = "SlackChannelData"
+	ChannelDataDataTypenameMsTeamsChannelData   ChannelDataDataTypename = "MsTeamsChannelData"
+	ChannelDataDataTypenameDiscordChannelData   ChannelDataDataTypename = "DiscordChannelData"
+	ChannelDataDataTypenameOneSignalChannelData ChannelDataDataTypename = "OneSignalChannelData"
 )
 
 func (r ChannelDataDataTypename) IsKnown() bool {
 	switch r {
-	case ChannelDataDataTypenamePushChannelData:
+	case ChannelDataDataTypenamePushChannelData, ChannelDataDataTypenameSlackChannelData, ChannelDataDataTypenameMsTeamsChannelData, ChannelDataDataTypenameDiscordChannelData, ChannelDataDataTypenameOneSignalChannelData:
 		return true
 	}
 	return false
@@ -173,9 +182,9 @@ func (r ChannelDataRequestParam) MarshalJSON() (data []byte, err error) {
 
 // Channel data for a given channel type.
 type ChannelDataRequestDataParam struct {
-	Token param.Field[interface{}] `json:"token"`
 	// The typename of the schema.
-	Typename    param.Field[ChannelDataRequestDataTypename] `json:"__typename"`
+	Typename    param.Field[ChannelDataRequestDataTypename] `json:"__typename,required"`
+	Token       param.Field[interface{}]                    `json:"token"`
 	Connections param.Field[interface{}]                    `json:"connections"`
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
@@ -202,12 +211,16 @@ type ChannelDataRequestDataUnionParam interface {
 type ChannelDataRequestDataTypename string
 
 const (
-	ChannelDataRequestDataTypenamePushChannelData ChannelDataRequestDataTypename = "PushChannelData"
+	ChannelDataRequestDataTypenamePushChannelData      ChannelDataRequestDataTypename = "PushChannelData"
+	ChannelDataRequestDataTypenameOneSignalChannelData ChannelDataRequestDataTypename = "OneSignalChannelData"
+	ChannelDataRequestDataTypenameSlackChannelData     ChannelDataRequestDataTypename = "SlackChannelData"
+	ChannelDataRequestDataTypenameMsTeamsChannelData   ChannelDataRequestDataTypename = "MsTeamsChannelData"
+	ChannelDataRequestDataTypenameDiscordChannelData   ChannelDataRequestDataTypename = "DiscordChannelData"
 )
 
 func (r ChannelDataRequestDataTypename) IsKnown() bool {
 	switch r {
-	case ChannelDataRequestDataTypenamePushChannelData:
+	case ChannelDataRequestDataTypenamePushChannelData, ChannelDataRequestDataTypenameOneSignalChannelData, ChannelDataRequestDataTypenameSlackChannelData, ChannelDataRequestDataTypenameMsTeamsChannelData, ChannelDataRequestDataTypenameDiscordChannelData:
 		return true
 	}
 	return false
@@ -215,6 +228,8 @@ func (r ChannelDataRequestDataTypename) IsKnown() bool {
 
 // Discord channel data.
 type DiscordChannelData struct {
+	// The typename of the schema.
+	Typename DiscordChannelData_Typename `json:"__typename,required"`
 	// List of Discord channel connections.
 	Connections []DiscordChannelDataConnection `json:"connections,required"`
 	JSON        discordChannelDataJSON         `json:"-"`
@@ -223,6 +238,7 @@ type DiscordChannelData struct {
 // discordChannelDataJSON contains the JSON metadata for the struct
 // [DiscordChannelData]
 type discordChannelDataJSON struct {
+	Typename    apijson.Field
 	Connections apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -237,6 +253,21 @@ func (r discordChannelDataJSON) RawJSON() string {
 }
 
 func (r DiscordChannelData) implementsChannelDataData() {}
+
+// The typename of the schema.
+type DiscordChannelData_Typename string
+
+const (
+	DiscordChannelData_TypenameDiscordChannelData DiscordChannelData_Typename = "DiscordChannelData"
+)
+
+func (r DiscordChannelData_Typename) IsKnown() bool {
+	switch r {
+	case DiscordChannelData_TypenameDiscordChannelData:
+		return true
+	}
+	return false
+}
 
 // Discord channel connection, either a channel connection or an incoming webhook
 // connection.
@@ -385,6 +416,8 @@ func (r discordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWeb
 
 // Discord channel data.
 type DiscordChannelDataParam struct {
+	// The typename of the schema.
+	Typename param.Field[DiscordChannelData_Typename] `json:"__typename,required"`
 	// List of Discord channel connections.
 	Connections param.Field[[]DiscordChannelDataConnectionsUnionParam] `json:"connections,required"`
 }
@@ -473,9 +506,9 @@ func (r InlineChannelDataRequestItemParam) MarshalJSON() (data []byte, err error
 
 // Channel data for a given channel type.
 type InlineChannelDataRequestItemDataParam struct {
-	Token param.Field[interface{}] `json:"token"`
 	// The typename of the schema.
-	Typename    param.Field[InlineChannelDataRequestItemDataTypename] `json:"__typename"`
+	Typename    param.Field[InlineChannelDataRequestItemDataTypename] `json:"__typename,required"`
+	Token       param.Field[interface{}]                              `json:"token"`
 	Connections param.Field[interface{}]                              `json:"connections"`
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
@@ -503,12 +536,16 @@ type InlineChannelDataRequestItemDataUnionParam interface {
 type InlineChannelDataRequestItemDataTypename string
 
 const (
-	InlineChannelDataRequestItemDataTypenamePushChannelData InlineChannelDataRequestItemDataTypename = "PushChannelData"
+	InlineChannelDataRequestItemDataTypenamePushChannelData      InlineChannelDataRequestItemDataTypename = "PushChannelData"
+	InlineChannelDataRequestItemDataTypenameOneSignalChannelData InlineChannelDataRequestItemDataTypename = "OneSignalChannelData"
+	InlineChannelDataRequestItemDataTypenameSlackChannelData     InlineChannelDataRequestItemDataTypename = "SlackChannelData"
+	InlineChannelDataRequestItemDataTypenameMsTeamsChannelData   InlineChannelDataRequestItemDataTypename = "MsTeamsChannelData"
+	InlineChannelDataRequestItemDataTypenameDiscordChannelData   InlineChannelDataRequestItemDataTypename = "DiscordChannelData"
 )
 
 func (r InlineChannelDataRequestItemDataTypename) IsKnown() bool {
 	switch r {
-	case InlineChannelDataRequestItemDataTypenamePushChannelData:
+	case InlineChannelDataRequestItemDataTypenamePushChannelData, InlineChannelDataRequestItemDataTypenameOneSignalChannelData, InlineChannelDataRequestItemDataTypenameSlackChannelData, InlineChannelDataRequestItemDataTypenameMsTeamsChannelData, InlineChannelDataRequestItemDataTypenameDiscordChannelData:
 		return true
 	}
 	return false
@@ -516,6 +553,8 @@ func (r InlineChannelDataRequestItemDataTypename) IsKnown() bool {
 
 // Microsoft Teams channel connection.
 type MsTeamsChannelData struct {
+	// The typename of the schema.
+	Typename MsTeamsChannelData_Typename `json:"__typename,required"`
 	// List of Microsoft Teams connections.
 	Connections []MsTeamsChannelDataConnection `json:"connections,required"`
 	// Microsoft Teams tenant ID.
@@ -526,6 +565,7 @@ type MsTeamsChannelData struct {
 // msTeamsChannelDataJSON contains the JSON metadata for the struct
 // [MsTeamsChannelData]
 type msTeamsChannelDataJSON struct {
+	Typename        apijson.Field
 	Connections     apijson.Field
 	MsTeamsTenantID apijson.Field
 	raw             string
@@ -541,6 +581,21 @@ func (r msTeamsChannelDataJSON) RawJSON() string {
 }
 
 func (r MsTeamsChannelData) implementsChannelDataData() {}
+
+// The typename of the schema.
+type MsTeamsChannelData_Typename string
+
+const (
+	MsTeamsChannelData_TypenameMsTeamsChannelData MsTeamsChannelData_Typename = "MsTeamsChannelData"
+)
+
+func (r MsTeamsChannelData_Typename) IsKnown() bool {
+	switch r {
+	case MsTeamsChannelData_TypenameMsTeamsChannelData:
+		return true
+	}
+	return false
+}
 
 // Microsoft Teams token connection.
 type MsTeamsChannelDataConnection struct {
@@ -705,6 +760,8 @@ func (r msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWeb
 
 // Microsoft Teams channel connection.
 type MsTeamsChannelDataParam struct {
+	// The typename of the schema.
+	Typename param.Field[MsTeamsChannelData_Typename] `json:"__typename,required"`
 	// List of Microsoft Teams connections.
 	Connections param.Field[[]MsTeamsChannelDataConnectionsUnionParam] `json:"connections,required"`
 	// Microsoft Teams tenant ID.
@@ -791,6 +848,8 @@ func (r MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWeb
 
 // OneSignal channel data.
 type OneSignalChannelData struct {
+	// The typename of the schema.
+	Typename OneSignalChannelData_Typename `json:"__typename,required"`
 	// A list of OneSignal player IDs.
 	PlayerIDs []string                 `json:"player_ids,required" format:"uuid"`
 	JSON      oneSignalChannelDataJSON `json:"-"`
@@ -799,6 +858,7 @@ type OneSignalChannelData struct {
 // oneSignalChannelDataJSON contains the JSON metadata for the struct
 // [OneSignalChannelData]
 type oneSignalChannelDataJSON struct {
+	Typename    apijson.Field
 	PlayerIDs   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -814,8 +874,25 @@ func (r oneSignalChannelDataJSON) RawJSON() string {
 
 func (r OneSignalChannelData) implementsChannelDataData() {}
 
+// The typename of the schema.
+type OneSignalChannelData_Typename string
+
+const (
+	OneSignalChannelData_TypenameOneSignalChannelData OneSignalChannelData_Typename = "OneSignalChannelData"
+)
+
+func (r OneSignalChannelData_Typename) IsKnown() bool {
+	switch r {
+	case OneSignalChannelData_TypenameOneSignalChannelData:
+		return true
+	}
+	return false
+}
+
 // OneSignal channel data.
 type OneSignalChannelDataParam struct {
+	// The typename of the schema.
+	Typename param.Field[OneSignalChannelData_Typename] `json:"__typename,required"`
 	// A list of OneSignal player IDs.
 	PlayerIDs param.Field[[]string] `json:"player_ids,required" format:"uuid"`
 }
@@ -888,18 +965,21 @@ func (r PushChannelDataParam) implementsInlineChannelDataRequestItemDataUnionPar
 
 // Slack channel data
 type SlackChannelData struct {
+	// The typename of the schema.
+	Typename SlackChannelData_Typename `json:"__typename,required"`
+	// List of Slack channel connections.
+	Connections []SlackChannelDataConnection `json:"connections,required"`
 	// A Slack connection token.
 	Token SlackChannelDataToken `json:"token,nullable"`
-	// List of Slack channel connections.
-	Connections []SlackChannelDataConnection `json:"connections"`
-	JSON        slackChannelDataJSON         `json:"-"`
+	JSON  slackChannelDataJSON  `json:"-"`
 }
 
 // slackChannelDataJSON contains the JSON metadata for the struct
 // [SlackChannelData]
 type slackChannelDataJSON struct {
-	Token       apijson.Field
+	Typename    apijson.Field
 	Connections apijson.Field
+	Token       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -914,27 +994,19 @@ func (r slackChannelDataJSON) RawJSON() string {
 
 func (r SlackChannelData) implementsChannelDataData() {}
 
-// A Slack connection token.
-type SlackChannelDataToken struct {
-	// A Slack access token.
-	AccessToken string                    `json:"access_token,required,nullable"`
-	JSON        slackChannelDataTokenJSON `json:"-"`
-}
+// The typename of the schema.
+type SlackChannelData_Typename string
 
-// slackChannelDataTokenJSON contains the JSON metadata for the struct
-// [SlackChannelDataToken]
-type slackChannelDataTokenJSON struct {
-	AccessToken apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
+const (
+	SlackChannelData_TypenameSlackChannelData SlackChannelData_Typename = "SlackChannelData"
+)
 
-func (r *SlackChannelDataToken) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r slackChannelDataTokenJSON) RawJSON() string {
-	return r.raw
+func (r SlackChannelData_Typename) IsKnown() bool {
+	switch r {
+	case SlackChannelData_TypenameSlackChannelData:
+		return true
+	}
+	return false
 }
 
 // A Slack connection, either an access token or an incoming webhook
@@ -1066,12 +1138,37 @@ func (r slackChannelDataConnectionsSlackIncomingWebhookConnectionJSON) RawJSON()
 func (r SlackChannelDataConnectionsSlackIncomingWebhookConnection) implementsSlackChannelDataConnection() {
 }
 
+// A Slack connection token.
+type SlackChannelDataToken struct {
+	// A Slack access token.
+	AccessToken string                    `json:"access_token,required,nullable"`
+	JSON        slackChannelDataTokenJSON `json:"-"`
+}
+
+// slackChannelDataTokenJSON contains the JSON metadata for the struct
+// [SlackChannelDataToken]
+type slackChannelDataTokenJSON struct {
+	AccessToken apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SlackChannelDataToken) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r slackChannelDataTokenJSON) RawJSON() string {
+	return r.raw
+}
+
 // Slack channel data
 type SlackChannelDataParam struct {
+	// The typename of the schema.
+	Typename param.Field[SlackChannelData_Typename] `json:"__typename,required"`
+	// List of Slack channel connections.
+	Connections param.Field[[]SlackChannelDataConnectionsUnionParam] `json:"connections,required"`
 	// A Slack connection token.
 	Token param.Field[SlackChannelDataTokenParam] `json:"token"`
-	// List of Slack channel connections.
-	Connections param.Field[[]SlackChannelDataConnectionsUnionParam] `json:"connections"`
 }
 
 func (r SlackChannelDataParam) MarshalJSON() (data []byte, err error) {
@@ -1081,16 +1178,6 @@ func (r SlackChannelDataParam) MarshalJSON() (data []byte, err error) {
 func (r SlackChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
 func (r SlackChannelDataParam) implementsInlineChannelDataRequestItemDataUnionParam() {}
-
-// A Slack connection token.
-type SlackChannelDataTokenParam struct {
-	// A Slack access token.
-	AccessToken param.Field[string] `json:"access_token,required"`
-}
-
-func (r SlackChannelDataTokenParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
 
 // A Slack connection, either an access token or an incoming webhook
 type SlackChannelDataConnectionParam struct {
@@ -1147,4 +1234,14 @@ func (r SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam) MarshalJ
 }
 
 func (r SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam) implementsSlackChannelDataConnectionsUnionParam() {
+}
+
+// A Slack connection token.
+type SlackChannelDataTokenParam struct {
+	// A Slack access token.
+	AccessToken param.Field[string] `json:"access_token,required"`
+}
+
+func (r SlackChannelDataTokenParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
