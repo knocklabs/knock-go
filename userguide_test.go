@@ -75,8 +75,8 @@ func TestUserGuideMarkMessageAsArchivedWithOptionalParams(t *testing.T) {
 				"product_id": "product_123",
 			}),
 			IsFinal: knock.F(true),
-			Metadata: knock.F[any](map[string]interface{}{
-				"source": "onboarding",
+			Metadata: knock.F(map[string]interface{}{
+				"source": "bar",
 			}),
 			Tenant: knock.F("tenant_12345"),
 		},
@@ -120,8 +120,8 @@ func TestUserGuideMarkMessageAsInteractedWithOptionalParams(t *testing.T) {
 				"product_id": "product_123",
 			}),
 			IsFinal: knock.F(true),
-			Metadata: knock.F[any](map[string]interface{}{
-				"source": "onboarding",
+			Metadata: knock.F(map[string]interface{}{
+				"source": "bar",
 			}),
 			Tenant: knock.F("tenant_12345"),
 		},
@@ -165,8 +165,8 @@ func TestUserGuideMarkMessageAsSeenWithOptionalParams(t *testing.T) {
 				"product_id": "product_123",
 			}),
 			IsFinal: knock.F(true),
-			Metadata: knock.F[any](map[string]interface{}{
-				"source": "onboarding",
+			Metadata: knock.F(map[string]interface{}{
+				"source": "bar",
 			}),
 			Tenant: knock.F("tenant_12345"),
 		},

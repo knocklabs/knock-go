@@ -285,7 +285,7 @@ type UserGuideMarkMessageAsArchivedParams struct {
 	// Whether the guide is final.
 	IsFinal param.Field[bool] `json:"is_final"`
 	// The metadata of the guide.
-	Metadata param.Field[interface{}] `json:"metadata"`
+	Metadata param.Field[map[string]interface{}] `json:"metadata"`
 	// The tenant ID of the guide.
 	Tenant param.Field[string] `json:"tenant"`
 }
@@ -310,7 +310,7 @@ type UserGuideMarkMessageAsInteractedParams struct {
 	// Whether the guide is final.
 	IsFinal param.Field[bool] `json:"is_final"`
 	// The metadata of the guide.
-	Metadata param.Field[interface{}] `json:"metadata"`
+	Metadata param.Field[map[string]interface{}] `json:"metadata"`
 	// The tenant ID of the guide.
 	Tenant param.Field[string] `json:"tenant"`
 }
@@ -335,7 +335,7 @@ type UserGuideMarkMessageAsSeenParams struct {
 	// Whether the guide is final.
 	IsFinal param.Field[bool] `json:"is_final"`
 	// The metadata of the guide.
-	Metadata param.Field[interface{}] `json:"metadata"`
+	Metadata param.Field[map[string]interface{}] `json:"metadata"`
 	// The tenant ID of the guide.
 	Tenant param.Field[string] `json:"tenant"`
 }
