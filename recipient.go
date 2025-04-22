@@ -52,13 +52,17 @@ type Recipient struct {
 	Collection string `json:"collection"`
 	// The creation date of the user from your system.
 	CreatedAt time.Time `json:"created_at,nullable" format:"date-time"`
-	// The email address of the user.
+	// The primary email address for the user.
 	Email string `json:"email,nullable"`
 	// Display name of the user.
 	Name string `json:"name,nullable"`
-	// Phone number of the user.
+	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
+	// user (required for SMS channels).
 	PhoneNumber string `json:"phone_number,nullable"`
-	// Timezone of the user.
+	// The timezone of the user. Must be a valid
+	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used for
+	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients)
 	Timezone string        `json:"timezone,nullable"`
 	JSON     recipientJSON `json:"-"`
 	union    RecipientUnion

@@ -271,7 +271,10 @@ func (r *MessageService) Unarchive(ctx context.Context, messageID string, opts .
 	return
 }
 
-// An activity associated with a workflow run.
+// An activity associated with a workflow trigger request. Messages produced after
+// a [batch step](/designing-workflows/batch-function) can be associated with one
+// or more activities. Non-batched messages will always be associated with a single
+// activity.
 type Activity struct {
 	// Unique identifier for the activity.
 	ID string `json:"id"`
@@ -279,13 +282,13 @@ type Activity struct {
 	Typename string `json:"__typename"`
 	// A recipient of a notification, which is either a user or an object.
 	Actor Recipient `json:"actor,nullable"`
-	// The data associated with the activity.
+	// The workflow trigger `data` payload associated with the activity.
 	Data map[string]interface{} `json:"data,nullable"`
-	// Timestamp when the resource was created.
+	// Timestamp when the activity was created.
 	InsertedAt time.Time `json:"inserted_at" format:"date-time"`
 	// A recipient of a notification, which is either a user or an object.
 	Recipient Recipient `json:"recipient"`
-	// The timestamp when the resource was last updated.
+	// Timestamp when the activity was last updated.
 	UpdatedAt time.Time    `json:"updated_at" format:"date-time"`
 	JSON      activityJSON `json:"-"`
 }
@@ -475,7 +478,8 @@ func (r MessageStatus) IsKnown() bool {
 	return false
 }
 
-// A message delivery log.
+// A message delivery log contains a `request` from Knock to a downstream provider
+// and the `response` that was returned.
 type MessageDeliveryLog struct {
 	// The unique identifier for the message delivery log.
 	ID string `json:"id,required"`
@@ -646,7 +650,8 @@ type MessageDeliveryLogResponseBodyMap map[string]interface{}
 
 func (r MessageDeliveryLogResponseBodyMap) ImplementsMessageDeliveryLogResponseBodyUnion() {}
 
-// A message event.
+// A message event. Occurs when a message
+// [delivery or engagement status](/send-notifications/message-statuses) changes.
 type MessageEvent struct {
 	// The unique identifier for the message event.
 	ID string `json:"id,required"`
@@ -1366,7 +1371,8 @@ type MessageListParams struct {
 	ChannelID param.Field[string] `query:"channel_id"`
 	// Limits the results to messages with the given engagement status.
 	EngagementStatus param.Field[[]MessageListParamsEngagementStatus] `query:"engagement_status"`
-	// Limits the results to only the message ids given (max 50). Note: when using this
+	InsertedAt       param.Field[MessageListParamsInsertedAt]         `query:"inserted_at"`
+	// Limits the results to only the message IDs given (max 50). Note: when using this
 	// option, the results will be subject to any other filters applied to the query.
 	MessageIDs param.Field[[]string] `query:"message_ids"`
 	// The number of items per page.
@@ -1414,6 +1420,26 @@ func (r MessageListParamsEngagementStatus) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type MessageListParamsInsertedAt struct {
+	// Limits the results to messages inserted after the given date.
+	Gt param.Field[string] `query:"gt"`
+	// Limits the results to messages inserted after or on the given date.
+	Gte param.Field[string] `query:"gte"`
+	// Limits the results to messages inserted before the given date.
+	Lt param.Field[string] `query:"lt"`
+	// Limits the results to messages inserted before or on the given date.
+	Lte param.Field[string] `query:"lte"`
+}
+
+// URLQuery serializes [MessageListParamsInsertedAt]'s query parameters as
+// `url.Values`.
+func (r MessageListParamsInsertedAt) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 type MessageListParamsStatus string

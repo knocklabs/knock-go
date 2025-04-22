@@ -33,6 +33,7 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 		"user_id",
 		knock.UserUpdateParams{
 			IdentifyUserRequest: knock.IdentifyUserRequestParam{
+				Avatar: knock.F("avatar"),
 				ChannelData: knock.F(knock.InlineChannelDataRequestParam{knock.InlineChannelDataRequestItemParam{
 					ChannelID: knock.F("97c5837d-c65c-4d54-aa39-080eeb81c69d"),
 					Data: knock.F[knock.InlineChannelDataRequestItemDataUnionParam](knock.PushChannelDataParam{
@@ -40,7 +41,11 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 						Tokens:   knock.F([]string{"push_token_123"}),
 					}),
 				}}),
-				CreatedAt: knock.F(time.Now()),
+				CreatedAt:   knock.F(time.Now()),
+				Email:       knock.F("jane@ingen.net"),
+				Locale:      knock.F("locale"),
+				Name:        knock.F("Jane Doe"),
+				PhoneNumber: knock.F("phone_number"),
 				Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
 					ID: knock.F("default"),
 					Categories: knock.F(map[string]knock.InlinePreferenceSetRequestItemCategoriesUnionParam{
@@ -87,6 +92,7 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 						},
 					}),
 				}}),
+				Timezone: knock.F("America/New_York"),
 			},
 		},
 	)
@@ -247,10 +253,16 @@ func TestUserListMessagesWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"user-123",
 		knock.UserListMessagesParams{
-			After:                  knock.F("after"),
-			Before:                 knock.F("before"),
-			ChannelID:              knock.F("channel_id"),
-			EngagementStatus:       knock.F([]knock.UserListMessagesParamsEngagementStatus{knock.UserListMessagesParamsEngagementStatusSeen}),
+			After:            knock.F("after"),
+			Before:           knock.F("before"),
+			ChannelID:        knock.F("channel_id"),
+			EngagementStatus: knock.F([]knock.UserListMessagesParamsEngagementStatus{knock.UserListMessagesParamsEngagementStatusSeen}),
+			InsertedAt: knock.F(knock.UserListMessagesParamsInsertedAt{
+				Gt:  knock.F("gt"),
+				Gte: knock.F("gte"),
+				Lt:  knock.F("lt"),
+				Lte: knock.F("lte"),
+			}),
 			MessageIDs:             knock.F([]string{"string"}),
 			PageSize:               knock.F(int64(0)),
 			Source:                 knock.F("source"),
@@ -347,7 +359,7 @@ func TestUserListSubscriptionsWithOptionalParams(t *testing.T) {
 			After:    knock.F("after"),
 			Before:   knock.F("before"),
 			Include:  knock.F([]knock.UserListSubscriptionsParamsInclude{knock.UserListSubscriptionsParamsIncludePreferences}),
-			Objects:  knock.F([]knock.RecipientReferenceUnionParam{shared.UnionString("user_123")}),
+			Objects:  knock.F([]string{"string"}),
 			PageSize: knock.F(int64(0)),
 		},
 	)

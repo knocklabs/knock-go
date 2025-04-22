@@ -296,8 +296,8 @@ func (r *ObjectService) ListSubscriptionsAutoPaging(ctx context.Context, collect
 }
 
 // Creates a new object or updates an existing one in the specified collection.
-// This operation is used to identify objects with their properties and channel
-// data.
+// This operation is used to identify objects with their properties, as well as
+// optional preferences and channel data.
 func (r *ObjectService) Set(ctx context.Context, collection string, objectID string, body ObjectSetParams, opts ...option.RequestOption) (res *Object, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
@@ -493,7 +493,8 @@ type ObjectListMessagesParams struct {
 	ChannelID param.Field[string] `query:"channel_id"`
 	// Limits the results to messages with the given engagement status.
 	EngagementStatus param.Field[[]ObjectListMessagesParamsEngagementStatus] `query:"engagement_status"`
-	// Limits the results to only the message ids given (max 50). Note: when using this
+	InsertedAt       param.Field[ObjectListMessagesParamsInsertedAt]         `query:"inserted_at"`
+	// Limits the results to only the message IDs given (max 50). Note: when using this
 	// option, the results will be subject to any other filters applied to the query.
 	MessageIDs param.Field[[]string] `query:"message_ids"`
 	// The number of items per page.
@@ -542,6 +543,26 @@ func (r ObjectListMessagesParamsEngagementStatus) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type ObjectListMessagesParamsInsertedAt struct {
+	// Limits the results to messages inserted after the given date.
+	Gt param.Field[string] `query:"gt"`
+	// Limits the results to messages inserted after or on the given date.
+	Gte param.Field[string] `query:"gte"`
+	// Limits the results to messages inserted before the given date.
+	Lt param.Field[string] `query:"lt"`
+	// Limits the results to messages inserted before or on the given date.
+	Lte param.Field[string] `query:"lte"`
+}
+
+// URLQuery serializes [ObjectListMessagesParamsInsertedAt]'s query parameters as
+// `url.Values`.
+func (r ObjectListMessagesParamsInsertedAt) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 type ObjectListMessagesParamsStatus string

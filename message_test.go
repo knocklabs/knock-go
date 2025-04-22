@@ -27,10 +27,16 @@ func TestMessageListWithOptionalParams(t *testing.T) {
 		option.WithBearerToken("My Bearer Token"),
 	)
 	_, err := client.Messages.List(context.TODO(), knock.MessageListParams{
-		After:                  knock.F("after"),
-		Before:                 knock.F("before"),
-		ChannelID:              knock.F("channel_id"),
-		EngagementStatus:       knock.F([]knock.MessageListParamsEngagementStatus{knock.MessageListParamsEngagementStatusSeen}),
+		After:            knock.F("after"),
+		Before:           knock.F("before"),
+		ChannelID:        knock.F("channel_id"),
+		EngagementStatus: knock.F([]knock.MessageListParamsEngagementStatus{knock.MessageListParamsEngagementStatusSeen}),
+		InsertedAt: knock.F(knock.MessageListParamsInsertedAt{
+			Gt:  knock.F("gt"),
+			Gte: knock.F("gte"),
+			Lt:  knock.F("lt"),
+			Lte: knock.F("lte"),
+		}),
 		MessageIDs:             knock.F([]string{"string"}),
 		PageSize:               knock.F(int64(0)),
 		Source:                 knock.F("source"),

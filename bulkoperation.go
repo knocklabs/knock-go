@@ -73,6 +73,8 @@ type BulkOperation struct {
 	ErrorItems []BulkOperationErrorItem `json:"error_items"`
 	// Timestamp when the bulk operation failed.
 	FailedAt time.Time `json:"failed_at,nullable" format:"date-time"`
+	// The URI to the bulk operation's progress.
+	ProgressPath string `json:"progress_path" format:"uri"`
 	// Timestamp when the bulk operation was started.
 	StartedAt time.Time         `json:"started_at,nullable" format:"date-time"`
 	JSON      bulkOperationJSON `json:"-"`
@@ -93,6 +95,7 @@ type bulkOperationJSON struct {
 	ErrorCount         apijson.Field
 	ErrorItems         apijson.Field
 	FailedAt           apijson.Field
+	ProgressPath       apijson.Field
 	StartedAt          apijson.Field
 	raw                string
 	ExtraFields        map[string]apijson.Field

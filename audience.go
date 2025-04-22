@@ -76,8 +76,9 @@ type AudienceMember struct {
 	Typename string `json:"__typename,required"`
 	// Timestamp when the resource was created.
 	AddedAt time.Time `json:"added_at,required" format:"date-time"`
-	// A user who can receive notifications in Knock. They are always referenced by
-	// your internal identifier.
+	// A [User](/concepts/users) represents an individual in your system who can
+	// receive notifications through Knock. Users are the most common recipients of
+	// notifications and are always referenced by your internal identifier.
 	User User `json:"user,required"`
 	// The ID for the user that you set when identifying them in Knock.
 	UserID string `json:"user_id,required"`

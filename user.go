@@ -43,8 +43,10 @@ func NewUserService(opts ...option.RequestOption) (r *UserService) {
 	return
 }
 
-// Create or update a user with the provided identification data.
-func (r *UserService) Update(ctx context.Context, userID string, body UserUpdateParams, opts ...option.RequestOption) (res *User, err error) {
+// Create or update a user with the provided identification data. When you identify
+// an existing user, the system merges the properties you specific with what is
+// currently set on the user, updating only the fields included in your requests.
+func (r *UserService) Update(ctx context.Context, userID string, body UserUpdateParams, opts ...option.RequestOption) (res *UserUpdateResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -55,7 +57,8 @@ func (r *UserService) Update(ctx context.Context, userID string, body UserUpdate
 	return
 }
 
-// Retrieve a paginated list of users in the environment.
+// Retrieve a paginated list of users in the environment. Defaults to 50 users per
+// page.
 func (r *UserService) List(ctx context.Context, query UserListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[User], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -73,7 +76,8 @@ func (r *UserService) List(ctx context.Context, query UserListParams, opts ...op
 	return res, nil
 }
 
-// Retrieve a paginated list of users in the environment.
+// Retrieve a paginated list of users in the environment. Defaults to 50 users per
+// page.
 func (r *UserService) ListAutoPaging(ctx context.Context, query UserListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[User] {
 	return pagination.NewEntriesCursorAutoPager(r.List(ctx, query, opts...))
 }
@@ -136,7 +140,8 @@ func (r *UserService) GetPreferences(ctx context.Context, userID string, prefere
 }
 
 // Returns a paginated list of messages for a specific user. Allows filtering by
-// message status and provides various sorting options.
+// message status and provides various sorting options. Messages outside the
+// account's retention window will not be included in the results.
 func (r *UserService) ListMessages(ctx context.Context, userID string, query UserListMessagesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Message], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -159,7 +164,8 @@ func (r *UserService) ListMessages(ctx context.Context, userID string, query Use
 }
 
 // Returns a paginated list of messages for a specific user. Allows filtering by
-// message status and provides various sorting options.
+// message status and provides various sorting options. Messages outside the
+// account's retention window will not be included in the results.
 func (r *UserService) ListMessagesAutoPaging(ctx context.Context, userID string, query UserListMessagesParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Message] {
 	return pagination.NewEntriesCursorAutoPager(r.ListMessages(ctx, userID, query, opts...))
 }
@@ -176,8 +182,7 @@ func (r *UserService) ListPreferences(ctx context.Context, userID string, opts .
 	return
 }
 
-// Returns a paginated list of schedules for a specific user. Can be filtered by
-// workflow and tenant.
+// Returns a paginated list of schedules for a specific user, in descending order.
 func (r *UserService) ListSchedules(ctx context.Context, userID string, query UserListSchedulesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Schedule], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -199,14 +204,13 @@ func (r *UserService) ListSchedules(ctx context.Context, userID string, query Us
 	return res, nil
 }
 
-// Returns a paginated list of schedules for a specific user. Can be filtered by
-// workflow and tenant.
+// Returns a paginated list of schedules for a specific user, in descending order.
 func (r *UserService) ListSchedulesAutoPaging(ctx context.Context, userID string, query UserListSchedulesParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Schedule] {
 	return pagination.NewEntriesCursorAutoPager(r.ListSchedules(ctx, userID, query, opts...))
 }
 
-// Retrieves a paginated list of subscriptions for a specific user. Allows
-// filtering by objects and includes optional preference data.
+// Retrieves a paginated list of subscriptions for a specific user, in descending
+// order.
 func (r *UserService) ListSubscriptions(ctx context.Context, userID string, query UserListSubscriptionsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Subscription], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -228,8 +232,8 @@ func (r *UserService) ListSubscriptions(ctx context.Context, userID string, quer
 	return res, nil
 }
 
-// Retrieves a paginated list of subscriptions for a specific user. Allows
-// filtering by objects and includes optional preference data.
+// Retrieves a paginated list of subscriptions for a specific user, in descending
+// order.
 func (r *UserService) ListSubscriptionsAutoPaging(ctx context.Context, userID string, query UserListSubscriptionsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Subscription] {
 	return pagination.NewEntriesCursorAutoPager(r.ListSubscriptions(ctx, userID, query, opts...))
 }
@@ -300,13 +304,29 @@ func (r *UserService) UnsetChannelData(ctx context.Context, userID string, chann
 // that's specified elsewhere in the request. You can supply any additional
 // properties you'd like to upsert for the user.
 type IdentifyUserRequestParam struct {
+	// URL to the user's avatar image.
+	Avatar param.Field[string] `json:"avatar"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// The creation date of the user from your system.
 	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// The primary email address for the user.
+	Email param.Field[string] `json:"email"`
+	// The locale of the user. Used for [message localization](/concepts/translations)
+	Locale param.Field[string] `json:"locale"`
+	// Display name of the user.
+	Name param.Field[string] `json:"name"`
+	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
+	// user (required for SMS channels).
+	PhoneNumber param.Field[string] `json:"phone_number"`
 	// Inline set preferences for a recipient, where the key is the preference set name
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
-	ExtraFields map[string]interface{}                       `json:"-,extras"`
+	// The timezone of the user. Must be a valid
+	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used for
+	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients)
+	Timezone    param.Field[string]    `json:"timezone"`
+	ExtraFields map[string]interface{} `json:"-,extras"`
 }
 
 func (r IdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
@@ -335,8 +355,9 @@ func (r InlineIdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
 
 func (r InlineIdentifyUserRequestParam) ImplementsRecipientRequestUnionParam() {}
 
-// A user who can receive notifications in Knock. They are always referenced by
-// your internal identifier.
+// A [User](/concepts/users) represents an individual in your system who can
+// receive notifications through Knock. Users are the most common recipients of
+// notifications and are always referenced by your internal identifier.
 type User struct {
 	// The ID for the user that you set when identifying them in Knock.
 	ID string `json:"id,required"`
@@ -348,13 +369,17 @@ type User struct {
 	Avatar string `json:"avatar,nullable"`
 	// The creation date of the user from your system.
 	CreatedAt time.Time `json:"created_at,nullable" format:"date-time"`
-	// The email address of the user.
+	// The primary email address for the user.
 	Email string `json:"email,nullable"`
 	// Display name of the user.
 	Name string `json:"name,nullable"`
-	// Phone number of the user.
+	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
+	// user (required for SMS channels).
 	PhoneNumber string `json:"phone_number,nullable"`
-	// Timezone of the user.
+	// The timezone of the user. Must be a valid
+	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used for
+	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients)
 	Timezone    string                 `json:"timezone,nullable"`
 	ExtraFields map[string]interface{} `json:"-,extras"`
 	JSON        userJSON               `json:"-"`
@@ -384,6 +409,68 @@ func (r userJSON) RawJSON() string {
 }
 
 func (r User) implementsRecipient() {}
+
+// The user that was created or updated.
+type UserUpdateResponse struct {
+	// The ID for the user that you set when identifying them in Knock.
+	ID string `json:"id,required"`
+	// The creation date of the user from your system.
+	CreatedAt time.Time `json:"created_at,required" format:"date-time"`
+	// The timestamp when the resource was last updated.
+	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
+	// The typename of the schema.
+	Typename string `json:"__typename"`
+	// URL to the user's avatar image.
+	Avatar string `json:"avatar,nullable"`
+	// Channel-specific information that's needed to deliver a notification to an end
+	// provider.
+	ChannelData []ChannelData `json:"channel_data,nullable"`
+	// The primary email address for the user.
+	Email string `json:"email,nullable"`
+	// The locale of the user. Used for [message localization](/concepts/translations)
+	Locale string `json:"locale,nullable"`
+	// Display name of the user.
+	Name string `json:"name,nullable"`
+	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
+	// user (required for SMS channels).
+	PhoneNumber string `json:"phone_number,nullable"`
+	// A preference set represents a specific set of notification preferences for a
+	// recipient. A recipient can have multiple preference sets.
+	Preferences PreferenceSet `json:"preferences,nullable"`
+	// The timezone of the user. Must be a valid
+	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used for
+	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients)
+	Timezone string                 `json:"timezone,nullable"`
+	JSON     userUpdateResponseJSON `json:"-"`
+}
+
+// userUpdateResponseJSON contains the JSON metadata for the struct
+// [UserUpdateResponse]
+type userUpdateResponseJSON struct {
+	ID          apijson.Field
+	CreatedAt   apijson.Field
+	UpdatedAt   apijson.Field
+	Typename    apijson.Field
+	Avatar      apijson.Field
+	ChannelData apijson.Field
+	Email       apijson.Field
+	Locale      apijson.Field
+	Name        apijson.Field
+	PhoneNumber apijson.Field
+	Preferences apijson.Field
+	Timezone    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserUpdateResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userUpdateResponseJSON) RawJSON() string {
+	return r.raw
+}
 
 type UserUpdateParams struct {
 	// A set of parameters to identify a user with. Does not include the user ID, as
@@ -452,7 +539,8 @@ type UserListMessagesParams struct {
 	ChannelID param.Field[string] `query:"channel_id"`
 	// Limits the results to messages with the given engagement status.
 	EngagementStatus param.Field[[]UserListMessagesParamsEngagementStatus] `query:"engagement_status"`
-	// Limits the results to only the message ids given (max 50). Note: when using this
+	InsertedAt       param.Field[UserListMessagesParamsInsertedAt]         `query:"inserted_at"`
+	// Limits the results to only the message IDs given (max 50). Note: when using this
 	// option, the results will be subject to any other filters applied to the query.
 	MessageIDs param.Field[[]string] `query:"message_ids"`
 	// The number of items per page.
@@ -502,6 +590,26 @@ func (r UserListMessagesParamsEngagementStatus) IsKnown() bool {
 	return false
 }
 
+type UserListMessagesParamsInsertedAt struct {
+	// Limits the results to messages inserted after the given date.
+	Gt param.Field[string] `query:"gt"`
+	// Limits the results to messages inserted after or on the given date.
+	Gte param.Field[string] `query:"gte"`
+	// Limits the results to messages inserted before the given date.
+	Lt param.Field[string] `query:"lt"`
+	// Limits the results to messages inserted before or on the given date.
+	Lte param.Field[string] `query:"lte"`
+}
+
+// URLQuery serializes [UserListMessagesParamsInsertedAt]'s query parameters as
+// `url.Values`.
+func (r UserListMessagesParamsInsertedAt) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
 type UserListMessagesParamsStatus string
 
 const (
@@ -529,9 +637,9 @@ type UserListSchedulesParams struct {
 	Before param.Field[string] `query:"before"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// The ID of the tenant to list schedules for.
+	// The tenant ID to filter schedules for.
 	Tenant param.Field[string] `query:"tenant"`
-	// The ID of the workflow to list schedules for.
+	// The workflow key to filter schedules for.
 	Workflow param.Field[string] `query:"workflow"`
 }
 
@@ -551,8 +659,8 @@ type UserListSubscriptionsParams struct {
 	Before param.Field[string] `query:"before"`
 	// Associated resources to include in the response.
 	Include param.Field[[]UserListSubscriptionsParamsInclude] `query:"include"`
-	// Only return subscriptions for the given recipients.
-	Objects param.Field[[]RecipientReferenceUnionParam] `query:"objects"`
+	// Only returns subscriptions for the specified object GIDs.
+	Objects param.Field[[]string] `query:"objects"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
 }
