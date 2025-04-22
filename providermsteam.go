@@ -14,6 +14,7 @@ import (
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
+	"github.com/stainless-sdks/knock-go/packages/pagination"
 )
 
 // ProviderMsTeamService contains methods and other services that help with
@@ -63,15 +64,31 @@ func (r *ProviderMsTeamService) ListChannels(ctx context.Context, channelID stri
 
 // Get a list of teams belonging to the Microsoft Entra tenant. By default,
 // archived and private channels are excluded from the results.
-func (r *ProviderMsTeamService) ListTeams(ctx context.Context, channelID string, query ProviderMsTeamListTeamsParams, opts ...option.RequestOption) (res *ProviderMsTeamListTeamsResponse, err error) {
+func (r *ProviderMsTeamService) ListTeams(ctx context.Context, channelID string, query ProviderMsTeamListTeamsParams, opts ...option.RequestOption) (res *pagination.MsTeamsPagination[ProviderMsTeamListTeamsResponse], err error) {
+	var raw *http.Response
 	opts = append(r.Options[:], opts...)
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/providers/ms-teams/%s/teams", channelID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// Get a list of teams belonging to the Microsoft Entra tenant. By default,
+// archived and private channels are excluded from the results.
+func (r *ProviderMsTeamService) ListTeamsAutoPaging(ctx context.Context, channelID string, query ProviderMsTeamListTeamsParams, opts ...option.RequestOption) *pagination.MsTeamsPaginationAutoPager[ProviderMsTeamListTeamsResponse] {
+	return pagination.NewMsTeamsPaginationAutoPager(r.ListTeams(ctx, channelID, query, opts...))
 }
 
 // Remove a Microsoft Entra tenant ID from a Microsoft Teams tenant object.
@@ -196,47 +213,19 @@ func (r providerMsTeamListChannelsResponseMsTeamsChannelJSON) RawJSON() string {
 	return r.raw
 }
 
-// The response from a Microsoft Teams provider request, containing a list of
-// teams.
 type ProviderMsTeamListTeamsResponse struct {
-	// List of Microsoft Teams teams.
-	MsTeamsTeams []ProviderMsTeamListTeamsResponseMsTeamsTeam `json:"ms_teams_teams,required"`
-	// [OData param](https://learn.microsoft.com/en-us/graph/query-parameters) passed
-	// to the Microsoft Graph API to retrieve the next page of results.
-	SkipToken string                              `json:"skip_token,required,nullable"`
-	JSON      providerMsTeamListTeamsResponseJSON `json:"-"`
-}
-
-// providerMsTeamListTeamsResponseJSON contains the JSON metadata for the struct
-// [ProviderMsTeamListTeamsResponse]
-type providerMsTeamListTeamsResponseJSON struct {
-	MsTeamsTeams apijson.Field
-	SkipToken    apijson.Field
-	raw          string
-	ExtraFields  map[string]apijson.Field
-}
-
-func (r *ProviderMsTeamListTeamsResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r providerMsTeamListTeamsResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type ProviderMsTeamListTeamsResponseMsTeamsTeam struct {
 	// Microsoft Teams team ID.
 	ID string `json:"id,required"`
 	// Microsoft Teams team display name.
 	DisplayName string `json:"displayName,required"`
 	// Microsoft Teams team description.
-	Description string                                         `json:"description,nullable"`
-	JSON        providerMsTeamListTeamsResponseMsTeamsTeamJSON `json:"-"`
+	Description string                              `json:"description,nullable"`
+	JSON        providerMsTeamListTeamsResponseJSON `json:"-"`
 }
 
-// providerMsTeamListTeamsResponseMsTeamsTeamJSON contains the JSON metadata for
-// the struct [ProviderMsTeamListTeamsResponseMsTeamsTeam]
-type providerMsTeamListTeamsResponseMsTeamsTeamJSON struct {
+// providerMsTeamListTeamsResponseJSON contains the JSON metadata for the struct
+// [ProviderMsTeamListTeamsResponse]
+type providerMsTeamListTeamsResponseJSON struct {
 	ID          apijson.Field
 	DisplayName apijson.Field
 	Description apijson.Field
@@ -244,11 +233,11 @@ type providerMsTeamListTeamsResponseMsTeamsTeamJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *ProviderMsTeamListTeamsResponseMsTeamsTeam) UnmarshalJSON(data []byte) (err error) {
+func (r *ProviderMsTeamListTeamsResponse) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r providerMsTeamListTeamsResponseMsTeamsTeamJSON) RawJSON() string {
+func (r providerMsTeamListTeamsResponseJSON) RawJSON() string {
 	return r.raw
 }
 
