@@ -46,7 +46,7 @@ func NewUserService(opts ...option.RequestOption) (r *UserService) {
 // Create or update a user with the provided identification data. When you identify
 // an existing user, the system merges the properties you specific with what is
 // currently set on the user, updating only the fields included in your requests.
-func (r *UserService) Update(ctx context.Context, userID string, body UserUpdateParams, opts ...option.RequestOption) (res *UserUpdateResponse, err error) {
+func (r *UserService) Update(ctx context.Context, userID string, body UserUpdateParams, opts ...option.RequestOption) (res *User, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -312,7 +312,7 @@ type IdentifyUserRequestParam struct {
 	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
 	// The primary email address for the user.
 	Email param.Field[string] `json:"email"`
-	// The locale of the user. Used for [message localization](/concepts/translations)
+	// The locale of the user. Used for [message localization](/concepts/translations).
 	Locale param.Field[string] `json:"locale"`
 	// Display name of the user.
 	Name param.Field[string] `json:"name"`
@@ -324,7 +324,7 @@ type IdentifyUserRequestParam struct {
 	// The timezone of the user. Must be a valid
 	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 	// Used for
-	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients)
+	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
 	Timezone    param.Field[string]    `json:"timezone"`
 	ExtraFields map[string]interface{} `json:"-,extras"`
 }
@@ -379,7 +379,7 @@ type User struct {
 	// The timezone of the user. Must be a valid
 	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 	// Used for
-	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients)
+	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
 	Timezone    string                 `json:"timezone,nullable"`
 	ExtraFields map[string]interface{} `json:"-,extras"`
 	JSON        userJSON               `json:"-"`
@@ -409,68 +409,6 @@ func (r userJSON) RawJSON() string {
 }
 
 func (r User) implementsRecipient() {}
-
-// The user that was created or updated.
-type UserUpdateResponse struct {
-	// The ID for the user that you set when identifying them in Knock.
-	ID string `json:"id,required"`
-	// The creation date of the user from your system.
-	CreatedAt time.Time `json:"created_at,required" format:"date-time"`
-	// The timestamp when the resource was last updated.
-	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
-	// The typename of the schema.
-	Typename string `json:"__typename"`
-	// URL to the user's avatar image.
-	Avatar string `json:"avatar,nullable"`
-	// Channel-specific information that's needed to deliver a notification to an end
-	// provider.
-	ChannelData []ChannelData `json:"channel_data,nullable"`
-	// The primary email address for the user.
-	Email string `json:"email,nullable"`
-	// The locale of the user. Used for [message localization](/concepts/translations)
-	Locale string `json:"locale,nullable"`
-	// Display name of the user.
-	Name string `json:"name,nullable"`
-	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
-	// user (required for SMS channels).
-	PhoneNumber string `json:"phone_number,nullable"`
-	// A preference set represents a specific set of notification preferences for a
-	// recipient. A recipient can have multiple preference sets.
-	Preferences PreferenceSet `json:"preferences,nullable"`
-	// The timezone of the user. Must be a valid
-	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
-	// Used for
-	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients)
-	Timezone string                 `json:"timezone,nullable"`
-	JSON     userUpdateResponseJSON `json:"-"`
-}
-
-// userUpdateResponseJSON contains the JSON metadata for the struct
-// [UserUpdateResponse]
-type userUpdateResponseJSON struct {
-	ID          apijson.Field
-	CreatedAt   apijson.Field
-	UpdatedAt   apijson.Field
-	Typename    apijson.Field
-	Avatar      apijson.Field
-	ChannelData apijson.Field
-	Email       apijson.Field
-	Locale      apijson.Field
-	Name        apijson.Field
-	PhoneNumber apijson.Field
-	Preferences apijson.Field
-	Timezone    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserUpdateResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userUpdateResponseJSON) RawJSON() string {
-	return r.raw
-}
 
 type UserUpdateParams struct {
 	// A set of parameters to identify a user with. Does not include the user ID, as

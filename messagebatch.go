@@ -765,7 +765,7 @@ func (r MessageBatchGetContentResponseDataMessageInAppFeedContentBlocksType) IsK
 
 type MessageBatchArchiveParams struct {
 	// The message IDs to update the status of.
-	MessageIDs param.Field[[]string] `json:"message_ids,required" format:"uuid"`
+	MessageIDs param.Field[[]string] `json:"message_ids,required"`
 }
 
 func (r MessageBatchArchiveParams) MarshalJSON() (data []byte, err error) {
@@ -799,7 +799,7 @@ func (r MessageBatchMarkAsInteractedParams) MarshalJSON() (data []byte, err erro
 
 type MessageBatchMarkAsReadParams struct {
 	// The message IDs to update the status of.
-	MessageIDs param.Field[[]string] `json:"message_ids,required" format:"uuid"`
+	MessageIDs param.Field[[]string] `json:"message_ids,required"`
 }
 
 func (r MessageBatchMarkAsReadParams) MarshalJSON() (data []byte, err error) {
@@ -808,7 +808,7 @@ func (r MessageBatchMarkAsReadParams) MarshalJSON() (data []byte, err error) {
 
 type MessageBatchMarkAsSeenParams struct {
 	// The message IDs to update the status of.
-	MessageIDs param.Field[[]string] `json:"message_ids,required" format:"uuid"`
+	MessageIDs param.Field[[]string] `json:"message_ids,required"`
 }
 
 func (r MessageBatchMarkAsSeenParams) MarshalJSON() (data []byte, err error) {
@@ -817,7 +817,7 @@ func (r MessageBatchMarkAsSeenParams) MarshalJSON() (data []byte, err error) {
 
 type MessageBatchMarkAsUnreadParams struct {
 	// The message IDs to update the status of.
-	MessageIDs param.Field[[]string] `json:"message_ids,required" format:"uuid"`
+	MessageIDs param.Field[[]string] `json:"message_ids,required"`
 }
 
 func (r MessageBatchMarkAsUnreadParams) MarshalJSON() (data []byte, err error) {
@@ -826,7 +826,7 @@ func (r MessageBatchMarkAsUnreadParams) MarshalJSON() (data []byte, err error) {
 
 type MessageBatchMarkAsUnseenParams struct {
 	// The message IDs to update the status of.
-	MessageIDs param.Field[[]string] `json:"message_ids,required" format:"uuid"`
+	MessageIDs param.Field[[]string] `json:"message_ids,required"`
 }
 
 func (r MessageBatchMarkAsUnseenParams) MarshalJSON() (data []byte, err error) {
@@ -835,7 +835,7 @@ func (r MessageBatchMarkAsUnseenParams) MarshalJSON() (data []byte, err error) {
 
 type MessageBatchUnarchiveParams struct {
 	// The message IDs to update the status of.
-	MessageIDs param.Field[[]string] `json:"message_ids,required" format:"uuid"`
+	MessageIDs param.Field[[]string] `json:"message_ids,required"`
 }
 
 func (r MessageBatchUnarchiveParams) MarshalJSON() (data []byte, err error) {

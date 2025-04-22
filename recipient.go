@@ -62,7 +62,7 @@ type Recipient struct {
 	// The timezone of the user. Must be a valid
 	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 	// Used for
-	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients)
+	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
 	Timezone string        `json:"timezone,nullable"`
 	JSON     recipientJSON `json:"-"`
 	union    RecipientUnion
