@@ -279,9 +279,9 @@ type UserGuideMarkMessageAsArchivedParams struct {
 	// The step reference of the guide.
 	GuideStepRef param.Field[string] `json:"guide_step_ref,required"`
 	// The content of the guide.
-	Content param.Field[interface{}] `json:"content"`
+	Content param.Field[map[string]interface{}] `json:"content"`
 	// The data of the guide.
-	Data param.Field[interface{}] `json:"data"`
+	Data param.Field[map[string]interface{}] `json:"data"`
 	// Whether the guide is final.
 	IsFinal param.Field[bool] `json:"is_final"`
 	// The metadata of the guide.
@@ -304,9 +304,9 @@ type UserGuideMarkMessageAsInteractedParams struct {
 	// The step reference of the guide.
 	GuideStepRef param.Field[string] `json:"guide_step_ref,required"`
 	// The content of the guide.
-	Content param.Field[interface{}] `json:"content"`
+	Content param.Field[map[string]interface{}] `json:"content"`
 	// The data of the guide.
-	Data param.Field[interface{}] `json:"data"`
+	Data param.Field[map[string]interface{}] `json:"data"`
 	// Whether the guide is final.
 	IsFinal param.Field[bool] `json:"is_final"`
 	// The metadata of the guide.
@@ -329,9 +329,9 @@ type UserGuideMarkMessageAsSeenParams struct {
 	// The step reference of the guide.
 	GuideStepRef param.Field[string] `json:"guide_step_ref,required"`
 	// The content of the guide.
-	Content param.Field[interface{}] `json:"content"`
+	Content param.Field[map[string]interface{}] `json:"content"`
 	// The data of the guide.
-	Data param.Field[interface{}] `json:"data"`
+	Data param.Field[map[string]interface{}] `json:"data"`
 	// Whether the guide is final.
 	IsFinal param.Field[bool] `json:"is_final"`
 	// The metadata of the guide.

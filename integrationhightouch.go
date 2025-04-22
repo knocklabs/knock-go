@@ -43,7 +43,7 @@ type IntegrationHightouchEmbeddedDestinationResponse struct {
 	// The request ID.
 	ID string `json:"id"`
 	// The result of the RPC call.
-	Result interface{}                                         `json:"result"`
+	Result map[string]interface{}                              `json:"result"`
 	JSON   integrationHightouchEmbeddedDestinationResponseJSON `json:"-"`
 }
 
@@ -72,7 +72,7 @@ type IntegrationHightouchEmbeddedDestinationParams struct {
 	// The method name to execute.
 	Method param.Field[string] `json:"method,required"`
 	// The parameters for the method.
-	Params param.Field[interface{}] `json:"params"`
+	Params param.Field[map[string]interface{}] `json:"params"`
 }
 
 func (r IntegrationHightouchEmbeddedDestinationParams) MarshalJSON() (data []byte, err error) {

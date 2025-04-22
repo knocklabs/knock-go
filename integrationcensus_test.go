@@ -30,7 +30,9 @@ func TestIntegrationCensusCustomDestinationWithOptionalParams(t *testing.T) {
 		ID:      knock.F("id"),
 		Jsonrpc: knock.F("jsonrpc"),
 		Method:  knock.F("method"),
-		Params:  knock.F[any](map[string]interface{}{}),
+		Params: knock.F(map[string]interface{}{
+			"foo": "bar",
+		}),
 	})
 	if err != nil {
 		var apierr *knock.Error

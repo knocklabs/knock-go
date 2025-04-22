@@ -67,12 +67,12 @@ func TestUserGuideMarkMessageAsArchivedWithOptionalParams(t *testing.T) {
 			GuideID:      knock.F("323e4567-e89b-12d3-a456-426614174000"),
 			GuideKey:     knock.F("guide_12345"),
 			GuideStepRef: knock.F("step_12345"),
-			Content: knock.F[any](map[string]interface{}{
-				"body":  "Guide content body",
-				"title": "Guide Title",
+			Content: knock.F(map[string]interface{}{
+				"body":  "bar",
+				"title": "bar",
 			}),
-			Data: knock.F[any](map[string]interface{}{
-				"product_id": "product_123",
+			Data: knock.F(map[string]interface{}{
+				"product_id": "bar",
 			}),
 			IsFinal: knock.F(true),
 			Metadata: knock.F(map[string]interface{}{
@@ -112,12 +112,12 @@ func TestUserGuideMarkMessageAsInteractedWithOptionalParams(t *testing.T) {
 			GuideID:      knock.F("323e4567-e89b-12d3-a456-426614174000"),
 			GuideKey:     knock.F("guide_12345"),
 			GuideStepRef: knock.F("step_12345"),
-			Content: knock.F[any](map[string]interface{}{
-				"body":  "Guide content body",
-				"title": "Guide Title",
+			Content: knock.F(map[string]interface{}{
+				"body":  "bar",
+				"title": "bar",
 			}),
-			Data: knock.F[any](map[string]interface{}{
-				"product_id": "product_123",
+			Data: knock.F(map[string]interface{}{
+				"product_id": "bar",
 			}),
 			IsFinal: knock.F(true),
 			Metadata: knock.F(map[string]interface{}{
@@ -157,12 +157,12 @@ func TestUserGuideMarkMessageAsSeenWithOptionalParams(t *testing.T) {
 			GuideID:      knock.F("323e4567-e89b-12d3-a456-426614174000"),
 			GuideKey:     knock.F("guide_12345"),
 			GuideStepRef: knock.F("step_12345"),
-			Content: knock.F[any](map[string]interface{}{
-				"body":  "Guide content body",
-				"title": "Guide Title",
+			Content: knock.F(map[string]interface{}{
+				"body":  "bar",
+				"title": "bar",
 			}),
-			Data: knock.F[any](map[string]interface{}{
-				"product_id": "product_123",
+			Data: knock.F(map[string]interface{}{
+				"product_id": "bar",
 			}),
 			IsFinal: knock.F(true),
 			Metadata: knock.F(map[string]interface{}{
