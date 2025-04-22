@@ -38,13 +38,13 @@ func NewChannelBulkService(opts ...option.RequestOption) (r *ChannelBulkService)
 // specified by the `channel_id` parameter. The action to perform is specified by
 // the `action` parameter, where the action is a status change action (e.g.
 // `archive`, `unarchive`).
-func (r *ChannelBulkService) UpdateMessageStatus(ctx context.Context, channelID string, status ChannelBulkUpdateMessageStatusParamsStatus, body ChannelBulkUpdateMessageStatusParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
+func (r *ChannelBulkService) UpdateMessageStatus(ctx context.Context, channelID string, action ChannelBulkUpdateMessageStatusParamsAction, body ChannelBulkUpdateMessageStatusParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
 		return
 	}
-	path := fmt.Sprintf("v1/channels/%s/messages/bulk/%v", channelID, status)
+	path := fmt.Sprintf("v1/channels/%s/messages/bulk/%v", channelID, action)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
@@ -78,25 +78,24 @@ func (r ChannelBulkUpdateMessageStatusParams) MarshalJSON() (data []byte, err er
 	return apijson.MarshalRoot(r)
 }
 
-// The target status to be applied to the messages.
-type ChannelBulkUpdateMessageStatusParamsStatus string
+type ChannelBulkUpdateMessageStatusParamsAction string
 
 const (
-	ChannelBulkUpdateMessageStatusParamsStatusSeen       ChannelBulkUpdateMessageStatusParamsStatus = "seen"
-	ChannelBulkUpdateMessageStatusParamsStatusUnseen     ChannelBulkUpdateMessageStatusParamsStatus = "unseen"
-	ChannelBulkUpdateMessageStatusParamsStatusRead       ChannelBulkUpdateMessageStatusParamsStatus = "read"
-	ChannelBulkUpdateMessageStatusParamsStatusUnread     ChannelBulkUpdateMessageStatusParamsStatus = "unread"
-	ChannelBulkUpdateMessageStatusParamsStatusArchived   ChannelBulkUpdateMessageStatusParamsStatus = "archived"
-	ChannelBulkUpdateMessageStatusParamsStatusUnarchived ChannelBulkUpdateMessageStatusParamsStatus = "unarchived"
-	ChannelBulkUpdateMessageStatusParamsStatusInteracted ChannelBulkUpdateMessageStatusParamsStatus = "interacted"
-	ChannelBulkUpdateMessageStatusParamsStatusArchive    ChannelBulkUpdateMessageStatusParamsStatus = "archive"
-	ChannelBulkUpdateMessageStatusParamsStatusUnarchive  ChannelBulkUpdateMessageStatusParamsStatus = "unarchive"
-	ChannelBulkUpdateMessageStatusParamsStatusDelete     ChannelBulkUpdateMessageStatusParamsStatus = "delete"
+	ChannelBulkUpdateMessageStatusParamsActionSeen       ChannelBulkUpdateMessageStatusParamsAction = "seen"
+	ChannelBulkUpdateMessageStatusParamsActionUnseen     ChannelBulkUpdateMessageStatusParamsAction = "unseen"
+	ChannelBulkUpdateMessageStatusParamsActionRead       ChannelBulkUpdateMessageStatusParamsAction = "read"
+	ChannelBulkUpdateMessageStatusParamsActionUnread     ChannelBulkUpdateMessageStatusParamsAction = "unread"
+	ChannelBulkUpdateMessageStatusParamsActionArchived   ChannelBulkUpdateMessageStatusParamsAction = "archived"
+	ChannelBulkUpdateMessageStatusParamsActionUnarchived ChannelBulkUpdateMessageStatusParamsAction = "unarchived"
+	ChannelBulkUpdateMessageStatusParamsActionInteracted ChannelBulkUpdateMessageStatusParamsAction = "interacted"
+	ChannelBulkUpdateMessageStatusParamsActionArchive    ChannelBulkUpdateMessageStatusParamsAction = "archive"
+	ChannelBulkUpdateMessageStatusParamsActionUnarchive  ChannelBulkUpdateMessageStatusParamsAction = "unarchive"
+	ChannelBulkUpdateMessageStatusParamsActionDelete     ChannelBulkUpdateMessageStatusParamsAction = "delete"
 )
 
-func (r ChannelBulkUpdateMessageStatusParamsStatus) IsKnown() bool {
+func (r ChannelBulkUpdateMessageStatusParamsAction) IsKnown() bool {
 	switch r {
-	case ChannelBulkUpdateMessageStatusParamsStatusSeen, ChannelBulkUpdateMessageStatusParamsStatusUnseen, ChannelBulkUpdateMessageStatusParamsStatusRead, ChannelBulkUpdateMessageStatusParamsStatusUnread, ChannelBulkUpdateMessageStatusParamsStatusArchived, ChannelBulkUpdateMessageStatusParamsStatusUnarchived, ChannelBulkUpdateMessageStatusParamsStatusInteracted, ChannelBulkUpdateMessageStatusParamsStatusArchive, ChannelBulkUpdateMessageStatusParamsStatusUnarchive, ChannelBulkUpdateMessageStatusParamsStatusDelete:
+	case ChannelBulkUpdateMessageStatusParamsActionSeen, ChannelBulkUpdateMessageStatusParamsActionUnseen, ChannelBulkUpdateMessageStatusParamsActionRead, ChannelBulkUpdateMessageStatusParamsActionUnread, ChannelBulkUpdateMessageStatusParamsActionArchived, ChannelBulkUpdateMessageStatusParamsActionUnarchived, ChannelBulkUpdateMessageStatusParamsActionInteracted, ChannelBulkUpdateMessageStatusParamsActionArchive, ChannelBulkUpdateMessageStatusParamsActionUnarchive, ChannelBulkUpdateMessageStatusParamsActionDelete:
 		return true
 	}
 	return false

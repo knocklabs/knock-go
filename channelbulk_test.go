@@ -30,7 +30,7 @@ func TestChannelBulkUpdateMessageStatusWithOptionalParams(t *testing.T) {
 	_, err := client.Channels.Bulk.UpdateMessageStatus(
 		context.TODO(),
 		"182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
-		knock.ChannelBulkUpdateMessageStatusParamsStatusSeen,
+		knock.ChannelBulkUpdateMessageStatusParamsActionSeen,
 		knock.ChannelBulkUpdateMessageStatusParams{
 			Archived:         knock.F(knock.ChannelBulkUpdateMessageStatusParamsArchivedInclude),
 			DeliveryStatus:   knock.F(knock.ChannelBulkUpdateMessageStatusParamsDeliveryStatusDelivered),
