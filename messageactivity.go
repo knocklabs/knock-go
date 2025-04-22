@@ -9,11 +9,11 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/stainless-sdks/knock-go/internal/apijson"
 	"github.com/stainless-sdks/knock-go/internal/apiquery"
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
+	"github.com/stainless-sdks/knock-go/packages/pagination"
 )
 
 // MessageActivityService contains methods and other services that help with
@@ -36,44 +36,30 @@ func NewMessageActivityService(opts ...option.RequestOption) (r *MessageActivity
 }
 
 // Returns a paginated list of activities for the specified message.
-func (r *MessageActivityService) List(ctx context.Context, messageID string, query MessageActivityListParams, opts ...option.RequestOption) (res *MessageActivityListResponse, err error) {
+func (r *MessageActivityService) List(ctx context.Context, messageID string, query MessageActivityListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Activity], err error) {
+	var raw *http.Response
 	opts = append(r.Options[:], opts...)
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/messages/%s/activities", messageID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
 }
 
-// Returns a paginated list of `activities` associated with a given message. For
-// messages produced after a [batch step](/designing-workflows/batch-function),
-// this will contain one or more activities. Non-batched messages will always
-// return a single activity.
-type MessageActivityListResponse struct {
-	// A list of activities.
-	Entries []Activity `json:"entries,required"`
-	// Pagination information for a list of resources.
-	PageInfo PageInfo                        `json:"page_info,required"`
-	JSON     messageActivityListResponseJSON `json:"-"`
-}
-
-// messageActivityListResponseJSON contains the JSON metadata for the struct
-// [MessageActivityListResponse]
-type messageActivityListResponseJSON struct {
-	Entries     apijson.Field
-	PageInfo    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *MessageActivityListResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageActivityListResponseJSON) RawJSON() string {
-	return r.raw
+// Returns a paginated list of activities for the specified message.
+func (r *MessageActivityService) ListAutoPaging(ctx context.Context, messageID string, query MessageActivityListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Activity] {
+	return pagination.NewEntriesCursorAutoPager(r.List(ctx, messageID, query, opts...))
 }
 
 type MessageActivityListParams struct {
