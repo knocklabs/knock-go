@@ -106,15 +106,30 @@ func (r *MessageService) GetContent(ctx context.Context, messageID string, opts 
 }
 
 // Returns a paginated list of activities for the specified message.
-func (r *MessageService) ListActivities(ctx context.Context, messageID string, query MessageListActivitiesParams, opts ...option.RequestOption) (res *MessageListActivitiesResponse, err error) {
+func (r *MessageService) ListActivities(ctx context.Context, messageID string, query MessageListActivitiesParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[Activity], err error) {
+	var raw *http.Response
 	opts = append(r.Options[:], opts...)
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/messages/%s/activities", messageID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// Returns a paginated list of activities for the specified message.
+func (r *MessageService) ListActivitiesAutoPaging(ctx context.Context, messageID string, query MessageListActivitiesParams, opts ...option.RequestOption) *pagination.ItemsCursorAutoPager[Activity] {
+	return pagination.NewItemsCursorAutoPager(r.ListActivities(ctx, messageID, query, opts...))
 }
 
 // Returns a paginated list of delivery logs for the specified message.
@@ -1340,35 +1355,6 @@ func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksType) IsKnown(
 		return true
 	}
 	return false
-}
-
-// Returns a paginated list of `activities` associated with a given message. For
-// messages produced after a [batch step](/designing-workflows/batch-function),
-// this will contain one or more activities. Non-batched messages will always
-// return a single activity.
-type MessageListActivitiesResponse struct {
-	// A list of activities.
-	Entries []Activity `json:"entries,required"`
-	// Pagination information for a list of resources.
-	PageInfo PageInfo                          `json:"page_info,required"`
-	JSON     messageListActivitiesResponseJSON `json:"-"`
-}
-
-// messageListActivitiesResponseJSON contains the JSON metadata for the struct
-// [MessageListActivitiesResponse]
-type messageListActivitiesResponseJSON struct {
-	Entries     apijson.Field
-	PageInfo    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *MessageListActivitiesResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageListActivitiesResponseJSON) RawJSON() string {
-	return r.raw
 }
 
 type MessageListParams struct {

@@ -36,7 +36,7 @@ func NewMessageActivityService(opts ...option.RequestOption) (r *MessageActivity
 }
 
 // Returns a paginated list of activities for the specified message.
-func (r *MessageActivityService) List(ctx context.Context, messageID string, query MessageActivityListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Activity], err error) {
+func (r *MessageActivityService) List(ctx context.Context, messageID string, query MessageActivityListParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[Activity], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -58,8 +58,8 @@ func (r *MessageActivityService) List(ctx context.Context, messageID string, que
 }
 
 // Returns a paginated list of activities for the specified message.
-func (r *MessageActivityService) ListAutoPaging(ctx context.Context, messageID string, query MessageActivityListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Activity] {
-	return pagination.NewEntriesCursorAutoPager(r.List(ctx, messageID, query, opts...))
+func (r *MessageActivityService) ListAutoPaging(ctx context.Context, messageID string, query MessageActivityListParams, opts ...option.RequestOption) *pagination.ItemsCursorAutoPager[Activity] {
+	return pagination.NewItemsCursorAutoPager(r.List(ctx, messageID, query, opts...))
 }
 
 type MessageActivityListParams struct {
