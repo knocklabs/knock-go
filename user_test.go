@@ -39,6 +39,7 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 					Data: knock.F[knock.InlineChannelDataRequestItemDataUnionParam](knock.PushChannelDataParam{
 						Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
 						Tokens:   knock.F([]string{"push_token_123"}),
+						Type:     knock.F(knock.PushChannelDataTypePushFcm),
 					}),
 					Provider: knock.F("push_fcm"),
 				}}),
@@ -424,6 +425,7 @@ func TestUserSetChannelData(t *testing.T) {
 				Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
 					Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
 					Tokens:   knock.F([]string{"push_token_1"}),
+					Type:     knock.F(knock.PushChannelDataTypePushFcm),
 				}),
 			},
 		},

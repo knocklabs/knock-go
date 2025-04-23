@@ -111,6 +111,7 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 				Data: knock.F[knock.InlineChannelDataRequestItemDataUnionParam](knock.PushChannelDataParam{
 					Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
 					Tokens:   knock.F([]string{"push_token_xxx"}),
+					Type:     knock.F(knock.PushChannelDataTypePushFcm),
 				}),
 				Provider: knock.F("push_fcm"),
 			}}),
