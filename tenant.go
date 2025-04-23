@@ -4,8 +4,6 @@ package knock
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -59,43 +57,6 @@ func (r *TenantService) List(ctx context.Context, query TenantListParams, opts .
 // List tenants for the current environment.
 func (r *TenantService) ListAutoPaging(ctx context.Context, query TenantListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Tenant] {
 	return pagination.NewEntriesCursorAutoPager(r.List(ctx, query, opts...))
-}
-
-// Delete a tenant and all associated data. This operation cannot be undone.
-func (r *TenantService) Delete(ctx context.Context, tenantID string, opts ...option.RequestOption) (res *string, err error) {
-	opts = append(r.Options[:], opts...)
-	if tenantID == "" {
-		err = errors.New("missing required tenant_id parameter")
-		return
-	}
-	path := fmt.Sprintf("v1/tenants/%s", tenantID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
-	return
-}
-
-// Get a tenant by ID.
-func (r *TenantService) Get(ctx context.Context, tenantID string, opts ...option.RequestOption) (res *Tenant, err error) {
-	opts = append(r.Options[:], opts...)
-	if tenantID == "" {
-		err = errors.New("missing required tenant_id parameter")
-		return
-	}
-	path := fmt.Sprintf("v1/tenants/%s", tenantID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
-}
-
-// Set or update a tenant's properties and settings. This operation allows you to
-// update tenant preferences, channel data, and branding settings.
-func (r *TenantService) Set(ctx context.Context, tenantID string, body TenantSetParams, opts ...option.RequestOption) (res *Tenant, err error) {
-	opts = append(r.Options[:], opts...)
-	if tenantID == "" {
-		err = errors.New("missing required tenant_id parameter")
-		return
-	}
-	path := fmt.Sprintf("v1/tenants/%s", tenantID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
 }
 
 // An request to set a tenant inline.
@@ -200,45 +161,4 @@ func (r TenantListParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
-}
-
-type TenantSetParams struct {
-	// A request to set channel data for a type of channel inline.
-	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
-	// The settings for the tenant. Includes branding and preference set.
-	Settings param.Field[TenantSetParamsSettings] `json:"settings"`
-}
-
-func (r TenantSetParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// The settings for the tenant. Includes branding and preference set.
-type TenantSetParamsSettings struct {
-	// The branding for the tenant.
-	Branding param.Field[TenantSetParamsSettingsBranding] `json:"branding"`
-	// A request to set a preference set for a recipient.
-	PreferenceSet param.Field[PreferenceSetRequestParam] `json:"preference_set"`
-}
-
-func (r TenantSetParamsSettings) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// The branding for the tenant.
-type TenantSetParamsSettingsBranding struct {
-	// The icon URL for the tenant.
-	IconURL param.Field[string] `json:"icon_url"`
-	// The logo URL for the tenant.
-	LogoURL param.Field[string] `json:"logo_url"`
-	// The primary color for the tenant.
-	PrimaryColor param.Field[string] `json:"primary_color"`
-	// The primary color contrast for the tenant.
-	PrimaryColorContrast param.Field[string] `json:"primary_color_contrast"`
-}
-
-func (r TenantSetParamsSettingsBranding) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
 }

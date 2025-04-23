@@ -207,36 +207,6 @@ func TestUserGetChannelData(t *testing.T) {
 	}
 }
 
-func TestUserGetPreferencesWithOptionalParams(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := knock.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
-	)
-	_, err := client.Users.GetPreferences(
-		context.TODO(),
-		"user_id",
-		"default",
-		knock.UserGetPreferencesParams{
-			Tenant: knock.F("tenant"),
-		},
-	)
-	if err != nil {
-		var apierr *knock.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
 func TestUserListMessagesWithOptionalParams(t *testing.T) {
 	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
 	baseURL := "http://localhost:4010"
@@ -424,80 +394,6 @@ func TestUserSetChannelData(t *testing.T) {
 				Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
 					Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
 					Tokens:   knock.F([]string{"push_token_1"}),
-				}),
-			},
-		},
-	)
-	if err != nil {
-		var apierr *knock.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestUserSetPreferencesWithOptionalParams(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := knock.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
-	)
-	_, err := client.Users.SetPreferences(
-		context.TODO(),
-		"user_id",
-		"default",
-		knock.UserSetPreferencesParams{
-			PreferenceSetRequest: knock.PreferenceSetRequestParam{
-				Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
-					"marketing": shared.UnionBool(false),
-					"transactional": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
-						ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-							Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-							Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
-							HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-							InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-							Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-							SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
-						}),
-						Conditions: knock.F([]knock.ConditionParam{{
-							Argument: knock.F("some_property"),
-							Operator: knock.F(knock.ConditionOperatorEqualTo),
-							Variable: knock.F("recipient.property"),
-						}}),
-					},
-				}),
-				ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-					Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-					Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
-					HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-					InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-					Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-					SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
-				}),
-				Workflows: knock.F(map[string]knock.PreferenceSetRequestWorkflowsUnionParam{
-					"dinosaurs-loose": knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
-						ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-							Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-							Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
-							HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-							InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-							Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-							SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
-						}),
-						Conditions: knock.F([]knock.ConditionParam{{
-							Argument: knock.F("some_property"),
-							Operator: knock.F(knock.ConditionOperatorEqualTo),
-							Variable: knock.F("recipient.property"),
-						}}),
-					},
 				}),
 			},
 		},
