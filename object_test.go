@@ -386,7 +386,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 				ChannelID: knock.F("97c5837d-c65c-4d54-aa39-080eeb81c69d"),
 				Data: knock.F[knock.InlineChannelDataRequestItemDataUnionParam](knock.PushChannelDataParam{
 					Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
-					Tokens:   knock.F([]string{"push_token_xxx"}),
+					Tokens:   knock.F([]string{"push_token_123"}),
 				}),
 				Provider: knock.F("push_fcm"),
 			}}),
@@ -394,7 +394,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
 				ID: knock.F("default"),
 				Categories: knock.F(map[string]knock.InlinePreferenceSetRequestItemCategoriesUnionParam{
-					"transactional": knock.InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
+					"marketing": knock.InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
 						ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
 							Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
 							Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
@@ -409,6 +409,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 							Variable: knock.F("recipient.property"),
 						}}),
 					},
+					"transactional": shared.UnionBool(true),
 				}),
 				ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
 					Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
