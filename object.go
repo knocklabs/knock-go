@@ -314,22 +314,22 @@ func (r *ObjectService) Set(ctx context.Context, collection string, id string, b
 }
 
 // Sets the channel data for the specified object and channel.
-func (r *ObjectService) SetChannelData(ctx context.Context, collection string, channelID string, params ObjectSetChannelDataParams, opts ...option.RequestOption) (res *ChannelData, err error) {
+func (r *ObjectService) SetChannelData(ctx context.Context, collection string, objectID string, channelID string, body ObjectSetChannelDataParams, opts ...option.RequestOption) (res *ChannelData, err error) {
 	opts = append(r.Options[:], opts...)
-	if params.ObjectID.Value == "" {
-		err = errors.New("missing required object_id parameter")
-		return
-	}
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
+		return
+	}
+	if objectID == "" {
+		err = errors.New("missing required object_id parameter")
 		return
 	}
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
 		return
 	}
-	path := fmt.Sprintf("v1/objects/%s/%s/channel_data/%s", collection, params.ObjectID, channelID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, params, &res, opts...)
+	path := fmt.Sprintf("v1/objects/%s/%s/channel_data/%s", collection, objectID, channelID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
 	return
 }
 
@@ -683,7 +683,6 @@ func (r ObjectSetParams) MarshalJSON() (data []byte, err error) {
 }
 
 type ObjectSetChannelDataParams struct {
-	ObjectID param.Field[string] `path:"object_id,required"`
 	// A request to set channel data for a type of channel.
 	ChannelDataRequest ChannelDataRequestParam `json:"channel_data_request,required"`
 }

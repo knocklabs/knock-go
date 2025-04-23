@@ -465,9 +465,9 @@ func TestObjectSetChannelData(t *testing.T) {
 	_, err := client.Objects.SetChannelData(
 		context.TODO(),
 		"collection",
+		"object_id",
 		"182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
 		knock.ObjectSetChannelDataParams{
-			ObjectID: knock.F("object_id"),
 			ChannelDataRequest: knock.ChannelDataRequestParam{
 				Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
 					Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
