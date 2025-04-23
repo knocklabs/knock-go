@@ -382,14 +382,14 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 		"collection",
 		"object_id",
 		knock.ObjectSetParams{
-			ChannelData: knock.F(knock.InlineChannelDataRequestParam{knock.InlineChannelDataRequestItemParam{
-				ChannelID: knock.F("97c5837d-c65c-4d54-aa39-080eeb81c69d"),
+			ChannelData: knock.F([]knock.InlineChannelDataRequestParam{{knock.InlineChannelDataRequestItemParam{
+				ChannelID: knock.F("182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e"),
 				Data: knock.F[knock.InlineChannelDataRequestItemDataUnionParam](knock.PushChannelDataParam{
 					Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
-					Tokens:   knock.F([]string{"push_token_123"}),
+					Tokens:   knock.F([]string{"push_token_1"}),
 				}),
 				Provider: knock.F("push_fcm"),
-			}}),
+			}}}),
 			Locale: knock.F("en-US"),
 			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
 				ID: knock.F("default"),

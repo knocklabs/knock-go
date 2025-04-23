@@ -664,8 +664,9 @@ func (r ObjectListSubscriptionsParamsMode) IsKnown() bool {
 }
 
 type ObjectSetParams struct {
-	// A request to set channel data for a type of channel inline.
-	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// An optional set of [channel data](/managing-recipients/setting-channel-data) for
+	// the object. This is a list of `ChannelData` objects.
+	ChannelData param.Field[[]InlineChannelDataRequestParam] `json:"channel_data"`
 	// The locale of the object. Used for
 	// [message localization](/concepts/translations).
 	Locale param.Field[string] `json:"locale"`
