@@ -122,6 +122,23 @@ func (r *UserService) GetChannelData(ctx context.Context, userID string, channel
 	return
 }
 
+// Retrieves a specific preference set for a user identified by the preference set
+// ID.
+func (r *UserService) GetPreferences(ctx context.Context, userID string, id string, query UserGetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
+	opts = append(r.Options[:], opts...)
+	if userID == "" {
+		err = errors.New("missing required user_id parameter")
+		return
+	}
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/users/%s/preferences/%s", userID, id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
 // Returns a paginated list of messages for a specific user. Allows filtering by
 // message status and provides various sorting options. Messages outside the
 // account's retention window will not be included in the results.
@@ -246,6 +263,23 @@ func (r *UserService) SetChannelData(ctx context.Context, userID string, channel
 		return
 	}
 	path := fmt.Sprintf("v1/users/%s/channel_data/%s", userID, channelID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
+	return
+}
+
+// Updates a complete preference set for a user. This is a destructive operation
+// that will replace the existing preference set for the user.
+func (r *UserService) SetPreferences(ctx context.Context, userID string, id string, body UserSetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
+	opts = append(r.Options[:], opts...)
+	if userID == "" {
+		err = errors.New("missing required user_id parameter")
+		return
+	}
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/users/%s/preferences/%s", userID, id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
 	return
 }
@@ -418,6 +452,20 @@ func (r UserListParamsInclude) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type UserGetPreferencesParams struct {
+	// The unique identifier for the tenant.
+	Tenant param.Field[string] `query:"tenant"`
+}
+
+// URLQuery serializes [UserGetPreferencesParams]'s query parameters as
+// `url.Values`.
+func (r UserGetPreferencesParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 type UserListMessagesParams struct {
@@ -594,4 +642,13 @@ type UserSetChannelDataParams struct {
 
 func (r UserSetChannelDataParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r.ChannelDataRequest)
+}
+
+type UserSetPreferencesParams struct {
+	// A request to set a preference set for a recipient.
+	PreferenceSetRequest PreferenceSetRequestParam `json:"preference_set_request,required"`
+}
+
+func (r UserSetPreferencesParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r.PreferenceSetRequest)
 }
