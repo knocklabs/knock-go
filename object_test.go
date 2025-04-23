@@ -390,6 +390,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 				}),
 				Provider: knock.F("push_fcm"),
 			}}),
+			Locale: knock.F("en-US"),
 			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
 				ID: knock.F("default"),
 				Categories: knock.F(map[string]knock.InlinePreferenceSetRequestItemCategoriesUnionParam{
@@ -435,6 +436,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 					},
 				}),
 			}}),
+			Timezone: knock.F("America/New_York"),
 		},
 	)
 	if err != nil {

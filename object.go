@@ -666,8 +666,16 @@ func (r ObjectListSubscriptionsParamsMode) IsKnown() bool {
 type ObjectSetParams struct {
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// The locale of the object. Used for
+	// [message localization](/concepts/translations).
+	Locale param.Field[string] `json:"locale"`
 	// Inline set preferences for a recipient, where the key is the preference set name
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+	// The timezone of the object. Must be a valid
+	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used for
+	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
+	Timezone param.Field[string] `json:"timezone"`
 }
 
 func (r ObjectSetParams) MarshalJSON() (data []byte, err error) {
