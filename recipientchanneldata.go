@@ -494,10 +494,12 @@ type InlineChannelDataRequestParam []InlineChannelDataRequestItemParam
 
 // A request to set channel data for a type of channel inline.
 type InlineChannelDataRequestItemParam struct {
-	// The ID of the channel to associate data with
+	// The ID of the channel to associate data with.
 	ChannelID param.Field[string] `json:"channel_id,required" format:"uuid"`
 	// Channel data for a given channel type.
 	Data param.Field[InlineChannelDataRequestItemDataUnionParam] `json:"data,required"`
+	// The provider identifier (must match the data.type value)
+	Provider param.Field[string] `json:"provider,required"`
 }
 
 func (r InlineChannelDataRequestItemParam) MarshalJSON() (data []byte, err error) {

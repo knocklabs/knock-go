@@ -39,6 +39,7 @@ func TestScheduleBulkNew(t *testing.T) {
 						Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
 						Tokens:   knock.F([]string{"push_token_xxx"}),
 					}),
+					Provider: knock.F("push_fcm"),
 				}}),
 				CreatedAt: knock.F(time.Now()),
 				Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
@@ -113,6 +114,7 @@ func TestScheduleBulkNew(t *testing.T) {
 						Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
 						Tokens:   knock.F([]string{"push_token_xxx"}),
 					}),
+					Provider: knock.F("push_fcm"),
 				}}),
 				CreatedAt: knock.F(time.Now()),
 				Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{

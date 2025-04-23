@@ -388,6 +388,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 					Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
 					Tokens:   knock.F([]string{"push_token_xxx"}),
 				}),
+				Provider: knock.F("push_fcm"),
 			}}),
 			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
 				ID: knock.F("default"),
