@@ -38,8 +38,6 @@ type InlinePreferenceSetRequestParam map[string]PreferenceSetRequestParam
 type PreferenceSet struct {
 	// Unique identifier for the preference set.
 	ID string `json:"id,required"`
-	// The typename of the schema.
-	Typename string `json:"__typename,required"`
 	// An object where the key is the category and the values are the preference
 	// settings for that category.
 	Categories map[string]PreferenceSetCategoriesUnion `json:"categories,nullable"`
@@ -54,7 +52,6 @@ type PreferenceSet struct {
 // preferenceSetJSON contains the JSON metadata for the struct [PreferenceSet]
 type preferenceSetJSON struct {
 	ID           apijson.Field
-	Typename     apijson.Field
 	Categories   apijson.Field
 	ChannelTypes apijson.Field
 	Workflows    apijson.Field

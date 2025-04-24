@@ -386,17 +386,15 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 		"id",
 		knock.ObjectSetParams{
 			ChannelData: knock.F(knock.InlineChannelDataRequestParam{
-				"0": knock.ChannelDataRequestParam{
+				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.ChannelDataRequestParam{
 					Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
-						Tokens:   knock.F([]string{"push_token_123"}),
-						Type:     knock.F(knock.PushChannelDataTypePushFcm),
-						Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
+						Tokens: knock.F([]string{"push_token_123"}),
 					}),
 				},
 			}),
 			Locale: knock.F("en-US"),
 			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
-				"0": knock.PreferenceSetRequestParam{
+				"default": knock.PreferenceSetRequestParam{
 					Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
 						"marketing": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
 							ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
@@ -475,9 +473,7 @@ func TestObjectSetChannelData(t *testing.T) {
 		knock.ObjectSetChannelDataParams{
 			ChannelDataRequest: knock.ChannelDataRequestParam{
 				Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
-					Tokens:   knock.F([]string{"push_token_1"}),
-					Type:     knock.F(knock.PushChannelDataTypePushFcm),
-					Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
+					Tokens: knock.F([]string{"push_token_1"}),
 				}),
 			},
 		},
