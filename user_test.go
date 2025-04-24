@@ -44,9 +44,9 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 					Provider: knock.F("push_fcm"),
 				}}),
 				CreatedAt:   knock.F(time.Now()),
-				Email:       knock.F("jane@ingen.net"),
+				Email:       knock.F("ian.malcolm@chaos.theory"),
 				Locale:      knock.F("locale"),
-				Name:        knock.F("Jane Doe"),
+				Name:        knock.F("Dr. Ian Malcolm"),
 				PhoneNumber: knock.F("phone_number"),
 				Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
 					ID: knock.F("default"),

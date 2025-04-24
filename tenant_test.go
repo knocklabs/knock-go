@@ -162,10 +162,10 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 			}}),
 			Settings: knock.F(knock.TenantSetParamsSettings{
 				Branding: knock.F(knock.TenantSetParamsSettingsBranding{
-					IconURL:              knock.F("https://example.com/icon.png"),
-					LogoURL:              knock.F("https://example.com/logo.png"),
-					PrimaryColor:         knock.F("#000000"),
-					PrimaryColorContrast: knock.F("#FFFFFF"),
+					IconURL:              knock.F("https://example.com/trex_silhouette_icon.png"),
+					LogoURL:              knock.F("https://example.com/amber_fossil_logo.png"),
+					PrimaryColor:         knock.F("#DF1A22"),
+					PrimaryColorContrast: knock.F("#FFDE00"),
 				}),
 				PreferenceSet: knock.F(knock.PreferenceSetRequestParam{
 					Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{

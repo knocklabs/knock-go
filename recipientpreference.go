@@ -33,9 +33,8 @@ func NewRecipientPreferenceService(opts ...option.RequestOption) (r *RecipientPr
 
 type InlinePreferenceSetRequestParam []InlinePreferenceSetRequestItemParam
 
-// Inline set preferences for a recipient, where the key is the preference set name
 type InlinePreferenceSetRequestItemParam struct {
-	// The ID of the preference set
+	// Unique identifier for the preference set.
 	ID param.Field[string] `json:"id,required"`
 	// An object where the key is the category and the values are the preference
 	// settings for that category.
