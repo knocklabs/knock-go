@@ -313,17 +313,17 @@ func (r PreferenceSetChannelTypeSettingParam) ImplementsPreferenceSetChannelType
 
 // Channel type preferences.
 type PreferenceSetChannelTypes struct {
-	// Whether the channel type is enabled for the preference set.
+	// Either a boolean or a setting for the given channel type.
 	Chat PreferenceSetChannelTypesChatUnion `json:"chat"`
-	// Whether the channel type is enabled for the preference set.
+	// Either a boolean or a setting for the given channel type.
 	Email PreferenceSetChannelTypesEmailUnion `json:"email"`
-	// Whether the channel type is enabled for the preference set.
+	// Either a boolean or a setting for the given channel type.
 	HTTP PreferenceSetChannelTypesHTTPUnion `json:"http"`
-	// Whether the channel type is enabled for the preference set.
+	// Either a boolean or a setting for the given channel type.
 	InAppFeed PreferenceSetChannelTypesInAppFeedUnion `json:"in_app_feed"`
-	// Whether the channel type is enabled for the preference set.
+	// Either a boolean or a setting for the given channel type.
 	Push PreferenceSetChannelTypesPushUnion `json:"push"`
-	// Whether the channel type is enabled for the preference set.
+	// Either a boolean or a setting for the given channel type.
 	SMS  PreferenceSetChannelTypesSMSUnion `json:"sms"`
 	JSON preferenceSetChannelTypesJSON     `json:"-"`
 }
@@ -349,7 +349,7 @@ func (r preferenceSetChannelTypesJSON) RawJSON() string {
 	return r.raw
 }
 
-// Whether the channel type is enabled for the preference set.
+// Either a boolean or a setting for the given channel type.
 //
 // Union satisfied by [shared.UnionBool] or [PreferenceSetChannelTypeSetting].
 type PreferenceSetChannelTypesChatUnion interface {
@@ -375,7 +375,7 @@ func init() {
 	)
 }
 
-// Whether the channel type is enabled for the preference set.
+// Either a boolean or a setting for the given channel type.
 //
 // Union satisfied by [shared.UnionBool] or [PreferenceSetChannelTypeSetting].
 type PreferenceSetChannelTypesEmailUnion interface {
@@ -401,7 +401,7 @@ func init() {
 	)
 }
 
-// Whether the channel type is enabled for the preference set.
+// Either a boolean or a setting for the given channel type.
 //
 // Union satisfied by [shared.UnionBool] or [PreferenceSetChannelTypeSetting].
 type PreferenceSetChannelTypesHTTPUnion interface {
@@ -427,7 +427,7 @@ func init() {
 	)
 }
 
-// Whether the channel type is enabled for the preference set.
+// Either a boolean or a setting for the given channel type.
 //
 // Union satisfied by [shared.UnionBool] or [PreferenceSetChannelTypeSetting].
 type PreferenceSetChannelTypesInAppFeedUnion interface {
@@ -453,7 +453,7 @@ func init() {
 	)
 }
 
-// Whether the channel type is enabled for the preference set.
+// Either a boolean or a setting for the given channel type.
 //
 // Union satisfied by [shared.UnionBool] or [PreferenceSetChannelTypeSetting].
 type PreferenceSetChannelTypesPushUnion interface {
@@ -479,7 +479,7 @@ func init() {
 	)
 }
 
-// Whether the channel type is enabled for the preference set.
+// Either a boolean or a setting for the given channel type.
 //
 // Union satisfied by [shared.UnionBool] or [PreferenceSetChannelTypeSetting].
 type PreferenceSetChannelTypesSMSUnion interface {
@@ -507,17 +507,17 @@ func init() {
 
 // Channel type preferences.
 type PreferenceSetChannelTypesParam struct {
-	// Whether the channel type is enabled for the preference set.
+	// Either a boolean or a setting for the given channel type.
 	Chat param.Field[PreferenceSetChannelTypesChatUnionParam] `json:"chat"`
-	// Whether the channel type is enabled for the preference set.
+	// Either a boolean or a setting for the given channel type.
 	Email param.Field[PreferenceSetChannelTypesEmailUnionParam] `json:"email"`
-	// Whether the channel type is enabled for the preference set.
+	// Either a boolean or a setting for the given channel type.
 	HTTP param.Field[PreferenceSetChannelTypesHTTPUnionParam] `json:"http"`
-	// Whether the channel type is enabled for the preference set.
+	// Either a boolean or a setting for the given channel type.
 	InAppFeed param.Field[PreferenceSetChannelTypesInAppFeedUnionParam] `json:"in_app_feed"`
-	// Whether the channel type is enabled for the preference set.
+	// Either a boolean or a setting for the given channel type.
 	Push param.Field[PreferenceSetChannelTypesPushUnionParam] `json:"push"`
-	// Whether the channel type is enabled for the preference set.
+	// Either a boolean or a setting for the given channel type.
 	SMS param.Field[PreferenceSetChannelTypesSMSUnionParam] `json:"sms"`
 }
 
@@ -525,42 +525,42 @@ func (r PreferenceSetChannelTypesParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// Whether the channel type is enabled for the preference set.
+// Either a boolean or a setting for the given channel type.
 //
 // Satisfied by [shared.UnionBool], [PreferenceSetChannelTypeSettingParam].
 type PreferenceSetChannelTypesChatUnionParam interface {
 	ImplementsPreferenceSetChannelTypesChatUnionParam()
 }
 
-// Whether the channel type is enabled for the preference set.
+// Either a boolean or a setting for the given channel type.
 //
 // Satisfied by [shared.UnionBool], [PreferenceSetChannelTypeSettingParam].
 type PreferenceSetChannelTypesEmailUnionParam interface {
 	ImplementsPreferenceSetChannelTypesEmailUnionParam()
 }
 
-// Whether the channel type is enabled for the preference set.
+// Either a boolean or a setting for the given channel type.
 //
 // Satisfied by [shared.UnionBool], [PreferenceSetChannelTypeSettingParam].
 type PreferenceSetChannelTypesHTTPUnionParam interface {
 	ImplementsPreferenceSetChannelTypesHTTPUnionParam()
 }
 
-// Whether the channel type is enabled for the preference set.
+// Either a boolean or a setting for the given channel type.
 //
 // Satisfied by [shared.UnionBool], [PreferenceSetChannelTypeSettingParam].
 type PreferenceSetChannelTypesInAppFeedUnionParam interface {
 	ImplementsPreferenceSetChannelTypesInAppFeedUnionParam()
 }
 
-// Whether the channel type is enabled for the preference set.
+// Either a boolean or a setting for the given channel type.
 //
 // Satisfied by [shared.UnionBool], [PreferenceSetChannelTypeSettingParam].
 type PreferenceSetChannelTypesPushUnionParam interface {
 	ImplementsPreferenceSetChannelTypesPushUnionParam()
 }
 
-// Whether the channel type is enabled for the preference set.
+// Either a boolean or a setting for the given channel type.
 //
 // Satisfied by [shared.UnionBool], [PreferenceSetChannelTypeSettingParam].
 type PreferenceSetChannelTypesSMSUnionParam interface {
