@@ -34,7 +34,7 @@ func TestAudienceAddMembers(t *testing.T) {
 		knock.AudienceAddMembersParams{
 			Members: knock.F([]knock.AudienceAddMembersParamsMember{{
 				User: knock.F(knock.InlineIdentifyUserRequestParam{
-					ID: knock.F("user_1"),
+					ID: knock.F("dr_sattler"),
 					ChannelData: knock.F(knock.InlineChannelDataRequestParam{knock.InlineChannelDataRequestItemParam{
 						ChannelID: knock.F("97c5837d-c65c-4d54-aa39-080eeb81c69d"),
 						Data: knock.F[knock.InlineChannelDataRequestItemDataUnionParam](knock.PushChannelDataParam{
@@ -58,9 +58,9 @@ func TestAudienceAddMembers(t *testing.T) {
 									SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
 								}),
 								Conditions: knock.F([]knock.ConditionParam{{
-									Argument: knock.F("some_property"),
-									Operator: knock.F(knock.ConditionOperatorEqualTo),
-									Variable: knock.F("recipient.property"),
+									Argument: knock.F("frog_genome"),
+									Operator: knock.F(knock.ConditionOperatorContains),
+									Variable: knock.F("specimen.dna_sequence"),
 								}}),
 							},
 						}),
@@ -83,15 +83,15 @@ func TestAudienceAddMembers(t *testing.T) {
 									SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
 								}),
 								Conditions: knock.F([]knock.ConditionParam{{
-									Argument: knock.F("some_property"),
-									Operator: knock.F(knock.ConditionOperatorEqualTo),
-									Variable: knock.F("recipient.property"),
+									Argument: knock.F("frog_genome"),
+									Operator: knock.F(knock.ConditionOperatorContains),
+									Variable: knock.F("specimen.dna_sequence"),
 								}}),
 							},
 						}),
 					}}),
 				}),
-				Tenant: knock.Null[string](),
+				Tenant: knock.F("ingen_isla_nublar"),
 			}}),
 		},
 	)
@@ -146,7 +146,7 @@ func TestAudienceRemoveMembers(t *testing.T) {
 		knock.AudienceRemoveMembersParams{
 			Members: knock.F([]knock.AudienceRemoveMembersParamsMember{{
 				User: knock.F(knock.InlineIdentifyUserRequestParam{
-					ID: knock.F("user_1"),
+					ID: knock.F("dr_sattler"),
 					ChannelData: knock.F(knock.InlineChannelDataRequestParam{knock.InlineChannelDataRequestItemParam{
 						ChannelID: knock.F("97c5837d-c65c-4d54-aa39-080eeb81c69d"),
 						Data: knock.F[knock.InlineChannelDataRequestItemDataUnionParam](knock.PushChannelDataParam{
@@ -170,9 +170,9 @@ func TestAudienceRemoveMembers(t *testing.T) {
 									SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
 								}),
 								Conditions: knock.F([]knock.ConditionParam{{
-									Argument: knock.F("some_property"),
-									Operator: knock.F(knock.ConditionOperatorEqualTo),
-									Variable: knock.F("recipient.property"),
+									Argument: knock.F("frog_genome"),
+									Operator: knock.F(knock.ConditionOperatorContains),
+									Variable: knock.F("specimen.dna_sequence"),
 								}}),
 							},
 						}),
@@ -195,15 +195,15 @@ func TestAudienceRemoveMembers(t *testing.T) {
 									SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
 								}),
 								Conditions: knock.F([]knock.ConditionParam{{
-									Argument: knock.F("some_property"),
-									Operator: knock.F(knock.ConditionOperatorEqualTo),
-									Variable: knock.F("recipient.property"),
+									Argument: knock.F("frog_genome"),
+									Operator: knock.F(knock.ConditionOperatorContains),
+									Variable: knock.F("specimen.dna_sequence"),
 								}}),
 							},
 						}),
 					}}),
 				}),
-				Tenant: knock.Null[string](),
+				Tenant: knock.F("ingen_isla_nublar"),
 			}}),
 		},
 	)

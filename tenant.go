@@ -114,7 +114,7 @@ type Tenant struct {
 	// An optional name for the tenant.
 	Name string `json:"name,nullable"`
 	// The settings for the tenant. Includes branding and preference set.
-	Settings    interface{}            `json:"settings,nullable"`
+	Settings    TenantSettings         `json:"settings,nullable"`
 	ExtraFields map[string]interface{} `json:"-,extras"`
 	JSON        tenantJSON             `json:"-"`
 }
@@ -134,6 +134,66 @@ func (r *Tenant) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r tenantJSON) RawJSON() string {
+	return r.raw
+}
+
+// The settings for the tenant. Includes branding and preference set.
+type TenantSettings struct {
+	// The branding for the tenant.
+	Branding TenantSettingsBranding `json:"branding,nullable"`
+	// A preference set represents a specific set of notification preferences for a
+	// recipient. A recipient can have multiple preference sets.
+	PreferenceSet PreferenceSet      `json:"preference_set,nullable"`
+	JSON          tenantSettingsJSON `json:"-"`
+}
+
+// tenantSettingsJSON contains the JSON metadata for the struct [TenantSettings]
+type tenantSettingsJSON struct {
+	Branding      apijson.Field
+	PreferenceSet apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
+}
+
+func (r *TenantSettings) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r tenantSettingsJSON) RawJSON() string {
+	return r.raw
+}
+
+// The branding for the tenant.
+type TenantSettingsBranding struct {
+	// The icon URL for the tenant. Must point to a valid image with an image MIME
+	// type.
+	IconURL string `json:"icon_url,nullable" format:"uri"`
+	// The logo URL for the tenant. Must point to a valid image with an image MIME
+	// type.
+	LogoURL string `json:"logo_url,nullable" format:"uri"`
+	// The primary color for the tenant, provided as a hex value.
+	PrimaryColor string `json:"primary_color,nullable"`
+	// The primary color contrast for the tenant, provided as a hex value.
+	PrimaryColorContrast string                     `json:"primary_color_contrast,nullable"`
+	JSON                 tenantSettingsBrandingJSON `json:"-"`
+}
+
+// tenantSettingsBrandingJSON contains the JSON metadata for the struct
+// [TenantSettingsBranding]
+type tenantSettingsBrandingJSON struct {
+	IconURL              apijson.Field
+	LogoURL              apijson.Field
+	PrimaryColor         apijson.Field
+	PrimaryColorContrast apijson.Field
+	raw                  string
+	ExtraFields          map[string]apijson.Field
+}
+
+func (r *TenantSettingsBranding) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r tenantSettingsBrandingJSON) RawJSON() string {
 	return r.raw
 }
 

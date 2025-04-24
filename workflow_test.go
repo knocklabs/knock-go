@@ -61,17 +61,18 @@ func TestWorkflowTriggerWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"key",
 		knock.WorkflowTriggerParams{
-			Recipients:      knock.F([]knock.RecipientRequestUnionParam{shared.UnionString("jhammond")}),
-			Actor:           knock.F[knock.RecipientRequestUnionParam](shared.UnionString("string")),
-			CancellationKey: knock.Null[string](),
+			Recipients:      knock.F([]knock.RecipientRequestUnionParam{shared.UnionString("dr_grant"), shared.UnionString("dr_sattler"), shared.UnionString("dr_malcolm")}),
+			Actor:           knock.F[knock.RecipientRequestUnionParam](shared.UnionString("mr_dna")),
+			CancellationKey: knock.F("isla_nublar_incident_1993"),
 			Data: knock.F(map[string]interface{}{
-				"dinosaur_names":  "bar",
-				"is_alert":        "bar",
-				"park_id":         "bar",
-				"severity":        "bar",
-				"welcome_message": "bar",
+				"affected_areas":      "bar",
+				"attraction_id":       "bar",
+				"evacuation_protocol": "bar",
+				"message":             "bar",
+				"severity":            "bar",
+				"system_status":       "bar",
 			}),
-			Tenant: knock.F[knock.InlineTenantRequestUnionParam](shared.UnionString("acme_corp")),
+			Tenant: knock.F[knock.InlineTenantRequestUnionParam](shared.UnionString("ingen_isla_nublar")),
 		},
 	)
 	if err != nil {

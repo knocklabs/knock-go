@@ -64,21 +64,25 @@ func TestUserGuideMarkMessageAsArchivedWithOptionalParams(t *testing.T) {
 		"message_id",
 		knock.UserGuideMarkMessageAsArchivedParams{
 			ChannelID:    knock.F("123e4567-e89b-12d3-a456-426614174000"),
-			GuideID:      knock.F("323e4567-e89b-12d3-a456-426614174000"),
-			GuideKey:     knock.F("guide_12345"),
-			GuideStepRef: knock.F("step_12345"),
+			GuideID:      knock.F("7e9dc78c-b3b1-4127-a54e-71f1899b831a"),
+			GuideKey:     knock.F("tour_notification"),
+			GuideStepRef: knock.F("lab_tours"),
 			Content: knock.F(map[string]interface{}{
 				"body":  "bar",
 				"title": "bar",
 			}),
 			Data: knock.F(map[string]interface{}{
-				"product_id": "bar",
+				"next_time":  "bar",
+				"spots_left": "bar",
+				"tour_id":    "bar",
 			}),
-			IsFinal: knock.F(true),
+			IsFinal: knock.F(false),
 			Metadata: knock.F(map[string]interface{}{
-				"source": "bar",
+				"cta":   "bar",
+				"theme": "bar",
+				"type":  "bar",
 			}),
-			Tenant: knock.F("tenant_12345"),
+			Tenant: knock.F("ingen_isla_nublar"),
 		},
 	)
 	if err != nil {
@@ -109,21 +113,25 @@ func TestUserGuideMarkMessageAsInteractedWithOptionalParams(t *testing.T) {
 		"message_id",
 		knock.UserGuideMarkMessageAsInteractedParams{
 			ChannelID:    knock.F("123e4567-e89b-12d3-a456-426614174000"),
-			GuideID:      knock.F("323e4567-e89b-12d3-a456-426614174000"),
-			GuideKey:     knock.F("guide_12345"),
-			GuideStepRef: knock.F("step_12345"),
+			GuideID:      knock.F("7e9dc78c-b3b1-4127-a54e-71f1899b831a"),
+			GuideKey:     knock.F("tour_notification"),
+			GuideStepRef: knock.F("lab_tours"),
 			Content: knock.F(map[string]interface{}{
 				"body":  "bar",
 				"title": "bar",
 			}),
 			Data: knock.F(map[string]interface{}{
-				"product_id": "bar",
+				"next_time":  "bar",
+				"spots_left": "bar",
+				"tour_id":    "bar",
 			}),
-			IsFinal: knock.F(true),
+			IsFinal: knock.F(false),
 			Metadata: knock.F(map[string]interface{}{
-				"source": "bar",
+				"cta":   "bar",
+				"theme": "bar",
+				"type":  "bar",
 			}),
-			Tenant: knock.F("tenant_12345"),
+			Tenant: knock.F("ingen_isla_nublar"),
 		},
 	)
 	if err != nil {
@@ -154,21 +162,25 @@ func TestUserGuideMarkMessageAsSeenWithOptionalParams(t *testing.T) {
 		"message_id",
 		knock.UserGuideMarkMessageAsSeenParams{
 			ChannelID:    knock.F("123e4567-e89b-12d3-a456-426614174000"),
-			GuideID:      knock.F("323e4567-e89b-12d3-a456-426614174000"),
-			GuideKey:     knock.F("guide_12345"),
-			GuideStepRef: knock.F("step_12345"),
+			GuideID:      knock.F("7e9dc78c-b3b1-4127-a54e-71f1899b831a"),
+			GuideKey:     knock.F("tour_notification"),
+			GuideStepRef: knock.F("lab_tours"),
 			Content: knock.F(map[string]interface{}{
 				"body":  "bar",
 				"title": "bar",
 			}),
 			Data: knock.F(map[string]interface{}{
-				"product_id": "bar",
+				"next_time":  "bar",
+				"spots_left": "bar",
+				"tour_id":    "bar",
 			}),
-			IsFinal: knock.F(true),
+			IsFinal: knock.F(false),
 			Metadata: knock.F(map[string]interface{}{
-				"source": "bar",
+				"cta":   "bar",
+				"theme": "bar",
+				"type":  "bar",
 			}),
-			Tenant: knock.F("tenant_12345"),
+			Tenant: knock.F("ingen_isla_nublar"),
 		},
 	)
 	if err != nil {
