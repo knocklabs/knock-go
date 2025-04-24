@@ -390,9 +390,9 @@ type InlineObjectRequestParam struct {
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// Timestamp when the resource was created.
 	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
-	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
-	ExtraFields map[string]interface{}                       `json:"-,extras"`
+	// An optional set of [preferences](/concepts/preferences) for the object.
+	Preferences param.Field[[]InlinePreferenceSetRequestParam] `json:"preferences"`
+	ExtraFields map[string]interface{}                         `json:"-,extras"`
 }
 
 func (r InlineObjectRequestParam) MarshalJSON() (data []byte, err error) {

@@ -31,71 +31,69 @@ func NewRecipientPreferenceService(opts ...option.RequestOption) (r *RecipientPr
 	return
 }
 
-type InlinePreferenceSetRequestParam []InlinePreferenceSetRequestItemParam
-
-type InlinePreferenceSetRequestItemParam struct {
+type InlinePreferenceSetRequestParam struct {
 	// Unique identifier for the preference set.
 	ID param.Field[string] `json:"id,required"`
 	// An object where the key is the category and the values are the preference
 	// settings for that category.
-	Categories param.Field[map[string]InlinePreferenceSetRequestItemCategoriesUnionParam] `json:"categories"`
+	Categories param.Field[map[string]InlinePreferenceSetRequestCategoriesUnionParam] `json:"categories"`
 	// Channel type preferences.
 	ChannelTypes param.Field[PreferenceSetChannelTypesParam] `json:"channel_types"`
 	// An object where the key is the workflow key and the values are the preference
 	// settings for that workflow.
-	Workflows param.Field[map[string]InlinePreferenceSetRequestItemWorkflowsUnionParam] `json:"workflows"`
+	Workflows param.Field[map[string]InlinePreferenceSetRequestWorkflowsUnionParam] `json:"workflows"`
 }
 
-func (r InlinePreferenceSetRequestItemParam) MarshalJSON() (data []byte, err error) {
+func (r InlinePreferenceSetRequestParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
 // Workflow or category preferences within a preference set
 //
 // Satisfied by [shared.UnionBool],
-// [InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam].
-type InlinePreferenceSetRequestItemCategoriesUnionParam interface {
-	ImplementsInlinePreferenceSetRequestItemCategoriesUnionParam()
+// [InlinePreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam].
+type InlinePreferenceSetRequestCategoriesUnionParam interface {
+	ImplementsInlinePreferenceSetRequestCategoriesUnionParam()
 }
 
 // The settings object for a workflow or category, where you can specify channel
 // types or conditions.
-type InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam struct {
+type InlinePreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam struct {
 	// Channel type preferences.
 	ChannelTypes param.Field[PreferenceSetChannelTypesParam] `json:"channel_types"`
 	// A list of conditions to apply to a channel type.
 	Conditions param.Field[[]ConditionParam] `json:"conditions"`
 }
 
-func (r InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam) MarshalJSON() (data []byte, err error) {
+func (r InlinePreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam) ImplementsInlinePreferenceSetRequestItemCategoriesUnionParam() {
+func (r InlinePreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam) ImplementsInlinePreferenceSetRequestCategoriesUnionParam() {
 }
 
 // Workflow or category preferences within a preference set
 //
 // Satisfied by [shared.UnionBool],
-// [InlinePreferenceSetRequestItemWorkflowsPreferenceSetWorkflowCategorySettingObjectParam].
-type InlinePreferenceSetRequestItemWorkflowsUnionParam interface {
-	ImplementsInlinePreferenceSetRequestItemWorkflowsUnionParam()
+// [InlinePreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam].
+type InlinePreferenceSetRequestWorkflowsUnionParam interface {
+	ImplementsInlinePreferenceSetRequestWorkflowsUnionParam()
 }
 
 // The settings object for a workflow or category, where you can specify channel
 // types or conditions.
-type InlinePreferenceSetRequestItemWorkflowsPreferenceSetWorkflowCategorySettingObjectParam struct {
+type InlinePreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam struct {
 	// Channel type preferences.
 	ChannelTypes param.Field[PreferenceSetChannelTypesParam] `json:"channel_types"`
 	// A list of conditions to apply to a channel type.
 	Conditions param.Field[[]ConditionParam] `json:"conditions"`
 }
 
-func (r InlinePreferenceSetRequestItemWorkflowsPreferenceSetWorkflowCategorySettingObjectParam) MarshalJSON() (data []byte, err error) {
+func (r InlinePreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r InlinePreferenceSetRequestItemWorkflowsPreferenceSetWorkflowCategorySettingObjectParam) ImplementsInlinePreferenceSetRequestItemWorkflowsUnionParam() {
+func (r InlinePreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam) ImplementsInlinePreferenceSetRequestWorkflowsUnionParam() {
 }
 
 // A preference set represents a specific set of notification preferences for a
