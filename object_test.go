@@ -346,11 +346,14 @@ func TestObjectListSubscriptionsWithOptionalParams(t *testing.T) {
 		"collection",
 		"object_id",
 		knock.ObjectListSubscriptionsParams{
-			After:      knock.F("after"),
-			Before:     knock.F("before"),
-			Include:    knock.F([]knock.ObjectListSubscriptionsParamsInclude{knock.ObjectListSubscriptionsParamsIncludePreferences}),
-			Mode:       knock.F(knock.ObjectListSubscriptionsParamsModeRecipient),
-			Objects:    knock.F([]knock.RecipientReferenceUnionParam{shared.UnionString("user_123")}),
+			After:   knock.F("after"),
+			Before:  knock.F("before"),
+			Include: knock.F([]knock.ObjectListSubscriptionsParamsInclude{knock.ObjectListSubscriptionsParamsIncludePreferences}),
+			Mode:    knock.F(knock.ObjectListSubscriptionsParamsModeRecipient),
+			Objects: knock.F([]knock.ObjectListSubscriptionsParamsObject{{
+				ID:         knock.F("project_123"),
+				Collection: knock.F("projects"),
+			}}),
 			PageSize:   knock.F(int64(0)),
 			Recipients: knock.F([]knock.RecipientReferenceUnionParam{shared.UnionString("user_123")}),
 		},
@@ -385,9 +388,9 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 			ChannelData: knock.F(knock.InlineChannelDataRequestParam{knock.InlineChannelDataRequestItemParam{
 				ChannelID: knock.F("97c5837d-c65c-4d54-aa39-080eeb81c69d"),
 				Data: knock.F[knock.InlineChannelDataRequestItemDataUnionParam](knock.PushChannelDataParam{
-					Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
 					Tokens:   knock.F([]string{"push_token_123"}),
 					Type:     knock.F(knock.PushChannelDataTypePushFcm),
+					Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
 				}),
 				Provider: knock.F("push_fcm"),
 			}}),
@@ -471,9 +474,9 @@ func TestObjectSetChannelData(t *testing.T) {
 		knock.ObjectSetChannelDataParams{
 			ChannelDataRequest: knock.ChannelDataRequestParam{
 				Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
-					Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
 					Tokens:   knock.F([]string{"push_token_1"}),
 					Type:     knock.F(knock.PushChannelDataTypePushFcm),
+					Typename: knock.F(knock.PushChannelData_TypenamePushChannelData),
 				}),
 			},
 		},

@@ -7,10 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 
 	"github.com/stainless-sdks/knock-go/internal/apijson"
-	"github.com/stainless-sdks/knock-go/internal/apiquery"
 	"github.com/stainless-sdks/knock-go/internal/param"
 	"github.com/stainless-sdks/knock-go/internal/requestconfig"
 	"github.com/stainless-sdks/knock-go/option"
@@ -63,7 +61,7 @@ func (r *ObjectBulkService) AddSubscriptions(ctx context.Context, collection str
 	return
 }
 
-// Bulk sets objects in the specified collection.
+// Bulk sets up to 1,000 objects at a time in the specified collection.
 func (r *ObjectBulkService) Set(ctx context.Context, collection string, body ObjectBulkSetParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
@@ -76,16 +74,12 @@ func (r *ObjectBulkService) Set(ctx context.Context, collection string, body Obj
 }
 
 type ObjectBulkDeleteParams struct {
-	// A list of object IDs.
-	ObjectIDs param.Field[[]string] `query:"object_ids,required"`
+	// List of object IDs to delete.
+	ObjectIDs param.Field[[]string] `json:"object_ids,required"`
 }
 
-// URLQuery serializes [ObjectBulkDeleteParams]'s query parameters as `url.Values`.
-func (r ObjectBulkDeleteParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
+func (r ObjectBulkDeleteParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type ObjectBulkAddSubscriptionsParams struct {
@@ -98,11 +92,10 @@ func (r ObjectBulkAddSubscriptionsParams) MarshalJSON() (data []byte, err error)
 }
 
 type ObjectBulkAddSubscriptionsParamsSubscription struct {
-	// Unique identifier for the subscription.
-	ID param.Field[string] `json:"id,required"`
-	// The recipients of the subscription.
+	// The recipients of the subscription. You can subscribe up to 100 recipients to an
+	// object at a time.
 	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
-	// The custom properties associated with the recipients of the subscription.
+	// The custom properties associated with the subscription relationship.
 	Properties param.Field[map[string]interface{}] `json:"properties"`
 }
 

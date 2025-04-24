@@ -158,7 +158,7 @@ func (r *ObjectService) GetChannelData(ctx context.Context, collection string, o
 	return
 }
 
-// Returns the preference set for the specified object.
+// Returns the preference set for the specified object and preference set `id`.
 func (r *ObjectService) GetPreferences(ctx context.Context, collection string, objectID string, id string, opts ...option.RequestOption) (res *PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
@@ -313,7 +313,9 @@ func (r *ObjectService) Set(ctx context.Context, collection string, id string, b
 	return
 }
 
-// Sets the channel data for the specified object and channel.
+// Sets the channel data for the specified object and channel. If no object exists
+// in the current environment for the given `collection` and `object_id`, Knock
+// will create the object as part of this request.
 func (r *ObjectService) SetChannelData(ctx context.Context, collection string, objectID string, channelID string, body ObjectSetChannelDataParams, opts ...option.RequestOption) (res *ChannelData, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
@@ -333,7 +335,12 @@ func (r *ObjectService) SetChannelData(ctx context.Context, collection string, o
 	return
 }
 
-// Updates the preference set for the specified object.
+// Sets preferences within the given preference set. This is a destructive
+// operation and will replace any existing preferences with the preferences given.
+// If no object exists in the current environment for the given `:collection` and
+// `:object_id`, Knock will create the object as part of this request. The
+// preference set `:id` can be either `default` or a `tenant.id`. Learn more about
+// [per-tenant preferences](/preferences/tenant-preferences).
 func (r *ObjectService) SetPreferences(ctx context.Context, collection string, objectID string, id string, body ObjectSetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)
 	if collection == "" {
@@ -373,7 +380,7 @@ func (r *ObjectService) UnsetChannelData(ctx context.Context, collection string,
 	return
 }
 
-// A custom object entity which belongs to a collection.
+// A custom [Object](/concepts/objects) entity which belongs to a collection.
 type InlineObjectRequestParam struct {
 	// Unique identifier for the object.
 	ID param.Field[string] `json:"id,required"`
@@ -394,7 +401,7 @@ func (r InlineObjectRequestParam) MarshalJSON() (data []byte, err error) {
 
 func (r InlineObjectRequestParam) ImplementsRecipientRequestUnionParam() {}
 
-// A custom object entity which belongs to a collection.
+// A custom [Object](/concepts/objects) entity which belongs to a collection.
 type Object struct {
 	// Unique identifier for the object.
 	ID string `json:"id,required"`
@@ -465,9 +472,10 @@ func (r ObjectListParamsInclude) IsKnown() bool {
 }
 
 type ObjectAddSubscriptionsParams struct {
-	// The recipients of the subscription.
+	// The recipients of the subscription. You can subscribe up to 100 recipients to an
+	// object at a time.
 	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
-	// The custom properties associated with the recipients of the subscription.
+	// The custom properties associated with the subscription relationship.
 	Properties param.Field[map[string]interface{}] `json:"properties"`
 }
 
@@ -476,7 +484,8 @@ func (r ObjectAddSubscriptionsParams) MarshalJSON() (data []byte, err error) {
 }
 
 type ObjectDeleteSubscriptionsParams struct {
-	// The recipients of the subscription.
+	// The recipients of the subscription. You can subscribe up to 100 recipients to an
+	// object at a time.
 	Recipients param.Field[[]RecipientReferenceUnionParam] `json:"recipients,required"`
 }
 
@@ -614,10 +623,12 @@ type ObjectListSubscriptionsParams struct {
 	Before param.Field[string] `query:"before"`
 	// Additional fields to include in the response.
 	Include param.Field[[]ObjectListSubscriptionsParamsInclude] `query:"include"`
-	// Mode of the request.
+	// Mode of the request. `recipient` to list the objects that the provided object is
+	// subscribed to, `object` to list the recipients that subscribe to the provided
+	// object.
 	Mode param.Field[ObjectListSubscriptionsParamsMode] `query:"mode"`
 	// Objects to filter by (only used if mode is `recipient`).
-	Objects param.Field[[]RecipientReferenceUnionParam] `query:"objects"`
+	Objects param.Field[[]ObjectListSubscriptionsParamsObject] `query:"objects"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
 	// Recipients to filter by (only used if mode is `object`).
@@ -647,7 +658,9 @@ func (r ObjectListSubscriptionsParamsInclude) IsKnown() bool {
 	return false
 }
 
-// Mode of the request.
+// Mode of the request. `recipient` to list the objects that the provided object is
+// subscribed to, `object` to list the recipients that subscribe to the provided
+// object.
 type ObjectListSubscriptionsParamsMode string
 
 const (
@@ -661,6 +674,23 @@ func (r ObjectListSubscriptionsParamsMode) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+// A reference to a recipient object.
+type ObjectListSubscriptionsParamsObject struct {
+	// An identifier for the recipient object.
+	ID param.Field[string] `query:"id"`
+	// The collection the recipient object belongs to.
+	Collection param.Field[string] `query:"collection"`
+}
+
+// URLQuery serializes [ObjectListSubscriptionsParamsObject]'s query parameters as
+// `url.Values`.
+func (r ObjectListSubscriptionsParamsObject) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 type ObjectSetParams struct {

@@ -34,13 +34,13 @@ type Subscription struct {
 	Typename string `json:"__typename,required"`
 	// Timestamp when the resource was created.
 	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
-	// A custom object entity which belongs to a collection.
+	// A custom [Object](/concepts/objects) entity which belongs to a collection.
 	Object Object `json:"object,required"`
 	// A recipient of a notification, which is either a user or an object.
 	Recipient Recipient `json:"recipient,required"`
 	// The timestamp when the resource was last updated.
 	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
-	// The custom properties associated with the recipients of the subscription.
+	// The custom properties associated with the subscription relationship.
 	Properties map[string]interface{} `json:"properties,nullable"`
 	JSON       subscriptionJSON       `json:"-"`
 }

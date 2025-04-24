@@ -32,20 +32,23 @@ func NewRecipientChannelDataService(opts ...option.RequestOption) (r *RecipientC
 
 // Channel data for a given channel type.
 type ChannelData struct {
-	// The typename of the schema.
-	Typename string `json:"__typename,required"`
 	// The unique identifier for the channel.
 	ChannelID string `json:"channel_id,required" format:"uuid"`
 	// Channel data for a given channel type.
 	Data ChannelDataData `json:"data,required"`
-	JSON channelDataJSON `json:"-"`
+	// The type of provider.
+	Provider ChannelDataProvider `json:"provider,required"`
+	// The typename of the schema.
+	Typename string          `json:"__typename"`
+	JSON     channelDataJSON `json:"-"`
 }
 
 // channelDataJSON contains the JSON metadata for the struct [ChannelData]
 type channelDataJSON struct {
-	Typename    apijson.Field
 	ChannelID   apijson.Field
 	Data        apijson.Field
+	Provider    apijson.Field
+	Typename    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -60,12 +63,12 @@ func (r channelDataJSON) RawJSON() string {
 
 // Channel data for a given channel type.
 type ChannelDataData struct {
-	// The typename of the schema.
-	Typename ChannelDataDataTypename `json:"__typename,required"`
-	// The push provider type
+	// The type of provider.
 	Type ChannelDataDataType `json:"type,required"`
 	// This field can have the runtime type of [SlackChannelDataToken].
 	Token interface{} `json:"token"`
+	// The typename of the schema.
+	Typename ChannelDataDataTypename `json:"__typename"`
 	// This field can have the runtime type of [[]SlackChannelDataConnection],
 	// [[]MsTeamsChannelDataConnection], [[]DiscordChannelDataConnection].
 	Connections interface{} `json:"connections"`
@@ -81,9 +84,9 @@ type ChannelDataData struct {
 
 // channelDataDataJSON contains the JSON metadata for the struct [ChannelDataData]
 type channelDataDataJSON struct {
-	Typename        apijson.Field
 	Type            apijson.Field
 	Token           apijson.Field
+	Typename        apijson.Field
 	Connections     apijson.Field
 	MsTeamsTenantID apijson.Field
 	PlayerIDs       apijson.Field
@@ -125,33 +128,64 @@ type ChannelDataDataUnion interface {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*ChannelDataDataUnion)(nil)).Elem(),
-		"__typename",
+		"type",
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			Type:               reflect.TypeOf(PushChannelData{}),
-			DiscriminatorValue: "PushChannelData",
+			DiscriminatorValue: "push_fcm",
+		},
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			Type:               reflect.TypeOf(PushChannelData{}),
+			DiscriminatorValue: "push_apns",
+		},
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			Type:               reflect.TypeOf(PushChannelData{}),
+			DiscriminatorValue: "push_expo",
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			Type:               reflect.TypeOf(SlackChannelData{}),
-			DiscriminatorValue: "SlackChannelData",
+			DiscriminatorValue: "chat_slack",
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			Type:               reflect.TypeOf(MsTeamsChannelData{}),
-			DiscriminatorValue: "MsTeamsChannelData",
+			DiscriminatorValue: "chat_ms_teams",
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			Type:               reflect.TypeOf(DiscordChannelData{}),
-			DiscriminatorValue: "DiscordChannelData",
+			DiscriminatorValue: "chat_discord",
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			Type:               reflect.TypeOf(OneSignalChannelData{}),
-			DiscriminatorValue: "OneSignalChannelData",
+			DiscriminatorValue: "push_one_signal",
 		},
 	)
+}
+
+// The type of provider.
+type ChannelDataDataType string
+
+const (
+	ChannelDataDataTypePushFcm       ChannelDataDataType = "push_fcm"
+	ChannelDataDataTypePushApns      ChannelDataDataType = "push_apns"
+	ChannelDataDataTypePushExpo      ChannelDataDataType = "push_expo"
+	ChannelDataDataTypeChatSlack     ChannelDataDataType = "chat_slack"
+	ChannelDataDataTypeChatMsTeams   ChannelDataDataType = "chat_ms_teams"
+	ChannelDataDataTypeChatDiscord   ChannelDataDataType = "chat_discord"
+	ChannelDataDataTypePushOneSignal ChannelDataDataType = "push_one_signal"
+)
+
+func (r ChannelDataDataType) IsKnown() bool {
+	switch r {
+	case ChannelDataDataTypePushFcm, ChannelDataDataTypePushApns, ChannelDataDataTypePushExpo, ChannelDataDataTypeChatSlack, ChannelDataDataTypeChatMsTeams, ChannelDataDataTypeChatDiscord, ChannelDataDataTypePushOneSignal:
+		return true
+	}
+	return false
 }
 
 // The typename of the schema.
@@ -173,22 +207,23 @@ func (r ChannelDataDataTypename) IsKnown() bool {
 	return false
 }
 
-// The push provider type
-type ChannelDataDataType string
+// The type of provider.
+type ChannelDataProvider string
 
 const (
-	ChannelDataDataTypePushFcm       ChannelDataDataType = "push_fcm"
-	ChannelDataDataTypePushApns      ChannelDataDataType = "push_apns"
-	ChannelDataDataTypePushExpo      ChannelDataDataType = "push_expo"
-	ChannelDataDataTypeChatSlack     ChannelDataDataType = "chat_slack"
-	ChannelDataDataTypeChatMsTeams   ChannelDataDataType = "chat_ms_teams"
-	ChannelDataDataTypeChatDiscord   ChannelDataDataType = "chat_discord"
-	ChannelDataDataTypePushOneSignal ChannelDataDataType = "push_one_signal"
+	ChannelDataProviderPushFcm          ChannelDataProvider = "push_fcm"
+	ChannelDataProviderPushApns         ChannelDataProvider = "push_apns"
+	ChannelDataProviderPushExpo         ChannelDataProvider = "push_expo"
+	ChannelDataProviderPushOneSignal    ChannelDataProvider = "push_one_signal"
+	ChannelDataProviderChatSlack        ChannelDataProvider = "chat_slack"
+	ChannelDataProviderChatMsTeams      ChannelDataProvider = "chat_ms_teams"
+	ChannelDataProviderChatDiscord      ChannelDataProvider = "chat_discord"
+	ChannelDataProviderHTTPKnockWebhook ChannelDataProvider = "http_knock_webhook"
 )
 
-func (r ChannelDataDataType) IsKnown() bool {
+func (r ChannelDataProvider) IsKnown() bool {
 	switch r {
-	case ChannelDataDataTypePushFcm, ChannelDataDataTypePushApns, ChannelDataDataTypePushExpo, ChannelDataDataTypeChatSlack, ChannelDataDataTypeChatMsTeams, ChannelDataDataTypeChatDiscord, ChannelDataDataTypePushOneSignal:
+	case ChannelDataProviderPushFcm, ChannelDataProviderPushApns, ChannelDataProviderPushExpo, ChannelDataProviderPushOneSignal, ChannelDataProviderChatSlack, ChannelDataProviderChatMsTeams, ChannelDataProviderChatDiscord, ChannelDataProviderHTTPKnockWebhook:
 		return true
 	}
 	return false
@@ -206,12 +241,12 @@ func (r ChannelDataRequestParam) MarshalJSON() (data []byte, err error) {
 
 // Channel data for a given channel type.
 type ChannelDataRequestDataParam struct {
+	// The type of provider.
+	Type  param.Field[ChannelDataRequestDataType] `json:"type,required"`
+	Token param.Field[interface{}]                `json:"token"`
 	// The typename of the schema.
-	Typename param.Field[ChannelDataRequestDataTypename] `json:"__typename,required"`
-	// The push provider type
-	Type        param.Field[ChannelDataRequestDataType] `json:"type,required"`
-	Token       param.Field[interface{}]                `json:"token"`
-	Connections param.Field[interface{}]                `json:"connections"`
+	Typename    param.Field[ChannelDataRequestDataTypename] `json:"__typename"`
+	Connections param.Field[interface{}]                    `json:"connections"`
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
 	PlayerIDs       param.Field[interface{}] `json:"player_ids"`
@@ -233,26 +268,7 @@ type ChannelDataRequestDataUnionParam interface {
 	implementsChannelDataRequestDataUnionParam()
 }
 
-// The typename of the schema.
-type ChannelDataRequestDataTypename string
-
-const (
-	ChannelDataRequestDataTypenamePushChannelData      ChannelDataRequestDataTypename = "PushChannelData"
-	ChannelDataRequestDataTypenameOneSignalChannelData ChannelDataRequestDataTypename = "OneSignalChannelData"
-	ChannelDataRequestDataTypenameSlackChannelData     ChannelDataRequestDataTypename = "SlackChannelData"
-	ChannelDataRequestDataTypenameMsTeamsChannelData   ChannelDataRequestDataTypename = "MsTeamsChannelData"
-	ChannelDataRequestDataTypenameDiscordChannelData   ChannelDataRequestDataTypename = "DiscordChannelData"
-)
-
-func (r ChannelDataRequestDataTypename) IsKnown() bool {
-	switch r {
-	case ChannelDataRequestDataTypenamePushChannelData, ChannelDataRequestDataTypenameOneSignalChannelData, ChannelDataRequestDataTypenameSlackChannelData, ChannelDataRequestDataTypenameMsTeamsChannelData, ChannelDataRequestDataTypenameDiscordChannelData:
-		return true
-	}
-	return false
-}
-
-// The push provider type
+// The type of provider.
 type ChannelDataRequestDataType string
 
 const (
@@ -273,23 +289,42 @@ func (r ChannelDataRequestDataType) IsKnown() bool {
 	return false
 }
 
+// The typename of the schema.
+type ChannelDataRequestDataTypename string
+
+const (
+	ChannelDataRequestDataTypenamePushChannelData      ChannelDataRequestDataTypename = "PushChannelData"
+	ChannelDataRequestDataTypenameOneSignalChannelData ChannelDataRequestDataTypename = "OneSignalChannelData"
+	ChannelDataRequestDataTypenameSlackChannelData     ChannelDataRequestDataTypename = "SlackChannelData"
+	ChannelDataRequestDataTypenameMsTeamsChannelData   ChannelDataRequestDataTypename = "MsTeamsChannelData"
+	ChannelDataRequestDataTypenameDiscordChannelData   ChannelDataRequestDataTypename = "DiscordChannelData"
+)
+
+func (r ChannelDataRequestDataTypename) IsKnown() bool {
+	switch r {
+	case ChannelDataRequestDataTypenamePushChannelData, ChannelDataRequestDataTypenameOneSignalChannelData, ChannelDataRequestDataTypenameSlackChannelData, ChannelDataRequestDataTypenameMsTeamsChannelData, ChannelDataRequestDataTypenameDiscordChannelData:
+		return true
+	}
+	return false
+}
+
 // Discord channel data.
 type DiscordChannelData struct {
-	// The typename of the schema.
-	Typename DiscordChannelData_Typename `json:"__typename,required"`
 	// List of Discord channel connections.
 	Connections []DiscordChannelDataConnection `json:"connections,required"`
-	// The channel type identifier
+	// The type of provider.
 	Type DiscordChannelDataType `json:"type,required"`
-	JSON discordChannelDataJSON `json:"-"`
+	// The typename of the schema.
+	Typename DiscordChannelData_Typename `json:"__typename"`
+	JSON     discordChannelDataJSON      `json:"-"`
 }
 
 // discordChannelDataJSON contains the JSON metadata for the struct
 // [DiscordChannelData]
 type discordChannelDataJSON struct {
-	Typename    apijson.Field
 	Connections apijson.Field
 	Type        apijson.Field
+	Typename    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -303,21 +338,6 @@ func (r discordChannelDataJSON) RawJSON() string {
 }
 
 func (r DiscordChannelData) implementsChannelDataData() {}
-
-// The typename of the schema.
-type DiscordChannelData_Typename string
-
-const (
-	DiscordChannelData_TypenameDiscordChannelData DiscordChannelData_Typename = "DiscordChannelData"
-)
-
-func (r DiscordChannelData_Typename) IsKnown() bool {
-	switch r {
-	case DiscordChannelData_TypenameDiscordChannelData:
-		return true
-	}
-	return false
-}
 
 // Discord channel connection, either a channel connection or an incoming webhook
 // connection.
@@ -464,7 +484,7 @@ func (r discordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWeb
 	return r.raw
 }
 
-// The channel type identifier
+// The type of provider.
 type DiscordChannelDataType string
 
 const (
@@ -479,14 +499,29 @@ func (r DiscordChannelDataType) IsKnown() bool {
 	return false
 }
 
+// The typename of the schema.
+type DiscordChannelData_Typename string
+
+const (
+	DiscordChannelData_TypenameDiscordChannelData DiscordChannelData_Typename = "DiscordChannelData"
+)
+
+func (r DiscordChannelData_Typename) IsKnown() bool {
+	switch r {
+	case DiscordChannelData_TypenameDiscordChannelData:
+		return true
+	}
+	return false
+}
+
 // Discord channel data.
 type DiscordChannelDataParam struct {
-	// The typename of the schema.
-	Typename param.Field[DiscordChannelData_Typename] `json:"__typename,required"`
 	// List of Discord channel connections.
 	Connections param.Field[[]DiscordChannelDataConnectionsUnionParam] `json:"connections,required"`
-	// The channel type identifier
+	// The type of provider.
 	Type param.Field[DiscordChannelDataType] `json:"type,required"`
+	// The typename of the schema.
+	Typename param.Field[DiscordChannelData_Typename] `json:"__typename"`
 }
 
 func (r DiscordChannelDataParam) MarshalJSON() (data []byte, err error) {
@@ -575,12 +610,12 @@ func (r InlineChannelDataRequestItemParam) MarshalJSON() (data []byte, err error
 
 // Channel data for a given channel type.
 type InlineChannelDataRequestItemDataParam struct {
+	// The type of provider.
+	Type  param.Field[InlineChannelDataRequestItemDataType] `json:"type,required"`
+	Token param.Field[interface{}]                          `json:"token"`
 	// The typename of the schema.
-	Typename param.Field[InlineChannelDataRequestItemDataTypename] `json:"__typename,required"`
-	// The push provider type
-	Type        param.Field[InlineChannelDataRequestItemDataType] `json:"type,required"`
-	Token       param.Field[interface{}]                          `json:"token"`
-	Connections param.Field[interface{}]                          `json:"connections"`
+	Typename    param.Field[InlineChannelDataRequestItemDataTypename] `json:"__typename"`
+	Connections param.Field[interface{}]                              `json:"connections"`
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
 	PlayerIDs       param.Field[interface{}] `json:"player_ids"`
@@ -603,26 +638,7 @@ type InlineChannelDataRequestItemDataUnionParam interface {
 	implementsInlineChannelDataRequestItemDataUnionParam()
 }
 
-// The typename of the schema.
-type InlineChannelDataRequestItemDataTypename string
-
-const (
-	InlineChannelDataRequestItemDataTypenamePushChannelData      InlineChannelDataRequestItemDataTypename = "PushChannelData"
-	InlineChannelDataRequestItemDataTypenameOneSignalChannelData InlineChannelDataRequestItemDataTypename = "OneSignalChannelData"
-	InlineChannelDataRequestItemDataTypenameSlackChannelData     InlineChannelDataRequestItemDataTypename = "SlackChannelData"
-	InlineChannelDataRequestItemDataTypenameMsTeamsChannelData   InlineChannelDataRequestItemDataTypename = "MsTeamsChannelData"
-	InlineChannelDataRequestItemDataTypenameDiscordChannelData   InlineChannelDataRequestItemDataTypename = "DiscordChannelData"
-)
-
-func (r InlineChannelDataRequestItemDataTypename) IsKnown() bool {
-	switch r {
-	case InlineChannelDataRequestItemDataTypenamePushChannelData, InlineChannelDataRequestItemDataTypenameOneSignalChannelData, InlineChannelDataRequestItemDataTypenameSlackChannelData, InlineChannelDataRequestItemDataTypenameMsTeamsChannelData, InlineChannelDataRequestItemDataTypenameDiscordChannelData:
-		return true
-	}
-	return false
-}
-
-// The push provider type
+// The type of provider.
 type InlineChannelDataRequestItemDataType string
 
 const (
@@ -643,14 +659,33 @@ func (r InlineChannelDataRequestItemDataType) IsKnown() bool {
 	return false
 }
 
+// The typename of the schema.
+type InlineChannelDataRequestItemDataTypename string
+
+const (
+	InlineChannelDataRequestItemDataTypenamePushChannelData      InlineChannelDataRequestItemDataTypename = "PushChannelData"
+	InlineChannelDataRequestItemDataTypenameOneSignalChannelData InlineChannelDataRequestItemDataTypename = "OneSignalChannelData"
+	InlineChannelDataRequestItemDataTypenameSlackChannelData     InlineChannelDataRequestItemDataTypename = "SlackChannelData"
+	InlineChannelDataRequestItemDataTypenameMsTeamsChannelData   InlineChannelDataRequestItemDataTypename = "MsTeamsChannelData"
+	InlineChannelDataRequestItemDataTypenameDiscordChannelData   InlineChannelDataRequestItemDataTypename = "DiscordChannelData"
+)
+
+func (r InlineChannelDataRequestItemDataTypename) IsKnown() bool {
+	switch r {
+	case InlineChannelDataRequestItemDataTypenamePushChannelData, InlineChannelDataRequestItemDataTypenameOneSignalChannelData, InlineChannelDataRequestItemDataTypenameSlackChannelData, InlineChannelDataRequestItemDataTypenameMsTeamsChannelData, InlineChannelDataRequestItemDataTypenameDiscordChannelData:
+		return true
+	}
+	return false
+}
+
 // Microsoft Teams channel connection.
 type MsTeamsChannelData struct {
-	// The typename of the schema.
-	Typename MsTeamsChannelData_Typename `json:"__typename,required"`
 	// List of Microsoft Teams connections.
 	Connections []MsTeamsChannelDataConnection `json:"connections,required"`
-	// The channel type identifier
+	// The type of provider.
 	Type MsTeamsChannelDataType `json:"type,required"`
+	// The typename of the schema.
+	Typename MsTeamsChannelData_Typename `json:"__typename"`
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID string                 `json:"ms_teams_tenant_id,nullable" format:"uuid"`
 	JSON            msTeamsChannelDataJSON `json:"-"`
@@ -659,9 +694,9 @@ type MsTeamsChannelData struct {
 // msTeamsChannelDataJSON contains the JSON metadata for the struct
 // [MsTeamsChannelData]
 type msTeamsChannelDataJSON struct {
-	Typename        apijson.Field
 	Connections     apijson.Field
 	Type            apijson.Field
+	Typename        apijson.Field
 	MsTeamsTenantID apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
@@ -676,21 +711,6 @@ func (r msTeamsChannelDataJSON) RawJSON() string {
 }
 
 func (r MsTeamsChannelData) implementsChannelDataData() {}
-
-// The typename of the schema.
-type MsTeamsChannelData_Typename string
-
-const (
-	MsTeamsChannelData_TypenameMsTeamsChannelData MsTeamsChannelData_Typename = "MsTeamsChannelData"
-)
-
-func (r MsTeamsChannelData_Typename) IsKnown() bool {
-	switch r {
-	case MsTeamsChannelData_TypenameMsTeamsChannelData:
-		return true
-	}
-	return false
-}
 
 // Microsoft Teams token connection.
 type MsTeamsChannelDataConnection struct {
@@ -853,7 +873,7 @@ func (r msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWeb
 	return r.raw
 }
 
-// The channel type identifier
+// The type of provider.
 type MsTeamsChannelDataType string
 
 const (
@@ -868,14 +888,29 @@ func (r MsTeamsChannelDataType) IsKnown() bool {
 	return false
 }
 
+// The typename of the schema.
+type MsTeamsChannelData_Typename string
+
+const (
+	MsTeamsChannelData_TypenameMsTeamsChannelData MsTeamsChannelData_Typename = "MsTeamsChannelData"
+)
+
+func (r MsTeamsChannelData_Typename) IsKnown() bool {
+	switch r {
+	case MsTeamsChannelData_TypenameMsTeamsChannelData:
+		return true
+	}
+	return false
+}
+
 // Microsoft Teams channel connection.
 type MsTeamsChannelDataParam struct {
-	// The typename of the schema.
-	Typename param.Field[MsTeamsChannelData_Typename] `json:"__typename,required"`
 	// List of Microsoft Teams connections.
 	Connections param.Field[[]MsTeamsChannelDataConnectionsUnionParam] `json:"connections,required"`
-	// The channel type identifier
+	// The type of provider.
 	Type param.Field[MsTeamsChannelDataType] `json:"type,required"`
+	// The typename of the schema.
+	Typename param.Field[MsTeamsChannelData_Typename] `json:"__typename"`
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string] `json:"ms_teams_tenant_id" format:"uuid"`
 }
@@ -960,21 +995,21 @@ func (r MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWeb
 
 // OneSignal channel data.
 type OneSignalChannelData struct {
-	// The typename of the schema.
-	Typename OneSignalChannelData_Typename `json:"__typename,required"`
 	// A list of OneSignal player IDs.
 	PlayerIDs []string `json:"player_ids,required" format:"uuid"`
-	// The channel type identifier
+	// The type of provider.
 	Type OneSignalChannelDataType `json:"type,required"`
-	JSON oneSignalChannelDataJSON `json:"-"`
+	// The typename of the schema.
+	Typename OneSignalChannelData_Typename `json:"__typename"`
+	JSON     oneSignalChannelDataJSON      `json:"-"`
 }
 
 // oneSignalChannelDataJSON contains the JSON metadata for the struct
 // [OneSignalChannelData]
 type oneSignalChannelDataJSON struct {
-	Typename    apijson.Field
 	PlayerIDs   apijson.Field
 	Type        apijson.Field
+	Typename    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -988,6 +1023,21 @@ func (r oneSignalChannelDataJSON) RawJSON() string {
 }
 
 func (r OneSignalChannelData) implementsChannelDataData() {}
+
+// The type of provider.
+type OneSignalChannelDataType string
+
+const (
+	OneSignalChannelDataTypePushOneSignal OneSignalChannelDataType = "push_one_signal"
+)
+
+func (r OneSignalChannelDataType) IsKnown() bool {
+	switch r {
+	case OneSignalChannelDataTypePushOneSignal:
+		return true
+	}
+	return false
+}
 
 // The typename of the schema.
 type OneSignalChannelData_Typename string
@@ -1004,29 +1054,14 @@ func (r OneSignalChannelData_Typename) IsKnown() bool {
 	return false
 }
 
-// The channel type identifier
-type OneSignalChannelDataType string
-
-const (
-	OneSignalChannelDataTypePushOneSignal OneSignalChannelDataType = "push_one_signal"
-)
-
-func (r OneSignalChannelDataType) IsKnown() bool {
-	switch r {
-	case OneSignalChannelDataTypePushOneSignal:
-		return true
-	}
-	return false
-}
-
 // OneSignal channel data.
 type OneSignalChannelDataParam struct {
-	// The typename of the schema.
-	Typename param.Field[OneSignalChannelData_Typename] `json:"__typename,required"`
 	// A list of OneSignal player IDs.
 	PlayerIDs param.Field[[]string] `json:"player_ids,required" format:"uuid"`
-	// The channel type identifier
+	// The type of provider.
 	Type param.Field[OneSignalChannelDataType] `json:"type,required"`
+	// The typename of the schema.
+	Typename param.Field[OneSignalChannelData_Typename] `json:"__typename"`
 }
 
 func (r OneSignalChannelDataParam) MarshalJSON() (data []byte, err error) {
@@ -1039,20 +1074,20 @@ func (r OneSignalChannelDataParam) implementsInlineChannelDataRequestItemDataUni
 
 // The content of a push notification.
 type PushChannelData struct {
-	// The typename of the schema.
-	Typename PushChannelData_Typename `json:"__typename,required"`
 	// A list of push channel tokens.
 	Tokens []string `json:"tokens,required"`
-	// The push provider type
+	// The type of provider.
 	Type PushChannelDataType `json:"type,required"`
-	JSON pushChannelDataJSON `json:"-"`
+	// The typename of the schema.
+	Typename PushChannelData_Typename `json:"__typename"`
+	JSON     pushChannelDataJSON      `json:"-"`
 }
 
 // pushChannelDataJSON contains the JSON metadata for the struct [PushChannelData]
 type pushChannelDataJSON struct {
-	Typename    apijson.Field
 	Tokens      apijson.Field
 	Type        apijson.Field
+	Typename    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1067,22 +1102,7 @@ func (r pushChannelDataJSON) RawJSON() string {
 
 func (r PushChannelData) implementsChannelDataData() {}
 
-// The typename of the schema.
-type PushChannelData_Typename string
-
-const (
-	PushChannelData_TypenamePushChannelData PushChannelData_Typename = "PushChannelData"
-)
-
-func (r PushChannelData_Typename) IsKnown() bool {
-	switch r {
-	case PushChannelData_TypenamePushChannelData:
-		return true
-	}
-	return false
-}
-
-// The push provider type
+// The type of provider.
 type PushChannelDataType string
 
 const (
@@ -1099,14 +1119,29 @@ func (r PushChannelDataType) IsKnown() bool {
 	return false
 }
 
+// The typename of the schema.
+type PushChannelData_Typename string
+
+const (
+	PushChannelData_TypenamePushChannelData PushChannelData_Typename = "PushChannelData"
+)
+
+func (r PushChannelData_Typename) IsKnown() bool {
+	switch r {
+	case PushChannelData_TypenamePushChannelData:
+		return true
+	}
+	return false
+}
+
 // The content of a push notification.
 type PushChannelDataParam struct {
-	// The typename of the schema.
-	Typename param.Field[PushChannelData_Typename] `json:"__typename,required"`
 	// A list of push channel tokens.
 	Tokens param.Field[[]string] `json:"tokens,required"`
-	// The push provider type
+	// The type of provider.
 	Type param.Field[PushChannelDataType] `json:"type,required"`
+	// The typename of the schema.
+	Typename param.Field[PushChannelData_Typename] `json:"__typename"`
 }
 
 func (r PushChannelDataParam) MarshalJSON() (data []byte, err error) {
@@ -1119,24 +1154,24 @@ func (r PushChannelDataParam) implementsInlineChannelDataRequestItemDataUnionPar
 
 // Slack channel data
 type SlackChannelData struct {
-	// The typename of the schema.
-	Typename SlackChannelData_Typename `json:"__typename,required"`
 	// List of Slack channel connections.
 	Connections []SlackChannelDataConnection `json:"connections,required"`
-	// The channel type identifier
+	// The type of provider.
 	Type SlackChannelDataType `json:"type,required"`
 	// A Slack connection token.
 	Token SlackChannelDataToken `json:"token,nullable"`
-	JSON  slackChannelDataJSON  `json:"-"`
+	// The typename of the schema.
+	Typename SlackChannelData_Typename `json:"__typename"`
+	JSON     slackChannelDataJSON      `json:"-"`
 }
 
 // slackChannelDataJSON contains the JSON metadata for the struct
 // [SlackChannelData]
 type slackChannelDataJSON struct {
-	Typename    apijson.Field
 	Connections apijson.Field
 	Type        apijson.Field
 	Token       apijson.Field
+	Typename    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1150,21 +1185,6 @@ func (r slackChannelDataJSON) RawJSON() string {
 }
 
 func (r SlackChannelData) implementsChannelDataData() {}
-
-// The typename of the schema.
-type SlackChannelData_Typename string
-
-const (
-	SlackChannelData_TypenameSlackChannelData SlackChannelData_Typename = "SlackChannelData"
-)
-
-func (r SlackChannelData_Typename) IsKnown() bool {
-	switch r {
-	case SlackChannelData_TypenameSlackChannelData:
-		return true
-	}
-	return false
-}
 
 // A Slack connection, either an access token or an incoming webhook
 type SlackChannelDataConnection struct {
@@ -1295,7 +1315,7 @@ func (r slackChannelDataConnectionsSlackIncomingWebhookConnectionJSON) RawJSON()
 func (r SlackChannelDataConnectionsSlackIncomingWebhookConnection) implementsSlackChannelDataConnection() {
 }
 
-// The channel type identifier
+// The type of provider.
 type SlackChannelDataType string
 
 const (
@@ -1333,16 +1353,31 @@ func (r slackChannelDataTokenJSON) RawJSON() string {
 	return r.raw
 }
 
+// The typename of the schema.
+type SlackChannelData_Typename string
+
+const (
+	SlackChannelData_TypenameSlackChannelData SlackChannelData_Typename = "SlackChannelData"
+)
+
+func (r SlackChannelData_Typename) IsKnown() bool {
+	switch r {
+	case SlackChannelData_TypenameSlackChannelData:
+		return true
+	}
+	return false
+}
+
 // Slack channel data
 type SlackChannelDataParam struct {
-	// The typename of the schema.
-	Typename param.Field[SlackChannelData_Typename] `json:"__typename,required"`
 	// List of Slack channel connections.
 	Connections param.Field[[]SlackChannelDataConnectionsUnionParam] `json:"connections,required"`
-	// The channel type identifier
+	// The type of provider.
 	Type param.Field[SlackChannelDataType] `json:"type,required"`
 	// A Slack connection token.
 	Token param.Field[SlackChannelDataTokenParam] `json:"token"`
+	// The typename of the schema.
+	Typename param.Field[SlackChannelData_Typename] `json:"__typename"`
 }
 
 func (r SlackChannelDataParam) MarshalJSON() (data []byte, err error) {

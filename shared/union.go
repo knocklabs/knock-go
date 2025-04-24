@@ -4,13 +4,12 @@ package shared
 
 type UnionString string
 
-func (UnionString) ImplementsRecipientReferenceUnionParam()              {}
-func (UnionString) ImplementsRecipientReferenceUnion()                   {}
-func (UnionString) ImplementsRecipientRequestUnionParam()                {}
-func (UnionString) ImplementsInlineTenantRequestUnionParam()             {}
-func (UnionString) ImplementsMessageDeliveryLogRequestBodyUnion()        {}
-func (UnionString) ImplementsMessageDeliveryLogResponseBodyUnion()       {}
-func (UnionString) ImplementsScheduleBulkNewParamsSchedulesTenantUnion() {}
+func (UnionString) ImplementsRecipientReferenceUnionParam()        {}
+func (UnionString) ImplementsRecipientReferenceUnion()             {}
+func (UnionString) ImplementsRecipientRequestUnionParam()          {}
+func (UnionString) ImplementsInlineTenantRequestUnionParam()       {}
+func (UnionString) ImplementsMessageDeliveryLogRequestBodyUnion()  {}
+func (UnionString) ImplementsMessageDeliveryLogResponseBodyUnion() {}
 
 type UnionBool bool
 

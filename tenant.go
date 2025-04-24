@@ -85,8 +85,8 @@ func (r *TenantService) Get(ctx context.Context, id string, opts ...option.Reque
 	return
 }
 
-// Set or update a tenant's properties and settings. This operation allows you to
-// update tenant preferences, channel data, and branding settings.
+// Sets a tenant within an environment, performing an upsert operation. Any
+// existing properties will be merged with the incoming properties.
 func (r *TenantService) Set(ctx context.Context, id string, body TenantSetParams, opts ...option.RequestOption) (res *Tenant, err error) {
 	opts = append(r.Options[:], opts...)
 	if id == "" {
@@ -110,7 +110,11 @@ type Tenant struct {
 	// The unique identifier for the tenant.
 	ID string `json:"id,required"`
 	// The typename of the schema.
-	Typename    string                 `json:"__typename,required"`
+	Typename string `json:"__typename,required"`
+	// An optional name for the tenant.
+	Name string `json:"name,nullable"`
+	// The settings for the tenant. Includes branding and preference set.
+	Settings    interface{}            `json:"settings,nullable"`
 	ExtraFields map[string]interface{} `json:"-,extras"`
 	JSON        tenantJSON             `json:"-"`
 }
@@ -119,6 +123,8 @@ type Tenant struct {
 type tenantJSON struct {
 	ID          apijson.Field
 	Typename    apijson.Field
+	Name        apijson.Field
+	Settings    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -151,8 +157,6 @@ func (r TenantRequestParam) MarshalJSON() (data []byte, err error) {
 
 func (r TenantRequestParam) ImplementsInlineTenantRequestUnionParam() {}
 
-func (r TenantRequestParam) ImplementsScheduleBulkNewParamsSchedulesTenantUnion() {}
-
 // The settings for the tenant. Includes branding and preference set.
 type TenantRequestSettingsParam struct {
 	// The branding for the tenant.
@@ -167,13 +171,15 @@ func (r TenantRequestSettingsParam) MarshalJSON() (data []byte, err error) {
 
 // The branding for the tenant.
 type TenantRequestSettingsBrandingParam struct {
-	// The icon URL for the tenant.
+	// The icon URL for the tenant. Must point to a valid image with an image MIME
+	// type.
 	IconURL param.Field[string] `json:"icon_url"`
-	// The logo URL for the tenant.
+	// The logo URL for the tenant. Must point to a valid image with an image MIME
+	// type.
 	LogoURL param.Field[string] `json:"logo_url"`
-	// The primary color for the tenant.
+	// The primary color for the tenant, provided as a hex value.
 	PrimaryColor param.Field[string] `json:"primary_color"`
-	// The primary color contrast for the tenant.
+	// The primary color contrast for the tenant, provided as a hex value.
 	PrimaryColorContrast param.Field[string] `json:"primary_color_contrast"`
 }
 
@@ -229,13 +235,15 @@ func (r TenantSetParamsSettings) MarshalJSON() (data []byte, err error) {
 
 // The branding for the tenant.
 type TenantSetParamsSettingsBranding struct {
-	// The icon URL for the tenant.
+	// The icon URL for the tenant. Must point to a valid image with an image MIME
+	// type.
 	IconURL param.Field[string] `json:"icon_url"`
-	// The logo URL for the tenant.
+	// The logo URL for the tenant. Must point to a valid image with an image MIME
+	// type.
 	LogoURL param.Field[string] `json:"logo_url"`
-	// The primary color for the tenant.
+	// The primary color for the tenant, provided as a hex value.
 	PrimaryColor param.Field[string] `json:"primary_color"`
-	// The primary color contrast for the tenant.
+	// The primary color contrast for the tenant, provided as a hex value.
 	PrimaryColorContrast param.Field[string] `json:"primary_color_contrast"`
 }
 

@@ -41,8 +41,7 @@ func (r *TenantBulkService) Delete(ctx context.Context, body TenantBulkDeletePar
 	return
 }
 
-// Set or update multiple tenants in a single operation. This operation allows you
-// to create or update multiple tenants with their properties and settings.
+// Set or update up to 1,000 tenants in a single operation.
 func (r *TenantBulkService) Set(ctx context.Context, body TenantBulkSetParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v1/tenants/bulk/set"
