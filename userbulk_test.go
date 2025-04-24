@@ -66,10 +66,10 @@ func TestUserBulkIdentify(t *testing.T) {
 				Provider: knock.F("push_fcm"),
 			}}),
 			CreatedAt: knock.F(time.Now()),
-			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
-				ID: knock.F("id"),
-				Categories: knock.F(map[string]knock.InlinePreferenceSetRequestCategoriesUnionParam{
-					"marketing": knock.InlinePreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
+			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
+				ID: knock.F("default"),
+				Categories: knock.F(map[string]knock.InlinePreferenceSetRequestItemCategoriesUnionParam{
+					"transactional": knock.InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
 						ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
 							Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
 							Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
@@ -84,7 +84,6 @@ func TestUserBulkIdentify(t *testing.T) {
 							Variable: knock.F("specimen.dna_sequence"),
 						}}),
 					},
-					"transactional": shared.UnionBool(true),
 				}),
 				ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
 					Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
@@ -92,19 +91,13 @@ func TestUserBulkIdentify(t *testing.T) {
 					HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
 					InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
 					Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-					SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
-						Conditions: knock.F([]knock.ConditionParam{{
-							Argument: knock.F("US"),
-							Operator: knock.F(knock.ConditionOperatorEqualTo),
-							Variable: knock.F("recipient.country_code"),
-						}}),
-					}),
+					SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
 				}),
-				Workflows: knock.F(map[string]knock.InlinePreferenceSetRequestWorkflowsUnionParam{
-					"dinosaurs-loose": knock.InlinePreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
+				Workflows: knock.F(map[string]knock.InlinePreferenceSetRequestItemWorkflowsUnionParam{
+					"dinosaurs-loose": knock.InlinePreferenceSetRequestItemWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
 						ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
 							Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-							Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
+							Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
 							HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
 							InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
 							Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
@@ -116,9 +109,8 @@ func TestUserBulkIdentify(t *testing.T) {
 							Variable: knock.F("specimen.dna_sequence"),
 						}}),
 					},
-					"welcome-sequence": shared.UnionBool(true),
 				}),
-			}),
+			}}),
 		}}),
 	})
 	if err != nil {

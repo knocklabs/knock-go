@@ -115,10 +115,10 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 				}),
 				Provider: knock.F("push_fcm"),
 			}}),
-			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
+			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
 				ID: knock.F("default"),
-				Categories: knock.F(map[string]knock.InlinePreferenceSetRequestCategoriesUnionParam{
-					"transactional": knock.InlinePreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
+				Categories: knock.F(map[string]knock.InlinePreferenceSetRequestItemCategoriesUnionParam{
+					"transactional": knock.InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
 						ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
 							Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
 							Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
@@ -142,8 +142,8 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 					Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
 					SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
 				}),
-				Workflows: knock.F(map[string]knock.InlinePreferenceSetRequestWorkflowsUnionParam{
-					"dinosaurs-loose": knock.InlinePreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
+				Workflows: knock.F(map[string]knock.InlinePreferenceSetRequestItemWorkflowsUnionParam{
+					"dinosaurs-loose": knock.InlinePreferenceSetRequestItemWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
 						ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
 							Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
 							Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
@@ -159,7 +159,7 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 						}}),
 					},
 				}),
-			}),
+			}}),
 			Settings: knock.F(knock.TenantSetParamsSettings{
 				Branding: knock.F(knock.TenantSetParamsSettingsBranding{
 					IconURL:              knock.F("https://example.com/trex_silhouette_icon.png"),
