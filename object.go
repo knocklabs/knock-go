@@ -390,7 +390,7 @@ type InlineObjectRequestParam struct {
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// Timestamp when the resource was created.
 	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
-	// Inline set preferences for a recipient, where the key is the preference set name
+	// Inline set preferences for a recipient.
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
 	ExtraFields map[string]interface{}                       `json:"-,extras"`
 }
@@ -699,7 +699,7 @@ type ObjectSetParams struct {
 	// The locale of the object. Used for
 	// [message localization](/concepts/translations).
 	Locale param.Field[string] `json:"locale"`
-	// Inline set preferences for a recipient, where the key is the preference set name
+	// Inline set preferences for a recipient.
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
 	// The timezone of the object. Must be a valid
 	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).

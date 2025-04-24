@@ -13,21 +13,19 @@ func (UnionString) ImplementsMessageDeliveryLogResponseBodyUnion() {}
 
 type UnionBool bool
 
-func (UnionBool) ImplementsInlinePreferenceSetRequestItemCategoriesUnionParam() {}
-func (UnionBool) ImplementsInlinePreferenceSetRequestItemWorkflowsUnionParam()  {}
-func (UnionBool) ImplementsPreferenceSetCategoriesUnion()                       {}
-func (UnionBool) ImplementsPreferenceSetWorkflowsUnion()                        {}
-func (UnionBool) ImplementsPreferenceSetChannelTypesChatUnionParam()            {}
-func (UnionBool) ImplementsPreferenceSetChannelTypesChatUnion()                 {}
-func (UnionBool) ImplementsPreferenceSetChannelTypesEmailUnionParam()           {}
-func (UnionBool) ImplementsPreferenceSetChannelTypesEmailUnion()                {}
-func (UnionBool) ImplementsPreferenceSetChannelTypesHTTPUnionParam()            {}
-func (UnionBool) ImplementsPreferenceSetChannelTypesHTTPUnion()                 {}
-func (UnionBool) ImplementsPreferenceSetChannelTypesInAppFeedUnionParam()       {}
-func (UnionBool) ImplementsPreferenceSetChannelTypesInAppFeedUnion()            {}
-func (UnionBool) ImplementsPreferenceSetChannelTypesPushUnionParam()            {}
-func (UnionBool) ImplementsPreferenceSetChannelTypesPushUnion()                 {}
-func (UnionBool) ImplementsPreferenceSetChannelTypesSMSUnionParam()             {}
-func (UnionBool) ImplementsPreferenceSetChannelTypesSMSUnion()                  {}
-func (UnionBool) ImplementsPreferenceSetRequestCategoriesUnionParam()           {}
-func (UnionBool) ImplementsPreferenceSetRequestWorkflowsUnionParam()            {}
+func (UnionBool) ImplementsPreferenceSetCategoriesUnion()                 {}
+func (UnionBool) ImplementsPreferenceSetWorkflowsUnion()                  {}
+func (UnionBool) ImplementsPreferenceSetChannelTypesChatUnionParam()      {}
+func (UnionBool) ImplementsPreferenceSetChannelTypesChatUnion()           {}
+func (UnionBool) ImplementsPreferenceSetChannelTypesEmailUnionParam()     {}
+func (UnionBool) ImplementsPreferenceSetChannelTypesEmailUnion()          {}
+func (UnionBool) ImplementsPreferenceSetChannelTypesHTTPUnionParam()      {}
+func (UnionBool) ImplementsPreferenceSetChannelTypesHTTPUnion()           {}
+func (UnionBool) ImplementsPreferenceSetChannelTypesInAppFeedUnionParam() {}
+func (UnionBool) ImplementsPreferenceSetChannelTypesInAppFeedUnion()      {}
+func (UnionBool) ImplementsPreferenceSetChannelTypesPushUnionParam()      {}
+func (UnionBool) ImplementsPreferenceSetChannelTypesPushUnion()           {}
+func (UnionBool) ImplementsPreferenceSetChannelTypesSMSUnionParam()       {}
+func (UnionBool) ImplementsPreferenceSetChannelTypesSMSUnion()            {}
+func (UnionBool) ImplementsPreferenceSetRequestCategoriesUnionParam()     {}
+func (UnionBool) ImplementsPreferenceSetRequestWorkflowsUnionParam()      {}
