@@ -319,7 +319,7 @@ type IdentifyUserRequestParam struct {
 	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
 	// user (required for SMS channels).
 	PhoneNumber param.Field[string] `json:"phone_number"`
-	// A list of objects that specify the preferences for the user.
+	// Inline set preferences for a recipient, where the key is the preference set name
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
 	// The timezone of the user. Must be a valid
 	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
@@ -344,7 +344,7 @@ type InlineIdentifyUserRequestParam struct {
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// The creation date of the user from your system.
 	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
-	// A list of objects that specify the preferences for the user.
+	// Inline set preferences for a recipient, where the key is the preference set name
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
 	ExtraFields map[string]interface{}                       `json:"-,extras"`
 }

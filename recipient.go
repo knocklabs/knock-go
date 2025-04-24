@@ -212,7 +212,7 @@ type RecipientRequestParam struct {
 	Collection param.Field[string] `json:"collection"`
 	// The creation date of the user from your system.
 	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
-	// A list of objects that specify the preferences for the user.
+	// Inline set preferences for a recipient, where the key is the preference set name
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
 }
 

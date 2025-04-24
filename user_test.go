@@ -48,21 +48,52 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 				Locale:      knock.F("locale"),
 				Name:        knock.F("Dr. Ian Malcolm"),
 				PhoneNumber: knock.F("phone_number"),
-				Preferences: knock.F[any](map[string]interface{}{
-					"0": map[string]interface{}{
-						"channel_types": map[string]interface{}{
-							"email": true,
+				Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
+					ID: knock.F("default"),
+					Categories: knock.F(map[string]knock.InlinePreferenceSetRequestItemCategoriesUnionParam{
+						"marketing": knock.InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
+							ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+								Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+								Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
+								HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+								Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+								SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+							}),
+							Conditions: knock.F([]knock.ConditionParam{{
+								Argument: knock.F("frog_genome"),
+								Operator: knock.F(knock.ConditionOperatorContains),
+								Variable: knock.F("specimen.dna_sequence"),
+							}}),
 						},
-						"id": "default",
-						"workflows": map[string]interface{}{
-							"dinosaurs-loose": map[string]interface{}{
-								"channel_types": map[string]interface{}{
-									"email": true,
-								},
-							},
+						"transactional": shared.UnionBool(true),
+					}),
+					ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+						Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+						Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
+						HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+						InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+						Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+						SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+					}),
+					Workflows: knock.F(map[string]knock.InlinePreferenceSetRequestItemWorkflowsUnionParam{
+						"dinosaurs-loose": knock.InlinePreferenceSetRequestItemWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
+							ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+								Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+								Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
+								HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+								Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+								SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+							}),
+							Conditions: knock.F([]knock.ConditionParam{{
+								Argument: knock.F("frog_genome"),
+								Operator: knock.F(knock.ConditionOperatorContains),
+								Variable: knock.F("specimen.dna_sequence"),
+							}}),
 						},
-					},
-				}),
+					}),
+				}}),
 				Timezone: knock.F("America/New_York"),
 			},
 		},

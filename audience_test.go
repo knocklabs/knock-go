@@ -12,6 +12,7 @@ import (
 	"github.com/stainless-sdks/knock-go"
 	"github.com/stainless-sdks/knock-go/internal/testutil"
 	"github.com/stainless-sdks/knock-go/option"
+	"github.com/stainless-sdks/knock-go/shared"
 )
 
 func TestAudienceAddMembers(t *testing.T) {
@@ -43,8 +44,52 @@ func TestAudienceAddMembers(t *testing.T) {
 						}),
 						Provider: knock.F("push_fcm"),
 					}}),
-					CreatedAt:   knock.F(time.Now()),
-					Preferences: knock.F[any](map[string]interface{}{}),
+					CreatedAt: knock.F(time.Now()),
+					Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
+						ID: knock.F("default"),
+						Categories: knock.F(map[string]knock.InlinePreferenceSetRequestItemCategoriesUnionParam{
+							"transactional": knock.InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
+								ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+									Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+									Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
+									HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+									InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+									Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+									SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+								}),
+								Conditions: knock.F([]knock.ConditionParam{{
+									Argument: knock.F("frog_genome"),
+									Operator: knock.F(knock.ConditionOperatorContains),
+									Variable: knock.F("specimen.dna_sequence"),
+								}}),
+							},
+						}),
+						ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+							Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+							Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
+							HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+							InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+							Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+							SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+						}),
+						Workflows: knock.F(map[string]knock.InlinePreferenceSetRequestItemWorkflowsUnionParam{
+							"dinosaurs-loose": knock.InlinePreferenceSetRequestItemWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
+								ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+									Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+									Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
+									HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+									InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+									Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+									SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+								}),
+								Conditions: knock.F([]knock.ConditionParam{{
+									Argument: knock.F("frog_genome"),
+									Operator: knock.F(knock.ConditionOperatorContains),
+									Variable: knock.F("specimen.dna_sequence"),
+								}}),
+							},
+						}),
+					}}),
 				}),
 				Tenant: knock.F("ingen_isla_nublar"),
 			}}),
@@ -111,8 +156,52 @@ func TestAudienceRemoveMembers(t *testing.T) {
 						}),
 						Provider: knock.F("push_fcm"),
 					}}),
-					CreatedAt:   knock.F(time.Now()),
-					Preferences: knock.F[any](map[string]interface{}{}),
+					CreatedAt: knock.F(time.Now()),
+					Preferences: knock.F(knock.InlinePreferenceSetRequestParam{knock.InlinePreferenceSetRequestItemParam{
+						ID: knock.F("default"),
+						Categories: knock.F(map[string]knock.InlinePreferenceSetRequestItemCategoriesUnionParam{
+							"transactional": knock.InlinePreferenceSetRequestItemCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
+								ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+									Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+									Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
+									HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+									InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+									Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+									SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+								}),
+								Conditions: knock.F([]knock.ConditionParam{{
+									Argument: knock.F("frog_genome"),
+									Operator: knock.F(knock.ConditionOperatorContains),
+									Variable: knock.F("specimen.dna_sequence"),
+								}}),
+							},
+						}),
+						ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+							Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+							Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
+							HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+							InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+							Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+							SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+						}),
+						Workflows: knock.F(map[string]knock.InlinePreferenceSetRequestItemWorkflowsUnionParam{
+							"dinosaurs-loose": knock.InlinePreferenceSetRequestItemWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
+								ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+									Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+									Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
+									HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+									InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+									Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+									SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+								}),
+								Conditions: knock.F([]knock.ConditionParam{{
+									Argument: knock.F("frog_genome"),
+									Operator: knock.F(knock.ConditionOperatorContains),
+									Variable: knock.F("specimen.dna_sequence"),
+								}}),
+							},
+						}),
+					}}),
 				}),
 				Tenant: knock.F("ingen_isla_nublar"),
 			}}),
