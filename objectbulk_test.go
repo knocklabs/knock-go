@@ -32,7 +32,13 @@ func TestObjectBulkDelete(t *testing.T) {
 		context.TODO(),
 		"collection",
 		knock.ObjectBulkDeleteParams{
-			ObjectIDs: knock.F([]string{"obj_123", "obj_456", "obj_789"}),
+			Body: map[string]interface{}{
+				"object_ids": map[string]interface{}{
+					"0": "obj_123",
+					"1": "obj_456",
+					"2": "obj_789",
+				},
+			},
 		},
 	)
 	if err != nil {

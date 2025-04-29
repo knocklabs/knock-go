@@ -74,12 +74,11 @@ func (r *ObjectBulkService) Set(ctx context.Context, collection string, body Obj
 }
 
 type ObjectBulkDeleteParams struct {
-	// List of object IDs to delete.
-	ObjectIDs param.Field[[]string] `json:"object_ids,required"`
+	Body interface{} `json:"body,required"`
 }
 
 func (r ObjectBulkDeleteParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+	return apijson.MarshalRoot(r.Body)
 }
 
 type ObjectBulkAddSubscriptionsParams struct {

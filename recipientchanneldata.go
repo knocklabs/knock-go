@@ -32,6 +32,8 @@ func NewRecipientChannelDataService(opts ...option.RequestOption) (r *RecipientC
 
 // Channel data for a given channel type.
 type ChannelData struct {
+	// The typename of the schema.
+	Typename string `json:"__typename,required"`
 	// The unique identifier for the channel.
 	ChannelID string `json:"channel_id,required" format:"uuid"`
 	// Channel data for a given channel type.
@@ -43,6 +45,7 @@ type ChannelData struct {
 
 // channelDataJSON contains the JSON metadata for the struct [ChannelData]
 type channelDataJSON struct {
+	Typename    apijson.Field
 	ChannelID   apijson.Field
 	Data        apijson.Field
 	Provider    apijson.Field
