@@ -573,6 +573,10 @@ func init() {
 			TypeFilter: gjson.String,
 			Type:       reflect.TypeOf(shared.UnionString("")),
 		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(MessageDeliveryLogRequestBodyMap{}),
+		},
 	)
 }
 
@@ -642,6 +646,10 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
 			Type:       reflect.TypeOf(shared.UnionString("")),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(MessageDeliveryLogResponseBodyMap{}),
 		},
 	)
 }
