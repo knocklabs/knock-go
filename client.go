@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/stainless-sdks/knock-go/internal/requestconfig"
-	"github.com/stainless-sdks/knock-go/option"
+	"github.com/knocklabs/knock-go/internal/requestconfig"
+	"github.com/knocklabs/knock-go/option"
 )
 
 // Client creates a struct with services and top level methods that help with

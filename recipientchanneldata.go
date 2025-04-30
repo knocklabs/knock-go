@@ -5,9 +5,9 @@ package knock
 import (
 	"reflect"
 
-	"github.com/stainless-sdks/knock-go/internal/apijson"
-	"github.com/stainless-sdks/knock-go/internal/param"
-	"github.com/stainless-sdks/knock-go/option"
+	"github.com/knocklabs/knock-go/internal/apijson"
+	"github.com/knocklabs/knock-go/internal/param"
+	"github.com/knocklabs/knock-go/option"
 	"github.com/tidwall/gjson"
 )
 

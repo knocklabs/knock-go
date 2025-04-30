@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/stainless-sdks/knock-go/internal/apijson"
-	"github.com/stainless-sdks/knock-go/internal/requestconfig"
-	"github.com/stainless-sdks/knock-go/option"
+	"github.com/knocklabs/knock-go/internal/apijson"
+	"github.com/knocklabs/knock-go/internal/requestconfig"
+	"github.com/knocklabs/knock-go/option"
 )
 
 // BulkOperationService contains methods and other services that help with

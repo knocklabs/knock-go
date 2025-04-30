@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stainless-sdks/knock-go/internal/param"
+	"github.com/knocklabs/knock-go/internal/param"
 )
 
 type Struct struct {

@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stainless-sdks/knock-go/internal/param"
+	"github.com/knocklabs/knock-go/internal/param"
 )
 
 var encoders sync.Map // map[encoderEntry]encoderFunc

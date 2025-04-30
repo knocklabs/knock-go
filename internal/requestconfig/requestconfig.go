@@ -18,11 +18,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stainless-sdks/knock-go/internal"
-	"github.com/stainless-sdks/knock-go/internal/apierror"
-	"github.com/stainless-sdks/knock-go/internal/apiform"
-	"github.com/stainless-sdks/knock-go/internal/apiquery"
-	"github.com/stainless-sdks/knock-go/internal/param"
+	"github.com/knocklabs/knock-go/internal"
+	"github.com/knocklabs/knock-go/internal/apierror"
+	"github.com/knocklabs/knock-go/internal/apiform"
+	"github.com/knocklabs/knock-go/internal/apiquery"
+	"github.com/knocklabs/knock-go/internal/param"
 )
 
 func getDefaultHeaders() map[string]string {

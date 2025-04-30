@@ -8,10 +8,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stainless-sdks/knock-go"
-	"github.com/stainless-sdks/knock-go/internal/testutil"
-	"github.com/stainless-sdks/knock-go/option"
-	"github.com/stainless-sdks/knock-go/shared"
+	"github.com/knocklabs/knock-go"
+	"github.com/knocklabs/knock-go/internal/testutil"
+	"github.com/knocklabs/knock-go/option"
+	"github.com/knocklabs/knock-go/shared"
 )
 
 func TestObjectListWithOptionalParams(t *testing.T) {

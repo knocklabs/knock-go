@@ -1,4 +1,4 @@
-module github.com/stainless-sdks/knock-go
+module github.com/knocklabs/knock-go
 
 go 1.21
 

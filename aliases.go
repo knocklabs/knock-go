@@ -3,7 +3,7 @@
 package knock
 
 import (
-	"github.com/stainless-sdks/knock-go/internal/apierror"
+	"github.com/knocklabs/knock-go/internal/apierror"
 )
 
 type Error = apierror.Error

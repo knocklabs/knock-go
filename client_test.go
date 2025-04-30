@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stainless-sdks/knock-go"
-	"github.com/stainless-sdks/knock-go/internal"
-	"github.com/stainless-sdks/knock-go/option"
+	"github.com/knocklabs/knock-go"
+	"github.com/knocklabs/knock-go/internal"
+	"github.com/knocklabs/knock-go/option"
 )
 
 type closureTransport struct {

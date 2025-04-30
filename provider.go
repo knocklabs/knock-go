@@ -3,7 +3,7 @@
 package knock
 
 import (
-	"github.com/stainless-sdks/knock-go/option"
+	"github.com/knocklabs/knock-go/option"
 )
 
 // ProviderService contains methods and other services that help with interacting
