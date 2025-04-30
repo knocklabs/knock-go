@@ -51,7 +51,7 @@ import (
 
 func main() {
 	client := knock.NewClient(
-		option.WithBearerToken("My Bearer Token"), // defaults to os.LookupEnv("KNOCK_API_KEY")
+		option.WithAPIKey("My API Key"), // defaults to os.LookupEnv("KNOCK_API_KEY")
 	)
 	response, err := client.Workflows.Trigger(
 		context.TODO(),

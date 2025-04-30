@@ -25,7 +25,7 @@ func TestObjectListWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.List(
 		context.TODO(),
@@ -57,7 +57,7 @@ func TestObjectDelete(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.Delete(
 		context.TODO(),
@@ -84,7 +84,7 @@ func TestObjectAddSubscriptionsWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.AddSubscriptions(
 		context.TODO(),
@@ -117,7 +117,7 @@ func TestObjectDeleteSubscriptions(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.DeleteSubscriptions(
 		context.TODO(),
@@ -147,7 +147,7 @@ func TestObjectGet(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.Get(
 		context.TODO(),
@@ -174,7 +174,7 @@ func TestObjectGetChannelData(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.GetChannelData(
 		context.TODO(),
@@ -202,7 +202,7 @@ func TestObjectGetPreferences(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.GetPreferences(
 		context.TODO(),
@@ -230,7 +230,7 @@ func TestObjectListMessagesWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.ListMessages(
 		context.TODO(),
@@ -278,7 +278,7 @@ func TestObjectListPreferences(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.ListPreferences(
 		context.TODO(),
@@ -305,7 +305,7 @@ func TestObjectListSchedulesWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.ListSchedules(
 		context.TODO(),
@@ -339,7 +339,7 @@ func TestObjectListSubscriptionsWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.ListSubscriptions(
 		context.TODO(),
@@ -378,7 +378,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.Set(
 		context.TODO(),
@@ -463,7 +463,7 @@ func TestObjectSetChannelData(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.SetChannelData(
 		context.TODO(),
@@ -498,7 +498,7 @@ func TestObjectSetPreferencesWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.SetPreferences(
 		context.TODO(),
@@ -573,7 +573,7 @@ func TestObjectUnsetChannelData(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.UnsetChannelData(
 		context.TODO(),

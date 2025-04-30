@@ -26,7 +26,7 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Schedules.New(context.TODO(), knock.ScheduleNewParams{
 		Recipients: knock.F([]knock.RecipientRequestUnionParam{shared.UnionString("user_123")}),
@@ -67,7 +67,7 @@ func TestScheduleUpdateWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Schedules.Update(context.TODO(), knock.ScheduleUpdateParams{
 		ScheduleIDs: knock.F([]string{"123e4567-e89b-12d3-a456-426614174000"}),
@@ -108,7 +108,7 @@ func TestScheduleListWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Schedules.List(context.TODO(), knock.ScheduleListParams{
 		Workflow:   knock.F("workflow"),
@@ -138,7 +138,7 @@ func TestScheduleDelete(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Schedules.Delete(context.TODO(), knock.ScheduleDeleteParams{
 		ScheduleIDs: knock.F([]string{"123e4567-e89b-12d3-a456-426614174000"}),

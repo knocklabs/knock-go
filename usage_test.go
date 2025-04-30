@@ -23,7 +23,7 @@ func TestUsage(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	response, err := client.Workflows.Trigger(
 		context.TODO(),

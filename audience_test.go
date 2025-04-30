@@ -26,7 +26,7 @@ func TestAudienceAddMembers(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Audiences.AddMembers(
 		context.TODO(),
@@ -115,7 +115,7 @@ func TestAudienceListMembers(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Audiences.ListMembers(context.TODO(), "key")
 	if err != nil {
@@ -138,7 +138,7 @@ func TestAudienceRemoveMembers(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Audiences.RemoveMembers(
 		context.TODO(),

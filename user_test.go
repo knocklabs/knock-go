@@ -26,7 +26,7 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Update(
 		context.TODO(),
@@ -117,7 +117,7 @@ func TestUserListWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.List(context.TODO(), knock.UserListParams{
 		After:    knock.F("after"),
@@ -145,7 +145,7 @@ func TestUserDelete(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Delete(context.TODO(), "user_id")
 	if err != nil {
@@ -168,7 +168,7 @@ func TestUserGet(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Get(context.TODO(), "user_id")
 	if err != nil {
@@ -191,7 +191,7 @@ func TestUserGetChannelData(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.GetChannelData(
 		context.TODO(),
@@ -218,7 +218,7 @@ func TestUserGetPreferencesWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.GetPreferences(
 		context.TODO(),
@@ -248,7 +248,7 @@ func TestUserListMessagesWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.ListMessages(
 		context.TODO(),
@@ -295,7 +295,7 @@ func TestUserListPreferences(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.ListPreferences(context.TODO(), "user_id")
 	if err != nil {
@@ -318,7 +318,7 @@ func TestUserListSchedulesWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.ListSchedules(
 		context.TODO(),
@@ -351,7 +351,7 @@ func TestUserListSubscriptionsWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.ListSubscriptions(
 		context.TODO(),
@@ -384,7 +384,7 @@ func TestUserMerge(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Merge(
 		context.TODO(),
@@ -413,7 +413,7 @@ func TestUserSetChannelData(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.SetChannelData(
 		context.TODO(),
@@ -447,7 +447,7 @@ func TestUserSetPreferencesWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.SetPreferences(
 		context.TODO(),
@@ -521,7 +521,7 @@ func TestUserUnsetChannelData(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.UnsetChannelData(
 		context.TODO(),

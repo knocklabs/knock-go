@@ -24,7 +24,7 @@ func TestIntegrationCensusCustomDestinationWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Integrations.Census.CustomDestination(context.TODO(), knock.IntegrationCensusCustomDestinationParams{
 		ID:      knock.F("id"),

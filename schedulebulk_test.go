@@ -26,7 +26,7 @@ func TestScheduleBulkNew(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Schedules.Bulk.New(context.TODO(), knock.ScheduleBulkNewParams{
 		Schedules: knock.F([]knock.ScheduleBulkNewParamsSchedule{{

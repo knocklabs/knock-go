@@ -24,7 +24,7 @@ func TestUserFeedGetSettings(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Feeds.GetSettings(
 		context.TODO(),
@@ -51,7 +51,7 @@ func TestUserFeedListItemsWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Feeds.ListItems(
 		context.TODO(),

@@ -26,7 +26,7 @@ func TestObjectBulkDelete(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.Bulk.Delete(
 		context.TODO(),
@@ -55,7 +55,7 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.Bulk.AddSubscriptions(
 		context.TODO(),
@@ -146,7 +146,7 @@ func TestObjectBulkSet(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Objects.Bulk.Set(
 		context.TODO(),
