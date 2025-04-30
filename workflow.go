@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/stainless-sdks/knock-go/internal/apijson"
-	"github.com/stainless-sdks/knock-go/internal/param"
-	"github.com/stainless-sdks/knock-go/internal/requestconfig"
-	"github.com/stainless-sdks/knock-go/option"
+	"github.com/knocklabs/knock-go/internal/apijson"
+	"github.com/knocklabs/knock-go/internal/param"
+	"github.com/knocklabs/knock-go/internal/requestconfig"
+	"github.com/knocklabs/knock-go/option"
 )
 
 // WorkflowService contains methods and other services that help with interacting

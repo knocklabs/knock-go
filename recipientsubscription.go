@@ -5,8 +5,8 @@ package knock
 import (
 	"time"
 
-	"github.com/stainless-sdks/knock-go/internal/apijson"
-	"github.com/stainless-sdks/knock-go/option"
+	"github.com/knocklabs/knock-go/internal/apijson"
+	"github.com/knocklabs/knock-go/option"
 )
 
 // RecipientSubscriptionService contains methods and other services that help with

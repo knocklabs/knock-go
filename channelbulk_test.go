@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stainless-sdks/knock-go"
-	"github.com/stainless-sdks/knock-go/internal/testutil"
-	"github.com/stainless-sdks/knock-go/option"
+	"github.com/knocklabs/knock-go"
+	"github.com/knocklabs/knock-go/internal/testutil"
+	"github.com/knocklabs/knock-go/option"
 )
 
 func TestChannelBulkUpdateMessageStatusWithOptionalParams(t *testing.T) {
