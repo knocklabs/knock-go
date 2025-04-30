@@ -1,25 +1,66 @@
-# Contributing
+## Setting up the environment
 
-## Getting Started
+To set up the repository, run:
 
-1. Install [asdf](https://asdf-vm.com)
-2. Install the asdf Go plugin
-
-```bash
-asdf plugin add golang https://github.com/kennyp/asdf-golang.git # Visit that repository to see installation prerequisites
+```sh
+$ ./scripts/bootstrap
+$ ./scripts/build
 ```
 
-3. Run `asdf install` to install the version of Go specified in the [.tool-versions](.tool-versions) file
+This will install all the required dependencies and build the SDK.
+
+You can also [install go 1.18+ manually](https://go.dev/doc/install).
+
+## Modifying/Adding code
+
+Most of the SDK is generated code. Modifications to code will be persisted between generations, but may
+result in merge conflicts between manual patches and changes from the generator. The generator will never
+modify the contents of the `lib/` and `examples/` directories.
+
+## Adding and running examples
+
+All files in the `examples/` directory are not modified by the generator and can be freely edited or added to.
+
+```go
+# add an example to examples/<your-example>/main.go
+
+package main
+
+func main() {
+  // ...
+}
+```
+
+```sh
+$ go run ./examples/<your-example>
+```
+
+## Using the repository from source
+
+To use a local version of this library from source in another project, edit the `go.mod` with a replace
+directive. This can be done through the CLI with the following:
+
+```sh
+$ go mod edit -replace github.com/stainless-sdks/knock-go=/path/to/knock-go
+```
 
 ## Running tests
 
-`go test ./knock`
+Most tests require you to [set up a mock server](https://github.com/stoplightio/prism) against the OpenAPI spec to run the tests.
 
-## Building
+```sh
+# you will need npm installed
+$ npx prism mock path/to/your/openapi.yml
+```
 
-`go build ./knock`
+```sh
+$ ./scripts/test
+```
 
 ## Formatting
 
-`go fmt ./knock`
+This library uses the standard gofmt code formatter:
 
+```sh
+$ ./scripts/format
+```

@@ -1,2 +1,4 @@
-.vscode/
-__debug_bin
+.prism.log
+codegen.log
+Brewfile.lock.json
+.idea/
