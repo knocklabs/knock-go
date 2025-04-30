@@ -22,7 +22,7 @@ func TestAutoPagination(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	iter := client.Users.ListAutoPaging(context.TODO(), knock.UserListParams{})
 	// Prism mock isn't going to give us real pagination

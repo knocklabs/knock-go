@@ -266,10 +266,10 @@ func WithEnvironmentProduction() RequestOption {
 	return WithBaseURL("https://api.knock.app/")
 }
 
-// WithBearerToken returns a RequestOption that sets the client setting "bearer_token".
-func WithBearerToken(value string) RequestOption {
+// WithAPIKey returns a RequestOption that sets the client setting "api_key".
+func WithAPIKey(value string) RequestOption {
 	return requestconfig.RequestOptionFunc(func(r *requestconfig.RequestConfig) error {
-		r.BearerToken = value
-		return r.Apply(WithHeader("authorization", fmt.Sprintf("Bearer %s", r.BearerToken)))
+		r.APIKey = value
+		return r.Apply(WithHeader("authorization", fmt.Sprintf("Bearer %s", r.APIKey)))
 	})
 }

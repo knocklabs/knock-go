@@ -25,7 +25,7 @@ func TestChannelBulkUpdateMessageStatusWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Channels.Bulk.UpdateMessageStatus(
 		context.TODO(),

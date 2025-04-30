@@ -24,7 +24,7 @@ func TestMessageListWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.List(context.TODO(), knock.MessageListParams{
 		After:            knock.F("after"),
@@ -67,7 +67,7 @@ func TestMessageArchive(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Archive(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
 	if err != nil {
@@ -90,7 +90,7 @@ func TestMessageGet(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Get(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
 	if err != nil {
@@ -113,7 +113,7 @@ func TestMessageGetContent(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.GetContent(context.TODO(), "message_id")
 	if err != nil {
@@ -136,7 +136,7 @@ func TestMessageListActivitiesWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.ListActivities(
 		context.TODO(),
@@ -168,7 +168,7 @@ func TestMessageListDeliveryLogsWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.ListDeliveryLogs(
 		context.TODO(),
@@ -199,7 +199,7 @@ func TestMessageListEventsWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.ListEvents(
 		context.TODO(),
@@ -230,7 +230,7 @@ func TestMessageMarkAsInteractedWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.MarkAsInteracted(
 		context.TODO(),
@@ -261,7 +261,7 @@ func TestMessageMarkAsRead(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.MarkAsRead(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
 	if err != nil {
@@ -284,7 +284,7 @@ func TestMessageMarkAsSeen(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.MarkAsSeen(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
 	if err != nil {
@@ -307,7 +307,7 @@ func TestMessageMarkAsUnread(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.MarkAsUnread(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
 	if err != nil {
@@ -330,7 +330,7 @@ func TestMessageMarkAsUnseen(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.MarkAsUnseen(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
 	if err != nil {
@@ -353,7 +353,7 @@ func TestMessageUnarchive(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Unarchive(context.TODO(), "1jNaXzB2RZX3LY8wVQnfCKyPnv7")
 	if err != nil {

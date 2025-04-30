@@ -24,7 +24,7 @@ func TestProviderSlackCheckAuth(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Providers.Slack.CheckAuth(
 		context.TODO(),
@@ -53,7 +53,7 @@ func TestProviderSlackListChannelsWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Providers.Slack.ListChannels(
 		context.TODO(),
@@ -89,7 +89,7 @@ func TestProviderSlackRevokeAccess(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Providers.Slack.RevokeAccess(
 		context.TODO(),

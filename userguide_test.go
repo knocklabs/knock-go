@@ -24,7 +24,7 @@ func TestUserGuideGetChannelWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Guides.GetChannel(
 		context.TODO(),
@@ -56,7 +56,7 @@ func TestUserGuideMarkMessageAsArchivedWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Guides.MarkMessageAsArchived(
 		context.TODO(),
@@ -105,7 +105,7 @@ func TestUserGuideMarkMessageAsInteractedWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Guides.MarkMessageAsInteracted(
 		context.TODO(),
@@ -154,7 +154,7 @@ func TestUserGuideMarkMessageAsSeenWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Guides.MarkMessageAsSeen(
 		context.TODO(),

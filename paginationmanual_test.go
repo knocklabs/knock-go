@@ -22,7 +22,7 @@ func TestManualPagination(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	page, err := client.Users.List(context.TODO(), knock.UserListParams{})
 	if err != nil {

@@ -26,7 +26,7 @@ func TestUserBulkDelete(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Bulk.Delete(context.TODO(), knock.UserBulkDeleteParams{
 		UserIDs: knock.F([]string{"user_1", "user_2"}),
@@ -51,7 +51,7 @@ func TestUserBulkIdentify(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Bulk.Identify(context.TODO(), knock.UserBulkIdentifyParams{
 		Users: knock.F([]knock.InlineIdentifyUserRequestParam{{
@@ -133,7 +133,7 @@ func TestUserBulkSetPreferencesWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Bulk.SetPreferences(context.TODO(), knock.UserBulkSetPreferencesParams{
 		Preferences: knock.F(knock.PreferenceSetRequestParam{

@@ -24,7 +24,7 @@ func TestIntegrationHightouchEmbeddedDestinationWithOptionalParams(t *testing.T)
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Integrations.Hightouch.EmbeddedDestination(context.TODO(), knock.IntegrationHightouchEmbeddedDestinationParams{
 		ID:      knock.F("id"),

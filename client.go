@@ -39,7 +39,7 @@ func DefaultClientOptions() []option.RequestOption {
 		defaults = append(defaults, option.WithBaseURL(o))
 	}
 	if o, ok := os.LookupEnv("KNOCK_API_KEY"); ok {
-		defaults = append(defaults, option.WithBearerToken(o))
+		defaults = append(defaults, option.WithAPIKey(o))
 	}
 	return defaults
 }

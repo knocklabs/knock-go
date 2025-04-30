@@ -25,7 +25,7 @@ func TestTenantBulkDelete(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Tenants.Bulk.Delete(context.TODO(), knock.TenantBulkDeleteParams{
 		TenantIDs: knock.F([]string{"string"}),
@@ -50,7 +50,7 @@ func TestTenantBulkSet(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Tenants.Bulk.Set(context.TODO(), knock.TenantBulkSetParams{
 		Tenants: knock.F([]knock.InlineTenantRequestUnionParam{shared.UnionString("string")}),

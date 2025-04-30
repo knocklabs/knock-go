@@ -25,7 +25,7 @@ func TestTenantListWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Tenants.List(context.TODO(), knock.TenantListParams{
 		After:    knock.F("after"),
@@ -54,7 +54,7 @@ func TestTenantDelete(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Tenants.Delete(context.TODO(), "id")
 	if err != nil {
@@ -77,7 +77,7 @@ func TestTenantGet(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Tenants.Get(context.TODO(), "id")
 	if err != nil {
@@ -100,7 +100,7 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Tenants.Set(
 		context.TODO(),

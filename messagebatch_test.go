@@ -24,7 +24,7 @@ func TestMessageBatchArchive(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.Archive(context.TODO(), knock.MessageBatchArchiveParams{
 		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
@@ -49,7 +49,7 @@ func TestMessageBatchGetContent(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.GetContent(context.TODO(), knock.MessageBatchGetContentParams{
 		MessageIDs: knock.F([]string{"string"}),
@@ -74,7 +74,7 @@ func TestMessageBatchMarkAsInteractedWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.MarkAsInteracted(context.TODO(), knock.MessageBatchMarkAsInteractedParams{
 		MessageIDs: knock.F([]string{"1jNaXzB2RZX3LY8wVQnfCKyPnv7"}),
@@ -102,7 +102,7 @@ func TestMessageBatchMarkAsRead(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.MarkAsRead(context.TODO(), knock.MessageBatchMarkAsReadParams{
 		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
@@ -127,7 +127,7 @@ func TestMessageBatchMarkAsSeen(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.MarkAsSeen(context.TODO(), knock.MessageBatchMarkAsSeenParams{
 		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
@@ -152,7 +152,7 @@ func TestMessageBatchMarkAsUnread(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.MarkAsUnread(context.TODO(), knock.MessageBatchMarkAsUnreadParams{
 		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
@@ -177,7 +177,7 @@ func TestMessageBatchMarkAsUnseen(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.MarkAsUnseen(context.TODO(), knock.MessageBatchMarkAsUnseenParams{
 		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
@@ -202,7 +202,7 @@ func TestMessageBatchUnarchive(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.Unarchive(context.TODO(), knock.MessageBatchUnarchiveParams{
 		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),

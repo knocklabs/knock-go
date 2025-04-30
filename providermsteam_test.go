@@ -24,7 +24,7 @@ func TestProviderMsTeamCheckAuth(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Providers.MsTeams.CheckAuth(
 		context.TODO(),
@@ -53,7 +53,7 @@ func TestProviderMsTeamListChannelsWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Providers.MsTeams.ListChannels(
 		context.TODO(),
@@ -87,7 +87,7 @@ func TestProviderMsTeamListTeamsWithOptionalParams(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Providers.MsTeams.ListTeams(
 		context.TODO(),
@@ -122,7 +122,7 @@ func TestProviderMsTeamRevokeAccess(t *testing.T) {
 	}
 	client := knock.NewClient(
 		option.WithBaseURL(baseURL),
-		option.WithBearerToken("My Bearer Token"),
+		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Providers.MsTeams.RevokeAccess(
 		context.TODO(),
