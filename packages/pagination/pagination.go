@@ -64,7 +64,10 @@ func (r *EntriesCursor[T]) GetNextPage() (res *EntriesCursor[T], err error) {
 		return nil, nil
 	}
 	cfg := r.cfg.Clone(r.cfg.Context)
-	cfg.Apply(option.WithQuery("after", next))
+	err = cfg.Apply(option.WithQuery("after", next))
+	if err != nil {
+		return nil, err
+	}
 	var raw *http.Response
 	cfg.ResponseInto = &raw
 	cfg.ResponseBodyInto = &res
@@ -182,7 +185,10 @@ func (r *ItemsCursor[T]) GetNextPage() (res *ItemsCursor[T], err error) {
 		return nil, nil
 	}
 	cfg := r.cfg.Clone(r.cfg.Context)
-	cfg.Apply(option.WithQuery("after", next))
+	err = cfg.Apply(option.WithQuery("after", next))
+	if err != nil {
+		return nil, err
+	}
 	var raw *http.Response
 	cfg.ResponseInto = &raw
 	cfg.ResponseBodyInto = &res
@@ -280,7 +286,10 @@ func (r *SlackChannelsCursor[T]) GetNextPage() (res *SlackChannelsCursor[T], err
 		return nil, nil
 	}
 	cfg := r.cfg.Clone(r.cfg.Context)
-	cfg.Apply(option.WithQuery("query_options.cursor", next))
+	err = cfg.Apply(option.WithQuery("query_options.cursor", next))
+	if err != nil {
+		return nil, err
+	}
 	var raw *http.Response
 	cfg.ResponseInto = &raw
 	cfg.ResponseBodyInto = &res
@@ -378,7 +387,10 @@ func (r *MsTeamsPagination[T]) GetNextPage() (res *MsTeamsPagination[T], err err
 		return nil, nil
 	}
 	cfg := r.cfg.Clone(r.cfg.Context)
-	cfg.Apply(option.WithQuery("query_options.$skiptoken", next))
+	err = cfg.Apply(option.WithQuery("query_options.$skiptoken", next))
+	if err != nil {
+		return nil, err
+	}
 	var raw *http.Response
 	cfg.ResponseInto = &raw
 	cfg.ResponseBodyInto = &res
