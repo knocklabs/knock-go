@@ -143,16 +143,21 @@ func (r AudienceAddMembersParams) MarshalJSON() (data []byte, err error) {
 
 // An audience member.
 type AudienceAddMembersParamsMember struct {
-	// A set of parameters to inline-identify a user with. Inline identifying the user
-	// will ensure that the user is available before the request is executed in Knock.
-	// It will perform an upsert for the user you're supplying, replacing any
-	// properties specified.
-	User param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
+	User param.Field[AudienceAddMembersParamsMembersUser] `json:"user,required"`
 	// The unique identifier for the tenant.
 	Tenant param.Field[string] `json:"tenant"`
 }
 
 func (r AudienceAddMembersParamsMember) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type AudienceAddMembersParamsMembersUser struct {
+	// The ID for the user that you set when identifying them in Knock.
+	ID param.Field[string] `json:"id"`
+}
+
+func (r AudienceAddMembersParamsMembersUser) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
@@ -167,15 +172,20 @@ func (r AudienceRemoveMembersParams) MarshalJSON() (data []byte, err error) {
 
 // An audience member.
 type AudienceRemoveMembersParamsMember struct {
-	// A set of parameters to inline-identify a user with. Inline identifying the user
-	// will ensure that the user is available before the request is executed in Knock.
-	// It will perform an upsert for the user you're supplying, replacing any
-	// properties specified.
-	User param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
+	User param.Field[AudienceRemoveMembersParamsMembersUser] `json:"user,required"`
 	// The unique identifier for the tenant.
 	Tenant param.Field[string] `json:"tenant"`
 }
 
 func (r AudienceRemoveMembersParamsMember) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type AudienceRemoveMembersParamsMembersUser struct {
+	// The ID for the user that you set when identifying them in Knock.
+	ID param.Field[string] `json:"id"`
+}
+
+func (r AudienceRemoveMembersParamsMembersUser) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
