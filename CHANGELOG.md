@@ -1,0 +1,29 @@
+# Changelog
+
+## 1.0.0 (2025-05-01)
+
+Full Changelog: [v0.1.22...v1.0.0](https://github.com/knocklabs/knock-go/compare/v0.1.22...v1.0.0)
+
+### Features
+
+* **api:** change bearer to apiKey ([db69f42](https://github.com/knocklabs/knock-go/commit/db69f4229f252955413f443409a04cc592adec61))
+* **api:** manual updates ([e1a8489](https://github.com/knocklabs/knock-go/commit/e1a84898fe0a0396ce75fe8baae9c9b52e19f0a7))
+* **api:** manual updates ([b09c086](https://github.com/knocklabs/knock-go/commit/b09c0861b5cefa8953ed7b516283593bd54e66e9))
+* **api:** manual updates ([af5cf78](https://github.com/knocklabs/knock-go/commit/af5cf7878f84391ff73aa68c68d348d26f72c94a))
+* update java publishing ([00127fe](https://github.com/knocklabs/knock-go/commit/00127feef9e9dc873c0b8b5d7a1eb8922b038a64))
+
+
+### Bug Fixes
+
+* **pagination:** handle errors when applying options ([3886f25](https://github.com/knocklabs/knock-go/commit/3886f252d457631ffd4f01a9cf70d4b110205acb))
+
+
+### Chores
+
+* sync repo ([0d75887](https://github.com/knocklabs/knock-go/commit/0d75887d0ca6573416422e38fe72f7ba362b46b9))
+* update SDK settings ([aeaca8f](https://github.com/knocklabs/knock-go/commit/aeaca8f97bba9be2abd6d1d96f0b8ca970fb6c8b))
+* update SDK settings ([632ed78](https://github.com/knocklabs/knock-go/commit/632ed78866c80802f564b6d04e696bdcc713d6f7))
+* update SDK settings ([7b22d52](https://github.com/knocklabs/knock-go/commit/7b22d520e8c0883adca99ce760c48616756cb22c))
+* update SDK settings ([cc582eb](https://github.com/knocklabs/knock-go/commit/cc582eb69583165bb4b10d16f1a3dcc5b55fed8a))
+* update SDK settings ([2843def](https://github.com/knocklabs/knock-go/commit/2843def2f5f3dd396951479fd74cceff1ae36d2e))
+* update SDK settings ([8d951d2](https://github.com/knocklabs/knock-go/commit/8d951d2b75c0a0f34f86b3c5f56eba770de13d2c))
