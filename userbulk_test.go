@@ -64,6 +64,8 @@ func TestUserBulkIdentify(t *testing.T) {
 				},
 			}),
 			CreatedAt: knock.F(time.Now()),
+			Email:     knock.F("jane@ingen.net"),
+			Name:      knock.F("Jane Doe"),
 			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
 				"default": knock.PreferenceSetRequestParam{
 					Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
@@ -111,6 +113,7 @@ func TestUserBulkIdentify(t *testing.T) {
 					}),
 				},
 			}),
+			Timezone: knock.F("America/New_York"),
 		}}),
 	})
 	if err != nil {
