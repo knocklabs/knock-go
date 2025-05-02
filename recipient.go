@@ -56,13 +56,13 @@ type Recipient struct {
 	Email string `json:"email,nullable"`
 	// Display name of the user.
 	Name string `json:"name,nullable"`
-	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
+	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
 	// user (required for SMS channels).
 	PhoneNumber string `json:"phone_number,nullable"`
-	// The timezone of the user. Must be a valid
-	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
-	// Used for
-	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
+	// The timezone of the user. Must be a
+	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used
+	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
 	Timezone string        `json:"timezone,nullable"`
 	JSON     recipientJSON `json:"-"`
 	union    RecipientUnion
@@ -212,8 +212,17 @@ type RecipientRequestParam struct {
 	Collection param.Field[string] `json:"collection"`
 	// The creation date of the user from your system.
 	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// The primary email address for the user.
+	Email param.Field[string] `json:"email"`
+	// Display name of the user.
+	Name param.Field[string] `json:"name"`
 	// Inline set preferences for a recipient, where the key is the preference set id.
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+	// The timezone of the user. Must be a
+	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used
+	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
+	Timezone param.Field[string] `json:"timezone"`
 }
 
 func (r RecipientRequestParam) MarshalJSON() (data []byte, err error) {

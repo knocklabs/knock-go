@@ -72,6 +72,8 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 						},
 					}),
 					CreatedAt: knock.F(time.Now()),
+					Email:     knock.F("email"),
+					Name:      knock.F("name"),
 					Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
 						"default": knock.PreferenceSetRequestParam{
 							Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
@@ -119,6 +121,7 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 							}),
 						},
 					}),
+					Timezone: knock.F("timezone"),
 				}}),
 				Properties: knock.F(map[string]interface{}{
 					"foo": "bar",

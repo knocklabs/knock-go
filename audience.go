@@ -143,6 +143,7 @@ func (r AudienceAddMembersParams) MarshalJSON() (data []byte, err error) {
 
 // An audience member.
 type AudienceAddMembersParamsMember struct {
+	// An object containing the user's ID.
 	User param.Field[AudienceAddMembersParamsMembersUser] `json:"user,required"`
 	// The unique identifier for the tenant.
 	Tenant param.Field[string] `json:"tenant"`
@@ -152,6 +153,7 @@ func (r AudienceAddMembersParamsMember) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// An object containing the user's ID.
 type AudienceAddMembersParamsMembersUser struct {
 	// The ID for the user that you set when identifying them in Knock.
 	ID param.Field[string] `json:"id"`
@@ -172,6 +174,7 @@ func (r AudienceRemoveMembersParams) MarshalJSON() (data []byte, err error) {
 
 // An audience member.
 type AudienceRemoveMembersParamsMember struct {
+	// An object containing the user's ID.
 	User param.Field[AudienceRemoveMembersParamsMembersUser] `json:"user,required"`
 	// The unique identifier for the tenant.
 	Tenant param.Field[string] `json:"tenant"`
@@ -181,6 +184,7 @@ func (r AudienceRemoveMembersParamsMember) MarshalJSON() (data []byte, err error
 	return apijson.MarshalRoot(r)
 }
 
+// An object containing the user's ID.
 type AudienceRemoveMembersParamsMembersUser struct {
 	// The ID for the user that you set when identifying them in Knock.
 	ID param.Field[string] `json:"id"`
