@@ -262,7 +262,7 @@ func WithRequestTimeout(dur time.Duration) RequestOption {
 // environment to be the "production" environment. An environment specifies which base URL
 // to use by default.
 func WithEnvironmentProduction() RequestOption {
-	return WithBaseURL("https://api.knock.app/")
+	return requestconfig.WithDefaultBaseURL("https://api.knock.app/")
 }
 
 // WithAPIKey returns a RequestOption that sets the client setting "api_key".
