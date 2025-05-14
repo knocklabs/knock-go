@@ -28,9 +28,8 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewMessageService] method instead.
 type MessageService struct {
-	Options    []option.RequestOption
-	Batch      *MessageBatchService
-	Activities *MessageActivityService
+	Options []option.RequestOption
+	Batch   *MessageBatchService
 }
 
 // NewMessageService generates a new service that applies the given options to each
@@ -40,7 +39,6 @@ func NewMessageService(opts ...option.RequestOption) (r *MessageService) {
 	r = &MessageService{}
 	r.Options = opts
 	r.Batch = NewMessageBatchService(opts...)
-	r.Activities = NewMessageActivityService(opts...)
 	return
 }
 
