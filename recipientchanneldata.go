@@ -385,6 +385,8 @@ func (r DiscordChannelDataParam) MarshalJSON() (data []byte, err error) {
 
 func (r DiscordChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
+func (r DiscordChannelDataParam) implementsInlineChannelDataRequestItemUnionParam() {}
+
 // Discord channel connection, either a channel connection or an incoming webhook
 // connection.
 type DiscordChannelDataConnectionParam struct {
@@ -445,7 +447,32 @@ func (r DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWeb
 	return apijson.MarshalRoot(r)
 }
 
-type InlineChannelDataRequestParam map[string]ChannelDataRequestParam
+type InlineChannelDataRequestParam map[string]InlineChannelDataRequestItemUnionParam
+
+// Channel data for a given channel type.
+type InlineChannelDataRequestItemParam struct {
+	Token       param.Field[interface{}] `json:"token"`
+	Connections param.Field[interface{}] `json:"connections"`
+	// Microsoft Teams tenant ID.
+	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
+	PlayerIDs       param.Field[interface{}] `json:"player_ids"`
+	Tokens          param.Field[interface{}] `json:"tokens"`
+}
+
+func (r InlineChannelDataRequestItemParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r InlineChannelDataRequestItemParam) implementsInlineChannelDataRequestItemUnionParam() {}
+
+// Channel data for a given channel type.
+//
+// Satisfied by [PushChannelDataParam], [OneSignalChannelDataParam],
+// [SlackChannelDataParam], [MsTeamsChannelDataParam], [DiscordChannelDataParam],
+// [InlineChannelDataRequestItemParam].
+type InlineChannelDataRequestItemUnionParam interface {
+	implementsInlineChannelDataRequestItemUnionParam()
+}
 
 // Microsoft Teams channel connection.
 type MsTeamsChannelData struct {
@@ -650,6 +677,8 @@ func (r MsTeamsChannelDataParam) MarshalJSON() (data []byte, err error) {
 
 func (r MsTeamsChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
+func (r MsTeamsChannelDataParam) implementsInlineChannelDataRequestItemUnionParam() {}
+
 // Microsoft Teams token connection.
 type MsTeamsChannelDataConnectionParam struct {
 	IncomingWebhook param.Field[interface{}] `json:"incoming_webhook"`
@@ -757,6 +786,8 @@ func (r OneSignalChannelDataParam) MarshalJSON() (data []byte, err error) {
 
 func (r OneSignalChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
+func (r OneSignalChannelDataParam) implementsInlineChannelDataRequestItemUnionParam() {}
+
 // The content of a push notification.
 type PushChannelData struct {
 	// A list of push channel tokens.
@@ -792,6 +823,8 @@ func (r PushChannelDataParam) MarshalJSON() (data []byte, err error) {
 }
 
 func (r PushChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
+
+func (r PushChannelDataParam) implementsInlineChannelDataRequestItemUnionParam() {}
 
 // Slack channel data
 type SlackChannelData struct {
@@ -986,6 +1019,8 @@ func (r SlackChannelDataParam) MarshalJSON() (data []byte, err error) {
 }
 
 func (r SlackChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
+
+func (r SlackChannelDataParam) implementsInlineChannelDataRequestItemUnionParam() {}
 
 // A Slack connection, either an access token or an incoming webhook
 type SlackChannelDataConnectionParam struct {

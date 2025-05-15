@@ -107,10 +107,8 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 		"id",
 		knock.TenantSetParams{
 			ChannelData: knock.F(knock.InlineChannelDataRequestParam{
-				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.ChannelDataRequestParam{
-					Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
-						Tokens: knock.F([]string{"push_token_xxx"}),
-					}),
+				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.PushChannelDataParam{
+					Tokens: knock.F([]string{"push_token_xxx"}),
 				},
 			}),
 			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{

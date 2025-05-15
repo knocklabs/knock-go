@@ -55,17 +55,18 @@ func TestUserBulkIdentify(t *testing.T) {
 	)
 	_, err := client.Users.Bulk.Identify(context.TODO(), knock.UserBulkIdentifyParams{
 		Users: knock.F([]knock.InlineIdentifyUserRequestParam{{
-			ID: knock.F("user_1"),
+			ID:     knock.F("user_1"),
+			Avatar: knock.F("avatar"),
 			ChannelData: knock.F(knock.InlineChannelDataRequestParam{
-				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.ChannelDataRequestParam{
-					Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
-						Tokens: knock.F([]string{"push_token_xxx"}),
-					}),
+				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.PushChannelDataParam{
+					Tokens: knock.F([]string{"push_token_xxx"}),
 				},
 			}),
-			CreatedAt: knock.F(time.Now()),
-			Email:     knock.F("jane@ingen.net"),
-			Name:      knock.F("Jane Doe"),
+			CreatedAt:   knock.F(time.Now()),
+			Email:       knock.F("jane@ingen.net"),
+			Locale:      knock.F("locale"),
+			Name:        knock.F("Jane Doe"),
+			PhoneNumber: knock.F("phone_number"),
 			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
 				"default": knock.PreferenceSetRequestParam{
 					Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{

@@ -255,8 +255,7 @@ func (r ScheduleRepeatRuleParam) MarshalJSON() (data []byte, err error) {
 }
 
 type ScheduleNewParams struct {
-	// The recipients to trigger the workflow for. Can inline identify users, objects,
-	// or use a list of user IDs. Limited to 1,000 recipients.
+	// The recipients to set the schedule for. Limited to 100 recipients per request.
 	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
 	// The repeat rule for the schedule.
 	Repeats param.Field[[]ScheduleRepeatRuleParam] `json:"repeats,required"`

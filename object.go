@@ -412,9 +412,10 @@ type Object struct {
 	// The timestamp when the resource was last updated.
 	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
 	// Timestamp when the resource was created.
-	CreatedAt   time.Time              `json:"created_at,nullable" format:"date-time"`
-	ExtraFields map[string]interface{} `json:"-,extras"`
-	JSON        objectJSON             `json:"-"`
+	CreatedAt time.Time `json:"created_at,nullable" format:"date-time"`
+	// The custom properties associated with the object.
+	Properties map[string]interface{} `json:"properties"`
+	JSON       objectJSON             `json:"-"`
 }
 
 // objectJSON contains the JSON metadata for the struct [Object]
@@ -424,6 +425,7 @@ type objectJSON struct {
 	Collection  apijson.Field
 	UpdatedAt   apijson.Field
 	CreatedAt   apijson.Field
+	Properties  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
