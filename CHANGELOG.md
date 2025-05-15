@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.1.0 (2025-05-15)
+
+Full Changelog: [v1.0.0...v1.1.0](https://github.com/knocklabs/knock-go/compare/v1.0.0...v1.1.0)
+
+### Features
+
+* **api:** api update ([dbdfca0](https://github.com/knocklabs/knock-go/commit/dbdfca027007d5b70cfc6e27747e1bf845be769a))
+* **api:** api update ([291a5a5](https://github.com/knocklabs/knock-go/commit/291a5a5df9c2565939a81faaf0aa7eb0e67e965b))
+* **api:** removes duplicate activities section ([47a3ae6](https://github.com/knocklabs/knock-go/commit/47a3ae6a24207dba5b223146620674dc1210e39c))
+* **client:** add support for endpoint-specific base URLs in python ([3efc721](https://github.com/knocklabs/knock-go/commit/3efc721bc2b24171be16b5fd3c105555aea1f506))
+
+
+### Bug Fixes
+
+* **client:** clean up reader resources ([723a47b](https://github.com/knocklabs/knock-go/commit/723a47bd182e716aad5299a906166f8abcc8216e))
+* **client:** correctly update body in WithJSONSet ([2cc189b](https://github.com/knocklabs/knock-go/commit/2cc189bdfe4e5dc7a87046bbbc8f22e139e7da1b))
+
 ## 1.0.0 (2025-05-01)
 
 Full Changelog: [v0.1.22...v1.0.0](https://github.com/knocklabs/knock-go/compare/v0.1.22...v1.0.0)
