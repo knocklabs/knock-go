@@ -412,9 +412,10 @@ type Object struct {
 	// The timestamp when the resource was last updated.
 	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
 	// Timestamp when the resource was created.
-	CreatedAt   time.Time              `json:"created_at,nullable" format:"date-time"`
-	ExtraFields map[string]interface{} `json:"-,extras"`
-	JSON        objectJSON             `json:"-"`
+	CreatedAt time.Time `json:"created_at,nullable" format:"date-time"`
+	// The custom properties associated with the object.
+	Properties map[string]interface{} `json:"properties"`
+	JSON       objectJSON             `json:"-"`
 }
 
 // objectJSON contains the JSON metadata for the struct [Object]
@@ -424,6 +425,7 @@ type objectJSON struct {
 	Collection  apijson.Field
 	UpdatedAt   apijson.Field
 	CreatedAt   apijson.Field
+	Properties  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -701,10 +703,10 @@ type ObjectSetParams struct {
 	Locale param.Field[string] `json:"locale"`
 	// Inline set preferences for a recipient, where the key is the preference set id.
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
-	// The timezone of the object. Must be a valid
-	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
-	// Used for
-	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
+	// The timezone of the object. Must be a
+	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used
+	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
 	Timezone param.Field[string] `json:"timezone"`
 }
 

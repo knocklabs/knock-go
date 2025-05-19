@@ -63,15 +63,18 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 		knock.ObjectBulkAddSubscriptionsParams{
 			Subscriptions: knock.F([]knock.ObjectBulkAddSubscriptionsParamsSubscription{{
 				Recipients: knock.F([]knock.RecipientRequestUnionParam{knock.InlineIdentifyUserRequestParam{
-					ID: knock.F("user_1"),
+					ID:     knock.F("user_1"),
+					Avatar: knock.F("avatar"),
 					ChannelData: knock.F(knock.InlineChannelDataRequestParam{
-						"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.ChannelDataRequestParam{
-							Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
-								Tokens: knock.F([]string{"push_token_xxx"}),
-							}),
+						"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.PushChannelDataParam{
+							Tokens: knock.F([]string{"push_token_xxx"}),
 						},
 					}),
-					CreatedAt: knock.F(time.Now()),
+					CreatedAt:   knock.F(time.Now()),
+					Email:       knock.F("email"),
+					Locale:      knock.F("locale"),
+					Name:        knock.F("name"),
+					PhoneNumber: knock.F("phone_number"),
 					Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
 						"default": knock.PreferenceSetRequestParam{
 							Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
@@ -119,6 +122,7 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 							}),
 						},
 					}),
+					Timezone: knock.F("timezone"),
 				}}),
 				Properties: knock.F(map[string]interface{}{
 					"foo": "bar",
@@ -156,10 +160,8 @@ func TestObjectBulkSet(t *testing.T) {
 				ID:         knock.F("project_1"),
 				Collection: knock.F("projects"),
 				ChannelData: knock.F(knock.InlineChannelDataRequestParam{
-					"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.ChannelDataRequestParam{
-						Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
-							Tokens: knock.F([]string{"push_token_xxx"}),
-						}),
+					"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.PushChannelDataParam{
+						Tokens: knock.F([]string{"push_token_xxx"}),
 					},
 				}),
 				CreatedAt: knock.F(time.Now()),

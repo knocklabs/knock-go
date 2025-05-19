@@ -241,12 +241,6 @@ Methods:
 - <code title="post /v1/messages/batch/unseen">client.Messages.Batch.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#MessageBatchService.MarkAsUnseen">MarkAsUnseen</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#MessageBatchMarkAsUnseenParams">MessageBatchMarkAsUnseenParams</a>) ([]<a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#Message">Message</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 - <code title="post /v1/messages/batch/unarchived">client.Messages.Batch.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#MessageBatchService.Unarchive">Unarchive</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#MessageBatchUnarchiveParams">MessageBatchUnarchiveParams</a>) ([]<a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#Message">Message</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
-## Activities
-
-Methods:
-
-- <code title="get /v1/messages/{message_id}/activities">client.Messages.Activities.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#MessageActivityService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, messageID <a href="https://pkg.go.dev/builtin#string">string</a>, query <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#MessageActivityListParams">MessageActivityListParams</a>) (<a href="https://pkg.go.dev/github.com/knocklabs/knock-go/packages/pagination">pagination</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go/packages/pagination#ItemsCursor">ItemsCursor</a>[<a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#Activity">Activity</a>], <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
-
 # Providers
 
 ## Slack

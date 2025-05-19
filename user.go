@@ -316,15 +316,15 @@ type IdentifyUserRequestParam struct {
 	Locale param.Field[string] `json:"locale"`
 	// Display name of the user.
 	Name param.Field[string] `json:"name"`
-	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
+	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
 	// user (required for SMS channels).
 	PhoneNumber param.Field[string] `json:"phone_number"`
 	// Inline set preferences for a recipient, where the key is the preference set id.
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
-	// The timezone of the user. Must be a valid
-	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
-	// Used for
-	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
+	// The timezone of the user. Must be a
+	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used
+	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
 	Timezone    param.Field[string]    `json:"timezone"`
 	ExtraFields map[string]interface{} `json:"-,extras"`
 }
@@ -340,13 +340,29 @@ func (r IdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
 type InlineIdentifyUserRequestParam struct {
 	// The ID for the user that you set when identifying them in Knock.
 	ID param.Field[string] `json:"id,required"`
+	// URL to the user's avatar image.
+	Avatar param.Field[string] `json:"avatar"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// The creation date of the user from your system.
 	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// The primary email address for the user.
+	Email param.Field[string] `json:"email"`
+	// The locale of the user. Used for [message localization](/concepts/translations).
+	Locale param.Field[string] `json:"locale"`
+	// Display name of the user.
+	Name param.Field[string] `json:"name"`
+	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
+	// user (required for SMS channels).
+	PhoneNumber param.Field[string] `json:"phone_number"`
 	// Inline set preferences for a recipient, where the key is the preference set id.
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
-	ExtraFields map[string]interface{}                       `json:"-,extras"`
+	// The timezone of the user. Must be a
+	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used
+	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
+	Timezone    param.Field[string]    `json:"timezone"`
+	ExtraFields map[string]interface{} `json:"-,extras"`
 }
 
 func (r InlineIdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
@@ -373,13 +389,13 @@ type User struct {
 	Email string `json:"email,nullable"`
 	// Display name of the user.
 	Name string `json:"name,nullable"`
-	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
+	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
 	// user (required for SMS channels).
 	PhoneNumber string `json:"phone_number,nullable"`
-	// The timezone of the user. Must be a valid
-	// [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
-	// Used for
-	// [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
+	// The timezone of the user. Must be a
+	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used
+	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
 	Timezone    string                 `json:"timezone,nullable"`
 	ExtraFields map[string]interface{} `json:"-,extras"`
 	JSON        userJSON               `json:"-"`
