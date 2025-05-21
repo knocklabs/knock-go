@@ -1414,15 +1414,18 @@ type MessageListParamsEngagementStatus string
 
 const (
 	MessageListParamsEngagementStatusSeen        MessageListParamsEngagementStatus = "seen"
+	MessageListParamsEngagementStatusUnseen      MessageListParamsEngagementStatus = "unseen"
 	MessageListParamsEngagementStatusRead        MessageListParamsEngagementStatus = "read"
-	MessageListParamsEngagementStatusInteracted  MessageListParamsEngagementStatus = "interacted"
-	MessageListParamsEngagementStatusLinkClicked MessageListParamsEngagementStatus = "link_clicked"
+	MessageListParamsEngagementStatusUnread      MessageListParamsEngagementStatus = "unread"
 	MessageListParamsEngagementStatusArchived    MessageListParamsEngagementStatus = "archived"
+	MessageListParamsEngagementStatusUnarchived  MessageListParamsEngagementStatus = "unarchived"
+	MessageListParamsEngagementStatusLinkClicked MessageListParamsEngagementStatus = "link_clicked"
+	MessageListParamsEngagementStatusInteracted  MessageListParamsEngagementStatus = "interacted"
 )
 
 func (r MessageListParamsEngagementStatus) IsKnown() bool {
 	switch r {
-	case MessageListParamsEngagementStatusSeen, MessageListParamsEngagementStatusRead, MessageListParamsEngagementStatusInteracted, MessageListParamsEngagementStatusLinkClicked, MessageListParamsEngagementStatusArchived:
+	case MessageListParamsEngagementStatusSeen, MessageListParamsEngagementStatusUnseen, MessageListParamsEngagementStatusRead, MessageListParamsEngagementStatusUnread, MessageListParamsEngagementStatusArchived, MessageListParamsEngagementStatusUnarchived, MessageListParamsEngagementStatusLinkClicked, MessageListParamsEngagementStatusInteracted:
 		return true
 	}
 	return false

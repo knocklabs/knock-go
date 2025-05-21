@@ -530,15 +530,18 @@ type UserListMessagesParamsEngagementStatus string
 
 const (
 	UserListMessagesParamsEngagementStatusSeen        UserListMessagesParamsEngagementStatus = "seen"
+	UserListMessagesParamsEngagementStatusUnseen      UserListMessagesParamsEngagementStatus = "unseen"
 	UserListMessagesParamsEngagementStatusRead        UserListMessagesParamsEngagementStatus = "read"
-	UserListMessagesParamsEngagementStatusInteracted  UserListMessagesParamsEngagementStatus = "interacted"
-	UserListMessagesParamsEngagementStatusLinkClicked UserListMessagesParamsEngagementStatus = "link_clicked"
+	UserListMessagesParamsEngagementStatusUnread      UserListMessagesParamsEngagementStatus = "unread"
 	UserListMessagesParamsEngagementStatusArchived    UserListMessagesParamsEngagementStatus = "archived"
+	UserListMessagesParamsEngagementStatusUnarchived  UserListMessagesParamsEngagementStatus = "unarchived"
+	UserListMessagesParamsEngagementStatusLinkClicked UserListMessagesParamsEngagementStatus = "link_clicked"
+	UserListMessagesParamsEngagementStatusInteracted  UserListMessagesParamsEngagementStatus = "interacted"
 )
 
 func (r UserListMessagesParamsEngagementStatus) IsKnown() bool {
 	switch r {
-	case UserListMessagesParamsEngagementStatusSeen, UserListMessagesParamsEngagementStatusRead, UserListMessagesParamsEngagementStatusInteracted, UserListMessagesParamsEngagementStatusLinkClicked, UserListMessagesParamsEngagementStatusArchived:
+	case UserListMessagesParamsEngagementStatusSeen, UserListMessagesParamsEngagementStatusUnseen, UserListMessagesParamsEngagementStatusRead, UserListMessagesParamsEngagementStatusUnread, UserListMessagesParamsEngagementStatusArchived, UserListMessagesParamsEngagementStatusUnarchived, UserListMessagesParamsEngagementStatusLinkClicked, UserListMessagesParamsEngagementStatusInteracted:
 		return true
 	}
 	return false
