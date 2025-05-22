@@ -117,7 +117,10 @@ type WorkflowTriggerParams struct {
 	// subsequent cancellation. Should be unique across trigger requests to avoid
 	// unintentional cancellations.
 	CancellationKey param.Field[string] `json:"cancellation_key"`
-	// An optional map of data to pass into the workflow execution.
+	// An optional map of data to pass into the workflow execution. There is a 1024
+	// byte limit on the size of any single string value (with the exception of
+	// [email attachments](/integrations/email/attachments)), and a 10MB limit on the
+	// size of the full `data` payload.
 	Data param.Field[map[string]interface{}] `json:"data"`
 	// An request to set a tenant inline.
 	Tenant param.Field[InlineTenantRequestUnionParam] `json:"tenant"`
