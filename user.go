@@ -142,7 +142,7 @@ func (r *UserService) GetPreferences(ctx context.Context, userID string, id stri
 // Returns a paginated list of messages for a specific user. Allows filtering by
 // message status and provides various sorting options. Messages outside the
 // account's retention window will not be included in the results.
-func (r *UserService) ListMessages(ctx context.Context, userID string, query UserListMessagesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Message], err error) {
+func (r *UserService) ListMessages(ctx context.Context, userID string, query UserListMessagesParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[Message], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -166,8 +166,8 @@ func (r *UserService) ListMessages(ctx context.Context, userID string, query Use
 // Returns a paginated list of messages for a specific user. Allows filtering by
 // message status and provides various sorting options. Messages outside the
 // account's retention window will not be included in the results.
-func (r *UserService) ListMessagesAutoPaging(ctx context.Context, userID string, query UserListMessagesParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Message] {
-	return pagination.NewEntriesCursorAutoPager(r.ListMessages(ctx, userID, query, opts...))
+func (r *UserService) ListMessagesAutoPaging(ctx context.Context, userID string, query UserListMessagesParams, opts ...option.RequestOption) *pagination.ItemsCursorAutoPager[Message] {
+	return pagination.NewItemsCursorAutoPager(r.ListMessages(ctx, userID, query, opts...))
 }
 
 // Retrieves a list of all preference sets for a specific user.
