@@ -181,7 +181,7 @@ func (r *ObjectService) GetPreferences(ctx context.Context, collection string, o
 // Returns a paginated list of messages for a specific object in the given
 // collection. Allows filtering by message status and provides various sorting
 // options.
-func (r *ObjectService) ListMessages(ctx context.Context, collection string, id string, query ObjectListMessagesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Message], err error) {
+func (r *ObjectService) ListMessages(ctx context.Context, collection string, id string, query ObjectListMessagesParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[Message], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -209,8 +209,8 @@ func (r *ObjectService) ListMessages(ctx context.Context, collection string, id 
 // Returns a paginated list of messages for a specific object in the given
 // collection. Allows filtering by message status and provides various sorting
 // options.
-func (r *ObjectService) ListMessagesAutoPaging(ctx context.Context, collection string, id string, query ObjectListMessagesParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Message] {
-	return pagination.NewEntriesCursorAutoPager(r.ListMessages(ctx, collection, id, query, opts...))
+func (r *ObjectService) ListMessagesAutoPaging(ctx context.Context, collection string, id string, query ObjectListMessagesParams, opts ...option.RequestOption) *pagination.ItemsCursorAutoPager[Message] {
+	return pagination.NewItemsCursorAutoPager(r.ListMessages(ctx, collection, id, query, opts...))
 }
 
 // Returns a paginated list of preference sets for the specified object.
