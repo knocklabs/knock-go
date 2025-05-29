@@ -251,7 +251,9 @@ func (r *UserService) Merge(ctx context.Context, userID string, body UserMergePa
 	return
 }
 
-// Updates or creates channel data for a specific user and channel ID.
+// Updates or creates channel data for a specific user and channel ID. If no user
+// exists in the current environment for the given `user_id`, Knock will create the
+// user entry as part of this request.
 func (r *UserService) SetChannelData(ctx context.Context, userID string, channelID string, body UserSetChannelDataParams, opts ...option.RequestOption) (res *ChannelData, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {
