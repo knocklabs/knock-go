@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.3.0 (2025-05-31)
+
+Full Changelog: [v1.2.0...v1.3.0](https://github.com/knocklabs/knock-go/compare/v1.2.0...v1.3.0)
+
+### Features
+
+* **api:** api update ([2ed84ce](https://github.com/knocklabs/knock-go/commit/2ed84ce0698d9f7f760fdf74a612d39751f2f679))
+* **api:** api update ([395c10a](https://github.com/knocklabs/knock-go/commit/395c10a43bbf186584c51a915f85902b3bea344f))
+* **api:** api update ([43d0bf8](https://github.com/knocklabs/knock-go/commit/43d0bf86fea7d89031f698139a800f515aa24216))
+
+
+### Chores
+
+* **docs:** grammar improvements ([ec55cde](https://github.com/knocklabs/knock-go/commit/ec55cde9651ee935074fe5bde0047ec7611bd3aa))
+* improve devcontainer setup ([cc435fb](https://github.com/knocklabs/knock-go/commit/cc435fb8bba52578b13b22b41f17b3ed69adf9ba))
+* make go mod tidy continue on error ([75e7ee6](https://github.com/knocklabs/knock-go/commit/75e7ee678cd975ddd200f2a92b5559b1007002d3))
+
 ## 1.2.0 (2025-05-20)
 
 Full Changelog: [v1.1.0...v1.2.0](https://github.com/knocklabs/knock-go/compare/v1.1.0...v1.2.0)
