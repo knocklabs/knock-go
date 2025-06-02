@@ -43,7 +43,7 @@ func NewMessageService(opts ...option.RequestOption) (r *MessageService) {
 }
 
 // Returns a paginated list of messages for the current environment.
-func (r *MessageService) List(ctx context.Context, query MessageListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Message], err error) {
+func (r *MessageService) List(ctx context.Context, query MessageListParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[Message], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -61,8 +61,8 @@ func (r *MessageService) List(ctx context.Context, query MessageListParams, opts
 }
 
 // Returns a paginated list of messages for the current environment.
-func (r *MessageService) ListAutoPaging(ctx context.Context, query MessageListParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[Message] {
-	return pagination.NewEntriesCursorAutoPager(r.List(ctx, query, opts...))
+func (r *MessageService) ListAutoPaging(ctx context.Context, query MessageListParams, opts ...option.RequestOption) *pagination.ItemsCursorAutoPager[Message] {
+	return pagination.NewItemsCursorAutoPager(r.List(ctx, query, opts...))
 }
 
 // Archives a message for the user. Archived messages are hidden from the default
@@ -131,7 +131,7 @@ func (r *MessageService) ListActivitiesAutoPaging(ctx context.Context, messageID
 }
 
 // Returns a paginated list of delivery logs for the specified message.
-func (r *MessageService) ListDeliveryLogs(ctx context.Context, messageID string, query MessageListDeliveryLogsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[MessageDeliveryLog], err error) {
+func (r *MessageService) ListDeliveryLogs(ctx context.Context, messageID string, query MessageListDeliveryLogsParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[MessageDeliveryLog], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -153,12 +153,12 @@ func (r *MessageService) ListDeliveryLogs(ctx context.Context, messageID string,
 }
 
 // Returns a paginated list of delivery logs for the specified message.
-func (r *MessageService) ListDeliveryLogsAutoPaging(ctx context.Context, messageID string, query MessageListDeliveryLogsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[MessageDeliveryLog] {
-	return pagination.NewEntriesCursorAutoPager(r.ListDeliveryLogs(ctx, messageID, query, opts...))
+func (r *MessageService) ListDeliveryLogsAutoPaging(ctx context.Context, messageID string, query MessageListDeliveryLogsParams, opts ...option.RequestOption) *pagination.ItemsCursorAutoPager[MessageDeliveryLog] {
+	return pagination.NewItemsCursorAutoPager(r.ListDeliveryLogs(ctx, messageID, query, opts...))
 }
 
 // Returns a paginated list of events for the specified message.
-func (r *MessageService) ListEvents(ctx context.Context, messageID string, query MessageListEventsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[MessageEvent], err error) {
+func (r *MessageService) ListEvents(ctx context.Context, messageID string, query MessageListEventsParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[MessageEvent], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -180,8 +180,8 @@ func (r *MessageService) ListEvents(ctx context.Context, messageID string, query
 }
 
 // Returns a paginated list of events for the specified message.
-func (r *MessageService) ListEventsAutoPaging(ctx context.Context, messageID string, query MessageListEventsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[MessageEvent] {
-	return pagination.NewEntriesCursorAutoPager(r.ListEvents(ctx, messageID, query, opts...))
+func (r *MessageService) ListEventsAutoPaging(ctx context.Context, messageID string, query MessageListEventsParams, opts ...option.RequestOption) *pagination.ItemsCursorAutoPager[MessageEvent] {
+	return pagination.NewItemsCursorAutoPager(r.ListEvents(ctx, messageID, query, opts...))
 }
 
 // Marks a message as `interacted` with by the user. This can include any user
