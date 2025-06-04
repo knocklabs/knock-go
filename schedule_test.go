@@ -30,6 +30,73 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 	)
 	_, err := client.Schedules.New(context.TODO(), knock.ScheduleNewParams{
 		Recipients: knock.F([]knock.RecipientRequestUnionParam{shared.UnionString("user_123")}),
+		Workflow:   knock.F("comment-created"),
+		Actor: knock.F[knock.RecipientRequestUnionParam](knock.InlineIdentifyUserRequestParam{
+			ID:     knock.F("user_1"),
+			Avatar: knock.F("avatar"),
+			ChannelData: knock.F(knock.InlineChannelDataRequestParam{
+				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.PushChannelDataParam{
+					Tokens: knock.F([]string{"push_token_xxx"}),
+				},
+			}),
+			CreatedAt:   knock.F(time.Now()),
+			Email:       knock.F("email"),
+			Locale:      knock.F("locale"),
+			Name:        knock.F("name"),
+			PhoneNumber: knock.F("phone_number"),
+			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
+				"default": knock.PreferenceSetRequestParam{
+					Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
+						"transactional": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
+							ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+								Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+								Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
+								HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+								Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+								SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+							}),
+							Conditions: knock.F([]knock.ConditionParam{{
+								Argument: knock.F("frog_genome"),
+								Operator: knock.F(knock.ConditionOperatorContains),
+								Variable: knock.F("specimen.dna_sequence"),
+							}}),
+						},
+					}),
+					ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+						Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+						Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
+						HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+						InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+						Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+						SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+					}),
+					Workflows: knock.F(map[string]knock.PreferenceSetRequestWorkflowsUnionParam{
+						"dinosaurs-loose": knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
+							ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
+								Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
+								Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
+								HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
+								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
+								Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+								SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+							}),
+							Conditions: knock.F([]knock.ConditionParam{{
+								Argument: knock.F("frog_genome"),
+								Operator: knock.F(knock.ConditionOperatorContains),
+								Variable: knock.F("specimen.dna_sequence"),
+							}}),
+						},
+						"welcome-sequence": shared.UnionBool(true),
+					}),
+				},
+			}),
+			Timezone: knock.F("timezone"),
+		}),
+		Data: knock.F(map[string]interface{}{
+			"key": "bar",
+		}),
+		EndingAt: knock.Null[time.Time](),
 		Repeats: knock.F([]knock.ScheduleRepeatRuleParam{{
 			Typename:   knock.F("ScheduleRepeat"),
 			Frequency:  knock.F(knock.ScheduleRepeatRuleFrequencyDaily),
@@ -39,11 +106,6 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 			Interval:   knock.F(int64(1)),
 			Minutes:    knock.Null[int64](),
 		}}),
-		Workflow: knock.F("comment-created"),
-		Data: knock.F(map[string]interface{}{
-			"key": "bar",
-		}),
-		EndingAt:    knock.Null[time.Time](),
 		ScheduledAt: knock.Null[time.Time](),
 		Tenant:      knock.F[knock.InlineTenantRequestUnionParam](shared.UnionString("acme_corp")),
 	})
