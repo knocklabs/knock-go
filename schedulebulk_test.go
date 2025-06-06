@@ -99,8 +99,8 @@ func TestScheduleBulkNew(t *testing.T) {
 			EndingAt:  knock.Null[time.Time](),
 			Recipient: knock.F[knock.RecipientRequestUnionParam](shared.UnionString("dnedry")),
 			Repeats: knock.F([]knock.ScheduleRepeatRuleParam{{
-				Typename:   knock.F("ScheduleRepeat"),
 				Frequency:  knock.F(knock.ScheduleRepeatRuleFrequencyDaily),
+				Typename:   knock.F("ScheduleRepeat"),
 				DayOfMonth: knock.Null[int64](),
 				Days:       knock.F([]knock.ScheduleRepeatRuleDay{knock.ScheduleRepeatRuleDayMon, knock.ScheduleRepeatRuleDayTue, knock.ScheduleRepeatRuleDayWed, knock.ScheduleRepeatRuleDayThu, knock.ScheduleRepeatRuleDayFri, knock.ScheduleRepeatRuleDaySat, knock.ScheduleRepeatRuleDaySun}),
 				Hours:      knock.Null[int64](),
@@ -179,8 +179,8 @@ func TestScheduleBulkNew(t *testing.T) {
 			EndingAt:  knock.Null[time.Time](),
 			Recipient: knock.F[knock.RecipientRequestUnionParam](shared.UnionString("esattler")),
 			Repeats: knock.F([]knock.ScheduleRepeatRuleParam{{
-				Typename:   knock.F("ScheduleRepeat"),
 				Frequency:  knock.F(knock.ScheduleRepeatRuleFrequencyDaily),
+				Typename:   knock.F("ScheduleRepeat"),
 				DayOfMonth: knock.Null[int64](),
 				Days:       knock.F([]knock.ScheduleRepeatRuleDay{knock.ScheduleRepeatRuleDayMon, knock.ScheduleRepeatRuleDayTue, knock.ScheduleRepeatRuleDayWed, knock.ScheduleRepeatRuleDayThu, knock.ScheduleRepeatRuleDayFri, knock.ScheduleRepeatRuleDaySat, knock.ScheduleRepeatRuleDaySun}),
 				Hours:      knock.Null[int64](),

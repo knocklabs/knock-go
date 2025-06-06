@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
 	"github.com/knocklabs/knock-go/internal/param"
@@ -105,9 +106,26 @@ func (r ObjectBulkAddSubscriptionsParamsSubscription) MarshalJSON() (data []byte
 
 type ObjectBulkSetParams struct {
 	// A list of objects.
-	Objects param.Field[[]InlineObjectRequestParam] `json:"objects,required"`
+	Objects param.Field[[]ObjectBulkSetParamsObject] `json:"objects,required"`
 }
 
 func (r ObjectBulkSetParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// A custom [Object](/concepts/objects) entity which belongs to a collection.
+type ObjectBulkSetParamsObject struct {
+	// Unique identifier for the object.
+	ID param.Field[string] `json:"id,required"`
+	// A request to set channel data for a type of channel inline.
+	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// Timestamp when the resource was created.
+	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// Inline set preferences for a recipient, where the key is the preference set id.
+	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
+	ExtraFields map[string]interface{}                       `json:"-,extras"`
+}
+
+func (r ObjectBulkSetParamsObject) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }

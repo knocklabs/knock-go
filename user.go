@@ -618,8 +618,8 @@ type UserListSubscriptionsParams struct {
 	Before param.Field[string] `query:"before"`
 	// Associated resources to include in the response.
 	Include param.Field[[]UserListSubscriptionsParamsInclude] `query:"include"`
-	// Only returns subscriptions for the specified object GIDs.
-	Objects param.Field[[]string] `query:"objects"`
+	// Only returns subscriptions for the specified object references.
+	Objects param.Field[[]RecipientReferenceUnionParam] `query:"objects"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
 }
