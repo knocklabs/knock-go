@@ -156,9 +156,8 @@ func TestObjectBulkSet(t *testing.T) {
 		context.TODO(),
 		"collection",
 		knock.ObjectBulkSetParams{
-			Objects: knock.F([]knock.InlineObjectRequestParam{{
-				ID:         knock.F("project_1"),
-				Collection: knock.F("projects"),
+			Objects: knock.F([]knock.ObjectBulkSetParamsObject{{
+				ID: knock.F("project_1"),
 				ChannelData: knock.F(knock.InlineChannelDataRequestParam{
 					"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.PushChannelDataParam{
 						Tokens: knock.F([]string{"push_token_xxx"}),

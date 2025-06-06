@@ -157,10 +157,10 @@ func (r scheduleJSON) RawJSON() string {
 
 // The repeat rule for the schedule.
 type ScheduleRepeatRule struct {
-	// The typename of the schema.
-	Typename string `json:"__typename,required"`
 	// The frequency of the schedule.
 	Frequency ScheduleRepeatRuleFrequency `json:"frequency,required"`
+	// The typename of the schema.
+	Typename string `json:"__typename"`
 	// The day of the month to repeat the schedule.
 	DayOfMonth int64 `json:"day_of_month,nullable"`
 	// The days of the week to repeat the schedule.
@@ -177,8 +177,8 @@ type ScheduleRepeatRule struct {
 // scheduleRepeatRuleJSON contains the JSON metadata for the struct
 // [ScheduleRepeatRule]
 type scheduleRepeatRuleJSON struct {
-	Typename    apijson.Field
 	Frequency   apijson.Field
+	Typename    apijson.Field
 	DayOfMonth  apijson.Field
 	Days        apijson.Field
 	Hours       apijson.Field
@@ -237,10 +237,10 @@ func (r ScheduleRepeatRuleDay) IsKnown() bool {
 
 // The repeat rule for the schedule.
 type ScheduleRepeatRuleParam struct {
-	// The typename of the schema.
-	Typename param.Field[string] `json:"__typename,required"`
 	// The frequency of the schedule.
 	Frequency param.Field[ScheduleRepeatRuleFrequency] `json:"frequency,required"`
+	// The typename of the schema.
+	Typename param.Field[string] `json:"__typename"`
 	// The day of the month to repeat the schedule.
 	DayOfMonth param.Field[int64] `json:"day_of_month"`
 	// The days of the week to repeat the schedule.
@@ -319,8 +319,8 @@ type ScheduleListParams struct {
 	Before param.Field[string] `query:"before"`
 	// The number of items per page.
 	PageSize param.Field[int64] `query:"page_size"`
-	// Filter by recipient IDs.
-	Recipients param.Field[[]string] `query:"recipients"`
+	// Filter by recipient references.
+	Recipients param.Field[[]RecipientReferenceUnionParam] `query:"recipients"`
 	// Filter by tenant ID.
 	Tenant param.Field[string] `query:"tenant"`
 }
