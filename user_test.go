@@ -358,7 +358,7 @@ func TestUserListSubscriptionsWithOptionalParams(t *testing.T) {
 			After:    knock.F("after"),
 			Before:   knock.F("before"),
 			Include:  knock.F([]knock.UserListSubscriptionsParamsInclude{knock.UserListSubscriptionsParamsIncludePreferences}),
-			Objects:  knock.F([]string{"string"}),
+			Objects:  knock.F([]knock.RecipientReferenceUnionParam{shared.UnionString("user_123")}),
 			PageSize: knock.F(int64(0)),
 		},
 	)
