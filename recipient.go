@@ -227,6 +227,8 @@ type RecipientRequestParam struct {
 	// user (required for SMS channels).
 	PhoneNumber param.Field[string] `json:"phone_number"`
 	// Inline set preferences for a recipient, where the key is the preference set id.
+	// Preferences that are set inline will be merged into any existing preferences
+	// rather than replacing them.
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
 	// The timezone of the user. Must be a
 	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).

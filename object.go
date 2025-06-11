@@ -391,6 +391,8 @@ type InlineObjectRequestParam struct {
 	// Timestamp when the resource was created.
 	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
 	// Inline set preferences for a recipient, where the key is the preference set id.
+	// Preferences that are set inline will be merged into any existing preferences
+	// rather than replacing them.
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
 	ExtraFields map[string]interface{}                       `json:"-,extras"`
 }
@@ -705,6 +707,8 @@ type ObjectSetParams struct {
 	// [message localization](/concepts/translations).
 	Locale param.Field[string] `json:"locale"`
 	// Inline set preferences for a recipient, where the key is the preference set id.
+	// Preferences that are set inline will be merged into any existing preferences
+	// rather than replacing them.
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
 	// The timezone of the object. Must be a
 	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
