@@ -122,6 +122,8 @@ type ObjectBulkSetParamsObject struct {
 	// Timestamp when the resource was created.
 	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
 	// Inline set preferences for a recipient, where the key is the preference set id.
+	// Preferences that are set inline will be merged into any existing preferences
+	// rather than replacing them.
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
 	ExtraFields map[string]interface{}                       `json:"-,extras"`
 }

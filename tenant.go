@@ -205,6 +205,8 @@ type TenantRequestParam struct {
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// Inline set preferences for a recipient, where the key is the preference set id.
+	// Preferences that are set inline will be merged into any existing preferences
+	// rather than replacing them.
 	Preferences param.Field[InlinePreferenceSetRequestParam] `json:"preferences"`
 	// The settings for the tenant. Includes branding and preference set.
 	Settings    param.Field[TenantRequestSettingsParam] `json:"settings"`
