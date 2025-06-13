@@ -228,14 +228,16 @@ type ProviderSlackListChannelsParamsQueryOptions struct {
 	// next_cursor attribute returned by a previous request's response_metadata.
 	// Default value fetches the first "page" of the collection.
 	Cursor param.Field[string] `query:"cursor"`
-	// Set to true to exclude archived channels from the list.
+	// Set to true to exclude archived channels from the list. Defaults to `true` when
+	// not explicitly provided.
 	ExcludeArchived param.Field[bool] `query:"exclude_archived"`
-	// The maximum number of channels to return.
+	// The maximum number of channels to return. Defaults to 200.
 	Limit param.Field[int64] `query:"limit"`
 	// Encoded team ID (T1234) to list channels in, required if org token is used.
 	TeamID param.Field[string] `query:"team_id"`
 	// Mix and match channel types by providing a comma-separated list of any
-	// combination of public_channel, private_channel, mpim, im.
+	// combination of public_channel, private_channel, mpim, im. Defaults to
+	// `"public_channel,private_channel"`.
 	Types param.Field[string] `query:"types"`
 }
 
