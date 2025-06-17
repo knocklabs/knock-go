@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.8.0 (2025-06-17)
+
+Full Changelog: [v1.7.0...v1.8.0](https://github.com/knocklabs/knock-go/compare/v1.7.0...v1.8.0)
+
+### Features
+
+* **client:** add debug log helper ([3ef0ac7](https://github.com/knocklabs/knock-go/commit/3ef0ac7afd4397a4d6401dcb81ab9650b2d1dd4a))
+
+
+### Chores
+
+* **ci:** enable for pull requests ([f487aa2](https://github.com/knocklabs/knock-go/commit/f487aa29d1cede9a5444a34e78cefef19a44591a))
+
 ## 1.7.0 (2025-06-13)
 
 Full Changelog: [v1.6.0...v1.7.0](https://github.com/knocklabs/knock-go/compare/v1.6.0...v1.7.0)
