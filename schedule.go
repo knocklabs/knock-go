@@ -317,7 +317,7 @@ type ScheduleListParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 	// Filter by recipient references.
 	Recipients param.Field[[]RecipientReferenceUnionParam] `query:"recipients"`

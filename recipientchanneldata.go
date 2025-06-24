@@ -474,7 +474,7 @@ type InlineChannelDataRequestItemUnionParam interface {
 	implementsInlineChannelDataRequestItemUnionParam()
 }
 
-// Microsoft Teams channel connection.
+// Microsoft Teams channel data.
 type MsTeamsChannelData struct {
 	// List of Microsoft Teams connections.
 	Connections []MsTeamsChannelDataConnection `json:"connections,required"`
@@ -663,7 +663,7 @@ func (r msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWeb
 	return r.raw
 }
 
-// Microsoft Teams channel connection.
+// Microsoft Teams channel data.
 type MsTeamsChannelDataParam struct {
 	// List of Microsoft Teams connections.
 	Connections param.Field[[]MsTeamsChannelDataConnectionsUnionParam] `json:"connections,required"`
@@ -788,7 +788,7 @@ func (r OneSignalChannelDataParam) implementsChannelDataRequestDataUnionParam() 
 
 func (r OneSignalChannelDataParam) implementsInlineChannelDataRequestItemUnionParam() {}
 
-// The content of a push notification.
+// Push channel data.
 type PushChannelData struct {
 	// A list of push channel tokens.
 	Tokens []string            `json:"tokens,required"`
@@ -812,7 +812,7 @@ func (r pushChannelDataJSON) RawJSON() string {
 
 func (r PushChannelData) implementsChannelDataData() {}
 
-// The content of a push notification.
+// Push channel data.
 type PushChannelDataParam struct {
 	// A list of push channel tokens.
 	Tokens param.Field[[]string] `json:"tokens,required"`
@@ -826,7 +826,7 @@ func (r PushChannelDataParam) implementsChannelDataRequestDataUnionParam() {}
 
 func (r PushChannelDataParam) implementsInlineChannelDataRequestItemUnionParam() {}
 
-// Slack channel data
+// Slack channel data.
 type SlackChannelData struct {
 	// List of Slack channel connections.
 	Connections []SlackChannelDataConnection `json:"connections,required"`
@@ -1006,7 +1006,7 @@ func (r slackChannelDataTokenJSON) RawJSON() string {
 	return r.raw
 }
 
-// Slack channel data
+// Slack channel data.
 type SlackChannelDataParam struct {
 	// List of Slack channel connections.
 	Connections param.Field[[]SlackChannelDataConnectionsUnionParam] `json:"connections,required"`

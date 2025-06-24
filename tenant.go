@@ -256,7 +256,7 @@ type TenantListParams struct {
 	Before param.Field[string] `query:"before"`
 	// Filter tenants by name.
 	Name param.Field[string] `query:"name"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 	// Filter tenants by ID.
 	TenantID param.Field[string] `query:"tenant_id"`

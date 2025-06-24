@@ -105,7 +105,7 @@ func (r ConditionParam) MarshalJSON() (data []byte, err error) {
 type PageInfo struct {
 	// The typename of the schema.
 	Typename string `json:"__typename,required"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize int64 `json:"page_size,required"`
 	// The cursor to fetch entries after.
 	After string `json:"after,nullable"`

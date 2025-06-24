@@ -449,7 +449,7 @@ type ObjectListParams struct {
 	Before param.Field[string] `query:"before"`
 	// Includes preferences of the objects in the response.
 	Include param.Field[[]ObjectListParamsInclude] `query:"include"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 }
 
@@ -510,7 +510,7 @@ type ObjectListMessagesParams struct {
 	// Limits the results to only the message IDs given (max 50). Note: when using this
 	// option, the results will be subject to any other filters applied to the query.
 	MessageIDs param.Field[[]string] `query:"message_ids"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 	// Limits the results to messages triggered by the given workflow key.
 	Source param.Field[string] `query:"source"`
@@ -606,7 +606,7 @@ type ObjectListSchedulesParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 	// Filter schedules by tenant id.
 	Tenant param.Field[string] `query:"tenant"`
@@ -636,7 +636,7 @@ type ObjectListSubscriptionsParams struct {
 	Mode param.Field[ObjectListSubscriptionsParamsMode] `query:"mode"`
 	// Objects to filter by (only used if mode is `recipient`).
 	Objects param.Field[[]ObjectListSubscriptionsParamsObject] `query:"objects"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 	// Recipients to filter by (only used if mode is `object`).
 	Recipients param.Field[[]RecipientReferenceUnionParam] `query:"recipients"`
