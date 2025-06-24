@@ -54,8 +54,20 @@ func (r *UserFeedService) GetSettings(ctx context.Context, userID string, id str
 	return
 }
 
-// Returns a paginated list of feed items for a user, including metadata about the
-// feed.
+// Returns a paginated list of feed items for a user in reverse chronological
+// order, including metadata about the feed. If the user has not yet been
+// identified within Knock, an empty feed will be returned.
+//
+// You can customize the response using
+// [response filters](/integrations/in-app/knock#customizing-api-response-content)
+// to exclude or only include specific properties on your resources.
+//
+// **Notes:**
+//
+//   - When making this call from a client-side environment, use your publishable key
+//     along with a user token.
+//   - This endpoint’s rate limit is always scoped per-user and per-environment. This
+//     is true even for requests made without a signed user token.
 func (r *UserFeedService) ListItems(ctx context.Context, userID string, id string, query UserFeedListItemsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[UserFeedListItemsResponse], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -81,8 +93,20 @@ func (r *UserFeedService) ListItems(ctx context.Context, userID string, id strin
 	return res, nil
 }
 
-// Returns a paginated list of feed items for a user, including metadata about the
-// feed.
+// Returns a paginated list of feed items for a user in reverse chronological
+// order, including metadata about the feed. If the user has not yet been
+// identified within Knock, an empty feed will be returned.
+//
+// You can customize the response using
+// [response filters](/integrations/in-app/knock#customizing-api-response-content)
+// to exclude or only include specific properties on your resources.
+//
+// **Notes:**
+//
+//   - When making this call from a client-side environment, use your publishable key
+//     along with a user token.
+//   - This endpoint’s rate limit is always scoped per-user and per-environment. This
+//     is true even for requests made without a signed user token.
 func (r *UserFeedService) ListItemsAutoPaging(ctx context.Context, userID string, id string, query UserFeedListItemsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[UserFeedListItemsResponse] {
 	return pagination.NewEntriesCursorAutoPager(r.ListItems(ctx, userID, id, query, opts...))
 }
@@ -470,9 +494,9 @@ type UserFeedListItemsParams struct {
 	Before param.Field[string] `query:"before"`
 	// Whether the feed items have a tenant.
 	HasTenant param.Field[bool] `query:"has_tenant"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
-	// The source of the feed items.
+	// The workflow key associated with the message in the feed.
 	Source param.Field[string] `query:"source"`
 	// The status of the feed items.
 	Status param.Field[UserFeedListItemsParamsStatus] `query:"status"`

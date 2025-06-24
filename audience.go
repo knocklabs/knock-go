@@ -80,7 +80,7 @@ type AudienceMember struct {
 	// receive notifications through Knock. Users are the most common recipients of
 	// notifications and are always referenced by your internal identifier.
 	User User `json:"user,required"`
-	// The ID for the user that you set when identifying them in Knock.
+	// The unique identifier of the user.
 	UserID string `json:"user_id,required"`
 	// The unique identifier for the tenant.
 	Tenant string             `json:"tenant,nullable"`
@@ -155,7 +155,7 @@ func (r AudienceAddMembersParamsMember) MarshalJSON() (data []byte, err error) {
 
 // An object containing the user's ID.
 type AudienceAddMembersParamsMembersUser struct {
-	// The ID for the user that you set when identifying them in Knock.
+	// The unique identifier of the user.
 	ID param.Field[string] `json:"id"`
 }
 
@@ -186,7 +186,7 @@ func (r AudienceRemoveMembersParamsMember) MarshalJSON() (data []byte, err error
 
 // An object containing the user's ID.
 type AudienceRemoveMembersParamsMembersUser struct {
-	// The ID for the user that you set when identifying them in Knock.
+	// The unique identifier of the user.
 	ID param.Field[string] `json:"id"`
 }
 

@@ -358,7 +358,7 @@ func (r messageBatchGetContentResponseDataMessageSMSContentJSON) RawJSON() strin
 func (r MessageBatchGetContentResponseDataMessageSMSContent) implementsMessageBatchGetContentResponseData() {
 }
 
-// The content of a push notification.
+// Push channel data.
 type MessageBatchGetContentResponseDataMessagePushContent struct {
 	// The device token to send the push notification to.
 	Token string `json:"token,required"`
