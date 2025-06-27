@@ -433,8 +433,10 @@ type MessageSource struct {
 	// The key of the workflow that triggered the message.
 	Key string `json:"key,required"`
 	// The ID of the version of the workflow that triggered the message.
-	VersionID string            `json:"version_id,required" format:"uuid"`
-	JSON      messageSourceJSON `json:"-"`
+	VersionID string `json:"version_id,required" format:"uuid"`
+	// The step reference for the step in the workflow that generated the message
+	StepRef string            `json:"step_ref,nullable"`
+	JSON    messageSourceJSON `json:"-"`
 }
 
 // messageSourceJSON contains the JSON metadata for the struct [MessageSource]
@@ -443,6 +445,7 @@ type messageSourceJSON struct {
 	Categories  apijson.Field
 	Key         apijson.Field
 	VersionID   apijson.Field
+	StepRef     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
