@@ -59,6 +59,9 @@ func (r entriesCursorJSON) RawJSON() string {
 // there is no next page, this function will return a 'nil' for the page value, but
 // will not return an error
 func (r *EntriesCursor[T]) GetNextPage() (res *EntriesCursor[T], err error) {
+	if len(r.Entries) == 0 {
+		return nil, nil
+	}
 	next := r.PageInfo.After
 	if len(next) == 0 {
 		return nil, nil
@@ -180,6 +183,9 @@ func (r itemsCursorJSON) RawJSON() string {
 // there is no next page, this function will return a 'nil' for the page value, but
 // will not return an error
 func (r *ItemsCursor[T]) GetNextPage() (res *ItemsCursor[T], err error) {
+	if len(r.Items) == 0 {
+		return nil, nil
+	}
 	next := r.PageInfo.After
 	if len(next) == 0 {
 		return nil, nil
@@ -281,6 +287,9 @@ func (r slackChannelsCursorJSON) RawJSON() string {
 // there is no next page, this function will return a 'nil' for the page value, but
 // will not return an error
 func (r *SlackChannelsCursor[T]) GetNextPage() (res *SlackChannelsCursor[T], err error) {
+	if len(r.SlackChannels) == 0 {
+		return nil, nil
+	}
 	next := r.NextCursor
 	if len(next) == 0 {
 		return nil, nil
@@ -382,6 +391,9 @@ func (r msTeamsPaginationJSON) RawJSON() string {
 // there is no next page, this function will return a 'nil' for the page value, but
 // will not return an error
 func (r *MsTeamsPagination[T]) GetNextPage() (res *MsTeamsPagination[T], err error) {
+	if len(r.MsTeamsTeams) == 0 {
+		return nil, nil
+	}
 	next := r.SkipToken
 	if len(next) == 0 {
 		return nil, nil
