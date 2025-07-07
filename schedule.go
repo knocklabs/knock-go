@@ -113,10 +113,10 @@ type Schedule struct {
 	Typename string `json:"__typename"`
 	// A recipient of a notification, which is either a user or an object.
 	Actor Recipient `json:"actor,nullable"`
-	// An optional map of data to pass into the workflow execution. There is a 1024
-	// byte limit on the size of any single string value (with the exception of
-	// [email attachments](/integrations/email/attachments)), and a 10MB limit on the
-	// size of the full `data` payload.
+	// An optional map of data to pass into the workflow execution. There is a 10MB
+	// limit on the size of the full `data` payload. Any individual string value
+	// greater than 1024 bytes in length will be
+	// [truncated](/developer-tools/api-logs#log-truncation) in your logs.
 	Data map[string]interface{} `json:"data,nullable"`
 	// The last occurrence of the schedule.
 	LastOccurrenceAt time.Time `json:"last_occurrence_at,nullable" format:"date-time"`
@@ -266,10 +266,10 @@ type ScheduleNewParams struct {
 	// (string), an inline user request (object), or an inline object request, which is
 	// determined by the presence of a `collection` property.
 	Actor param.Field[RecipientRequestUnionParam] `json:"actor"`
-	// An optional map of data to pass into the workflow execution. There is a 1024
-	// byte limit on the size of any single string value (with the exception of
-	// [email attachments](/integrations/email/attachments)), and a 10MB limit on the
-	// size of the full `data` payload.
+	// An optional map of data to pass into the workflow execution. There is a 10MB
+	// limit on the size of the full `data` payload. Any individual string value
+	// greater than 1024 bytes in length will be
+	// [truncated](/developer-tools/api-logs#log-truncation) in your logs.
 	Data param.Field[map[string]interface{}] `json:"data"`
 	// The ending date and time for the schedule.
 	EndingAt param.Field[time.Time] `json:"ending_at" format:"date-time"`
@@ -291,10 +291,10 @@ type ScheduleUpdateParams struct {
 	// A reference to a recipient, either a user identifier (string) or an object
 	// reference (ID, collection).
 	Actor param.Field[RecipientReferenceUnionParam] `json:"actor"`
-	// An optional map of data to pass into the workflow execution. There is a 1024
-	// byte limit on the size of any single string value (with the exception of
-	// [email attachments](/integrations/email/attachments)), and a 10MB limit on the
-	// size of the full `data` payload.
+	// An optional map of data to pass into the workflow execution. There is a 10MB
+	// limit on the size of the full `data` payload. Any individual string value
+	// greater than 1024 bytes in length will be
+	// [truncated](/developer-tools/api-logs#log-truncation) in your logs.
 	Data param.Field[map[string]interface{}] `json:"data"`
 	// The ending date and time for the schedule.
 	EndingAt param.Field[time.Time] `json:"ending_at" format:"date-time"`
