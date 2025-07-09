@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.9.0 (2025-07-09)
+
+Full Changelog: [v1.8.0...v1.9.0](https://github.com/knocklabs/knock-go/compare/v1.8.0...v1.9.0)
+
+### Features
+
+* **api:** api update ([2ec0e08](https://github.com/knocklabs/knock-go/commit/2ec0e085ebec302b748fbd67a4e155b279e3ac43))
+* **api:** api update ([ad305a5](https://github.com/knocklabs/knock-go/commit/ad305a56e79537a902282a384e1919405fc30730))
+* **api:** api update ([5fc9ef7](https://github.com/knocklabs/knock-go/commit/5fc9ef7ecfc9c19f42bae3694836bad9b7528752))
+* **api:** api update ([8c7bc4b](https://github.com/knocklabs/knock-go/commit/8c7bc4bee87689fd3822e4011bd92716f08f613c))
+
+
+### Bug Fixes
+
+* don't try to deserialize as json when ResponseBodyInto is []byte ([7e81dd3](https://github.com/knocklabs/knock-go/commit/7e81dd3f9cf3d5c0075390ff69906d6deda702a4))
+* **pagination:** check if page data is empty in GetNextPage ([b8add60](https://github.com/knocklabs/knock-go/commit/b8add60ea3511851e8d7a4f4290ef53c198be2c7))
+
+
+### Chores
+
+* **ci:** only run for pushes and fork pull requests ([9e534ec](https://github.com/knocklabs/knock-go/commit/9e534ecde42251d6668a402c3fcd92ab12e89ba9))
+* **internal:** fix lint script for tests ([964d2fc](https://github.com/knocklabs/knock-go/commit/964d2fc2f392875d58f2f1235667cad7120d1185))
+* lint tests ([d1cb5e0](https://github.com/knocklabs/knock-go/commit/d1cb5e06aaa98882a6ec4f033d7ad49af321498c))
+
 ## 1.8.0 (2025-06-17)
 
 Full Changelog: [v1.7.0...v1.8.0](https://github.com/knocklabs/knock-go/compare/v1.7.0...v1.8.0)
