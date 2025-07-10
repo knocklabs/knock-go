@@ -433,8 +433,10 @@ type MessageSource struct {
 	// The key of the workflow that triggered the message.
 	Key string `json:"key,required"`
 	// The ID of the version of the workflow that triggered the message.
-	VersionID string            `json:"version_id,required" format:"uuid"`
-	JSON      messageSourceJSON `json:"-"`
+	VersionID string `json:"version_id,required" format:"uuid"`
+	// The step reference for the step in the workflow that generated the message
+	StepRef string            `json:"step_ref,nullable"`
+	JSON    messageSourceJSON `json:"-"`
 }
 
 // messageSourceJSON contains the JSON metadata for the struct [MessageSource]
@@ -443,6 +445,7 @@ type messageSourceJSON struct {
 	Categories  apijson.Field
 	Key         apijson.Field
 	VersionID   apijson.Field
+	StepRef     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -966,7 +969,7 @@ func (r messageGetContentResponseDataMessageSMSContentJSON) RawJSON() string {
 
 func (r MessageGetContentResponseDataMessageSMSContent) implementsMessageGetContentResponseData() {}
 
-// The content of a push notification.
+// Push channel data.
 type MessageGetContentResponseDataMessagePushContent struct {
 	// The device token to send the push notification to.
 	Token string `json:"token,required"`
@@ -1381,7 +1384,7 @@ type MessageListParams struct {
 	// Limits the results to only the message IDs given (max 50). Note: when using this
 	// option, the results will be subject to any other filters applied to the query.
 	MessageIDs param.Field[[]string] `query:"message_ids"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 	// Limits the results to messages triggered by the given workflow key.
 	Source param.Field[string] `query:"source"`
@@ -1476,7 +1479,7 @@ type MessageListActivitiesParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 	// The trigger data to filter activities by.
 	TriggerData param.Field[string] `query:"trigger_data"`
@@ -1496,7 +1499,7 @@ type MessageListDeliveryLogsParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 }
 
@@ -1514,7 +1517,7 @@ type MessageListEventsParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 }
 

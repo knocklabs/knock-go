@@ -59,10 +59,10 @@ type ScheduleBulkNewParamsSchedule struct {
 	// (string), an inline user request (object), or an inline object request, which is
 	// determined by the presence of a `collection` property.
 	Actor param.Field[RecipientRequestUnionParam] `json:"actor"`
-	// An optional map of data to pass into the workflow execution. There is a 1024
-	// byte limit on the size of any single string value (with the exception of
-	// [email attachments](/integrations/email/attachments)), and a 10MB limit on the
-	// size of the full `data` payload.
+	// An optional map of data to pass into the workflow execution. There is a 10MB
+	// limit on the size of the full `data` payload. Any individual string value
+	// greater than 1024 bytes in length will be
+	// [truncated](/developer-tools/api-logs#log-truncation) in your logs.
 	Data param.Field[map[string]interface{}] `json:"data"`
 	// The ending date and time for the schedule.
 	EndingAt param.Field[time.Time] `json:"ending_at" format:"date-time"`

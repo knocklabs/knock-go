@@ -139,9 +139,9 @@ func (r *UserService) GetPreferences(ctx context.Context, userID string, id stri
 	return
 }
 
-// Returns a paginated list of messages for a specific user. Allows filtering by
-// message status and provides various sorting options. Messages outside the
-// account's retention window will not be included in the results.
+// Returns a paginated list of messages for a specific user. Messages are sorted
+// with the most recent ones appearing first. Messages outside the account's
+// retention window will not be included in the results.
 func (r *UserService) ListMessages(ctx context.Context, userID string, query UserListMessagesParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[Message], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -163,9 +163,9 @@ func (r *UserService) ListMessages(ctx context.Context, userID string, query Use
 	return res, nil
 }
 
-// Returns a paginated list of messages for a specific user. Allows filtering by
-// message status and provides various sorting options. Messages outside the
-// account's retention window will not be included in the results.
+// Returns a paginated list of messages for a specific user. Messages are sorted
+// with the most recent ones appearing first. Messages outside the account's
+// retention window will not be included in the results.
 func (r *UserService) ListMessagesAutoPaging(ctx context.Context, userID string, query UserListMessagesParams, opts ...option.RequestOption) *pagination.ItemsCursorAutoPager[Message] {
 	return pagination.NewItemsCursorAutoPager(r.ListMessages(ctx, userID, query, opts...))
 }
@@ -306,7 +306,7 @@ func (r *UserService) UnsetChannelData(ctx context.Context, userID string, chann
 // that's specified elsewhere in the request. You can supply any additional
 // properties you'd like to upsert for the user.
 type IdentifyUserRequestParam struct {
-	// URL to the user's avatar image.
+	// A URL for the avatar of the user.
 	Avatar param.Field[string] `json:"avatar"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
@@ -342,9 +342,9 @@ func (r IdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
 // It will perform an upsert for the user you're supplying, replacing any
 // properties specified.
 type InlineIdentifyUserRequestParam struct {
-	// The ID for the user that you set when identifying them in Knock.
+	// The unique identifier of the user.
 	ID param.Field[string] `json:"id,required"`
-	// URL to the user's avatar image.
+	// A URL for the avatar of the user.
 	Avatar param.Field[string] `json:"avatar"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
@@ -381,13 +381,13 @@ func (r InlineIdentifyUserRequestParam) ImplementsRecipientRequestUnionParam() {
 // receive notifications through Knock. Users are the most common recipients of
 // notifications and are always referenced by your internal identifier.
 type User struct {
-	// The ID for the user that you set when identifying them in Knock.
+	// The unique identifier of the user.
 	ID string `json:"id,required"`
 	// The typename of the schema.
 	Typename string `json:"__typename,required"`
 	// The timestamp when the resource was last updated.
 	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
-	// URL to the user's avatar image.
+	// A URL for the avatar of the user.
 	Avatar string `json:"avatar,nullable"`
 	// The creation date of the user from your system.
 	CreatedAt time.Time `json:"created_at,nullable" format:"date-time"`
@@ -450,7 +450,7 @@ type UserListParams struct {
 	Before param.Field[string] `query:"before"`
 	// Associated resources to include in the response.
 	Include param.Field[[]UserListParamsInclude] `query:"include"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 }
 
@@ -503,7 +503,7 @@ type UserListMessagesParams struct {
 	// Limits the results to only the message IDs given (max 50). Note: when using this
 	// option, the results will be subject to any other filters applied to the query.
 	MessageIDs param.Field[[]string] `query:"message_ids"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 	// Limits the results to messages triggered by the given workflow key.
 	Source param.Field[string] `query:"source"`
@@ -598,7 +598,7 @@ type UserListSchedulesParams struct {
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 	// The tenant ID to filter schedules for.
 	Tenant param.Field[string] `query:"tenant"`
@@ -624,7 +624,7 @@ type UserListSubscriptionsParams struct {
 	Include param.Field[[]UserListSubscriptionsParamsInclude] `query:"include"`
 	// Only returns subscriptions for the specified object references.
 	Objects param.Field[[]RecipientReferenceUnionParam] `query:"objects"`
-	// The number of items per page.
+	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 }
 
