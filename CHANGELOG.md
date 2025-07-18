@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.9.3 (2025-07-18)
+
+Full Changelog: [v1.9.2...v1.9.3](https://github.com/knocklabs/knock-go/compare/v1.9.2...v1.9.3)
+
+### Chores
+
+* **internal:** version bump ([fb13b98](https://github.com/knocklabs/knock-go/commit/fb13b989e6f13e3d39d720d32c19b661799b5a98))
+
 ## 1.9.2 (2025-07-18)
 
 Full Changelog: [v1.9.1...v1.9.2](https://github.com/knocklabs/knock-go/compare/v1.9.1...v1.9.2)
