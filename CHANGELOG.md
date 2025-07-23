@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.9.5 (2025-07-23)
+
+Full Changelog: [v1.9.4...v1.9.5](https://github.com/knocklabs/knock-go/compare/v1.9.4...v1.9.5)
+
+### Bug Fixes
+
+* **client:** process custom base url ahead of time ([8125775](https://github.com/knocklabs/knock-go/commit/8125775171ba40b84c1fe253879c10ebd8ea8a09))
+
+
+### Chores
+
+* **internal:** version bump ([04575d0](https://github.com/knocklabs/knock-go/commit/04575d0aa616b54b7d7f492af5ce9412134bc39b))
+
 ## 1.9.4 (2025-07-18)
 
 Full Changelog: [v1.9.3...v1.9.4](https://github.com/knocklabs/knock-go/compare/v1.9.3...v1.9.4)
