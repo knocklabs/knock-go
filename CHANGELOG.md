@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.10.0 (2025-08-12)
+
+Full Changelog: [v1.9.5...v1.10.0](https://github.com/knocklabs/knock-go/compare/v1.9.5...v1.10.0)
+
+### Features
+
+* **client:** support optional json html escaping ([d0ccec5](https://github.com/knocklabs/knock-go/commit/d0ccec598f5a88f5cd940b6bf3e176754c2f6157))
+
+
+### Chores
+
+* **internal:** codegen related update ([d049095](https://github.com/knocklabs/knock-go/commit/d049095f78f393a5d235cfbb401dc58d81b902d8))
+* **internal:** update comment in script ([f12f071](https://github.com/knocklabs/knock-go/commit/f12f0715a58a82fe9f77b0f1837424164f589888))
+* update @stainless-api/prism-cli to v5.15.0 ([b563d05](https://github.com/knocklabs/knock-go/commit/b563d052f2033ee8c41ffc104a64c7e982d17948))
+
 ## 1.9.5 (2025-08-05)
 
 Full Changelog: [v1.9.4...v1.9.5](https://github.com/knocklabs/knock-go/compare/v1.9.4...v1.9.5)

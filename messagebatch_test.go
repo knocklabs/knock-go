@@ -14,7 +14,7 @@ import (
 )
 
 func TestMessageBatchArchive(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	t.Skip("Prism doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -39,7 +39,7 @@ func TestMessageBatchArchive(t *testing.T) {
 }
 
 func TestMessageBatchGetContent(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	t.Skip("Prism doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -64,7 +64,7 @@ func TestMessageBatchGetContent(t *testing.T) {
 }
 
 func TestMessageBatchMarkAsInteractedWithOptionalParams(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	t.Skip("Prism doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -92,7 +92,7 @@ func TestMessageBatchMarkAsInteractedWithOptionalParams(t *testing.T) {
 }
 
 func TestMessageBatchMarkAsRead(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	t.Skip("Prism doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -117,7 +117,7 @@ func TestMessageBatchMarkAsRead(t *testing.T) {
 }
 
 func TestMessageBatchMarkAsSeen(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	t.Skip("Prism doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -142,7 +142,7 @@ func TestMessageBatchMarkAsSeen(t *testing.T) {
 }
 
 func TestMessageBatchMarkAsUnread(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	t.Skip("Prism doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -167,7 +167,7 @@ func TestMessageBatchMarkAsUnread(t *testing.T) {
 }
 
 func TestMessageBatchMarkAsUnseen(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	t.Skip("Prism doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -192,7 +192,7 @@ func TestMessageBatchMarkAsUnseen(t *testing.T) {
 }
 
 func TestMessageBatchUnarchive(t *testing.T) {
-	t.Skip("skipped: currently no good way to test endpoints defining callbacks, Prism mock server will fail trying to reach the provided callback url")
+	t.Skip("Prism doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
