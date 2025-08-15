@@ -393,6 +393,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 			Locale: knock.F("en-US"),
 			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
 				"default": knock.PreferenceSetRequestParam{
+					PersistenceStrategy: knock.F(knock.PreferenceSetRequest_PersistenceStrategyMerge),
 					Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
 						"marketing": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
 							ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
@@ -505,6 +506,7 @@ func TestObjectSetPreferencesWithOptionalParams(t *testing.T) {
 		"default",
 		knock.ObjectSetPreferencesParams{
 			PreferenceSetRequest: knock.PreferenceSetRequestParam{
+				PersistenceStrategy: knock.F(knock.PreferenceSetRequest_PersistenceStrategyMerge),
 				Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
 					"marketing": shared.UnionBool(false),
 					"transactional": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
