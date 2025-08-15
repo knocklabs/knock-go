@@ -335,11 +335,13 @@ func (r *ObjectService) SetChannelData(ctx context.Context, collection string, o
 	return
 }
 
-// Sets preferences within the given preference set. This is a destructive
-// operation and will replace any existing preferences with the preferences given.
-// If no object exists in the current environment for the given `:collection` and
-// `:object_id`, Knock will create the object as part of this request. The
-// preference set `:id` can be either `default` or a `tenant.id`. Learn more about
+// Sets preferences within the given preference set. By default, this is a
+// destructive operation and will replace any existing preferences with the
+// preferences given. Use '\_\_persistence_strategy': 'merge' to merge with
+// existing preferences instead. If no object exists in the current environment for
+// the given `:collection` and `:object_id`, Knock will create the object as part
+// of this request. The preference set `:id` can be either `default` or a
+// `tenant.id`. Learn more about
 // [per-tenant preferences](/preferences/tenant-preferences).
 func (r *ObjectService) SetPreferences(ctx context.Context, collection string, objectID string, id string, body ObjectSetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)

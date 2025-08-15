@@ -46,6 +46,7 @@ func TestUserUpdateWithOptionalParams(t *testing.T) {
 				PhoneNumber: knock.F("phone_number"),
 				Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
 					"default": knock.PreferenceSetRequestParam{
+						PersistenceStrategy: knock.F(knock.PreferenceSetRequest_PersistenceStrategyMerge),
 						Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
 							"marketing": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
 								ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
@@ -453,6 +454,7 @@ func TestUserSetPreferencesWithOptionalParams(t *testing.T) {
 		"default",
 		knock.UserSetPreferencesParams{
 			PreferenceSetRequest: knock.PreferenceSetRequestParam{
+				PersistenceStrategy: knock.F(knock.PreferenceSetRequest_PersistenceStrategyMerge),
 				Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
 					"marketing": shared.UnionBool(false),
 					"transactional": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{

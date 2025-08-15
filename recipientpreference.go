@@ -501,6 +501,9 @@ type PreferenceSetChannelTypesSMSUnionParam interface {
 
 // A request to set a preference set for a recipient.
 type PreferenceSetRequestParam struct {
+	// Controls how the preference set is persisted. 'replace' will completely replace
+	// the preference set, 'merge' will merge with existing preferences.
+	PersistenceStrategy param.Field[PreferenceSetRequest_PersistenceStrategy] `json:"__persistence_strategy__"`
 	// An object where the key is the category and the values are the preference
 	// settings for that category.
 	Categories param.Field[map[string]PreferenceSetRequestCategoriesUnionParam] `json:"categories"`
@@ -513,6 +516,23 @@ type PreferenceSetRequestParam struct {
 
 func (r PreferenceSetRequestParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// Controls how the preference set is persisted. 'replace' will completely replace
+// the preference set, 'merge' will merge with existing preferences.
+type PreferenceSetRequest_PersistenceStrategy string
+
+const (
+	PreferenceSetRequest_PersistenceStrategyMerge   PreferenceSetRequest_PersistenceStrategy = "merge"
+	PreferenceSetRequest_PersistenceStrategyReplace PreferenceSetRequest_PersistenceStrategy = "replace"
+)
+
+func (r PreferenceSetRequest_PersistenceStrategy) IsKnown() bool {
+	switch r {
+	case PreferenceSetRequest_PersistenceStrategyMerge, PreferenceSetRequest_PersistenceStrategyReplace:
+		return true
+	}
+	return false
 }
 
 // Workflow or category preferences within a preference set

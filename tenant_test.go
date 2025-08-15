@@ -119,6 +119,7 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 					PrimaryColorContrast: knock.F("#FFDE00"),
 				}),
 				PreferenceSet: knock.F(knock.PreferenceSetRequestParam{
+					PersistenceStrategy: knock.F(knock.PreferenceSetRequest_PersistenceStrategyMerge),
 					Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
 						"marketing": shared.UnionBool(false),
 						"transactional": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{

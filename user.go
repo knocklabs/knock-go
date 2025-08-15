@@ -269,8 +269,10 @@ func (r *UserService) SetChannelData(ctx context.Context, userID string, channel
 	return
 }
 
-// Updates a complete preference set for a user. This is a destructive operation
-// that will replace the existing preference set for the user.
+// Updates a complete preference set for a user. By default, this is a destructive
+// operation and will replace any existing preferences with the preferences given.
+// Use '**persistence_strategy**': 'merge' to merge with existing preferences
+// instead.
 func (r *UserService) SetPreferences(ctx context.Context, userID string, id string, body UserSetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
 	opts = append(r.Options[:], opts...)
 	if userID == "" {

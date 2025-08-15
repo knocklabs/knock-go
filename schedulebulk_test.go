@@ -46,6 +46,7 @@ func TestScheduleBulkNew(t *testing.T) {
 				PhoneNumber: knock.F("phone_number"),
 				Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
 					"default": knock.PreferenceSetRequestParam{
+						PersistenceStrategy: knock.F(knock.PreferenceSetRequest_PersistenceStrategyMerge),
 						Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
 							"transactional": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
 								ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
@@ -126,6 +127,7 @@ func TestScheduleBulkNew(t *testing.T) {
 				PhoneNumber: knock.F("phone_number"),
 				Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
 					"default": knock.PreferenceSetRequestParam{
+						PersistenceStrategy: knock.F(knock.PreferenceSetRequest_PersistenceStrategyMerge),
 						Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
 							"transactional": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
 								ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
