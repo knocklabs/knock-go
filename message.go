@@ -434,7 +434,7 @@ type MessageSource struct {
 	Key string `json:"key,required"`
 	// The ID of the version of the workflow that triggered the message.
 	VersionID string `json:"version_id,required" format:"uuid"`
-	// The step reference for the step in the workflow that generated the message
+	// The step reference for the step in the workflow that generated the message.
 	StepRef string            `json:"step_ref,nullable"`
 	JSON    messageSourceJSON `json:"-"`
 }
