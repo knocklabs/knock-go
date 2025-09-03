@@ -316,17 +316,30 @@ func (r activityJSON) RawJSON() string {
 // channel.
 type Message struct {
 	// The unique identifier for the message.
-	ID string `json:"id"`
+	ID string `json:"id,required"`
 	// The typename of the schema.
-	Typename string `json:"__typename"`
+	Typename string `json:"__typename,required"`
+	// The ID for the channel the message was sent through.
+	ChannelID string `json:"channel_id,required" format:"uuid"`
+	// A list of engagement statuses.
+	EngagementStatuses []MessageEngagementStatus `json:"engagement_statuses,required"`
+	// Timestamp when the resource was created.
+	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
+	// A reference to a recipient, either a user identifier (string) or an object
+	// reference (ID, collection).
+	Recipient RecipientReferenceUnion `json:"recipient,required"`
+	// The workflow that triggered the message.
+	Source MessageSource `json:"source,required"`
+	// The message delivery status.
+	Status MessageStatus `json:"status,required"`
+	// The timestamp when the resource was last updated.
+	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
 	// One or more actors that are associated with this message. Note: this is a list
 	// that can contain up to 10 actors if the message is produced from a
 	// [batch](/designing-workflows/batch-function).
 	Actors []RecipientReferenceUnion `json:"actors"`
 	// Timestamp when the message was archived.
 	ArchivedAt time.Time `json:"archived_at,nullable" format:"date-time"`
-	// The ID for the channel the message was sent through.
-	ChannelID string `json:"channel_id" format:"uuid"`
 	// Timestamp when the message was clicked.
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Data associated with the message’s workflow run. Includes the workflow trigger
@@ -335,10 +348,6 @@ type Message struct {
 	// after a [batch step](/designing-workflows/batch-function), includes the payload
 	// `data` from the most-recent trigger request (the final `activity` in the batch).
 	Data map[string]interface{} `json:"data,nullable"`
-	// A list of engagement statuses.
-	EngagementStatuses []MessageEngagementStatus `json:"engagement_statuses"`
-	// Timestamp when the resource was created.
-	InsertedAt time.Time `json:"inserted_at" format:"date-time"`
 	// Timestamp when the message was interacted with.
 	InteractedAt time.Time `json:"interacted_at,nullable" format:"date-time"`
 	// Timestamp when a link in the message was clicked.
@@ -347,22 +356,13 @@ type Message struct {
 	Metadata map[string]interface{} `json:"metadata,nullable"`
 	// Timestamp when the message was read.
 	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
-	// A reference to a recipient, either a user identifier (string) or an object
-	// reference (ID, collection).
-	Recipient RecipientReferenceUnion `json:"recipient"`
 	// Timestamp when the message was scheduled to be sent.
 	ScheduledAt time.Time `json:"scheduled_at,nullable" format:"date-time"`
 	// Timestamp when the message was seen.
 	SeenAt time.Time `json:"seen_at,nullable" format:"date-time"`
-	// The workflow that triggered the message.
-	Source MessageSource `json:"source"`
-	// The message delivery status.
-	Status MessageStatus `json:"status"`
 	// The ID of the `tenant` associated with the message. Only present when a `tenant`
 	// is provided on a workflow trigger request.
 	Tenant string `json:"tenant,nullable"`
-	// The timestamp when the resource was last updated.
-	UpdatedAt time.Time `json:"updated_at" format:"date-time"`
 	// The key of the workflow that generated the message.
 	//
 	// Deprecated: deprecated
@@ -374,24 +374,24 @@ type Message struct {
 type messageJSON struct {
 	ID                 apijson.Field
 	Typename           apijson.Field
-	Actors             apijson.Field
-	ArchivedAt         apijson.Field
 	ChannelID          apijson.Field
-	ClickedAt          apijson.Field
-	Data               apijson.Field
 	EngagementStatuses apijson.Field
 	InsertedAt         apijson.Field
+	Recipient          apijson.Field
+	Source             apijson.Field
+	Status             apijson.Field
+	UpdatedAt          apijson.Field
+	Actors             apijson.Field
+	ArchivedAt         apijson.Field
+	ClickedAt          apijson.Field
+	Data               apijson.Field
 	InteractedAt       apijson.Field
 	LinkClickedAt      apijson.Field
 	Metadata           apijson.Field
 	ReadAt             apijson.Field
-	Recipient          apijson.Field
 	ScheduledAt        apijson.Field
 	SeenAt             apijson.Field
-	Source             apijson.Field
-	Status             apijson.Field
 	Tenant             apijson.Field
-	UpdatedAt          apijson.Field
 	Workflow           apijson.Field
 	raw                string
 	ExtraFields        map[string]apijson.Field
@@ -434,7 +434,7 @@ type MessageSource struct {
 	Key string `json:"key,required"`
 	// The ID of the version of the workflow that triggered the message.
 	VersionID string `json:"version_id,required" format:"uuid"`
-	// The step reference for the step in the workflow that generated the message
+	// The step reference for the step in the workflow that generated the message.
 	StepRef string            `json:"step_ref,nullable"`
 	JSON    messageSourceJSON `json:"-"`
 }
