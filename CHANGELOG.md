@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.13.0 (2025-09-05)
+
+Full Changelog: [v1.12.0...v1.13.0](https://github.com/knocklabs/knock-go/compare/v1.12.0...v1.13.0)
+
+### Features
+
+* **api:** api update ([f16622f](https://github.com/knocklabs/knock-go/commit/f16622f8e7dcfacf705de5f51abe31e32205e768))
+* **api:** api update ([01bebf2](https://github.com/knocklabs/knock-go/commit/01bebf2d6ded1f987ac0d298d1641b1fede75535))
+* **api:** api update ([aa1fcfd](https://github.com/knocklabs/knock-go/commit/aa1fcfd9e81be5a5cc60a62e7901af617855d7bb))
+* **api:** api update ([0f92125](https://github.com/knocklabs/knock-go/commit/0f92125d1a970978434894851cd9ae4b5e31bb44))
+* **api:** api update ([47bc50b](https://github.com/knocklabs/knock-go/commit/47bc50be372bee301d7576e18d28688ea9178d89))
+* **api:** api update ([bb04067](https://github.com/knocklabs/knock-go/commit/bb04067127431577ad7f2e78ba502565a3702c2d))
+* **api:** api update ([cb7e2e5](https://github.com/knocklabs/knock-go/commit/cb7e2e5f502e8163c8cddf4039573d949f30957d))
+
+
+### Bug Fixes
+
+* close body before retrying ([d81ffa4](https://github.com/knocklabs/knock-go/commit/d81ffa4893cf1003d3d53d3323cf0547a494d5fc))
+* remove null from release please manifest ([5c181eb](https://github.com/knocklabs/knock-go/commit/5c181eb9e23fe80fc7864652d9cd67d9481b91a3))
+* use release please annotations on more places ([366e99e](https://github.com/knocklabs/knock-go/commit/366e99eb05084f6468aeb4529ff2118f62553d75))
+
 ## 1.12.0 (2025-08-27)
 
 Full Changelog: [v1.11.0...v1.12.0](https://github.com/knocklabs/knock-go/compare/v1.11.0...v1.12.0)

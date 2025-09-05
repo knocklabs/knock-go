@@ -73,6 +73,8 @@ type ChannelDataData struct {
 	// This field can have the runtime type of [[]string].
 	PlayerIDs interface{} `json:"player_ids"`
 	// This field can have the runtime type of [[]string].
+	TargetArns interface{} `json:"target_arns"`
+	// This field can have the runtime type of [[]string].
 	Tokens interface{}         `json:"tokens"`
 	JSON   channelDataDataJSON `json:"-"`
 	union  ChannelDataDataUnion
@@ -84,6 +86,7 @@ type channelDataDataJSON struct {
 	Connections     apijson.Field
 	MsTeamsTenantID apijson.Field
 	PlayerIDs       apijson.Field
+	TargetArns      apijson.Field
 	Tokens          apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
@@ -106,7 +109,8 @@ func (r *ChannelDataData) UnmarshalJSON(data []byte) (err error) {
 // specific types for more type safety.
 //
 // Possible runtime types of the union are [PushChannelData], [SlackChannelData],
-// [MsTeamsChannelData], [DiscordChannelData], [OneSignalChannelData].
+// [MsTeamsChannelData], [DiscordChannelData], [OneSignalChannelData],
+// [ChannelDataDataAwsSnsPushChannelData].
 func (r ChannelDataData) AsUnion() ChannelDataDataUnion {
 	return r.union
 }
@@ -114,7 +118,8 @@ func (r ChannelDataData) AsUnion() ChannelDataDataUnion {
 // Channel data for a given channel type.
 //
 // Union satisfied by [PushChannelData], [SlackChannelData], [MsTeamsChannelData],
-// [DiscordChannelData] or [OneSignalChannelData].
+// [DiscordChannelData], [OneSignalChannelData] or
+// [ChannelDataDataAwsSnsPushChannelData].
 type ChannelDataDataUnion interface {
 	implementsChannelDataData()
 }
@@ -143,8 +148,38 @@ func init() {
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(OneSignalChannelData{}),
 		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ChannelDataDataAwsSnsPushChannelData{}),
+		},
 	)
 }
+
+// AWS SNS push channel data.
+type ChannelDataDataAwsSnsPushChannelData struct {
+	// A list of platform endpoint ARNs. See
+	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
+	TargetArns []string                                 `json:"target_arns,required"`
+	JSON       channelDataDataAwsSnsPushChannelDataJSON `json:"-"`
+}
+
+// channelDataDataAwsSnsPushChannelDataJSON contains the JSON metadata for the
+// struct [ChannelDataDataAwsSnsPushChannelData]
+type channelDataDataAwsSnsPushChannelDataJSON struct {
+	TargetArns  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ChannelDataDataAwsSnsPushChannelData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r channelDataDataAwsSnsPushChannelDataJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r ChannelDataDataAwsSnsPushChannelData) implementsChannelDataData() {}
 
 // The type of provider.
 type ChannelDataProvider string
@@ -152,6 +187,7 @@ type ChannelDataProvider string
 const (
 	ChannelDataProviderPushFcm          ChannelDataProvider = "push_fcm"
 	ChannelDataProviderPushApns         ChannelDataProvider = "push_apns"
+	ChannelDataProviderPushAwsSns       ChannelDataProvider = "push_aws_sns"
 	ChannelDataProviderPushExpo         ChannelDataProvider = "push_expo"
 	ChannelDataProviderPushOneSignal    ChannelDataProvider = "push_one_signal"
 	ChannelDataProviderChatSlack        ChannelDataProvider = "chat_slack"
@@ -162,7 +198,7 @@ const (
 
 func (r ChannelDataProvider) IsKnown() bool {
 	switch r {
-	case ChannelDataProviderPushFcm, ChannelDataProviderPushApns, ChannelDataProviderPushExpo, ChannelDataProviderPushOneSignal, ChannelDataProviderChatSlack, ChannelDataProviderChatMsTeams, ChannelDataProviderChatDiscord, ChannelDataProviderHTTPKnockWebhook:
+	case ChannelDataProviderPushFcm, ChannelDataProviderPushApns, ChannelDataProviderPushAwsSns, ChannelDataProviderPushExpo, ChannelDataProviderPushOneSignal, ChannelDataProviderChatSlack, ChannelDataProviderChatMsTeams, ChannelDataProviderChatDiscord, ChannelDataProviderHTTPKnockWebhook:
 		return true
 	}
 	return false
@@ -185,6 +221,7 @@ type ChannelDataRequestDataParam struct {
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
 	PlayerIDs       param.Field[interface{}] `json:"player_ids"`
+	TargetArns      param.Field[interface{}] `json:"target_arns"`
 	Tokens          param.Field[interface{}] `json:"tokens"`
 }
 
@@ -197,10 +234,25 @@ func (r ChannelDataRequestDataParam) implementsChannelDataRequestDataUnionParam(
 // Channel data for a given channel type.
 //
 // Satisfied by [PushChannelDataParam], [OneSignalChannelDataParam],
-// [SlackChannelDataParam], [MsTeamsChannelDataParam], [DiscordChannelDataParam],
+// [ChannelDataRequestDataAwsSnsPushChannelDataParam], [SlackChannelDataParam],
+// [MsTeamsChannelDataParam], [DiscordChannelDataParam],
 // [ChannelDataRequestDataParam].
 type ChannelDataRequestDataUnionParam interface {
 	implementsChannelDataRequestDataUnionParam()
+}
+
+// AWS SNS push channel data.
+type ChannelDataRequestDataAwsSnsPushChannelDataParam struct {
+	// A list of platform endpoint ARNs. See
+	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
+	TargetArns param.Field[[]string] `json:"target_arns,required"`
+}
+
+func (r ChannelDataRequestDataAwsSnsPushChannelDataParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ChannelDataRequestDataAwsSnsPushChannelDataParam) implementsChannelDataRequestDataUnionParam() {
 }
 
 // Discord channel data.
@@ -456,6 +508,7 @@ type InlineChannelDataRequestItemParam struct {
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
 	PlayerIDs       param.Field[interface{}] `json:"player_ids"`
+	TargetArns      param.Field[interface{}] `json:"target_arns"`
 	Tokens          param.Field[interface{}] `json:"tokens"`
 }
 
@@ -468,10 +521,25 @@ func (r InlineChannelDataRequestItemParam) implementsInlineChannelDataRequestIte
 // Channel data for a given channel type.
 //
 // Satisfied by [PushChannelDataParam], [OneSignalChannelDataParam],
+// [InlineChannelDataRequestItemAwsSnsPushChannelDataParam],
 // [SlackChannelDataParam], [MsTeamsChannelDataParam], [DiscordChannelDataParam],
 // [InlineChannelDataRequestItemParam].
 type InlineChannelDataRequestItemUnionParam interface {
 	implementsInlineChannelDataRequestItemUnionParam()
+}
+
+// AWS SNS push channel data.
+type InlineChannelDataRequestItemAwsSnsPushChannelDataParam struct {
+	// A list of platform endpoint ARNs. See
+	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
+	TargetArns param.Field[[]string] `json:"target_arns,required"`
+}
+
+func (r InlineChannelDataRequestItemAwsSnsPushChannelDataParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r InlineChannelDataRequestItemAwsSnsPushChannelDataParam) implementsInlineChannelDataRequestItemUnionParam() {
 }
 
 // Microsoft Teams channel data.
