@@ -131,6 +131,8 @@ func (r userGuideGetChannelResponseJSON) RawJSON() string {
 type UserGuideGetChannelResponseGuide struct {
 	// The unique identifier for the guide.
 	ID string `json:"id" format:"uuid"`
+	// Whether the guide is active.
+	Active bool `json:"active"`
 	// The content of the guide.
 	Content string `json:"content"`
 	// The metadata of the guide.
@@ -144,6 +146,7 @@ type UserGuideGetChannelResponseGuide struct {
 // [UserGuideGetChannelResponseGuide]
 type userGuideGetChannelResponseGuideJSON struct {
 	ID          apijson.Field
+	Active      apijson.Field
 	Content     apijson.Field
 	Metadata    apijson.Field
 	Title       apijson.Field
