@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
 	"github.com/knocklabs/knock-go/internal/apiquery"
@@ -39,7 +40,7 @@ func NewProviderMsTeamService(opts ...option.RequestOption) (r *ProviderMsTeamSe
 // Check if a connection to Microsoft Teams has been authorized for a given
 // Microsoft Teams tenant object.
 func (r *ProviderMsTeamService) CheckAuth(ctx context.Context, channelID string, query ProviderMsTeamCheckAuthParams, opts ...option.RequestOption) (res *ProviderMsTeamCheckAuthResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
 		return
@@ -52,7 +53,7 @@ func (r *ProviderMsTeamService) CheckAuth(ctx context.Context, channelID string,
 // List the Microsoft Teams channels within a team. By default, archived and
 // private channels are excluded from the results.
 func (r *ProviderMsTeamService) ListChannels(ctx context.Context, channelID string, query ProviderMsTeamListChannelsParams, opts ...option.RequestOption) (res *ProviderMsTeamListChannelsResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
 		return
@@ -66,7 +67,7 @@ func (r *ProviderMsTeamService) ListChannels(ctx context.Context, channelID stri
 // archived and private channels are excluded from the results.
 func (r *ProviderMsTeamService) ListTeams(ctx context.Context, channelID string, query ProviderMsTeamListTeamsParams, opts ...option.RequestOption) (res *pagination.MsTeamsPagination[ProviderMsTeamListTeamsResponse], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
@@ -93,7 +94,7 @@ func (r *ProviderMsTeamService) ListTeamsAutoPaging(ctx context.Context, channel
 
 // Remove a Microsoft Entra tenant ID from a Microsoft Teams tenant object.
 func (r *ProviderMsTeamService) RevokeAccess(ctx context.Context, channelID string, body ProviderMsTeamRevokeAccessParams, opts ...option.RequestOption) (res *ProviderMsTeamRevokeAccessResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
 		return

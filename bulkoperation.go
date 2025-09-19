@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
@@ -35,7 +36,7 @@ func NewBulkOperationService(opts ...option.RequestOption) (r *BulkOperationServ
 
 // Retrieves a bulk operation (if it exists) and displays the current state of it.
 func (r *BulkOperationService) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *BulkOperation, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"time"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
@@ -47,7 +48,7 @@ func NewUserService(opts ...option.RequestOption) (r *UserService) {
 // an existing user, the system merges the properties you specific with what is
 // currently set on the user, updating only the fields included in your requests.
 func (r *UserService) Update(ctx context.Context, userID string, body UserUpdateParams, opts ...option.RequestOption) (res *User, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -61,7 +62,7 @@ func (r *UserService) Update(ctx context.Context, userID string, body UserUpdate
 // page.
 func (r *UserService) List(ctx context.Context, query UserListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[User], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	path := "v1/users"
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -84,7 +85,7 @@ func (r *UserService) ListAutoPaging(ctx context.Context, query UserListParams, 
 
 // Permanently delete a user and all associated data.
 func (r *UserService) Delete(ctx context.Context, userID string, opts ...option.RequestOption) (res *string, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -96,7 +97,7 @@ func (r *UserService) Delete(ctx context.Context, userID string, opts ...option.
 
 // Retrieve a specific user by their ID.
 func (r *UserService) Get(ctx context.Context, userID string, opts ...option.RequestOption) (res *User, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -108,7 +109,7 @@ func (r *UserService) Get(ctx context.Context, userID string, opts ...option.Req
 
 // Retrieves the channel data for a specific user and channel ID.
 func (r *UserService) GetChannelData(ctx context.Context, userID string, channelID string, opts ...option.RequestOption) (res *ChannelData, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -125,7 +126,7 @@ func (r *UserService) GetChannelData(ctx context.Context, userID string, channel
 // Retrieves a specific preference set for a user identified by the preference set
 // ID.
 func (r *UserService) GetPreferences(ctx context.Context, userID string, id string, query UserGetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -144,7 +145,7 @@ func (r *UserService) GetPreferences(ctx context.Context, userID string, id stri
 // retention window will not be included in the results.
 func (r *UserService) ListMessages(ctx context.Context, userID string, query UserListMessagesParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[Message], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -172,7 +173,7 @@ func (r *UserService) ListMessagesAutoPaging(ctx context.Context, userID string,
 
 // Retrieves a list of all preference sets for a specific user.
 func (r *UserService) ListPreferences(ctx context.Context, userID string, opts ...option.RequestOption) (res *[]PreferenceSet, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -185,7 +186,7 @@ func (r *UserService) ListPreferences(ctx context.Context, userID string, opts .
 // Returns a paginated list of schedules for a specific user, in descending order.
 func (r *UserService) ListSchedules(ctx context.Context, userID string, query UserListSchedulesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Schedule], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -213,7 +214,7 @@ func (r *UserService) ListSchedulesAutoPaging(ctx context.Context, userID string
 // order.
 func (r *UserService) ListSubscriptions(ctx context.Context, userID string, query UserListSubscriptionsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Subscription], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
@@ -241,7 +242,7 @@ func (r *UserService) ListSubscriptionsAutoPaging(ctx context.Context, userID st
 // Merge two users together, where the user specified with the `from_user_id` param
 // will be merged into the user specified by `user_id`.
 func (r *UserService) Merge(ctx context.Context, userID string, body UserMergeParams, opts ...option.RequestOption) (res *User, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -255,7 +256,7 @@ func (r *UserService) Merge(ctx context.Context, userID string, body UserMergePa
 // exists in the current environment for the given `user_id`, Knock will create the
 // user entry as part of this request.
 func (r *UserService) SetChannelData(ctx context.Context, userID string, channelID string, body UserSetChannelDataParams, opts ...option.RequestOption) (res *ChannelData, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -274,7 +275,7 @@ func (r *UserService) SetChannelData(ctx context.Context, userID string, channel
 // Use '**persistence_strategy**': 'merge' to merge with existing preferences
 // instead.
 func (r *UserService) SetPreferences(ctx context.Context, userID string, id string, body UserSetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -290,7 +291,7 @@ func (r *UserService) SetPreferences(ctx context.Context, userID string, id stri
 
 // Deletes channel data for a specific user and channel ID.
 func (r *UserService) UnsetChannelData(ctx context.Context, userID string, channelID string, opts ...option.RequestOption) (res *string, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return

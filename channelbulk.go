@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
@@ -39,7 +40,7 @@ func NewChannelBulkService(opts ...option.RequestOption) (r *ChannelBulkService)
 // the `action` parameter, where the action is a status change action (e.g.
 // `archive`, `unarchive`).
 func (r *ChannelBulkService) UpdateMessageStatus(ctx context.Context, channelID string, action ChannelBulkUpdateMessageStatusParamsAction, body ChannelBulkUpdateMessageStatusParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
 		return
