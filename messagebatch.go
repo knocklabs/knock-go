@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"slices"
 	"time"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
@@ -39,7 +40,7 @@ func NewMessageBatchService(opts ...option.RequestOption) (r *MessageBatchServic
 // Marks the given messages as archived. Archived messages are hidden from the
 // default message list in the feed but can still be accessed and unarchived later.
 func (r *MessageBatchService) Archive(ctx context.Context, body MessageBatchArchiveParams, opts ...option.RequestOption) (res *[]Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/archived"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
@@ -47,7 +48,7 @@ func (r *MessageBatchService) Archive(ctx context.Context, body MessageBatchArch
 
 // Get the contents of multiple messages in a single request.
 func (r *MessageBatchService) GetContent(ctx context.Context, query MessageBatchGetContentParams, opts ...option.RequestOption) (res *[]MessageBatchGetContentResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/content"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
@@ -59,7 +60,7 @@ func (r *MessageBatchService) GetContent(ctx context.Context, query MessageBatch
 // data. Read more about message engagement statuses
 // [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageBatchService) MarkAsInteracted(ctx context.Context, body MessageBatchMarkAsInteractedParams, opts ...option.RequestOption) (res *[]Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/interacted"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
@@ -68,7 +69,7 @@ func (r *MessageBatchService) MarkAsInteracted(ctx context.Context, body Message
 // Marks the given messages as `read`. Read more about message engagement statuses
 // [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageBatchService) MarkAsRead(ctx context.Context, body MessageBatchMarkAsReadParams, opts ...option.RequestOption) (res *[]Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/read"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
@@ -78,7 +79,7 @@ func (r *MessageBatchService) MarkAsRead(ctx context.Context, body MessageBatchM
 // message in their feed or inbox. Read more about message engagement statuses
 // [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageBatchService) MarkAsSeen(ctx context.Context, body MessageBatchMarkAsSeenParams, opts ...option.RequestOption) (res *[]Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/seen"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
@@ -88,7 +89,7 @@ func (r *MessageBatchService) MarkAsSeen(ctx context.Context, body MessageBatchM
 // about message engagement statuses
 // [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageBatchService) MarkAsUnread(ctx context.Context, body MessageBatchMarkAsUnreadParams, opts ...option.RequestOption) (res *[]Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/unread"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
@@ -98,7 +99,7 @@ func (r *MessageBatchService) MarkAsUnread(ctx context.Context, body MessageBatc
 // about message engagement statuses
 // [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageBatchService) MarkAsUnseen(ctx context.Context, body MessageBatchMarkAsUnseenParams, opts ...option.RequestOption) (res *[]Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/unseen"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
@@ -108,7 +109,7 @@ func (r *MessageBatchService) MarkAsUnseen(ctx context.Context, body MessageBatc
 // Archived messages are hidden from the default message list in the feed but can
 // still be accessed and unarchived later.
 func (r *MessageBatchService) Unarchive(ctx context.Context, body MessageBatchUnarchiveParams, opts ...option.RequestOption) (res *[]Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/unarchived"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return

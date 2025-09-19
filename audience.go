@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
@@ -36,7 +37,7 @@ func NewAudienceService(opts ...option.RequestOption) (r *AudienceService) {
 
 // Adds one or more members to the specified audience.
 func (r *AudienceService) AddMembers(ctx context.Context, key string, body AudienceAddMembersParams, opts ...option.RequestOption) (res *string, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return
@@ -48,7 +49,7 @@ func (r *AudienceService) AddMembers(ctx context.Context, key string, body Audie
 
 // Returns a paginated list of members for the specified audience.
 func (r *AudienceService) ListMembers(ctx context.Context, key string, opts ...option.RequestOption) (res *AudienceListMembersResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return
@@ -60,7 +61,7 @@ func (r *AudienceService) ListMembers(ctx context.Context, key string, opts ...o
 
 // Removes one or more members from the specified audience.
 func (r *AudienceService) RemoveMembers(ctx context.Context, key string, body AudienceRemoveMembersParams, opts ...option.RequestOption) (res *string, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return

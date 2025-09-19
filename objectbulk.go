@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
@@ -36,7 +37,7 @@ func NewObjectBulkService(opts ...option.RequestOption) (r *ObjectBulkService) {
 
 // Bulk deletes objects from the specified collection.
 func (r *ObjectBulkService) Delete(ctx context.Context, collection string, body ObjectBulkDeleteParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
@@ -52,7 +53,7 @@ func (r *ObjectBulkService) Delete(ctx context.Context, collection string, body 
 // [inline identifications](/managing-recipients/identifying-recipients#inline-identifying-recipients)
 // for the `recipient` field.
 func (r *ObjectBulkService) AddSubscriptions(ctx context.Context, collection string, body ObjectBulkAddSubscriptionsParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
@@ -64,7 +65,7 @@ func (r *ObjectBulkService) AddSubscriptions(ctx context.Context, collection str
 
 // Bulk sets up to 1,000 objects at a time in the specified collection.
 func (r *ObjectBulkService) Set(ctx context.Context, collection string, body ObjectBulkSetParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
