@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"slices"
 	"time"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
@@ -45,7 +46,7 @@ func NewMessageService(opts ...option.RequestOption) (r *MessageService) {
 // Returns a paginated list of messages for the current environment.
 func (r *MessageService) List(ctx context.Context, query MessageListParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[Message], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	path := "v1/messages"
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -68,7 +69,7 @@ func (r *MessageService) ListAutoPaging(ctx context.Context, query MessageListPa
 // Archives a message for the user. Archived messages are hidden from the default
 // message list in the feed but can still be accessed and unarchived later.
 func (r *MessageService) Archive(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
 		return
@@ -80,7 +81,7 @@ func (r *MessageService) Archive(ctx context.Context, messageID string, opts ...
 
 // Retrieves a specific message by its ID.
 func (r *MessageService) Get(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
 		return
@@ -93,7 +94,7 @@ func (r *MessageService) Get(ctx context.Context, messageID string, opts ...opti
 // Returns the fully rendered contents of a message, where the response depends on
 // which channel the message was sent through.
 func (r *MessageService) GetContent(ctx context.Context, messageID string, opts ...option.RequestOption) (res *MessageGetContentResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
 		return
@@ -106,7 +107,7 @@ func (r *MessageService) GetContent(ctx context.Context, messageID string, opts 
 // Returns a paginated list of activities for the specified message.
 func (r *MessageService) ListActivities(ctx context.Context, messageID string, query MessageListActivitiesParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[Activity], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
@@ -133,7 +134,7 @@ func (r *MessageService) ListActivitiesAutoPaging(ctx context.Context, messageID
 // Returns a paginated list of delivery logs for the specified message.
 func (r *MessageService) ListDeliveryLogs(ctx context.Context, messageID string, query MessageListDeliveryLogsParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[MessageDeliveryLog], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
@@ -160,7 +161,7 @@ func (r *MessageService) ListDeliveryLogsAutoPaging(ctx context.Context, message
 // Returns a paginated list of events for the specified message.
 func (r *MessageService) ListEvents(ctx context.Context, messageID string, query MessageListEventsParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[MessageEvent], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
@@ -190,7 +191,7 @@ func (r *MessageService) ListEventsAutoPaging(ctx context.Context, messageID str
 // more about message engagement statuses
 // [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageService) MarkAsInteracted(ctx context.Context, messageID string, body MessageMarkAsInteractedParams, opts ...option.RequestOption) (res *Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
 		return
@@ -204,7 +205,7 @@ func (r *MessageService) MarkAsInteracted(ctx context.Context, messageID string,
 // content. Read more about message engagement statuses
 // [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageService) MarkAsRead(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
 		return
@@ -218,7 +219,7 @@ func (r *MessageService) MarkAsRead(ctx context.Context, messageID string, opts 
 // in their feed or inbox. Read more about message engagement statuses
 // [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageService) MarkAsSeen(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
 		return
@@ -232,7 +233,7 @@ func (r *MessageService) MarkAsSeen(ctx context.Context, messageID string, opts 
 // message engagement statuses
 // [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageService) MarkAsUnread(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
 		return
@@ -246,7 +247,7 @@ func (r *MessageService) MarkAsUnread(ctx context.Context, messageID string, opt
 // message engagement statuses
 // [here](/send-notifications/message-statuses#engagement-status).
 func (r *MessageService) MarkAsUnseen(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
 		return
@@ -259,7 +260,7 @@ func (r *MessageService) MarkAsUnseen(ctx context.Context, messageID string, opt
 // Removes a message from the archived state, making it visible in the default
 // message list in the feed again.
 func (r *MessageService) Unarchive(ctx context.Context, messageID string, opts ...option.RequestOption) (res *Message, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
 		return

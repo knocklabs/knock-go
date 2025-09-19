@@ -5,6 +5,7 @@ package knock
 import (
 	"context"
 	"net/http"
+	"slices"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
 	"github.com/knocklabs/knock-go/internal/param"
@@ -33,7 +34,7 @@ func NewUserBulkService(opts ...option.RequestOption) (r *UserBulkService) {
 
 // Permanently deletes up to 1,000 users at a time.
 func (r *UserBulkService) Delete(ctx context.Context, body UserBulkDeleteParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/users/bulk/delete"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
@@ -43,7 +44,7 @@ func (r *UserBulkService) Delete(ctx context.Context, body UserBulkDeleteParams,
 // to 1,000 users in a single batch with various properties, preferences, and
 // channel data.
 func (r *UserBulkService) Identify(ctx context.Context, body UserBulkIdentifyParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/users/bulk/identify"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
@@ -55,7 +56,7 @@ func (r *UserBulkService) Identify(ctx context.Context, body UserBulkIdentifyPar
 // is a destructive operation and will replace any existing users' preferences with
 // the preferences sent.
 func (r *UserBulkService) SetPreferences(ctx context.Context, body UserBulkSetPreferencesParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/users/bulk/preferences"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
 	"github.com/knocklabs/knock-go/internal/param"
@@ -37,7 +38,7 @@ func NewWorkflowService(opts ...option.RequestOption) (r *WorkflowService) {
 // will cancel any queued workflow runs associated with that key/cancellation key
 // pair. Can optionally be provided one or more recipients to scope the request to.
 func (r *WorkflowService) Cancel(ctx context.Context, key string, body WorkflowCancelParams, opts ...option.RequestOption) (res *string, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return
@@ -53,7 +54,7 @@ func (r *WorkflowService) Cancel(ctx context.Context, key string, body WorkflowC
 // [inline identifications](/managing-recipients/identifying-recipients#inline-identifying-recipients)
 // for the `actor`, `recipient`, and `tenant` fields.
 func (r *WorkflowService) Trigger(ctx context.Context, key string, body WorkflowTriggerParams, opts ...option.RequestOption) (res *WorkflowTriggerResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return

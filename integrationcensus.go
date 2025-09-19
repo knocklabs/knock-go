@@ -5,6 +5,7 @@ package knock
 import (
 	"context"
 	"net/http"
+	"slices"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
 	"github.com/knocklabs/knock-go/internal/param"
@@ -33,7 +34,7 @@ func NewIntegrationCensusService(opts ...option.RequestOption) (r *IntegrationCe
 
 // Processes a Census custom destination RPC request.
 func (r *IntegrationCensusService) CustomDestination(ctx context.Context, body IntegrationCensusCustomDestinationParams, opts ...option.RequestOption) (res *IntegrationCensusCustomDestinationResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/integrations/census/custom-destination"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return

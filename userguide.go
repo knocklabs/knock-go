@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
 	"github.com/knocklabs/knock-go/internal/apiquery"
@@ -37,7 +38,7 @@ func NewUserGuideService(opts ...option.RequestOption) (r *UserGuideService) {
 
 // Returns a list of eligible in-app guides for a specific user and channel.
 func (r *UserGuideService) GetChannel(ctx context.Context, userID string, channelID string, query UserGuideGetChannelParams, opts ...option.RequestOption) (res *UserGuideGetChannelResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -54,7 +55,7 @@ func (r *UserGuideService) GetChannel(ctx context.Context, userID string, channe
 // Records that a guide has been archived by a user, triggering any associated
 // archived events.
 func (r *UserGuideService) MarkMessageAsArchived(ctx context.Context, userID string, messageID string, body UserGuideMarkMessageAsArchivedParams, opts ...option.RequestOption) (res *UserGuideMarkMessageAsArchivedResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -71,7 +72,7 @@ func (r *UserGuideService) MarkMessageAsArchived(ctx context.Context, userID str
 // Records that a user has interacted with a guide, triggering any associated
 // interacted events.
 func (r *UserGuideService) MarkMessageAsInteracted(ctx context.Context, userID string, messageID string, body UserGuideMarkMessageAsInteractedParams, opts ...option.RequestOption) (res *UserGuideMarkMessageAsInteractedResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -88,7 +89,7 @@ func (r *UserGuideService) MarkMessageAsInteracted(ctx context.Context, userID s
 // Records that a guide has been seen by a user, triggering any associated seen
 // events.
 func (r *UserGuideService) MarkMessageAsSeen(ctx context.Context, userID string, messageID string, body UserGuideMarkMessageAsSeenParams, opts ...option.RequestOption) (res *UserGuideMarkMessageAsSeenResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return

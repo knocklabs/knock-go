@@ -6,6 +6,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"slices"
 	"time"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
@@ -43,7 +44,7 @@ func NewScheduleService(opts ...option.RequestOption) (r *ScheduleService) {
 // [inline identifications](/managing-recipients/identifying-recipients#inline-identifying-recipients)
 // for the `actor`, `recipient`, and `tenant` fields.
 func (r *ScheduleService) New(ctx context.Context, body ScheduleNewParams, opts ...option.RequestOption) (res *[]Schedule, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/schedules"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
@@ -55,7 +56,7 @@ func (r *ScheduleService) New(ctx context.Context, body ScheduleNewParams, opts 
 // [inline identifications](/managing-recipients/identifying-recipients#inline-identifying-recipients)
 // for the `actor`, `recipient`, and `tenant` fields.
 func (r *ScheduleService) Update(ctx context.Context, body ScheduleUpdateParams, opts ...option.RequestOption) (res *[]Schedule, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/schedules"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
 	return
@@ -65,7 +66,7 @@ func (r *ScheduleService) Update(ctx context.Context, body ScheduleUpdateParams,
 // workflow and optionally by recipients and tenant.
 func (r *ScheduleService) List(ctx context.Context, query ScheduleListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Schedule], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	path := "v1/schedules"
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -89,7 +90,7 @@ func (r *ScheduleService) ListAutoPaging(ctx context.Context, query ScheduleList
 // Permanently deletes one or more schedules identified by the provided schedule
 // IDs. This operation cannot be undone.
 func (r *ScheduleService) Delete(ctx context.Context, body ScheduleDeleteParams, opts ...option.RequestOption) (res *[]Schedule, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/schedules"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
 	return

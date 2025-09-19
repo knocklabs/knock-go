@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
 	"github.com/knocklabs/knock-go/internal/apiquery"
@@ -38,7 +39,7 @@ func NewProviderSlackService(opts ...option.RequestOption) (r *ProviderSlackServ
 
 // Check if a Slack channel is authenticated.
 func (r *ProviderSlackService) CheckAuth(ctx context.Context, channelID string, query ProviderSlackCheckAuthParams, opts ...option.RequestOption) (res *ProviderSlackCheckAuthResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
 		return
@@ -51,7 +52,7 @@ func (r *ProviderSlackService) CheckAuth(ctx context.Context, channelID string, 
 // List Slack channels for a Slack workspace.
 func (r *ProviderSlackService) ListChannels(ctx context.Context, channelID string, query ProviderSlackListChannelsParams, opts ...option.RequestOption) (res *pagination.SlackChannelsCursor[ProviderSlackListChannelsResponse], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
@@ -77,7 +78,7 @@ func (r *ProviderSlackService) ListChannelsAutoPaging(ctx context.Context, chann
 
 // Revoke access for a Slack channel.
 func (r *ProviderSlackService) RevokeAccess(ctx context.Context, channelID string, body ProviderSlackRevokeAccessParams, opts ...option.RequestOption) (res *ProviderSlackRevokeAccessResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
 		return

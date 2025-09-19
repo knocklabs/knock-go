@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"time"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
@@ -43,7 +44,7 @@ func NewObjectService(opts ...option.RequestOption) (r *ObjectService) {
 // includes preference data for the objects.
 func (r *ObjectService) List(ctx context.Context, collection string, query ObjectListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Object], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -71,7 +72,7 @@ func (r *ObjectService) ListAutoPaging(ctx context.Context, collection string, q
 // Permanently removes an object from the specified collection. This operation
 // cannot be undone.
 func (r *ObjectService) Delete(ctx context.Context, collection string, id string, opts ...option.RequestOption) (res *string, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
@@ -90,7 +91,7 @@ func (r *ObjectService) Delete(ctx context.Context, collection string, id string
 // [inline identifications](/managing-recipients/identifying-recipients#inline-identifying-recipients)
 // for the `recipient`.
 func (r *ObjectService) AddSubscriptions(ctx context.Context, collection string, objectID string, body ObjectAddSubscriptionsParams, opts ...option.RequestOption) (res *[]Subscription, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
@@ -107,7 +108,7 @@ func (r *ObjectService) AddSubscriptions(ctx context.Context, collection string,
 // Delete subscriptions for the specified recipients from an object. Returns the
 // list of deleted subscriptions.
 func (r *ObjectService) DeleteSubscriptions(ctx context.Context, collection string, objectID string, body ObjectDeleteSubscriptionsParams, opts ...option.RequestOption) (res *[]Subscription, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
@@ -124,7 +125,7 @@ func (r *ObjectService) DeleteSubscriptions(ctx context.Context, collection stri
 // Retrieves a specific object by its ID from the specified collection. Returns the
 // object with all its properties.
 func (r *ObjectService) Get(ctx context.Context, collection string, id string, opts ...option.RequestOption) (res *Object, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
@@ -140,7 +141,7 @@ func (r *ObjectService) Get(ctx context.Context, collection string, id string, o
 
 // Returns the channel data for the specified object and channel.
 func (r *ObjectService) GetChannelData(ctx context.Context, collection string, objectID string, channelID string, opts ...option.RequestOption) (res *ChannelData, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
@@ -160,7 +161,7 @@ func (r *ObjectService) GetChannelData(ctx context.Context, collection string, o
 
 // Returns the preference set for the specified object and preference set `id`.
 func (r *ObjectService) GetPreferences(ctx context.Context, collection string, objectID string, id string, opts ...option.RequestOption) (res *PreferenceSet, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
@@ -183,7 +184,7 @@ func (r *ObjectService) GetPreferences(ctx context.Context, collection string, o
 // options.
 func (r *ObjectService) ListMessages(ctx context.Context, collection string, id string, query ObjectListMessagesParams, opts ...option.RequestOption) (res *pagination.ItemsCursor[Message], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -215,7 +216,7 @@ func (r *ObjectService) ListMessagesAutoPaging(ctx context.Context, collection s
 
 // Returns a paginated list of preference sets for the specified object.
 func (r *ObjectService) ListPreferences(ctx context.Context, collection string, objectID string, opts ...option.RequestOption) (res *[]PreferenceSet, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
@@ -232,7 +233,7 @@ func (r *ObjectService) ListPreferences(ctx context.Context, collection string, 
 // Returns a paginated list of schedules for an object.
 func (r *ObjectService) ListSchedules(ctx context.Context, collection string, id string, query ObjectListSchedulesParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Schedule], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -265,7 +266,7 @@ func (r *ObjectService) ListSchedulesAutoPaging(ctx context.Context, collection 
 // to. Determined by the `mode` query parameter.
 func (r *ObjectService) ListSubscriptions(ctx context.Context, collection string, objectID string, query ObjectListSubscriptionsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Subscription], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
@@ -299,7 +300,7 @@ func (r *ObjectService) ListSubscriptionsAutoPaging(ctx context.Context, collect
 // This operation is used to identify objects with their properties, as well as
 // optional preferences and channel data.
 func (r *ObjectService) Set(ctx context.Context, collection string, id string, body ObjectSetParams, opts ...option.RequestOption) (res *Object, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
@@ -317,7 +318,7 @@ func (r *ObjectService) Set(ctx context.Context, collection string, id string, b
 // in the current environment for the given `collection` and `object_id`, Knock
 // will create the object as part of this request.
 func (r *ObjectService) SetChannelData(ctx context.Context, collection string, objectID string, channelID string, body ObjectSetChannelDataParams, opts ...option.RequestOption) (res *ChannelData, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
@@ -344,7 +345,7 @@ func (r *ObjectService) SetChannelData(ctx context.Context, collection string, o
 // `tenant.id`. Learn more about
 // [per-tenant preferences](/preferences/tenant-preferences).
 func (r *ObjectService) SetPreferences(ctx context.Context, collection string, objectID string, id string, body ObjectSetPreferencesParams, opts ...option.RequestOption) (res *PreferenceSet, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
@@ -364,7 +365,7 @@ func (r *ObjectService) SetPreferences(ctx context.Context, collection string, o
 
 // Unsets the channel data for the specified object and channel.
 func (r *ObjectService) UnsetChannelData(ctx context.Context, collection string, objectID string, channelID string, opts ...option.RequestOption) (res *string, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return

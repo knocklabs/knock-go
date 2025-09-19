@@ -5,6 +5,7 @@ package knock
 import (
 	"context"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
@@ -36,7 +37,7 @@ func NewScheduleBulkService(opts ...option.RequestOption) (r *ScheduleBulkServic
 // [inline identifications](/managing-recipients/identifying-recipients#inline-identifying-recipients)
 // for the `actor`, `recipient`, and `tenant` fields.
 func (r *ScheduleBulkService) New(ctx context.Context, body ScheduleBulkNewParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/schedules/bulk/create"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return

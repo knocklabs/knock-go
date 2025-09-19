@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.14.1 (2025-09-19)
+
+Full Changelog: [v1.14.0...v1.14.1](https://github.com/knocklabs/knock-go/compare/v1.14.0...v1.14.1)
+
+### Bug Fixes
+
+* use slices.Concat instead of sometimes modifying r.Options ([fb2b448](https://github.com/knocklabs/knock-go/commit/fb2b44813ceda5fd5efcd996cb7af2898b5579ec))
+
+
+### Chores
+
+* bump minimum go version to 1.22 ([29095e7](https://github.com/knocklabs/knock-go/commit/29095e74233969c9c9b09bf288175ca1c5e0239f))
+* do not install brew dependencies in ./scripts/bootstrap by default ([4502b3c](https://github.com/knocklabs/knock-go/commit/4502b3c242c1e7cdfa5fadef8b6edd2f5fc0d56b))
+* update more docs for 1.22 ([96c4cc8](https://github.com/knocklabs/knock-go/commit/96c4cc8be6b6f33afe3381b183f5e899479eab71))
+
 ## 1.14.0 (2025-09-10)
 
 Full Changelog: [v1.13.0...v1.14.0](https://github.com/knocklabs/knock-go/compare/v1.13.0...v1.14.0)
