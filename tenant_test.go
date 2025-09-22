@@ -129,7 +129,13 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 								HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
 								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
 								Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-								SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+								SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+									Conditions: knock.F([]knock.ConditionParam{{
+										Argument: knock.F("US"),
+										Operator: knock.F(knock.ConditionOperatorEqualTo),
+										Variable: knock.F("recipient.country_code"),
+									}}),
+								}),
 							}),
 							Conditions: knock.F([]knock.ConditionParam{{
 								Argument: knock.F("frog_genome"),
@@ -144,7 +150,13 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 						HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
 						InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
 						Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-						SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+						SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+							Conditions: knock.F([]knock.ConditionParam{{
+								Argument: knock.F("US"),
+								Operator: knock.F(knock.ConditionOperatorEqualTo),
+								Variable: knock.F("recipient.country_code"),
+							}}),
+						}),
 					}),
 					Workflows: knock.F(map[string]knock.PreferenceSetRequestWorkflowsUnionParam{
 						"dinosaurs-loose": knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
@@ -154,7 +166,13 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 								HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
 								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
 								Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
-								SMS:       knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](shared.UnionBool(true)),
+								SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+									Conditions: knock.F([]knock.ConditionParam{{
+										Argument: knock.F("US"),
+										Operator: knock.F(knock.ConditionOperatorEqualTo),
+										Variable: knock.F("recipient.country_code"),
+									}}),
+								}),
 							}),
 							Conditions: knock.F([]knock.ConditionParam{{
 								Argument: knock.F("frog_genome"),
