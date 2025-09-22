@@ -18,6 +18,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/knocklabs/knock-go/internal"
 	"github.com/knocklabs/knock-go/internal/apierror"
 	"github.com/knocklabs/knock-go/internal/apiform"
@@ -149,7 +150,10 @@ func NewRequestConfig(ctx context.Context, method string, u string, body interfa
 	if reader != nil {
 		req.Header.Set("Content-Type", contentType)
 	}
-
+	if method != http.MethodGet {
+		// Note this can be overridden with `WithHeader("Idempotency-Key", myIdempotencyKey)`
+		req.Header.Set("Idempotency-Key", "stainless-go-"+uuid.New().String())
+	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Stainless-Retry-Count", "0")
 	req.Header.Set("X-Stainless-Timeout", "0")
@@ -590,7 +594,7 @@ func (cfg *RequestConfig) Clone(ctx context.Context) *RequestConfig {
 		Middlewares:    cfg.Middlewares,
 		APIKey:         cfg.APIKey,
 	}
-
+	new.Request.Header.Set("Idempotency-Key", "stainless-go-"+uuid.New().String())
 	return new
 }
 
