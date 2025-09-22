@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
 	"github.com/knocklabs/knock-go/internal/apiquery"
@@ -41,7 +42,7 @@ func NewTenantService(opts ...option.RequestOption) (r *TenantService) {
 // List tenants for the current environment.
 func (r *TenantService) List(ctx context.Context, query TenantListParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[Tenant], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	path := "v1/tenants"
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -63,7 +64,7 @@ func (r *TenantService) ListAutoPaging(ctx context.Context, query TenantListPara
 
 // Delete a tenant and all associated data. This operation cannot be undone.
 func (r *TenantService) Delete(ctx context.Context, id string, opts ...option.RequestOption) (res *string, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return
@@ -75,7 +76,7 @@ func (r *TenantService) Delete(ctx context.Context, id string, opts ...option.Re
 
 // Get a tenant by ID.
 func (r *TenantService) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *Tenant, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return
@@ -88,7 +89,7 @@ func (r *TenantService) Get(ctx context.Context, id string, opts ...option.Reque
 // Sets a tenant within an environment, performing an upsert operation. Any
 // existing properties will be merged with the incoming properties.
 func (r *TenantService) Set(ctx context.Context, id string, body TenantSetParams, opts ...option.RequestOption) (res *Tenant, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return

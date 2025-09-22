@@ -5,6 +5,7 @@ package knock
 import (
 	"context"
 	"net/http"
+	"slices"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
 	"github.com/knocklabs/knock-go/internal/param"
@@ -33,7 +34,7 @@ func NewIntegrationHightouchService(opts ...option.RequestOption) (r *Integratio
 
 // Processes a Hightouch embedded destination RPC request.
 func (r *IntegrationHightouchService) EmbeddedDestination(ctx context.Context, body IntegrationHightouchEmbeddedDestinationParams, opts ...option.RequestOption) (res *IntegrationHightouchEmbeddedDestinationResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/integrations/hightouch/embedded-destination"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return

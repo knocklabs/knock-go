@@ -1,8 +1,9 @@
 module github.com/knocklabs/knock-go
 
-go 1.21
+go 1.22
 
 require (
+	github.com/google/uuid v1.3.0
 	github.com/tidwall/gjson v1.14.4
 	github.com/tidwall/sjson v1.2.5
 )

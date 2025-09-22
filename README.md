@@ -24,14 +24,14 @@ Or to pin the version:
 <!-- x-release-please-start-version -->
 
 ```sh
-go get -u 'github.com/knocklabs/knock-go@v1.14.0'
+go get -u 'github.com/knocklabs/knock-go@v1.15.0'
 ```
 
 <!-- x-release-please-end -->
 
 ## Requirements
 
-This library requires Go 1.18+.
+This library requires Go 1.22+.
 
 ## Usage
 
