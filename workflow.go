@@ -37,14 +37,15 @@ func NewWorkflowService(opts ...option.RequestOption) (r *WorkflowService) {
 // When invoked for a workflow using a specific workflow key and cancellation key,
 // will cancel any queued workflow runs associated with that key/cancellation key
 // pair. Can optionally be provided one or more recipients to scope the request to.
-func (r *WorkflowService) Cancel(ctx context.Context, key string, body WorkflowCancelParams, opts ...option.RequestOption) (res *string, err error) {
+func (r *WorkflowService) Cancel(ctx context.Context, key string, body WorkflowCancelParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/workflows/%s/cancel", key)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
 	return
 }
 

@@ -84,14 +84,15 @@ func (r *UserService) ListAutoPaging(ctx context.Context, query UserListParams, 
 }
 
 // Permanently delete a user and all associated data.
-func (r *UserService) Delete(ctx context.Context, userID string, opts ...option.RequestOption) (res *string, err error) {
+func (r *UserService) Delete(ctx context.Context, userID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/users/%s", userID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
 	return
 }
 
@@ -290,8 +291,9 @@ func (r *UserService) SetPreferences(ctx context.Context, userID string, id stri
 }
 
 // Deletes channel data for a specific user and channel ID.
-func (r *UserService) UnsetChannelData(ctx context.Context, userID string, channelID string, opts ...option.RequestOption) (res *string, err error) {
+func (r *UserService) UnsetChannelData(ctx context.Context, userID string, channelID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -301,7 +303,7 @@ func (r *UserService) UnsetChannelData(ctx context.Context, userID string, chann
 		return
 	}
 	path := fmt.Sprintf("v1/users/%s/channel_data/%s", userID, channelID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
 	return
 }
 
