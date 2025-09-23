@@ -56,7 +56,7 @@ func TestTenantDelete(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Tenants.Delete(context.TODO(), "id")
+	err := client.Tenants.Delete(context.TODO(), "id")
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {

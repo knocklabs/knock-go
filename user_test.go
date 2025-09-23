@@ -164,7 +164,7 @@ func TestUserDelete(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Users.Delete(context.TODO(), "user_id")
+	err := client.Users.Delete(context.TODO(), "user_id")
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {
@@ -559,7 +559,7 @@ func TestUserUnsetChannelData(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Users.UnsetChannelData(
+	err := client.Users.UnsetChannelData(
 		context.TODO(),
 		"user_id",
 		"182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
