@@ -26,7 +26,7 @@ func TestAudienceAddMembers(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Audiences.AddMembers(
+	err := client.Audiences.AddMembers(
 		context.TODO(),
 		"key",
 		knock.AudienceAddMembersParams{
@@ -83,7 +83,7 @@ func TestAudienceRemoveMembers(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Audiences.RemoveMembers(
+	err := client.Audiences.RemoveMembers(
 		context.TODO(),
 		"key",
 		knock.AudienceRemoveMembersParams{

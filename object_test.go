@@ -59,7 +59,7 @@ func TestObjectDelete(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Objects.Delete(
+	err := client.Objects.Delete(
 		context.TODO(),
 		"collection",
 		"id",
@@ -611,7 +611,7 @@ func TestObjectUnsetChannelData(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Objects.UnsetChannelData(
+	err := client.Objects.UnsetChannelData(
 		context.TODO(),
 		"collection",
 		"object_id",

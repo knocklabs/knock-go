@@ -36,14 +36,15 @@ func NewAudienceService(opts ...option.RequestOption) (r *AudienceService) {
 }
 
 // Adds one or more members to the specified audience.
-func (r *AudienceService) AddMembers(ctx context.Context, key string, body AudienceAddMembersParams, opts ...option.RequestOption) (res *string, err error) {
+func (r *AudienceService) AddMembers(ctx context.Context, key string, body AudienceAddMembersParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/audiences/%s/members", key)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
 	return
 }
 
@@ -60,14 +61,15 @@ func (r *AudienceService) ListMembers(ctx context.Context, key string, opts ...o
 }
 
 // Removes one or more members from the specified audience.
-func (r *AudienceService) RemoveMembers(ctx context.Context, key string, body AudienceRemoveMembersParams, opts ...option.RequestOption) (res *string, err error) {
+func (r *AudienceService) RemoveMembers(ctx context.Context, key string, body AudienceRemoveMembersParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/audiences/%s/members", key)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, nil, opts...)
 	return
 }
 

@@ -27,7 +27,7 @@ func TestWorkflowCancelWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Workflows.Cancel(
+	err := client.Workflows.Cancel(
 		context.TODO(),
 		"key",
 		knock.WorkflowCancelParams{
