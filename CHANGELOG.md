@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.16.1 (2025-09-25)
+
+Full Changelog: [v1.16.0...v1.16.1](https://github.com/knocklabs/knock-go/compare/v1.16.0...v1.16.1)
+
+### Bug Fixes
+
+* bugfix for setting JSON keys with special characters ([f4a4d42](https://github.com/knocklabs/knock-go/commit/f4a4d42a85eaa3f801f4a3361c66140fb5600d9b))
+
 ## 1.16.0 (2025-09-23)
 
 Full Changelog: [v1.15.0...v1.16.0](https://github.com/knocklabs/knock-go/compare/v1.15.0...v1.16.0)
