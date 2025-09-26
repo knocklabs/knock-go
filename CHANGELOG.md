@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.18.0 (2025-09-26)
+
+Full Changelog: [v1.17.0...v1.18.0](https://github.com/knocklabs/knock-go/compare/v1.17.0...v1.18.0)
+
+### Features
+
+* **api:** add WithIdempotencyKey function ([#68](https://github.com/knocklabs/knock-go/issues/68)) ([7765fda](https://github.com/knocklabs/knock-go/commit/7765fdaf70d00d1f9be821fb79c6bc959d5a2150))
+
 ## 1.17.0 (2025-09-26)
 
 Full Changelog: [v1.16.1...v1.17.0](https://github.com/knocklabs/knock-go/compare/v1.16.1...v1.17.0)
