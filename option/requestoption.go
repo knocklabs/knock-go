@@ -273,3 +273,8 @@ func WithAPIKey(value string) RequestOption {
 		return r.Apply(WithHeader("authorization", fmt.Sprintf("Bearer %s", r.APIKey)))
 	})
 }
+
+// WithIdempotencyKey returns a RequestOption that sets the "Idempotency-Key" header.
+func WithIdempotencyKey(key string) RequestOption {
+	return WithHeader("Idempotency-Key", key)
+}

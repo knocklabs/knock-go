@@ -241,3 +241,25 @@ func TestContextDeadline(t *testing.T) {
 		}
 	}
 }
+
+func TestWithIdempotencyKey(t *testing.T) {
+	var idempotencyKey string
+	client := knock.NewClient(
+		option.WithAPIKey("My API Key"),
+		option.WithHTTPClient(&http.Client{
+			Transport: &closureTransport{
+				fn: func(req *http.Request) (*http.Response, error) {
+					idempotencyKey = req.Header.Get("Idempotency-Key")
+					return &http.Response{
+						StatusCode: http.StatusOK,
+					}, nil
+				},
+			},
+		}),
+		option.WithIdempotencyKey("test-idempotency-key-123"),
+	)
+	client.Users.Get(context.Background(), "dnedry")
+	if idempotencyKey != "test-idempotency-key-123" {
+		t.Errorf("Expected Idempotency-Key to be 'test-idempotency-key-123', but got: %#v", idempotencyKey)
+	}
+}
