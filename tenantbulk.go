@@ -34,7 +34,8 @@ func NewTenantBulkService(opts ...option.RequestOption) (r *TenantBulkService) {
 	return
 }
 
-// Delete multiple tenants in a single operation. This operation cannot be undone.
+// Delete up to 100 tenants at a time in a single operation. This operation cannot
+// be undone.
 func (r *TenantBulkService) Delete(ctx context.Context, body TenantBulkDeleteParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/tenants/bulk/delete"
@@ -42,7 +43,7 @@ func (r *TenantBulkService) Delete(ctx context.Context, body TenantBulkDeletePar
 	return
 }
 
-// Set or update up to 1,000 tenants in a single operation.
+// Set or update up to 100 tenants in a single operation.
 func (r *TenantBulkService) Set(ctx context.Context, body TenantBulkSetParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/tenants/bulk/set"
