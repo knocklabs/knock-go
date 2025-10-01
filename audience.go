@@ -136,7 +136,7 @@ func (r audienceListMembersResponseJSON) RawJSON() string {
 }
 
 type AudienceAddMembersParams struct {
-	// A list of audience members to add.
+	// A list of audience members to add. Limited to 1,000 members per request.
 	Members param.Field[[]AudienceAddMembersParamsMember] `json:"members,required"`
 }
 
