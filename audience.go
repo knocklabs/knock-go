@@ -14,6 +14,7 @@ import (
 	"github.com/knocklabs/knock-go/internal/param"
 	"github.com/knocklabs/knock-go/internal/requestconfig"
 	"github.com/knocklabs/knock-go/option"
+	"github.com/knocklabs/knock-go/shared"
 )
 
 // AudienceService contains methods and other services that help with interacting
@@ -114,7 +115,7 @@ type AudienceListMembersResponse struct {
 	// A list of audience members.
 	Entries []AudienceMember `json:"entries,required"`
 	// Pagination information for a list of resources.
-	PageInfo PageInfo                        `json:"page_info,required"`
+	PageInfo shared.PageInfo                 `json:"page_info,required"`
 	JSON     audienceListMembersResponseJSON `json:"-"`
 }
 
