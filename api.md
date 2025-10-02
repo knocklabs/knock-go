@@ -1,13 +1,11 @@
-# Shared
+# Shared Params Types
 
-Params Types:
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go/shared#ConditionParam">ConditionParam</a>
 
-- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#ConditionParam">ConditionParam</a>
+# Shared Response Types
 
-Response Types:
-
-- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#Condition">Condition</a>
-- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#PageInfo">PageInfo</a>
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go/shared#Condition">Condition</a>
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go/shared#PageInfo">PageInfo</a>
 
 # Recipients
 

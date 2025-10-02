@@ -404,16 +404,16 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
 								Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
 								SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
-									Conditions: knock.F([]knock.ConditionParam{{
+									Conditions: knock.F([]shared.ConditionParam{{
 										Argument: knock.F("US"),
-										Operator: knock.F(knock.ConditionOperatorEqualTo),
+										Operator: knock.F(shared.ConditionOperatorEqualTo),
 										Variable: knock.F("recipient.country_code"),
 									}}),
 								}),
 							}),
-							Conditions: knock.F([]knock.ConditionParam{{
+							Conditions: knock.F([]shared.ConditionParam{{
 								Argument: knock.F("frog_genome"),
-								Operator: knock.F(knock.ConditionOperatorContains),
+								Operator: knock.F(shared.ConditionOperatorContains),
 								Variable: knock.F("specimen.dna_sequence"),
 							}}),
 						},
@@ -425,9 +425,9 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 						InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
 						Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
 						SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
-							Conditions: knock.F([]knock.ConditionParam{{
+							Conditions: knock.F([]shared.ConditionParam{{
 								Argument: knock.F("US"),
-								Operator: knock.F(knock.ConditionOperatorEqualTo),
+								Operator: knock.F(shared.ConditionOperatorEqualTo),
 								Variable: knock.F("recipient.country_code"),
 							}}),
 						}),
@@ -441,16 +441,16 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
 								Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
 								SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
-									Conditions: knock.F([]knock.ConditionParam{{
+									Conditions: knock.F([]shared.ConditionParam{{
 										Argument: knock.F("US"),
-										Operator: knock.F(knock.ConditionOperatorEqualTo),
+										Operator: knock.F(shared.ConditionOperatorEqualTo),
 										Variable: knock.F("recipient.country_code"),
 									}}),
 								}),
 							}),
-							Conditions: knock.F([]knock.ConditionParam{{
+							Conditions: knock.F([]shared.ConditionParam{{
 								Argument: knock.F("frog_genome"),
-								Operator: knock.F(knock.ConditionOperatorContains),
+								Operator: knock.F(shared.ConditionOperatorContains),
 								Variable: knock.F("specimen.dna_sequence"),
 							}}),
 						},
@@ -535,16 +535,16 @@ func TestObjectSetPreferencesWithOptionalParams(t *testing.T) {
 							InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
 							Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
 							SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
-								Conditions: knock.F([]knock.ConditionParam{{
+								Conditions: knock.F([]shared.ConditionParam{{
 									Argument: knock.F("US"),
-									Operator: knock.F(knock.ConditionOperatorEqualTo),
+									Operator: knock.F(shared.ConditionOperatorEqualTo),
 									Variable: knock.F("recipient.country_code"),
 								}}),
 							}),
 						}),
-						Conditions: knock.F([]knock.ConditionParam{{
+						Conditions: knock.F([]shared.ConditionParam{{
 							Argument: knock.F("frog_genome"),
-							Operator: knock.F(knock.ConditionOperatorContains),
+							Operator: knock.F(shared.ConditionOperatorContains),
 							Variable: knock.F("specimen.dna_sequence"),
 						}}),
 					},
@@ -556,9 +556,9 @@ func TestObjectSetPreferencesWithOptionalParams(t *testing.T) {
 					InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
 					Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
 					SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
-						Conditions: knock.F([]knock.ConditionParam{{
+						Conditions: knock.F([]shared.ConditionParam{{
 							Argument: knock.F("US"),
-							Operator: knock.F(knock.ConditionOperatorEqualTo),
+							Operator: knock.F(shared.ConditionOperatorEqualTo),
 							Variable: knock.F("recipient.country_code"),
 						}}),
 					}),
@@ -572,16 +572,16 @@ func TestObjectSetPreferencesWithOptionalParams(t *testing.T) {
 							InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
 							Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
 							SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
-								Conditions: knock.F([]knock.ConditionParam{{
+								Conditions: knock.F([]shared.ConditionParam{{
 									Argument: knock.F("US"),
-									Operator: knock.F(knock.ConditionOperatorEqualTo),
+									Operator: knock.F(shared.ConditionOperatorEqualTo),
 									Variable: knock.F("recipient.country_code"),
 								}}),
 							}),
 						}),
-						Conditions: knock.F([]knock.ConditionParam{{
+						Conditions: knock.F([]shared.ConditionParam{{
 							Argument: knock.F("frog_genome"),
-							Operator: knock.F(knock.ConditionOperatorContains),
+							Operator: knock.F(shared.ConditionOperatorContains),
 							Variable: knock.F("specimen.dna_sequence"),
 						}}),
 					},
