@@ -329,7 +329,7 @@ type Message struct {
 	// A reference to a recipient, either a user identifier (string) or an object
 	// reference (ID, collection).
 	Recipient RecipientReferenceUnion `json:"recipient,required"`
-	// The workflow that triggered the message.
+	// The workflow or guide that triggered the message.
 	Source MessageSource `json:"source,required"`
 	// The message delivery status.
 	Status MessageStatus `json:"status,required"`
@@ -426,18 +426,20 @@ func (r MessageEngagementStatus) IsKnown() bool {
 	return false
 }
 
-// The workflow that triggered the message.
+// The workflow or guide that triggered the message.
 type MessageSource struct {
 	Typename string `json:"__typename,required"`
 	// The categories associated with the message.
 	Categories []string `json:"categories,required"`
-	// The key of the workflow that triggered the message.
+	// The key of the workflow or guide that triggered the message.
 	Key string `json:"key,required"`
-	// The ID of the version of the workflow that triggered the message.
+	// The ID of the version of the workflow or guide that triggered the message.
 	VersionID string `json:"version_id,required" format:"uuid"`
 	// The step reference for the step in the workflow that generated the message.
-	StepRef string            `json:"step_ref,nullable"`
-	JSON    messageSourceJSON `json:"-"`
+	StepRef string `json:"step_ref,nullable"`
+	// Whether this message was generated from a workflow, broadcast, or guide.
+	Type MessageSourceType `json:"type"`
+	JSON messageSourceJSON `json:"-"`
 }
 
 // messageSourceJSON contains the JSON metadata for the struct [MessageSource]
@@ -447,6 +449,7 @@ type messageSourceJSON struct {
 	Key         apijson.Field
 	VersionID   apijson.Field
 	StepRef     apijson.Field
+	Type        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -457,6 +460,23 @@ func (r *MessageSource) UnmarshalJSON(data []byte) (err error) {
 
 func (r messageSourceJSON) RawJSON() string {
 	return r.raw
+}
+
+// Whether this message was generated from a workflow, broadcast, or guide.
+type MessageSourceType string
+
+const (
+	MessageSourceTypeBroadcast MessageSourceType = "broadcast"
+	MessageSourceTypeWorkflow  MessageSourceType = "workflow"
+	MessageSourceTypeGuide     MessageSourceType = "guide"
+)
+
+func (r MessageSourceType) IsKnown() bool {
+	switch r {
+	case MessageSourceTypeBroadcast, MessageSourceTypeWorkflow, MessageSourceTypeGuide:
+		return true
+	}
+	return false
 }
 
 // The message delivery status.
