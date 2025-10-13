@@ -320,7 +320,9 @@ type Message struct {
 	ID string `json:"id,required"`
 	// The typename of the schema.
 	Typename string `json:"__typename,required"`
-	// The ID for the channel the message was sent through.
+	// Deprecated, use channel.id instead.
+	//
+	// Deprecated: deprecated
 	ChannelID string `json:"channel_id,required" format:"uuid"`
 	// A list of engagement statuses.
 	EngagementStatuses []MessageEngagementStatus `json:"engagement_statuses,required"`
@@ -341,6 +343,8 @@ type Message struct {
 	Actors []RecipientReferenceUnion `json:"actors"`
 	// Timestamp when the message was archived.
 	ArchivedAt time.Time `json:"archived_at,nullable" format:"date-time"`
+	// A configured channel, which is a way to route messages to a provider.
+	Channel MessageChannel `json:"channel"`
 	// Timestamp when the message was clicked.
 	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
 	// Data associated with the message’s workflow run. Includes the workflow trigger
@@ -384,6 +388,7 @@ type messageJSON struct {
 	UpdatedAt          apijson.Field
 	Actors             apijson.Field
 	ArchivedAt         apijson.Field
+	Channel            apijson.Field
 	ClickedAt          apijson.Field
 	Data               apijson.Field
 	InteractedAt       apijson.Field
@@ -495,6 +500,68 @@ const (
 func (r MessageStatus) IsKnown() bool {
 	switch r {
 	case MessageStatusQueued, MessageStatusSent, MessageStatusDelivered, MessageStatusDeliveryAttempted, MessageStatusUndelivered, MessageStatusNotSent, MessageStatusBounced:
+		return true
+	}
+	return false
+}
+
+// A configured channel, which is a way to route messages to a provider.
+type MessageChannel struct {
+	// The unique identifier for the channel.
+	ID string `json:"id,required"`
+	// The timestamp of when the channel was created.
+	CreatedAt time.Time `json:"created_at,required" format:"date-time"`
+	// The ID of the provider that this channel uses to deliver messages.
+	Provider string `json:"provider,required"`
+	// The type of channel, determining what kind of messages it can send.
+	Type MessageChannelType `json:"type,required"`
+	// The timestamp of when the channel was last updated.
+	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
+	// Unique identifier for the channel within a project (immutable once created).
+	Key string `json:"key,nullable"`
+	// The human-readable name of the channel.
+	Name string             `json:"name,nullable"`
+	JSON messageChannelJSON `json:"-"`
+}
+
+// messageChannelJSON contains the JSON metadata for the struct [MessageChannel]
+type messageChannelJSON struct {
+	ID          apijson.Field
+	CreatedAt   apijson.Field
+	Provider    apijson.Field
+	Type        apijson.Field
+	UpdatedAt   apijson.Field
+	Key         apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageChannel) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageChannelJSON) RawJSON() string {
+	return r.raw
+}
+
+// The type of channel, determining what kind of messages it can send.
+type MessageChannelType string
+
+const (
+	MessageChannelTypeEmail      MessageChannelType = "email"
+	MessageChannelTypeInApp      MessageChannelType = "in_app"
+	MessageChannelTypeInAppFeed  MessageChannelType = "in_app_feed"
+	MessageChannelTypeInAppGuide MessageChannelType = "in_app_guide"
+	MessageChannelTypeSMS        MessageChannelType = "sms"
+	MessageChannelTypePush       MessageChannelType = "push"
+	MessageChannelTypeChat       MessageChannelType = "chat"
+	MessageChannelTypeHTTP       MessageChannelType = "http"
+)
+
+func (r MessageChannelType) IsKnown() bool {
+	switch r {
+	case MessageChannelTypeEmail, MessageChannelTypeInApp, MessageChannelTypeInAppFeed, MessageChannelTypeInAppGuide, MessageChannelTypeSMS, MessageChannelTypePush, MessageChannelTypeChat, MessageChannelTypeHTTP:
 		return true
 	}
 	return false
