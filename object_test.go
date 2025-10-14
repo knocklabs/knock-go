@@ -432,6 +432,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 							}}),
 						}),
 					}),
+					CommercialSubscribed: knock.F(true),
 					Workflows: knock.F(map[string]knock.PreferenceSetRequestWorkflowsUnionParam{
 						"dinosaurs-loose": knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
 							ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
@@ -563,6 +564,7 @@ func TestObjectSetPreferencesWithOptionalParams(t *testing.T) {
 						}}),
 					}),
 				}),
+				CommercialSubscribed: knock.F(true),
 				Workflows: knock.F(map[string]knock.PreferenceSetRequestWorkflowsUnionParam{
 					"dinosaurs-loose": knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
 						ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
