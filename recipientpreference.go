@@ -509,6 +509,9 @@ type PreferenceSetRequestParam struct {
 	Categories param.Field[map[string]PreferenceSetRequestCategoriesUnionParam] `json:"categories"`
 	// Channel type preferences.
 	ChannelTypes param.Field[PreferenceSetChannelTypesParam] `json:"channel_types"`
+	// Whether the recipient is subscribed to commercial communications. When false,
+	// the recipient will not receive commercial workflow notifications.
+	CommercialSubscribed param.Field[bool] `json:"commercial_subscribed"`
 	// An object where the key is the workflow key and the values are the preference
 	// settings for that workflow.
 	Workflows param.Field[map[string]PreferenceSetRequestWorkflowsUnionParam] `json:"workflows"`
