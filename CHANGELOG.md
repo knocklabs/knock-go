@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.22.1 (2025-10-16)
+
+Full Changelog: [v1.22.0...v1.22.1](https://github.com/knocklabs/knock-go/compare/v1.22.0...v1.22.1)
+
+### Bug Fixes
+
+* ensure accept header is */* and not empty str ([#76](https://github.com/knocklabs/knock-go/issues/76)) ([e4c82c2](https://github.com/knocklabs/knock-go/commit/e4c82c2152a211d1a7ac9762f5c250edbdd62ada))
+
 ## 1.22.0 (2025-10-14)
 
 Full Changelog: [v1.21.0...v1.22.0](https://github.com/knocklabs/knock-go/compare/v1.21.0...v1.22.0)
