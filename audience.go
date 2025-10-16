@@ -39,7 +39,7 @@ func NewAudienceService(opts ...option.RequestOption) (r *AudienceService) {
 // Adds one or more members to the specified audience.
 func (r *AudienceService) AddMembers(ctx context.Context, key string, body AudienceAddMembersParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return
@@ -64,7 +64,7 @@ func (r *AudienceService) ListMembers(ctx context.Context, key string, opts ...o
 // Removes one or more members from the specified audience.
 func (r *AudienceService) RemoveMembers(ctx context.Context, key string, body AudienceRemoveMembersParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return
