@@ -39,7 +39,7 @@ func NewWorkflowService(opts ...option.RequestOption) (r *WorkflowService) {
 // pair. Can optionally be provided one or more recipients to scope the request to.
 func (r *WorkflowService) Cancel(ctx context.Context, key string, body WorkflowCancelParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if key == "" {
 		err = errors.New("missing required key parameter")
 		return
