@@ -386,7 +386,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 		"id",
 		knock.ObjectSetParams{
 			ChannelData: knock.F(knock.InlineChannelDataRequestParam{
-				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.PushChannelDataParam{
+				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.InlineChannelDataRequestItemPushChannelDataTokensOnlyParam{
 					Tokens: knock.F([]string{"push_token_123"}),
 				},
 			}),
@@ -490,7 +490,7 @@ func TestObjectSetChannelData(t *testing.T) {
 		"182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
 		knock.ObjectSetChannelDataParams{
 			ChannelDataRequest: knock.ChannelDataRequestParam{
-				Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.PushChannelDataParam{
+				Data: knock.F[knock.ChannelDataRequestDataUnionParam](knock.ChannelDataRequestDataPushChannelDataTokensOnlyParam{
 					Tokens: knock.F([]string{"push_token_1"}),
 				}),
 			},

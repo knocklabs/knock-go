@@ -58,7 +58,7 @@ func TestUserBulkIdentify(t *testing.T) {
 			ID:     knock.F("user_1"),
 			Avatar: knock.F("avatar"),
 			ChannelData: knock.F(knock.InlineChannelDataRequestParam{
-				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.PushChannelDataParam{
+				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.InlineChannelDataRequestItemPushChannelDataTokensOnlyParam{
 					Tokens: knock.F([]string{"push_token_123"}),
 				},
 			}),
