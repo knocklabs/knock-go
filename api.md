@@ -48,8 +48,6 @@ Params Types:
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#DiscordChannelDataParam">DiscordChannelDataParam</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#InlineChannelDataRequestParam">InlineChannelDataRequestParam</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#MsTeamsChannelDataParam">MsTeamsChannelDataParam</a>
-- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#OneSignalChannelDataParam">OneSignalChannelDataParam</a>
-- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#PushChannelDataParam">PushChannelDataParam</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#SlackChannelDataParam">SlackChannelDataParam</a>
 
 Response Types:
@@ -57,8 +55,6 @@ Response Types:
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#ChannelData">ChannelData</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#DiscordChannelData">DiscordChannelData</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#MsTeamsChannelData">MsTeamsChannelData</a>
-- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#OneSignalChannelData">OneSignalChannelData</a>
-- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#PushChannelData">PushChannelData</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#SlackChannelData">SlackChannelData</a>
 
 # Users
