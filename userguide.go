@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"time"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
 	"github.com/knocklabs/knock-go/internal/apiquery"
@@ -106,19 +107,22 @@ func (r *UserGuideService) MarkMessageAsSeen(ctx context.Context, userID string,
 // A response for a list of guides.
 type UserGuideGetChannelResponse struct {
 	// A list of guides.
-	Guides []UserGuideGetChannelResponseGuide `json:"guides,required"`
-	// The recipient of the guide.
-	Recipient UserGuideGetChannelResponseRecipient `json:"recipient,nullable"`
-	JSON      userGuideGetChannelResponseJSON      `json:"-"`
+	Entries []UserGuideGetChannelResponseEntry `json:"entries,required"`
+	// A map of guide group keys to their last display timestamps.
+	GuideGroupDisplayLogs map[string]time.Time `json:"guide_group_display_logs,required" format:"date-time"`
+	// A list of guide groups with their display sequences and intervals.
+	GuideGroups []UserGuideGetChannelResponseGuideGroup `json:"guide_groups,required"`
+	JSON        userGuideGetChannelResponseJSON         `json:"-"`
 }
 
 // userGuideGetChannelResponseJSON contains the JSON metadata for the struct
 // [UserGuideGetChannelResponse]
 type userGuideGetChannelResponseJSON struct {
-	Guides      apijson.Field
-	Recipient   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Entries               apijson.Field
+	GuideGroupDisplayLogs apijson.Field
+	GuideGroups           apijson.Field
+	raw                   string
+	ExtraFields           map[string]apijson.Field
 }
 
 func (r *UserGuideGetChannelResponse) UnmarshalJSON(data []byte) (err error) {
@@ -129,60 +133,206 @@ func (r userGuideGetChannelResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-type UserGuideGetChannelResponseGuide struct {
+type UserGuideGetChannelResponseEntry struct {
 	// The unique identifier for the guide.
 	ID string `json:"id" format:"uuid"`
+	// The typename of the schema.
+	Typename string `json:"__typename"`
+	// A list of URL Patterns to evaluate user's current location to activate the
+	// guide, if matched
+	ActivationURLPatterns []UserGuideGetChannelResponseEntriesActivationURLPattern `json:"activation_url_patterns"`
+	// A list of URL rules to evaluate user's current location to activate the guide,
+	// if matched
+	ActivationURLRules []UserGuideGetChannelResponseEntriesActivationURLRule `json:"activation_url_rules"`
 	// Whether the guide is active.
-	Active bool `json:"active"`
-	// The content of the guide.
-	Content string `json:"content"`
-	// The metadata of the guide.
-	Metadata map[string]interface{} `json:"metadata"`
-	// The title of the guide.
-	Title string                               `json:"title"`
-	JSON  userGuideGetChannelResponseGuideJSON `json:"-"`
+	Active                 bool      `json:"active"`
+	BypassGlobalGroupLimit bool      `json:"bypass_global_group_limit"`
+	ChannelID              string    `json:"channel_id" format:"uuid"`
+	InsertedAt             time.Time `json:"inserted_at" format:"date-time"`
+	// The key of the guide.
+	Key    string                                   `json:"key"`
+	Semver string                                   `json:"semver"`
+	Steps  []UserGuideGetChannelResponseEntriesStep `json:"steps"`
+	// The type of the guide.
+	Type      string                               `json:"type"`
+	UpdatedAt time.Time                            `json:"updated_at" format:"date-time"`
+	JSON      userGuideGetChannelResponseEntryJSON `json:"-"`
 }
 
-// userGuideGetChannelResponseGuideJSON contains the JSON metadata for the struct
-// [UserGuideGetChannelResponseGuide]
-type userGuideGetChannelResponseGuideJSON struct {
-	ID          apijson.Field
-	Active      apijson.Field
-	Content     apijson.Field
-	Metadata    apijson.Field
-	Title       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+// userGuideGetChannelResponseEntryJSON contains the JSON metadata for the struct
+// [UserGuideGetChannelResponseEntry]
+type userGuideGetChannelResponseEntryJSON struct {
+	ID                     apijson.Field
+	Typename               apijson.Field
+	ActivationURLPatterns  apijson.Field
+	ActivationURLRules     apijson.Field
+	Active                 apijson.Field
+	BypassGlobalGroupLimit apijson.Field
+	ChannelID              apijson.Field
+	InsertedAt             apijson.Field
+	Key                    apijson.Field
+	Semver                 apijson.Field
+	Steps                  apijson.Field
+	Type                   apijson.Field
+	UpdatedAt              apijson.Field
+	raw                    string
+	ExtraFields            map[string]apijson.Field
 }
 
-func (r *UserGuideGetChannelResponseGuide) UnmarshalJSON(data []byte) (err error) {
+func (r *UserGuideGetChannelResponseEntry) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r userGuideGetChannelResponseGuideJSON) RawJSON() string {
+func (r userGuideGetChannelResponseEntryJSON) RawJSON() string {
 	return r.raw
 }
 
-// The recipient of the guide.
-type UserGuideGetChannelResponseRecipient struct {
-	// Unique identifier for the recipient.
-	ID   string                                   `json:"id"`
-	JSON userGuideGetChannelResponseRecipientJSON `json:"-"`
+type UserGuideGetChannelResponseEntriesActivationURLPattern struct {
+	// The directive for the URL pattern ('allow' or 'block')
+	Directive string `json:"directive"`
+	// The pathname pattern to match (supports wildcards like /\*)
+	Pathname string                                                     `json:"pathname"`
+	JSON     userGuideGetChannelResponseEntriesActivationURLPatternJSON `json:"-"`
 }
 
-// userGuideGetChannelResponseRecipientJSON contains the JSON metadata for the
-// struct [UserGuideGetChannelResponseRecipient]
-type userGuideGetChannelResponseRecipientJSON struct {
-	ID          apijson.Field
+// userGuideGetChannelResponseEntriesActivationURLPatternJSON contains the JSON
+// metadata for the struct [UserGuideGetChannelResponseEntriesActivationURLPattern]
+type userGuideGetChannelResponseEntriesActivationURLPatternJSON struct {
+	Directive   apijson.Field
+	Pathname    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *UserGuideGetChannelResponseRecipient) UnmarshalJSON(data []byte) (err error) {
+func (r *UserGuideGetChannelResponseEntriesActivationURLPattern) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r userGuideGetChannelResponseRecipientJSON) RawJSON() string {
+func (r userGuideGetChannelResponseEntriesActivationURLPatternJSON) RawJSON() string {
+	return r.raw
+}
+
+type UserGuideGetChannelResponseEntriesActivationURLRule struct {
+	// The value to compare against
+	Argument string `json:"argument"`
+	// The directive for the URL pattern ('allow' or 'block')
+	Directive string `json:"directive"`
+	// The comparison operator ('contains' or 'equal_to')
+	Operator string `json:"operator"`
+	// The variable to evaluate ('pathname')
+	Variable string                                                  `json:"variable"`
+	JSON     userGuideGetChannelResponseEntriesActivationURLRuleJSON `json:"-"`
+}
+
+// userGuideGetChannelResponseEntriesActivationURLRuleJSON contains the JSON
+// metadata for the struct [UserGuideGetChannelResponseEntriesActivationURLRule]
+type userGuideGetChannelResponseEntriesActivationURLRuleJSON struct {
+	Argument    apijson.Field
+	Directive   apijson.Field
+	Operator    apijson.Field
+	Variable    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserGuideGetChannelResponseEntriesActivationURLRule) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userGuideGetChannelResponseEntriesActivationURLRuleJSON) RawJSON() string {
+	return r.raw
+}
+
+type UserGuideGetChannelResponseEntriesStep struct {
+	Content          map[string]interface{}                         `json:"content"`
+	Message          UserGuideGetChannelResponseEntriesStepsMessage `json:"message"`
+	Ref              string                                         `json:"ref"`
+	SchemaKey        string                                         `json:"schema_key"`
+	SchemaSemver     string                                         `json:"schema_semver"`
+	SchemaVariantKey string                                         `json:"schema_variant_key"`
+	JSON             userGuideGetChannelResponseEntriesStepJSON     `json:"-"`
+}
+
+// userGuideGetChannelResponseEntriesStepJSON contains the JSON metadata for the
+// struct [UserGuideGetChannelResponseEntriesStep]
+type userGuideGetChannelResponseEntriesStepJSON struct {
+	Content          apijson.Field
+	Message          apijson.Field
+	Ref              apijson.Field
+	SchemaKey        apijson.Field
+	SchemaSemver     apijson.Field
+	SchemaVariantKey apijson.Field
+	raw              string
+	ExtraFields      map[string]apijson.Field
+}
+
+func (r *UserGuideGetChannelResponseEntriesStep) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userGuideGetChannelResponseEntriesStepJSON) RawJSON() string {
+	return r.raw
+}
+
+type UserGuideGetChannelResponseEntriesStepsMessage struct {
+	ID            string                                             `json:"id,nullable"`
+	ArchivedAt    time.Time                                          `json:"archived_at,nullable" format:"date-time"`
+	InteractedAt  time.Time                                          `json:"interacted_at,nullable" format:"date-time"`
+	LinkClickedAt time.Time                                          `json:"link_clicked_at,nullable" format:"date-time"`
+	ReadAt        time.Time                                          `json:"read_at,nullable" format:"date-time"`
+	SeenAt        time.Time                                          `json:"seen_at,nullable" format:"date-time"`
+	JSON          userGuideGetChannelResponseEntriesStepsMessageJSON `json:"-"`
+}
+
+// userGuideGetChannelResponseEntriesStepsMessageJSON contains the JSON metadata
+// for the struct [UserGuideGetChannelResponseEntriesStepsMessage]
+type userGuideGetChannelResponseEntriesStepsMessageJSON struct {
+	ID            apijson.Field
+	ArchivedAt    apijson.Field
+	InteractedAt  apijson.Field
+	LinkClickedAt apijson.Field
+	ReadAt        apijson.Field
+	SeenAt        apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
+}
+
+func (r *UserGuideGetChannelResponseEntriesStepsMessage) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userGuideGetChannelResponseEntriesStepsMessageJSON) RawJSON() string {
+	return r.raw
+}
+
+type UserGuideGetChannelResponseGuideGroup struct {
+	Typename        string                                    `json:"__typename"`
+	DisplayInterval int64                                     `json:"display_interval"`
+	DisplaySequence []string                                  `json:"display_sequence"`
+	InsertedAt      time.Time                                 `json:"inserted_at" format:"date-time"`
+	Key             string                                    `json:"key"`
+	UpdatedAt       time.Time                                 `json:"updated_at" format:"date-time"`
+	JSON            userGuideGetChannelResponseGuideGroupJSON `json:"-"`
+}
+
+// userGuideGetChannelResponseGuideGroupJSON contains the JSON metadata for the
+// struct [UserGuideGetChannelResponseGuideGroup]
+type userGuideGetChannelResponseGuideGroupJSON struct {
+	Typename        apijson.Field
+	DisplayInterval apijson.Field
+	DisplaySequence apijson.Field
+	InsertedAt      apijson.Field
+	Key             apijson.Field
+	UpdatedAt       apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *UserGuideGetChannelResponseGuideGroup) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userGuideGetChannelResponseGuideGroupJSON) RawJSON() string {
 	return r.raw
 }
 
