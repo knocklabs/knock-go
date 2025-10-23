@@ -68,10 +68,6 @@ type ChannelDataData struct {
 	// This field can have the runtime type of [[]SlackChannelDataConnection],
 	// [[]MsTeamsChannelDataConnection], [[]DiscordChannelDataConnection].
 	Connections interface{} `json:"connections"`
-	// This field can have the runtime type of
-	// [[]ChannelDataDataPushChannelDataFullDevice],
-	// [[]ChannelDataDataAwssnsPushChannelDataFullDevice].
-	Devices interface{} `json:"devices"`
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID string `json:"ms_teams_tenant_id,nullable" format:"uuid"`
 	// This field can have the runtime type of [[]string].
@@ -88,7 +84,6 @@ type ChannelDataData struct {
 type channelDataDataJSON struct {
 	Token           apijson.Field
 	Connections     apijson.Field
-	Devices         apijson.Field
 	MsTeamsTenantID apijson.Field
 	PlayerIDs       apijson.Field
 	TargetArns      apijson.Field
@@ -113,8 +108,9 @@ func (r *ChannelDataData) UnmarshalJSON(data []byte) (err error) {
 // AsUnion returns a [ChannelDataDataUnion] interface which you can cast to the
 // specific types for more type safety.
 //
-// Possible runtime types of the union are [ChannelDataDataPushChannelDataFull],
-// [ChannelDataDataAwssnsPushChannelDataFull],
+// Possible runtime types of the union are
+// [ChannelDataDataPushChannelDataTokensOnly],
+// [ChannelDataDataAwssnsPushChannelDataTargetArNsOnly],
 // [ChannelDataDataOneSignalChannelDataPlayerIDsOnly], [SlackChannelData],
 // [MsTeamsChannelData], [DiscordChannelData].
 func (r ChannelDataData) AsUnion() ChannelDataDataUnion {
@@ -123,8 +119,8 @@ func (r ChannelDataData) AsUnion() ChannelDataDataUnion {
 
 // Channel data for a given channel type.
 //
-// Union satisfied by [ChannelDataDataPushChannelDataFull],
-// [ChannelDataDataAwssnsPushChannelDataFull],
+// Union satisfied by [ChannelDataDataPushChannelDataTokensOnly],
+// [ChannelDataDataAwssnsPushChannelDataTargetArNsOnly],
 // [ChannelDataDataOneSignalChannelDataPlayerIDsOnly], [SlackChannelData],
 // [MsTeamsChannelData] or [DiscordChannelData].
 type ChannelDataDataUnion interface {
@@ -137,11 +133,11 @@ func init() {
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ChannelDataDataPushChannelDataFull{}),
+			Type:       reflect.TypeOf(ChannelDataDataPushChannelDataTokensOnly{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ChannelDataDataAwssnsPushChannelDataFull{}),
+			Type:       reflect.TypeOf(ChannelDataDataAwssnsPushChannelDataTargetArNsOnly{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -163,129 +159,55 @@ func init() {
 }
 
 // Push channel data.
-type ChannelDataDataPushChannelDataFull struct {
-	// A list of devices. Each device contains a token, and optionally a locale and
-	// timezone.
-	Devices []ChannelDataDataPushChannelDataFullDevice `json:"devices,required"`
+type ChannelDataDataPushChannelDataTokensOnly struct {
 	// A list of push channel tokens.
-	Tokens []string                               `json:"tokens,required"`
-	JSON   channelDataDataPushChannelDataFullJSON `json:"-"`
+	Tokens []string                                     `json:"tokens,required"`
+	JSON   channelDataDataPushChannelDataTokensOnlyJSON `json:"-"`
 }
 
-// channelDataDataPushChannelDataFullJSON contains the JSON metadata for the struct
-// [ChannelDataDataPushChannelDataFull]
-type channelDataDataPushChannelDataFullJSON struct {
-	Devices     apijson.Field
+// channelDataDataPushChannelDataTokensOnlyJSON contains the JSON metadata for the
+// struct [ChannelDataDataPushChannelDataTokensOnly]
+type channelDataDataPushChannelDataTokensOnlyJSON struct {
 	Tokens      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *ChannelDataDataPushChannelDataFull) UnmarshalJSON(data []byte) (err error) {
+func (r *ChannelDataDataPushChannelDataTokensOnly) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r channelDataDataPushChannelDataFullJSON) RawJSON() string {
+func (r channelDataDataPushChannelDataTokensOnlyJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r ChannelDataDataPushChannelDataFull) implementsChannelDataData() {}
-
-type ChannelDataDataPushChannelDataFullDevice struct {
-	// The device token to send the push notification to.
-	Token string `json:"token,required"`
-	// The locale of the object. Used for
-	// [message localization](/concepts/translations).
-	Locale string `json:"locale"`
-	// The timezone of the object. Must be a
-	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
-	// Used
-	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
-	Timezone string                                       `json:"timezone"`
-	JSON     channelDataDataPushChannelDataFullDeviceJSON `json:"-"`
-}
-
-// channelDataDataPushChannelDataFullDeviceJSON contains the JSON metadata for the
-// struct [ChannelDataDataPushChannelDataFullDevice]
-type channelDataDataPushChannelDataFullDeviceJSON struct {
-	Token       apijson.Field
-	Locale      apijson.Field
-	Timezone    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ChannelDataDataPushChannelDataFullDevice) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r channelDataDataPushChannelDataFullDeviceJSON) RawJSON() string {
-	return r.raw
-}
+func (r ChannelDataDataPushChannelDataTokensOnly) implementsChannelDataData() {}
 
 // AWS SNS push channel data.
-type ChannelDataDataAwssnsPushChannelDataFull struct {
-	// A list of devices. Each device contains a target_arn, and optionally a locale
-	// and timezone.
-	Devices []ChannelDataDataAwssnsPushChannelDataFullDevice `json:"devices,required"`
+type ChannelDataDataAwssnsPushChannelDataTargetArNsOnly struct {
 	// A list of platform endpoint ARNs. See
 	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
-	TargetArns []string                                     `json:"target_arns,required"`
-	JSON       channelDataDataAwssnsPushChannelDataFullJSON `json:"-"`
+	TargetArns []string                                               `json:"target_arns,required"`
+	JSON       channelDataDataAwssnsPushChannelDataTargetArNsOnlyJSON `json:"-"`
 }
 
-// channelDataDataAwssnsPushChannelDataFullJSON contains the JSON metadata for the
-// struct [ChannelDataDataAwssnsPushChannelDataFull]
-type channelDataDataAwssnsPushChannelDataFullJSON struct {
-	Devices     apijson.Field
+// channelDataDataAwssnsPushChannelDataTargetArNsOnlyJSON contains the JSON
+// metadata for the struct [ChannelDataDataAwssnsPushChannelDataTargetArNsOnly]
+type channelDataDataAwssnsPushChannelDataTargetArNsOnlyJSON struct {
 	TargetArns  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *ChannelDataDataAwssnsPushChannelDataFull) UnmarshalJSON(data []byte) (err error) {
+func (r *ChannelDataDataAwssnsPushChannelDataTargetArNsOnly) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r channelDataDataAwssnsPushChannelDataFullJSON) RawJSON() string {
+func (r channelDataDataAwssnsPushChannelDataTargetArNsOnlyJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r ChannelDataDataAwssnsPushChannelDataFull) implementsChannelDataData() {}
-
-type ChannelDataDataAwssnsPushChannelDataFullDevice struct {
-	// The ARN of a platform endpoint associated with a platform application and a
-	// device token. See
-	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
-	TargetArn string `json:"target_arn,required"`
-	// The locale of the object. Used for
-	// [message localization](/concepts/translations).
-	Locale string `json:"locale"`
-	// The timezone of the object. Must be a
-	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
-	// Used
-	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
-	Timezone string                                             `json:"timezone"`
-	JSON     channelDataDataAwssnsPushChannelDataFullDeviceJSON `json:"-"`
-}
-
-// channelDataDataAwssnsPushChannelDataFullDeviceJSON contains the JSON metadata
-// for the struct [ChannelDataDataAwssnsPushChannelDataFullDevice]
-type channelDataDataAwssnsPushChannelDataFullDeviceJSON struct {
-	TargetArn   apijson.Field
-	Locale      apijson.Field
-	Timezone    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ChannelDataDataAwssnsPushChannelDataFullDevice) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r channelDataDataAwssnsPushChannelDataFullDeviceJSON) RawJSON() string {
-	return r.raw
-}
+func (r ChannelDataDataAwssnsPushChannelDataTargetArNsOnly) implementsChannelDataData() {}
 
 // OneSignal channel data.
 type ChannelDataDataOneSignalChannelDataPlayerIDsOnly struct {
