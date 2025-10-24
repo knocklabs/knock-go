@@ -196,12 +196,12 @@ type ChannelDataDataPushChannelDataFullDevice struct {
 	Token string `json:"token,required"`
 	// The locale of the object. Used for
 	// [message localization](/concepts/translations).
-	Locale string `json:"locale"`
+	Locale string `json:"locale,nullable"`
 	// The timezone of the object. Must be a
 	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 	// Used
 	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
-	Timezone string                                       `json:"timezone"`
+	Timezone string                                       `json:"timezone,nullable"`
 	JSON     channelDataDataPushChannelDataFullDeviceJSON `json:"-"`
 }
 
@@ -260,12 +260,12 @@ type ChannelDataDataAwssnsPushChannelDataFullDevice struct {
 	TargetArn string `json:"target_arn,required"`
 	// The locale of the object. Used for
 	// [message localization](/concepts/translations).
-	Locale string `json:"locale"`
+	Locale string `json:"locale,nullable"`
 	// The timezone of the object. Must be a
 	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 	// Used
 	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
-	Timezone string                                             `json:"timezone"`
+	Timezone string                                             `json:"timezone,nullable"`
 	JSON     channelDataDataAwssnsPushChannelDataFullDeviceJSON `json:"-"`
 }
 
