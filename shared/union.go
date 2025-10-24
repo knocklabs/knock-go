@@ -13,8 +13,13 @@ func (UnionString) ImplementsMessageDeliveryLogResponseBodyUnion() {}
 
 type UnionBool bool
 
-func (UnionBool) ImplementsPreferenceSetCategoriesUnion()                 {}
-func (UnionBool) ImplementsPreferenceSetWorkflowsUnion()                  {}
+func (UnionBool) ImplementsPreferenceSetCategoriesUnion() {}
+func (UnionBool) ImplementsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
+}
+func (UnionBool) ImplementsPreferenceSetChannelsUnion()  {}
+func (UnionBool) ImplementsPreferenceSetWorkflowsUnion() {}
+func (UnionBool) ImplementsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
+}
 func (UnionBool) ImplementsPreferenceSetChannelTypesChatUnionParam()      {}
 func (UnionBool) ImplementsPreferenceSetChannelTypesChatUnion()           {}
 func (UnionBool) ImplementsPreferenceSetChannelTypesEmailUnionParam()     {}
@@ -28,4 +33,9 @@ func (UnionBool) ImplementsPreferenceSetChannelTypesPushUnion()           {}
 func (UnionBool) ImplementsPreferenceSetChannelTypesSMSUnionParam()       {}
 func (UnionBool) ImplementsPreferenceSetChannelTypesSMSUnion()            {}
 func (UnionBool) ImplementsPreferenceSetRequestCategoriesUnionParam()     {}
-func (UnionBool) ImplementsPreferenceSetRequestWorkflowsUnionParam()      {}
+func (UnionBool) ImplementsPreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam() {
+}
+func (UnionBool) ImplementsPreferenceSetRequestChannelsUnionParam()  {}
+func (UnionBool) ImplementsPreferenceSetRequestWorkflowsUnionParam() {}
+func (UnionBool) ImplementsPreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam() {
+}
