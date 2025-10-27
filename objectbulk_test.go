@@ -95,9 +95,6 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 											}}),
 										}),
 									}),
-									Channels: knock.F(map[string]knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam{
-										"aef6e715-df82-4ab6-b61e-b743e249f7b6": shared.UnionBool(true),
-									}),
 									Conditions: knock.F([]shared.ConditionParam{{
 										Argument: knock.F("frog_genome"),
 										Operator: knock.F(shared.ConditionOperatorContains),
@@ -119,16 +116,6 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 									}}),
 								}),
 							}),
-							Channels: knock.F(map[string]knock.PreferenceSetRequestChannelsUnionParam{
-								"2f641633-95d3-4555-9222-9f1eb7888a80": knock.PreferenceSetRequestChannelsPreferenceSetChannelSettingParam{
-									Conditions: knock.F([]shared.ConditionParam{{
-										Argument: knock.F("US"),
-										Operator: knock.F(shared.ConditionOperatorEqualTo),
-										Variable: knock.F("recipient.country_code"),
-									}}),
-								},
-								"aef6e715-df82-4ab6-b61e-b743e249f7b6": shared.UnionBool(true),
-							}),
 							CommercialSubscribed: knock.F(true),
 							Workflows: knock.F(map[string]knock.PreferenceSetRequestWorkflowsUnionParam{
 								"dinosaurs-loose": knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
@@ -145,9 +132,6 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 												Variable: knock.F("recipient.country_code"),
 											}}),
 										}),
-									}),
-									Channels: knock.F(map[string]knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam{
-										"aef6e715-df82-4ab6-b61e-b743e249f7b6": shared.UnionBool(true),
 									}),
 									Conditions: knock.F([]shared.ConditionParam{{
 										Argument: knock.F("frog_genome"),
@@ -219,9 +203,6 @@ func TestObjectBulkSet(t *testing.T) {
 										}}),
 									}),
 								}),
-								Channels: knock.F(map[string]knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam{
-									"aef6e715-df82-4ab6-b61e-b743e249f7b6": shared.UnionBool(true),
-								}),
 								Conditions: knock.F([]shared.ConditionParam{{
 									Argument: knock.F("frog_genome"),
 									Operator: knock.F(shared.ConditionOperatorContains),
@@ -243,16 +224,6 @@ func TestObjectBulkSet(t *testing.T) {
 								}}),
 							}),
 						}),
-						Channels: knock.F(map[string]knock.PreferenceSetRequestChannelsUnionParam{
-							"2f641633-95d3-4555-9222-9f1eb7888a80": knock.PreferenceSetRequestChannelsPreferenceSetChannelSettingParam{
-								Conditions: knock.F([]shared.ConditionParam{{
-									Argument: knock.F("US"),
-									Operator: knock.F(shared.ConditionOperatorEqualTo),
-									Variable: knock.F("recipient.country_code"),
-								}}),
-							},
-							"aef6e715-df82-4ab6-b61e-b743e249f7b6": shared.UnionBool(true),
-						}),
 						CommercialSubscribed: knock.F(true),
 						Workflows: knock.F(map[string]knock.PreferenceSetRequestWorkflowsUnionParam{
 							"dinosaurs-loose": knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
@@ -269,9 +240,6 @@ func TestObjectBulkSet(t *testing.T) {
 											Variable: knock.F("recipient.country_code"),
 										}}),
 									}),
-								}),
-								Channels: knock.F(map[string]knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam{
-									"aef6e715-df82-4ab6-b61e-b743e249f7b6": shared.UnionBool(true),
 								}),
 								Conditions: knock.F([]shared.ConditionParam{{
 									Argument: knock.F("frog_genome"),
