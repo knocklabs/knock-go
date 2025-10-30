@@ -349,6 +349,7 @@ func (r ChannelDataRequestParam) MarshalJSON() (data []byte, err error) {
 type ChannelDataRequestDataParam struct {
 	Token       param.Field[interface{}] `json:"token"`
 	Connections param.Field[interface{}] `json:"connections"`
+	Devices     param.Field[interface{}] `json:"devices"`
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
 	PlayerIDs       param.Field[interface{}] `json:"player_ids"`
@@ -365,7 +366,9 @@ func (r ChannelDataRequestDataParam) implementsChannelDataRequestDataUnionParam(
 // Channel data for a given channel type.
 //
 // Satisfied by [ChannelDataRequestDataPushChannelDataTokensOnlyParam],
+// [ChannelDataRequestDataPushChannelDataDevicesOnlyParam],
 // [ChannelDataRequestDataAwssnsPushChannelDataTargetArNsOnlyParam],
+// [ChannelDataRequestDataAwssnsPushChannelDataDevicesOnlyParam],
 // [ChannelDataRequestDataOneSignalChannelDataPlayerIDsOnlyParam],
 // [SlackChannelDataParam], [MsTeamsChannelDataParam], [DiscordChannelDataParam],
 // [ChannelDataRequestDataParam].
@@ -386,6 +389,37 @@ func (r ChannelDataRequestDataPushChannelDataTokensOnlyParam) MarshalJSON() (dat
 func (r ChannelDataRequestDataPushChannelDataTokensOnlyParam) implementsChannelDataRequestDataUnionParam() {
 }
 
+// Push channel data.
+type ChannelDataRequestDataPushChannelDataDevicesOnlyParam struct {
+	// A list of devices. Each device contains a token, and optionally a locale and
+	// timezone.
+	Devices param.Field[[]ChannelDataRequestDataPushChannelDataDevicesOnlyDeviceParam] `json:"devices,required"`
+}
+
+func (r ChannelDataRequestDataPushChannelDataDevicesOnlyParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ChannelDataRequestDataPushChannelDataDevicesOnlyParam) implementsChannelDataRequestDataUnionParam() {
+}
+
+type ChannelDataRequestDataPushChannelDataDevicesOnlyDeviceParam struct {
+	// The device token to send the push notification to.
+	Token param.Field[string] `json:"token,required"`
+	// The locale of the object. Used for
+	// [message localization](/concepts/translations).
+	Locale param.Field[string] `json:"locale"`
+	// The timezone of the object. Must be a
+	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used
+	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
+	Timezone param.Field[string] `json:"timezone"`
+}
+
+func (r ChannelDataRequestDataPushChannelDataDevicesOnlyDeviceParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 // AWS SNS push channel data.
 type ChannelDataRequestDataAwssnsPushChannelDataTargetArNsOnlyParam struct {
 	// A list of platform endpoint ARNs. See
@@ -398,6 +432,39 @@ func (r ChannelDataRequestDataAwssnsPushChannelDataTargetArNsOnlyParam) MarshalJ
 }
 
 func (r ChannelDataRequestDataAwssnsPushChannelDataTargetArNsOnlyParam) implementsChannelDataRequestDataUnionParam() {
+}
+
+// AWS SNS push channel data.
+type ChannelDataRequestDataAwssnsPushChannelDataDevicesOnlyParam struct {
+	// A list of devices. Each device contains a target_arn, and optionally a locale
+	// and timezone.
+	Devices param.Field[[]ChannelDataRequestDataAwssnsPushChannelDataDevicesOnlyDeviceParam] `json:"devices,required"`
+}
+
+func (r ChannelDataRequestDataAwssnsPushChannelDataDevicesOnlyParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ChannelDataRequestDataAwssnsPushChannelDataDevicesOnlyParam) implementsChannelDataRequestDataUnionParam() {
+}
+
+type ChannelDataRequestDataAwssnsPushChannelDataDevicesOnlyDeviceParam struct {
+	// The ARN of a platform endpoint associated with a platform application and a
+	// device token. See
+	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
+	TargetArn param.Field[string] `json:"target_arn,required"`
+	// The locale of the object. Used for
+	// [message localization](/concepts/translations).
+	Locale param.Field[string] `json:"locale"`
+	// The timezone of the object. Must be a
+	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used
+	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
+	Timezone param.Field[string] `json:"timezone"`
+}
+
+func (r ChannelDataRequestDataAwssnsPushChannelDataDevicesOnlyDeviceParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 // OneSignal channel data.
@@ -663,6 +730,7 @@ type InlineChannelDataRequestParam map[string]InlineChannelDataRequestItemUnionP
 type InlineChannelDataRequestItemParam struct {
 	Token       param.Field[interface{}] `json:"token"`
 	Connections param.Field[interface{}] `json:"connections"`
+	Devices     param.Field[interface{}] `json:"devices"`
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
 	PlayerIDs       param.Field[interface{}] `json:"player_ids"`
@@ -679,7 +747,9 @@ func (r InlineChannelDataRequestItemParam) implementsInlineChannelDataRequestIte
 // Channel data for a given channel type.
 //
 // Satisfied by [InlineChannelDataRequestItemPushChannelDataTokensOnlyParam],
+// [InlineChannelDataRequestItemPushChannelDataDevicesOnlyParam],
 // [InlineChannelDataRequestItemAwssnsPushChannelDataTargetArNsOnlyParam],
+// [InlineChannelDataRequestItemAwssnsPushChannelDataDevicesOnlyParam],
 // [InlineChannelDataRequestItemOneSignalChannelDataPlayerIDsOnlyParam],
 // [SlackChannelDataParam], [MsTeamsChannelDataParam], [DiscordChannelDataParam],
 // [InlineChannelDataRequestItemParam].
@@ -700,6 +770,37 @@ func (r InlineChannelDataRequestItemPushChannelDataTokensOnlyParam) MarshalJSON(
 func (r InlineChannelDataRequestItemPushChannelDataTokensOnlyParam) implementsInlineChannelDataRequestItemUnionParam() {
 }
 
+// Push channel data.
+type InlineChannelDataRequestItemPushChannelDataDevicesOnlyParam struct {
+	// A list of devices. Each device contains a token, and optionally a locale and
+	// timezone.
+	Devices param.Field[[]InlineChannelDataRequestItemPushChannelDataDevicesOnlyDeviceParam] `json:"devices,required"`
+}
+
+func (r InlineChannelDataRequestItemPushChannelDataDevicesOnlyParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r InlineChannelDataRequestItemPushChannelDataDevicesOnlyParam) implementsInlineChannelDataRequestItemUnionParam() {
+}
+
+type InlineChannelDataRequestItemPushChannelDataDevicesOnlyDeviceParam struct {
+	// The device token to send the push notification to.
+	Token param.Field[string] `json:"token,required"`
+	// The locale of the object. Used for
+	// [message localization](/concepts/translations).
+	Locale param.Field[string] `json:"locale"`
+	// The timezone of the object. Must be a
+	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used
+	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
+	Timezone param.Field[string] `json:"timezone"`
+}
+
+func (r InlineChannelDataRequestItemPushChannelDataDevicesOnlyDeviceParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 // AWS SNS push channel data.
 type InlineChannelDataRequestItemAwssnsPushChannelDataTargetArNsOnlyParam struct {
 	// A list of platform endpoint ARNs. See
@@ -712,6 +813,39 @@ func (r InlineChannelDataRequestItemAwssnsPushChannelDataTargetArNsOnlyParam) Ma
 }
 
 func (r InlineChannelDataRequestItemAwssnsPushChannelDataTargetArNsOnlyParam) implementsInlineChannelDataRequestItemUnionParam() {
+}
+
+// AWS SNS push channel data.
+type InlineChannelDataRequestItemAwssnsPushChannelDataDevicesOnlyParam struct {
+	// A list of devices. Each device contains a target_arn, and optionally a locale
+	// and timezone.
+	Devices param.Field[[]InlineChannelDataRequestItemAwssnsPushChannelDataDevicesOnlyDeviceParam] `json:"devices,required"`
+}
+
+func (r InlineChannelDataRequestItemAwssnsPushChannelDataDevicesOnlyParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r InlineChannelDataRequestItemAwssnsPushChannelDataDevicesOnlyParam) implementsInlineChannelDataRequestItemUnionParam() {
+}
+
+type InlineChannelDataRequestItemAwssnsPushChannelDataDevicesOnlyDeviceParam struct {
+	// The ARN of a platform endpoint associated with a platform application and a
+	// device token. See
+	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
+	TargetArn param.Field[string] `json:"target_arn,required"`
+	// The locale of the object. Used for
+	// [message localization](/concepts/translations).
+	Locale param.Field[string] `json:"locale"`
+	// The timezone of the object. Must be a
+	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used
+	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
+	Timezone param.Field[string] `json:"timezone"`
+}
+
+func (r InlineChannelDataRequestItemAwssnsPushChannelDataDevicesOnlyDeviceParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 // OneSignal channel data.
