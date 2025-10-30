@@ -285,6 +285,8 @@ func (r TenantSetParams) MarshalJSON() (data []byte, err error) {
 
 // The settings for the tenant. Includes branding and preference set.
 type TenantSetParamsSettings struct {
+	// The optional name for the tenant.
+	Name param.Field[string] `json:"name"`
 	// The branding for the tenant.
 	Branding param.Field[TenantSetParamsSettingsBranding] `json:"branding"`
 	// A request to set a preference set for a recipient.
