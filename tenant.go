@@ -273,6 +273,8 @@ func (r TenantListParams) URLQuery() (v url.Values) {
 }
 
 type TenantSetParams struct {
+	// The optional name for the tenant.
+	Name param.Field[string] `json:"name"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// The settings for the tenant. Includes branding and preference set.
@@ -285,8 +287,6 @@ func (r TenantSetParams) MarshalJSON() (data []byte, err error) {
 
 // The settings for the tenant. Includes branding and preference set.
 type TenantSetParamsSettings struct {
-	// The optional name for the tenant.
-	Name param.Field[string] `json:"name"`
 	// The branding for the tenant.
 	Branding param.Field[TenantSetParamsSettingsBranding] `json:"branding"`
 	// A request to set a preference set for a recipient.
