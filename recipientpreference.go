@@ -138,8 +138,7 @@ func (r PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject) Imple
 // Whether the specific channel (by channel_id) is enabled for the preference set,
 // or a settings object with conditions.
 //
-// Union satisfied by [shared.UnionBool] or
-// [PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSetting].
+// Union satisfied by [shared.UnionBool] or [PreferenceSetChannelSetting].
 type PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnion interface {
 	ImplementsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnion()
 }
@@ -158,44 +157,15 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSetting{}),
+			Type:       reflect.TypeOf(PreferenceSetChannelSetting{}),
 		},
 	)
-}
-
-// A set of settings for a specific channel. Currently, this can only be a list of
-// conditions to apply.
-type PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSetting struct {
-	// A list of conditions to apply to a specific channel.
-	Conditions []shared.Condition                                                                                       `json:"conditions,required"`
-	JSON       preferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingJSON `json:"-"`
-}
-
-// preferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingJSON
-// contains the JSON metadata for the struct
-// [PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSetting]
-type preferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingJSON struct {
-	Conditions  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSetting) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r preferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSetting) ImplementsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
 }
 
 // Whether the specific channel (by channel_id) is enabled for the preference set,
 // or a settings object with conditions.
 //
-// Union satisfied by [shared.UnionBool] or
-// [PreferenceSetChannelsPreferenceSetChannelSetting].
+// Union satisfied by [shared.UnionBool] or [PreferenceSetChannelSetting].
 type PreferenceSetChannelsUnion interface {
 	ImplementsPreferenceSetChannelsUnion()
 }
@@ -214,36 +184,10 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PreferenceSetChannelsPreferenceSetChannelSetting{}),
+			Type:       reflect.TypeOf(PreferenceSetChannelSetting{}),
 		},
 	)
 }
-
-// A set of settings for a specific channel. Currently, this can only be a list of
-// conditions to apply.
-type PreferenceSetChannelsPreferenceSetChannelSetting struct {
-	// A list of conditions to apply to a specific channel.
-	Conditions []shared.Condition                                   `json:"conditions,required"`
-	JSON       preferenceSetChannelsPreferenceSetChannelSettingJSON `json:"-"`
-}
-
-// preferenceSetChannelsPreferenceSetChannelSettingJSON contains the JSON metadata
-// for the struct [PreferenceSetChannelsPreferenceSetChannelSetting]
-type preferenceSetChannelsPreferenceSetChannelSettingJSON struct {
-	Conditions  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PreferenceSetChannelsPreferenceSetChannelSetting) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r preferenceSetChannelsPreferenceSetChannelSettingJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r PreferenceSetChannelsPreferenceSetChannelSetting) ImplementsPreferenceSetChannelsUnion() {}
 
 // Workflow or category preferences within a preference set
 //
@@ -309,8 +253,7 @@ func (r PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject) Implem
 // Whether the specific channel (by channel_id) is enabled for the preference set,
 // or a settings object with conditions.
 //
-// Union satisfied by [shared.UnionBool] or
-// [PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSetting].
+// Union satisfied by [shared.UnionBool] or [PreferenceSetChannelSetting].
 type PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnion interface {
 	ImplementsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnion()
 }
@@ -329,37 +272,60 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSetting{}),
+			Type:       reflect.TypeOf(PreferenceSetChannelSetting{}),
 		},
 	)
 }
 
 // A set of settings for a specific channel. Currently, this can only be a list of
 // conditions to apply.
-type PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSetting struct {
+type PreferenceSetChannelSetting struct {
 	// A list of conditions to apply to a specific channel.
-	Conditions []shared.Condition                                                                                      `json:"conditions,required"`
-	JSON       preferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingJSON `json:"-"`
+	Conditions []shared.Condition              `json:"conditions,required"`
+	JSON       preferenceSetChannelSettingJSON `json:"-"`
 }
 
-// preferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingJSON
-// contains the JSON metadata for the struct
-// [PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSetting]
-type preferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingJSON struct {
+// preferenceSetChannelSettingJSON contains the JSON metadata for the struct
+// [PreferenceSetChannelSetting]
+type preferenceSetChannelSettingJSON struct {
 	Conditions  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSetting) UnmarshalJSON(data []byte) (err error) {
+func (r *PreferenceSetChannelSetting) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r preferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingJSON) RawJSON() string {
+func (r preferenceSetChannelSettingJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSetting) ImplementsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
+func (r PreferenceSetChannelSetting) ImplementsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
+}
+
+func (r PreferenceSetChannelSetting) ImplementsPreferenceSetChannelsUnion() {}
+
+func (r PreferenceSetChannelSetting) ImplementsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
+}
+
+// A set of settings for a specific channel. Currently, this can only be a list of
+// conditions to apply.
+type PreferenceSetChannelSettingParam struct {
+	// A list of conditions to apply to a specific channel.
+	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
+}
+
+func (r PreferenceSetChannelSettingParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r PreferenceSetChannelSettingParam) ImplementsPreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam() {
+}
+
+func (r PreferenceSetChannelSettingParam) ImplementsPreferenceSetRequestChannelsUnionParam() {}
+
+func (r PreferenceSetChannelSettingParam) ImplementsPreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam() {
 }
 
 // A set of settings for a channel type. Currently, this can only be a list of
@@ -748,47 +714,17 @@ func (r PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObject
 // Whether the specific channel (by channel_id) is enabled for the preference set,
 // or a settings object with conditions.
 //
-// Satisfied by [shared.UnionBool],
-// [PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingParam].
+// Satisfied by [shared.UnionBool], [PreferenceSetChannelSettingParam].
 type PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam interface {
 	ImplementsPreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam()
-}
-
-// A set of settings for a specific channel. Currently, this can only be a list of
-// conditions to apply.
-type PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingParam struct {
-	// A list of conditions to apply to a specific channel.
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
-}
-
-func (r PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingParam) ImplementsPreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam() {
 }
 
 // Whether the specific channel (by channel_id) is enabled for the preference set,
 // or a settings object with conditions.
 //
-// Satisfied by [shared.UnionBool],
-// [PreferenceSetRequestChannelsPreferenceSetChannelSettingParam].
+// Satisfied by [shared.UnionBool], [PreferenceSetChannelSettingParam].
 type PreferenceSetRequestChannelsUnionParam interface {
 	ImplementsPreferenceSetRequestChannelsUnionParam()
-}
-
-// A set of settings for a specific channel. Currently, this can only be a list of
-// conditions to apply.
-type PreferenceSetRequestChannelsPreferenceSetChannelSettingParam struct {
-	// A list of conditions to apply to a specific channel.
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
-}
-
-func (r PreferenceSetRequestChannelsPreferenceSetChannelSettingParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r PreferenceSetRequestChannelsPreferenceSetChannelSettingParam) ImplementsPreferenceSetRequestChannelsUnionParam() {
 }
 
 // Workflow or category preferences within a preference set
@@ -820,22 +756,7 @@ func (r PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectP
 // Whether the specific channel (by channel_id) is enabled for the preference set,
 // or a settings object with conditions.
 //
-// Satisfied by [shared.UnionBool],
-// [PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingParam].
+// Satisfied by [shared.UnionBool], [PreferenceSetChannelSettingParam].
 type PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam interface {
 	ImplementsPreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam()
-}
-
-// A set of settings for a specific channel. Currently, this can only be a list of
-// conditions to apply.
-type PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingParam struct {
-	// A list of conditions to apply to a specific channel.
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
-}
-
-func (r PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsPreferenceSetChannelSettingParam) ImplementsPreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam() {
 }
