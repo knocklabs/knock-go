@@ -706,6 +706,8 @@ func (r ObjectListSubscriptionsParamsObject) URLQuery() (v url.Values) {
 }
 
 type ObjectSetParams struct {
+	// The optional name for the object.
+	Name param.Field[string] `json:"name"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// The locale of the object. Used for
