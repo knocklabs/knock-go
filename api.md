@@ -30,6 +30,7 @@ Response Types:
 Params Types:
 
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#InlinePreferenceSetRequestParam">InlinePreferenceSetRequestParam</a>
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#PreferenceSetChannelSettingParam">PreferenceSetChannelSettingParam</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#PreferenceSetChannelTypeSettingParam">PreferenceSetChannelTypeSettingParam</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#PreferenceSetChannelTypesParam">PreferenceSetChannelTypesParam</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#PreferenceSetRequestParam">PreferenceSetRequestParam</a>
@@ -37,6 +38,7 @@ Params Types:
 Response Types:
 
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#PreferenceSet">PreferenceSet</a>
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#PreferenceSetChannelSetting">PreferenceSetChannelSetting</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#PreferenceSetChannelTypeSetting">PreferenceSetChannelTypeSetting</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#PreferenceSetChannelTypes">PreferenceSetChannelTypes</a>
 
@@ -44,10 +46,15 @@ Response Types:
 
 Params Types:
 
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#AwsSnsPushChannelDataDevicesOnlyParam">AwsSnsPushChannelDataDevicesOnlyParam</a>
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#AwsSnsPushChannelDataTargetArnsOnlyParam">AwsSnsPushChannelDataTargetArnsOnlyParam</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#ChannelDataRequestParam">ChannelDataRequestParam</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#DiscordChannelDataParam">DiscordChannelDataParam</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#InlineChannelDataRequestParam">InlineChannelDataRequestParam</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#MsTeamsChannelDataParam">MsTeamsChannelDataParam</a>
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#OneSignalChannelDataPlayerIDsOnlyParam">OneSignalChannelDataPlayerIDsOnlyParam</a>
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#PushChannelDataDevicesOnlyParam">PushChannelDataDevicesOnlyParam</a>
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#PushChannelDataTokensOnlyParam">PushChannelDataTokensOnlyParam</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#SlackChannelDataParam">SlackChannelDataParam</a>
 
 Response Types:
@@ -55,6 +62,7 @@ Response Types:
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#ChannelData">ChannelData</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#DiscordChannelData">DiscordChannelData</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#MsTeamsChannelData">MsTeamsChannelData</a>
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#OneSignalChannelDataPlayerIDsOnly">OneSignalChannelDataPlayerIDsOnly</a>
 - <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#SlackChannelData">SlackChannelData</a>
 
 # Users

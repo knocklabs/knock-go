@@ -58,7 +58,7 @@ func TestUserBulkIdentify(t *testing.T) {
 			ID:     knock.F("user_1"),
 			Avatar: knock.F("avatar"),
 			ChannelData: knock.F(knock.InlineChannelDataRequestParam{
-				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.InlineChannelDataRequestItemPushChannelDataTokensOnlyParam{
+				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.PushChannelDataTokensOnlyParam{
 					Tokens: knock.F([]string{"push_token_123"}),
 				},
 			}),
@@ -112,7 +112,7 @@ func TestUserBulkIdentify(t *testing.T) {
 						}),
 					}),
 					Channels: knock.F(map[string]knock.PreferenceSetRequestChannelsUnionParam{
-						"2f641633-95d3-4555-9222-9f1eb7888a80": knock.PreferenceSetRequestChannelsPreferenceSetChannelSettingParam{
+						"2f641633-95d3-4555-9222-9f1eb7888a80": knock.PreferenceSetChannelSettingParam{
 							Conditions: knock.F([]shared.ConditionParam{{
 								Argument: knock.F("US"),
 								Operator: knock.F(shared.ConditionOperatorEqualTo),
@@ -220,7 +220,7 @@ func TestUserBulkSetPreferencesWithOptionalParams(t *testing.T) {
 				}),
 			}),
 			Channels: knock.F(map[string]knock.PreferenceSetRequestChannelsUnionParam{
-				"2f641633-95d3-4555-9222-9f1eb7888a80": knock.PreferenceSetRequestChannelsPreferenceSetChannelSettingParam{
+				"2f641633-95d3-4555-9222-9f1eb7888a80": knock.PreferenceSetChannelSettingParam{
 					Conditions: knock.F([]shared.ConditionParam{{
 						Argument: knock.F("US"),
 						Operator: knock.F(shared.ConditionOperatorEqualTo),
