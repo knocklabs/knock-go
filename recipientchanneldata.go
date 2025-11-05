@@ -30,6 +30,56 @@ func NewRecipientChannelDataService(opts ...option.RequestOption) (r *RecipientC
 	return
 }
 
+// AWS SNS push channel data.
+type AwsSnsPushChannelDataDevicesOnlyParam struct {
+	// A list of devices. Each device contains a target_arn, and optionally a locale
+	// and timezone.
+	Devices param.Field[[]AwsSnsPushChannelDataDevicesOnlyDeviceParam] `json:"devices,required"`
+}
+
+func (r AwsSnsPushChannelDataDevicesOnlyParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r AwsSnsPushChannelDataDevicesOnlyParam) implementsChannelDataRequestDataUnionParam() {}
+
+func (r AwsSnsPushChannelDataDevicesOnlyParam) implementsInlineChannelDataRequestItemUnionParam() {}
+
+type AwsSnsPushChannelDataDevicesOnlyDeviceParam struct {
+	// The ARN of a platform endpoint associated with a platform application and a
+	// device token. See
+	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
+	TargetArn param.Field[string] `json:"target_arn,required"`
+	// The locale of the object. Used for
+	// [message localization](/concepts/translations).
+	Locale param.Field[string] `json:"locale"`
+	// The timezone of the object. Must be a
+	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used
+	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
+	Timezone param.Field[string] `json:"timezone"`
+}
+
+func (r AwsSnsPushChannelDataDevicesOnlyDeviceParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// AWS SNS push channel data.
+type AwsSnsPushChannelDataTargetArnsOnlyParam struct {
+	// A list of platform endpoint ARNs. See
+	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
+	TargetArns param.Field[[]string] `json:"target_arns,required"`
+}
+
+func (r AwsSnsPushChannelDataTargetArnsOnlyParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r AwsSnsPushChannelDataTargetArnsOnlyParam) implementsChannelDataRequestDataUnionParam() {}
+
+func (r AwsSnsPushChannelDataTargetArnsOnlyParam) implementsInlineChannelDataRequestItemUnionParam() {
+}
+
 // Channel data for a given channel type.
 type ChannelData struct {
 	// The typename of the schema.
@@ -114,9 +164,8 @@ func (r *ChannelDataData) UnmarshalJSON(data []byte) (err error) {
 // specific types for more type safety.
 //
 // Possible runtime types of the union are [ChannelDataDataPushChannelDataFull],
-// [ChannelDataDataAwssnsPushChannelDataFull],
-// [ChannelDataDataOneSignalChannelDataPlayerIDsOnly], [SlackChannelData],
-// [MsTeamsChannelData], [DiscordChannelData].
+// [ChannelDataDataAwssnsPushChannelDataFull], [OneSignalChannelDataPlayerIDsOnly],
+// [SlackChannelData], [MsTeamsChannelData], [DiscordChannelData].
 func (r ChannelDataData) AsUnion() ChannelDataDataUnion {
 	return r.union
 }
@@ -124,9 +173,8 @@ func (r ChannelDataData) AsUnion() ChannelDataDataUnion {
 // Channel data for a given channel type.
 //
 // Union satisfied by [ChannelDataDataPushChannelDataFull],
-// [ChannelDataDataAwssnsPushChannelDataFull],
-// [ChannelDataDataOneSignalChannelDataPlayerIDsOnly], [SlackChannelData],
-// [MsTeamsChannelData] or [DiscordChannelData].
+// [ChannelDataDataAwssnsPushChannelDataFull], [OneSignalChannelDataPlayerIDsOnly],
+// [SlackChannelData], [MsTeamsChannelData] or [DiscordChannelData].
 type ChannelDataDataUnion interface {
 	implementsChannelDataData()
 }
@@ -145,7 +193,7 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ChannelDataDataOneSignalChannelDataPlayerIDsOnly{}),
+			Type:       reflect.TypeOf(OneSignalChannelDataPlayerIDsOnly{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -196,12 +244,12 @@ type ChannelDataDataPushChannelDataFullDevice struct {
 	Token string `json:"token,required"`
 	// The locale of the object. Used for
 	// [message localization](/concepts/translations).
-	Locale string `json:"locale"`
+	Locale string `json:"locale,nullable"`
 	// The timezone of the object. Must be a
 	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 	// Used
 	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
-	Timezone string                                       `json:"timezone"`
+	Timezone string                                       `json:"timezone,nullable"`
 	JSON     channelDataDataPushChannelDataFullDeviceJSON `json:"-"`
 }
 
@@ -260,12 +308,12 @@ type ChannelDataDataAwssnsPushChannelDataFullDevice struct {
 	TargetArn string `json:"target_arn,required"`
 	// The locale of the object. Used for
 	// [message localization](/concepts/translations).
-	Locale string `json:"locale"`
+	Locale string `json:"locale,nullable"`
 	// The timezone of the object. Must be a
 	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 	// Used
 	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
-	Timezone string                                             `json:"timezone"`
+	Timezone string                                             `json:"timezone,nullable"`
 	JSON     channelDataDataAwssnsPushChannelDataFullDeviceJSON `json:"-"`
 }
 
@@ -286,31 +334,6 @@ func (r *ChannelDataDataAwssnsPushChannelDataFullDevice) UnmarshalJSON(data []by
 func (r channelDataDataAwssnsPushChannelDataFullDeviceJSON) RawJSON() string {
 	return r.raw
 }
-
-// OneSignal channel data.
-type ChannelDataDataOneSignalChannelDataPlayerIDsOnly struct {
-	// A list of OneSignal player IDs.
-	PlayerIDs []string                                             `json:"player_ids,required" format:"uuid"`
-	JSON      channelDataDataOneSignalChannelDataPlayerIDsOnlyJSON `json:"-"`
-}
-
-// channelDataDataOneSignalChannelDataPlayerIDsOnlyJSON contains the JSON metadata
-// for the struct [ChannelDataDataOneSignalChannelDataPlayerIDsOnly]
-type channelDataDataOneSignalChannelDataPlayerIDsOnlyJSON struct {
-	PlayerIDs   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ChannelDataDataOneSignalChannelDataPlayerIDsOnly) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r channelDataDataOneSignalChannelDataPlayerIDsOnlyJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r ChannelDataDataOneSignalChannelDataPlayerIDsOnly) implementsChannelDataData() {}
 
 // The type of provider.
 type ChannelDataProvider string
@@ -349,6 +372,7 @@ func (r ChannelDataRequestParam) MarshalJSON() (data []byte, err error) {
 type ChannelDataRequestDataParam struct {
 	Token       param.Field[interface{}] `json:"token"`
 	Connections param.Field[interface{}] `json:"connections"`
+	Devices     param.Field[interface{}] `json:"devices"`
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
 	PlayerIDs       param.Field[interface{}] `json:"player_ids"`
@@ -364,53 +388,14 @@ func (r ChannelDataRequestDataParam) implementsChannelDataRequestDataUnionParam(
 
 // Channel data for a given channel type.
 //
-// Satisfied by [ChannelDataRequestDataPushChannelDataTokensOnlyParam],
-// [ChannelDataRequestDataAwssnsPushChannelDataTargetArNsOnlyParam],
-// [ChannelDataRequestDataOneSignalChannelDataPlayerIDsOnlyParam],
-// [SlackChannelDataParam], [MsTeamsChannelDataParam], [DiscordChannelDataParam],
+// Satisfied by [PushChannelDataTokensOnlyParam],
+// [PushChannelDataDevicesOnlyParam], [AwsSnsPushChannelDataTargetArnsOnlyParam],
+// [AwsSnsPushChannelDataDevicesOnlyParam],
+// [OneSignalChannelDataPlayerIDsOnlyParam], [SlackChannelDataParam],
+// [MsTeamsChannelDataParam], [DiscordChannelDataParam],
 // [ChannelDataRequestDataParam].
 type ChannelDataRequestDataUnionParam interface {
 	implementsChannelDataRequestDataUnionParam()
-}
-
-// Push channel data.
-type ChannelDataRequestDataPushChannelDataTokensOnlyParam struct {
-	// A list of push channel tokens.
-	Tokens param.Field[[]string] `json:"tokens,required"`
-}
-
-func (r ChannelDataRequestDataPushChannelDataTokensOnlyParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ChannelDataRequestDataPushChannelDataTokensOnlyParam) implementsChannelDataRequestDataUnionParam() {
-}
-
-// AWS SNS push channel data.
-type ChannelDataRequestDataAwssnsPushChannelDataTargetArNsOnlyParam struct {
-	// A list of platform endpoint ARNs. See
-	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
-	TargetArns param.Field[[]string] `json:"target_arns,required"`
-}
-
-func (r ChannelDataRequestDataAwssnsPushChannelDataTargetArNsOnlyParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ChannelDataRequestDataAwssnsPushChannelDataTargetArNsOnlyParam) implementsChannelDataRequestDataUnionParam() {
-}
-
-// OneSignal channel data.
-type ChannelDataRequestDataOneSignalChannelDataPlayerIDsOnlyParam struct {
-	// A list of OneSignal player IDs.
-	PlayerIDs param.Field[[]string] `json:"player_ids,required" format:"uuid"`
-}
-
-func (r ChannelDataRequestDataOneSignalChannelDataPlayerIDsOnlyParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ChannelDataRequestDataOneSignalChannelDataPlayerIDsOnlyParam) implementsChannelDataRequestDataUnionParam() {
 }
 
 // Discord channel data.
@@ -663,6 +648,7 @@ type InlineChannelDataRequestParam map[string]InlineChannelDataRequestItemUnionP
 type InlineChannelDataRequestItemParam struct {
 	Token       param.Field[interface{}] `json:"token"`
 	Connections param.Field[interface{}] `json:"connections"`
+	Devices     param.Field[interface{}] `json:"devices"`
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string]      `json:"ms_teams_tenant_id" format:"uuid"`
 	PlayerIDs       param.Field[interface{}] `json:"player_ids"`
@@ -678,53 +664,14 @@ func (r InlineChannelDataRequestItemParam) implementsInlineChannelDataRequestIte
 
 // Channel data for a given channel type.
 //
-// Satisfied by [InlineChannelDataRequestItemPushChannelDataTokensOnlyParam],
-// [InlineChannelDataRequestItemAwssnsPushChannelDataTargetArNsOnlyParam],
-// [InlineChannelDataRequestItemOneSignalChannelDataPlayerIDsOnlyParam],
-// [SlackChannelDataParam], [MsTeamsChannelDataParam], [DiscordChannelDataParam],
+// Satisfied by [PushChannelDataTokensOnlyParam],
+// [PushChannelDataDevicesOnlyParam], [AwsSnsPushChannelDataTargetArnsOnlyParam],
+// [AwsSnsPushChannelDataDevicesOnlyParam],
+// [OneSignalChannelDataPlayerIDsOnlyParam], [SlackChannelDataParam],
+// [MsTeamsChannelDataParam], [DiscordChannelDataParam],
 // [InlineChannelDataRequestItemParam].
 type InlineChannelDataRequestItemUnionParam interface {
 	implementsInlineChannelDataRequestItemUnionParam()
-}
-
-// Push channel data.
-type InlineChannelDataRequestItemPushChannelDataTokensOnlyParam struct {
-	// A list of push channel tokens.
-	Tokens param.Field[[]string] `json:"tokens,required"`
-}
-
-func (r InlineChannelDataRequestItemPushChannelDataTokensOnlyParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r InlineChannelDataRequestItemPushChannelDataTokensOnlyParam) implementsInlineChannelDataRequestItemUnionParam() {
-}
-
-// AWS SNS push channel data.
-type InlineChannelDataRequestItemAwssnsPushChannelDataTargetArNsOnlyParam struct {
-	// A list of platform endpoint ARNs. See
-	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
-	TargetArns param.Field[[]string] `json:"target_arns,required"`
-}
-
-func (r InlineChannelDataRequestItemAwssnsPushChannelDataTargetArNsOnlyParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r InlineChannelDataRequestItemAwssnsPushChannelDataTargetArNsOnlyParam) implementsInlineChannelDataRequestItemUnionParam() {
-}
-
-// OneSignal channel data.
-type InlineChannelDataRequestItemOneSignalChannelDataPlayerIDsOnlyParam struct {
-	// A list of OneSignal player IDs.
-	PlayerIDs param.Field[[]string] `json:"player_ids,required" format:"uuid"`
-}
-
-func (r InlineChannelDataRequestItemOneSignalChannelDataPlayerIDsOnlyParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r InlineChannelDataRequestItemOneSignalChannelDataPlayerIDsOnlyParam) implementsInlineChannelDataRequestItemUnionParam() {
 }
 
 // Microsoft Teams channel data.
@@ -1001,6 +948,91 @@ type MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhoo
 func (r MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
+
+// OneSignal channel data.
+type OneSignalChannelDataPlayerIDsOnly struct {
+	// A list of OneSignal player IDs.
+	PlayerIDs []string                              `json:"player_ids,required" format:"uuid"`
+	JSON      oneSignalChannelDataPlayerIDsOnlyJSON `json:"-"`
+}
+
+// oneSignalChannelDataPlayerIDsOnlyJSON contains the JSON metadata for the struct
+// [OneSignalChannelDataPlayerIDsOnly]
+type oneSignalChannelDataPlayerIDsOnlyJSON struct {
+	PlayerIDs   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OneSignalChannelDataPlayerIDsOnly) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r oneSignalChannelDataPlayerIDsOnlyJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r OneSignalChannelDataPlayerIDsOnly) implementsChannelDataData() {}
+
+// OneSignal channel data.
+type OneSignalChannelDataPlayerIDsOnlyParam struct {
+	// A list of OneSignal player IDs.
+	PlayerIDs param.Field[[]string] `json:"player_ids,required" format:"uuid"`
+}
+
+func (r OneSignalChannelDataPlayerIDsOnlyParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r OneSignalChannelDataPlayerIDsOnlyParam) implementsChannelDataRequestDataUnionParam() {}
+
+func (r OneSignalChannelDataPlayerIDsOnlyParam) implementsInlineChannelDataRequestItemUnionParam() {}
+
+// Push channel data.
+type PushChannelDataDevicesOnlyParam struct {
+	// A list of devices. Each device contains a token, and optionally a locale and
+	// timezone.
+	Devices param.Field[[]PushChannelDataDevicesOnlyDeviceParam] `json:"devices,required"`
+}
+
+func (r PushChannelDataDevicesOnlyParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r PushChannelDataDevicesOnlyParam) implementsChannelDataRequestDataUnionParam() {}
+
+func (r PushChannelDataDevicesOnlyParam) implementsInlineChannelDataRequestItemUnionParam() {}
+
+type PushChannelDataDevicesOnlyDeviceParam struct {
+	// The device token to send the push notification to.
+	Token param.Field[string] `json:"token,required"`
+	// The locale of the object. Used for
+	// [message localization](/concepts/translations).
+	Locale param.Field[string] `json:"locale"`
+	// The timezone of the object. Must be a
+	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	// Used
+	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
+	Timezone param.Field[string] `json:"timezone"`
+}
+
+func (r PushChannelDataDevicesOnlyDeviceParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Push channel data.
+type PushChannelDataTokensOnlyParam struct {
+	// A list of push channel tokens.
+	Tokens param.Field[[]string] `json:"tokens,required"`
+}
+
+func (r PushChannelDataTokensOnlyParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r PushChannelDataTokensOnlyParam) implementsChannelDataRequestDataUnionParam() {}
+
+func (r PushChannelDataTokensOnlyParam) implementsInlineChannelDataRequestItemUnionParam() {}
 
 // Slack channel data.
 type SlackChannelData struct {

@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.24.0 (2025-11-04)
+
+Full Changelog: [v1.23.0...v1.24.0](https://github.com/knocklabs/knock-go/compare/v1.23.0...v1.24.0)
+
+### Features
+
+* **api:** api update ([fc6844e](https://github.com/knocklabs/knock-go/commit/fc6844edd9f3729a363dc58aa18c2771d6656c80))
+* **api:** api update ([8f90346](https://github.com/knocklabs/knock-go/commit/8f903464823aabc810fcc6455b887fcc0cc490b9))
+* **api:** api update ([b49cdb9](https://github.com/knocklabs/knock-go/commit/b49cdb9c7e5237d255ad2f2dcb61f4fff257f65f))
+* **api:** api update ([ce142ec](https://github.com/knocklabs/knock-go/commit/ce142ecf5566925209da68fee4c446b0c0a2e200))
+* **api:** api update ([935a3f6](https://github.com/knocklabs/knock-go/commit/935a3f6e3cbc6f2937a1442b0d039090f8f4e7a2))
+* **api:** api update ([0953e18](https://github.com/knocklabs/knock-go/commit/0953e180e631597fd0f8b8fc41e84ec984d67ba9))
+* **api:** api update ([c61163b](https://github.com/knocklabs/knock-go/commit/c61163bf4d96bada767a08f4eb3354e45d7f438c))
+* **api:** api update ([f838531](https://github.com/knocklabs/knock-go/commit/f838531622127692523c72d017aa2ebec1338e25))
+* correct channel data schemas ([a259443](https://github.com/knocklabs/knock-go/commit/a2594437da589081322ac570e19bf1d488a1e3d2))
+
 ## 1.23.0 (2025-10-22)
 
 Full Changelog: [v1.22.1...v1.23.0](https://github.com/knocklabs/knock-go/compare/v1.22.1...v1.23.0)
