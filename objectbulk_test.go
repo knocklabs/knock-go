@@ -200,6 +200,7 @@ func TestObjectBulkSet(t *testing.T) {
 					},
 				}),
 				CreatedAt: knock.F(time.Now()),
+				Name:      knock.F("My project"),
 				Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
 					"default": knock.PreferenceSetRequestParam{
 						PersistenceStrategy: knock.F(knock.PreferenceSetRequest_PersistenceStrategyMerge),

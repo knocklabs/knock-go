@@ -206,6 +206,8 @@ type TenantRequestParam struct {
 	ID param.Field[string] `json:"id,required"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// An optional name for the tenant.
+	Name param.Field[string] `json:"name"`
 	// Inline set preferences for a recipient, where the key is the preference set id.
 	// Preferences that are set inline will be merged into any existing preferences
 	// rather than replacing them.
@@ -275,6 +277,8 @@ func (r TenantListParams) URLQuery() (v url.Values) {
 type TenantSetParams struct {
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
+	// An optional name for the tenant.
+	Name param.Field[string] `json:"name"`
 	// The settings for the tenant. Includes branding and preference set.
 	Settings param.Field[TenantSetParamsSettings] `json:"settings"`
 }
