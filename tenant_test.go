@@ -111,6 +111,7 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 					Tokens: knock.F([]string{"push_token_xxx"}),
 				},
 			}),
+			Name: knock.F("Jurassic Park"),
 			Settings: knock.F(knock.TenantSetParamsSettings{
 				Branding: knock.F(knock.TenantSetParamsSettingsBranding{
 					IconURL:              knock.F("https://example.com/trex_silhouette_icon.png"),
