@@ -391,6 +391,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 				},
 			}),
 			Locale: knock.F("en-US"),
+			Name:   knock.F("My product"),
 			Preferences: knock.F(knock.InlinePreferenceSetRequestParam{
 				"default": knock.PreferenceSetRequestParam{
 					PersistenceStrategy: knock.F(knock.PreferenceSetRequest_PersistenceStrategyMerge),

@@ -495,6 +495,11 @@ type UserFeedListItemsParams struct {
 	Before param.Field[string] `query:"before"`
 	// Whether the feed items have a tenant.
 	HasTenant param.Field[bool] `query:"has_tenant"`
+	// The locale to render the feed items in. Must be in the IETF 5646 format (e.g.
+	// `en-US`). When not provided, will default to the locale that the feed items were
+	// rendered in. Only available for enterprise plan customers using custom
+	// translations.
+	Locale param.Field[string] `query:"locale"`
 	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 	// The workflow key associated with the message in the feed.

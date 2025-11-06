@@ -395,6 +395,8 @@ type InlineObjectRequestParam struct {
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// Timestamp when the resource was created.
 	CreatedAt param.Field[time.Time] `json:"created_at" format:"date-time"`
+	// An optional name for the object.
+	Name param.Field[string] `json:"name"`
 	// Inline set preferences for a recipient, where the key is the preference set id.
 	// Preferences that are set inline will be merged into any existing preferences
 	// rather than replacing them.
@@ -711,6 +713,8 @@ type ObjectSetParams struct {
 	// The locale of the object. Used for
 	// [message localization](/concepts/translations).
 	Locale param.Field[string] `json:"locale"`
+	// An optional name for the object.
+	Name param.Field[string] `json:"name"`
 	// Inline set preferences for a recipient, where the key is the preference set id.
 	// Preferences that are set inline will be merged into any existing preferences
 	// rather than replacing them.
