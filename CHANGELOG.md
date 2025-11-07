@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.26.0 (2025-11-07)
+
+Full Changelog: [v1.25.0...v1.26.0](https://github.com/knocklabs/knock-go/compare/v1.25.0...v1.26.0)
+
+### Features
+
+* **api:** support specifying a branch ([0f31d0b](https://github.com/knocklabs/knock-go/commit/0f31d0b532ede0847c44923b3f341a7f6231fe65))
+
 ## 1.25.0 (2025-11-06)
 
 Full Changelog: [v1.24.0...v1.25.0](https://github.com/knocklabs/knock-go/compare/v1.24.0...v1.25.0)
