@@ -22,6 +22,15 @@ import (
 // [README]: https://pkg.go.dev/github.com/knocklabs/knock-go#readme-requestoptions
 type RequestOption = requestconfig.RequestOption
 
+// MiddlewareNext is a function which is called by a middleware to pass an HTTP request
+// to the next stage in the middleware chain.
+type MiddlewareNext = func(*http.Request) (*http.Response, error)
+
+// Middleware is a function which intercepts HTTP requests, processing or modifying
+// them, and then passing the request to the next middleware or handler
+// in the chain by calling the provided MiddlewareNext function.
+type Middleware = func(*http.Request, MiddlewareNext) (*http.Response, error)
+
 // WithBaseURL returns a RequestOption that sets the BaseURL for the client.
 //
 // For security reasons, ensure that the base URL is trusted.
@@ -72,15 +81,6 @@ func WithHTTPClient(client HTTPClient) RequestOption {
 		return nil
 	})
 }
-
-// MiddlewareNext is a function which is called by a middleware to pass an HTTP request
-// to the next stage in the middleware chain.
-type MiddlewareNext = func(*http.Request) (*http.Response, error)
-
-// Middleware is a function which intercepts HTTP requests, processing or modifying
-// them, and then passing the request to the next middleware or handler
-// in the chain by calling the provided MiddlewareNext function.
-type Middleware = func(*http.Request, MiddlewareNext) (*http.Response, error)
 
 // WithMiddleware returns a RequestOption that applies the given middleware
 // to the requests made. Each middleware will execute in the order they were given.
@@ -277,4 +277,12 @@ func WithAPIKey(value string) RequestOption {
 // WithIdempotencyKey returns a RequestOption that sets the "Idempotency-Key" header.
 func WithIdempotencyKey(key string) RequestOption {
 	return WithHeader("Idempotency-Key", key)
+}
+
+// WithBranch returns a RequestOption that sets the client setting "branch".
+func WithBranch(value string) RequestOption {
+	return requestconfig.RequestOptionFunc(func(r *requestconfig.RequestConfig) error {
+		r.Branch = value
+		return r.Apply(WithHeader("X-Knock-Branch", value))
+	})
 }
