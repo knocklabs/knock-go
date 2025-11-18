@@ -73,7 +73,7 @@ func (r *ObjectService) ListAutoPaging(ctx context.Context, collection string, q
 // cannot be undone.
 func (r *ObjectService) Delete(ctx context.Context, collection string, id string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return
@@ -367,7 +367,7 @@ func (r *ObjectService) SetPreferences(ctx context.Context, collection string, o
 // Unsets the channel data for the specified object and channel.
 func (r *ObjectService) UnsetChannelData(ctx context.Context, collection string, objectID string, channelID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
 		return

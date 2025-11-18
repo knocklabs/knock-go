@@ -86,7 +86,7 @@ func (r *UserService) ListAutoPaging(ctx context.Context, query UserListParams, 
 // Permanently delete a user and all associated data.
 func (r *UserService) Delete(ctx context.Context, userID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
@@ -293,7 +293,7 @@ func (r *UserService) SetPreferences(ctx context.Context, userID string, id stri
 // Deletes channel data for a specific user and channel ID.
 func (r *UserService) UnsetChannelData(ctx context.Context, userID string, channelID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return
