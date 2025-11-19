@@ -76,27 +76,27 @@ func (r *TenantService) Delete(ctx context.Context, id string, opts ...option.Re
 }
 
 // Get a tenant by ID.
-func (r *TenantService) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *Tenant, err error) {
+func (r *TenantService) Get(ctx context.Context, id string, query TenantGetParams, opts ...option.RequestOption) (res *Tenant, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/tenants/%s", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
 }
 
 // Sets a tenant within an environment, performing an upsert operation. Any
 // existing properties will be merged with the incoming properties.
-func (r *TenantService) Set(ctx context.Context, id string, body TenantSetParams, opts ...option.RequestOption) (res *Tenant, err error) {
+func (r *TenantService) Set(ctx context.Context, id string, params TenantSetParams, opts ...option.RequestOption) (res *Tenant, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/tenants/%s", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, params, &res, opts...)
 	return
 }
 
@@ -274,7 +274,26 @@ func (r TenantListParams) URLQuery() (v url.Values) {
 	})
 }
 
+type TenantGetParams struct {
+	// When true, merges environment-level default preferences into the tenant's
+	// `settings.preference_set` field before returning the response. Defaults to
+	// false.
+	ResolveFullPreferenceSettings param.Field[bool] `query:"resolve_full_preference_settings"`
+}
+
+// URLQuery serializes [TenantGetParams]'s query parameters as `url.Values`.
+func (r TenantGetParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
 type TenantSetParams struct {
+	// When true, merges environment-level default preferences into the tenant's
+	// `settings.preference_set` field before returning the response. Defaults to
+	// false.
+	ResolveFullPreferenceSettings param.Field[bool] `query:"resolve_full_preference_settings"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// An optional name for the tenant.
@@ -285,6 +304,14 @@ type TenantSetParams struct {
 
 func (r TenantSetParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// URLQuery serializes [TenantSetParams]'s query parameters as `url.Values`.
+func (r TenantSetParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 // The settings for the tenant. Includes branding and preference set.
