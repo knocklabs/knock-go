@@ -66,7 +66,7 @@ func TestTenantDelete(t *testing.T) {
 	}
 }
 
-func TestTenantGet(t *testing.T) {
+func TestTenantGetWithOptionalParams(t *testing.T) {
 	t.Skip("Prism doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -79,7 +79,13 @@ func TestTenantGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Tenants.Get(context.TODO(), "id")
+	_, err := client.Tenants.Get(
+		context.TODO(),
+		"id",
+		knock.TenantGetParams{
+			ResolveFullPreferenceSettings: knock.F(true),
+		},
+	)
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {
@@ -106,6 +112,7 @@ func TestTenantSetWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		knock.TenantSetParams{
+			ResolveFullPreferenceSettings: knock.F(true),
 			ChannelData: knock.F(knock.InlineChannelDataRequestParam{
 				"97c5837d-c65c-4d54-aa39-080eeb81c69d": knock.PushChannelDataTokensOnlyParam{
 					Tokens: knock.F([]string{"push_token_xxx"}),

@@ -62,6 +62,7 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 		"projects",
 		knock.ObjectBulkAddSubscriptionsParams{
 			Subscriptions: knock.F([]knock.ObjectBulkAddSubscriptionsParamsSubscription{{
+				ID: knock.F("project-1"),
 				Recipients: knock.F([]knock.RecipientRequestUnionParam{knock.InlineIdentifyUserRequestParam{
 					ID:     knock.F("user_1"),
 					Avatar: knock.F("avatar"),
