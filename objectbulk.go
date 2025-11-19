@@ -85,7 +85,7 @@ func (r ObjectBulkDeleteParams) MarshalJSON() (data []byte, err error) {
 }
 
 type ObjectBulkAddSubscriptionsParams struct {
-	// A list of subscriptions.
+	// A nested list of subscriptions.
 	Subscriptions param.Field[[]ObjectBulkAddSubscriptionsParamsSubscription] `json:"subscriptions,required"`
 }
 
@@ -93,7 +93,10 @@ func (r ObjectBulkAddSubscriptionsParams) MarshalJSON() (data []byte, err error)
 	return apijson.MarshalRoot(r)
 }
 
+// A list of subscriptions. 1 subscribed-to id, and N subscriber recipients.
 type ObjectBulkAddSubscriptionsParamsSubscription struct {
+	// Unique identifier for the object.
+	ID param.Field[string] `json:"id,required"`
 	// The recipients of the subscription. You can subscribe up to 100 recipients to an
 	// object at a time.
 	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
