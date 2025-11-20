@@ -176,6 +176,44 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 	}
 }
 
+func TestObjectBulkDeleteSubscriptions(t *testing.T) {
+	t.Skip("Prism doesn't support callbacks yet")
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := knock.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Objects.Bulk.DeleteSubscriptions(
+		context.TODO(),
+		"projects",
+		knock.ObjectBulkDeleteSubscriptionsParams{
+			Subscriptions: knock.F([]knock.ObjectBulkDeleteSubscriptionsParamsSubscription{{
+				ID: knock.F("subscribed-to-object-1"),
+				Recipients: knock.F([]knock.RecipientReferenceUnionParam{knock.RecipientReferenceObjectReferenceParam{
+					ID:         knock.F("subscriber-project-1"),
+					Collection: knock.F("projects"),
+				}, shared.UnionString("subscriber-user-1")}),
+			}, {
+				ID:         knock.F("subscribed-to-object-2"),
+				Recipients: knock.F([]knock.RecipientReferenceUnionParam{shared.UnionString("subscriber-user-2")}),
+			}}),
+		},
+	)
+	if err != nil {
+		var apierr *knock.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
 func TestObjectBulkSet(t *testing.T) {
 	t.Skip("Prism doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
