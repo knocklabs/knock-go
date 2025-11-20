@@ -63,6 +63,19 @@ func (r *ObjectBulkService) AddSubscriptions(ctx context.Context, collection str
 	return
 }
 
+// Delete subscriptions for many objects in a single collection type. If a
+// subscription for an object in the collection doesn't exist, it will be skipped.
+func (r *ObjectBulkService) DeleteSubscriptions(ctx context.Context, collection string, body ObjectBulkDeleteSubscriptionsParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if collection == "" {
+		err = errors.New("missing required collection parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/objects/%s/bulk/subscriptions/delete", collection)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
 // Bulk sets up to 1,000 objects at a time in the specified collection.
 func (r *ObjectBulkService) Set(ctx context.Context, collection string, body ObjectBulkSetParams, opts ...option.RequestOption) (res *BulkOperation, err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -105,6 +118,28 @@ type ObjectBulkAddSubscriptionsParamsSubscription struct {
 }
 
 func (r ObjectBulkAddSubscriptionsParamsSubscription) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type ObjectBulkDeleteSubscriptionsParams struct {
+	// A nested list of subscriptions.
+	Subscriptions param.Field[[]ObjectBulkDeleteSubscriptionsParamsSubscription] `json:"subscriptions,required"`
+}
+
+func (r ObjectBulkDeleteSubscriptionsParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// A list of subscriptions. 1 subscribed-to id, and N subscriber recipients.
+type ObjectBulkDeleteSubscriptionsParamsSubscription struct {
+	// Unique identifier for the object.
+	ID param.Field[string] `json:"id,required"`
+	// The recipients of the subscription. You can subscribe up to 100 recipients to an
+	// object at a time.
+	Recipients param.Field[[]RecipientReferenceUnionParam] `json:"recipients,required"`
+}
+
+func (r ObjectBulkDeleteSubscriptionsParamsSubscription) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
