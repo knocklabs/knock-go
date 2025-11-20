@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.28.0 (2025-11-20)
+
+Full Changelog: [v1.27.0...v1.28.0](https://github.com/knocklabs/knock-go/compare/v1.27.0...v1.28.0)
+
+### Features
+
+* **api:** Add bulk delete subscriptions ([b4ed47f](https://github.com/knocklabs/knock-go/commit/b4ed47f62cd1f78d6534f2c918bd634a88bdbf6a))
+
 ## 1.27.0 (2025-11-19)
 
 Full Changelog: [v1.26.0...v1.27.0](https://github.com/knocklabs/knock-go/compare/v1.26.0...v1.27.0)
