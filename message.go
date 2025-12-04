@@ -444,19 +444,27 @@ type MessageSource struct {
 	StepRef string `json:"step_ref,nullable"`
 	// Whether this message was generated from a workflow, broadcast, or guide.
 	Type MessageSourceType `json:"type"`
-	JSON messageSourceJSON `json:"-"`
+	// The unique identifier for the workflow recipient run that generated this
+	// message. Only present for workflow/broadcast messages.
+	WorkflowRecipientRunID string `json:"workflow_recipient_run_id,nullable" format:"uuid"`
+	// The unique identifier for the workflow run that generated this message. Only
+	// present for workflow/broadcast messages.
+	WorkflowRunID string            `json:"workflow_run_id,nullable" format:"uuid"`
+	JSON          messageSourceJSON `json:"-"`
 }
 
 // messageSourceJSON contains the JSON metadata for the struct [MessageSource]
 type messageSourceJSON struct {
-	Typename    apijson.Field
-	Categories  apijson.Field
-	Key         apijson.Field
-	VersionID   apijson.Field
-	StepRef     apijson.Field
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Typename               apijson.Field
+	Categories             apijson.Field
+	Key                    apijson.Field
+	VersionID              apijson.Field
+	StepRef                apijson.Field
+	Type                   apijson.Field
+	WorkflowRecipientRunID apijson.Field
+	WorkflowRunID          apijson.Field
+	raw                    string
+	ExtraFields            map[string]apijson.Field
 }
 
 func (r *MessageSource) UnmarshalJSON(data []byte) (err error) {
