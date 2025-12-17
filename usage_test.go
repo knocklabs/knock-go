@@ -25,6 +25,7 @@ func TestUsage(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
+	t.Skip("Prism doesn't support callbacks yet")
 	response, err := client.Workflows.Trigger(
 		context.TODO(),
 		"dinosaurs-loose",
