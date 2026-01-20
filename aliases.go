@@ -59,7 +59,7 @@ const ConditionOperatorIsTimestamp = shared.ConditionOperatorIsTimestamp
 const ConditionOperatorIsNotTimestamp = shared.ConditionOperatorIsNotTimestamp
 
 // This is an alias to an internal value.
-const ConditionOperatorIsTimestampOnOrAfter = shared.ConditionOperatorIsTimestampOnOrAfter
+const ConditionOperatorIsTimestampAfter = shared.ConditionOperatorIsTimestampAfter
 
 // This is an alias to an internal value.
 const ConditionOperatorIsTimestampBefore = shared.ConditionOperatorIsTimestampBefore
