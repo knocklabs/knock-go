@@ -147,23 +147,16 @@ func (r AudienceAddMembersParams) MarshalJSON() (data []byte, err error) {
 
 // An audience member.
 type AudienceAddMembersParamsMember struct {
-	// An object containing the user's ID.
-	User param.Field[AudienceAddMembersParamsMembersUser] `json:"user,required"`
+	// A set of parameters to inline-identify a user with. Inline identifying the user
+	// will ensure that the user is available before the request is executed in Knock.
+	// It will perform an upsert for the user you're supplying, replacing any
+	// properties specified.
+	User param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
 	// The unique identifier for the tenant.
 	Tenant param.Field[string] `json:"tenant"`
 }
 
 func (r AudienceAddMembersParamsMember) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// An object containing the user's ID.
-type AudienceAddMembersParamsMembersUser struct {
-	// The unique identifier of the user.
-	ID param.Field[string] `json:"id"`
-}
-
-func (r AudienceAddMembersParamsMembersUser) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
@@ -178,22 +171,15 @@ func (r AudienceRemoveMembersParams) MarshalJSON() (data []byte, err error) {
 
 // An audience member.
 type AudienceRemoveMembersParamsMember struct {
-	// An object containing the user's ID.
-	User param.Field[AudienceRemoveMembersParamsMembersUser] `json:"user,required"`
+	// A set of parameters to inline-identify a user with. Inline identifying the user
+	// will ensure that the user is available before the request is executed in Knock.
+	// It will perform an upsert for the user you're supplying, replacing any
+	// properties specified.
+	User param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
 	// The unique identifier for the tenant.
 	Tenant param.Field[string] `json:"tenant"`
 }
 
 func (r AudienceRemoveMembersParamsMember) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// An object containing the user's ID.
-type AudienceRemoveMembersParamsMembersUser struct {
-	// The unique identifier of the user.
-	ID param.Field[string] `json:"id"`
-}
-
-func (r AudienceRemoveMembersParamsMembersUser) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
