@@ -69,9 +69,6 @@ func (r *UserFeedService) GetSettings(ctx context.Context, userID string, id str
 //     along with a user token.
 //   - This endpoint’s rate limit is always scoped per-user and per-environment. This
 //     is true even for requests made without a signed user token.
-//   - Any [attachments](/integrations/email/attachments) present in trigger data are
-//     automatically excluded from both the `data` and `activities` fields of
-//     `UserInAppFeedResponse`.
 func (r *UserFeedService) ListItems(ctx context.Context, userID string, id string, query UserFeedListItemsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[UserFeedListItemsResponse], err error) {
 	var raw *http.Response
 	opts = slices.Concat(r.Options, opts)
@@ -111,9 +108,6 @@ func (r *UserFeedService) ListItems(ctx context.Context, userID string, id strin
 //     along with a user token.
 //   - This endpoint’s rate limit is always scoped per-user and per-environment. This
 //     is true even for requests made without a signed user token.
-//   - Any [attachments](/integrations/email/attachments) present in trigger data are
-//     automatically excluded from both the `data` and `activities` fields of
-//     `UserInAppFeedResponse`.
 func (r *UserFeedService) ListItemsAutoPaging(ctx context.Context, userID string, id string, query UserFeedListItemsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[UserFeedListItemsResponse] {
 	return pagination.NewEntriesCursorAutoPager(r.ListItems(ctx, userID, id, query, opts...))
 }
