@@ -194,8 +194,10 @@ type UserGuideGetChannelResponseEntriesActivationURLPattern struct {
 	// The directive for the URL pattern ('allow' or 'block')
 	Directive string `json:"directive"`
 	// The pathname pattern to match (supports wildcards like /\*)
-	Pathname string                                                     `json:"pathname"`
-	JSON     userGuideGetChannelResponseEntriesActivationURLPatternJSON `json:"-"`
+	Pathname string `json:"pathname"`
+	// The search query params to match
+	Search string                                                     `json:"search"`
+	JSON   userGuideGetChannelResponseEntriesActivationURLPatternJSON `json:"-"`
 }
 
 // userGuideGetChannelResponseEntriesActivationURLPatternJSON contains the JSON
@@ -203,6 +205,7 @@ type UserGuideGetChannelResponseEntriesActivationURLPattern struct {
 type userGuideGetChannelResponseEntriesActivationURLPatternJSON struct {
 	Directive   apijson.Field
 	Pathname    apijson.Field
+	Search      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -218,7 +221,7 @@ func (r userGuideGetChannelResponseEntriesActivationURLPatternJSON) RawJSON() st
 type UserGuideGetChannelResponseEntriesActivationURLRule struct {
 	// The value to compare against
 	Argument string `json:"argument"`
-	// The directive for the URL pattern ('allow' or 'block')
+	// The directive for the URL rule ('allow' or 'block')
 	Directive string `json:"directive"`
 	// The comparison operator ('contains' or 'equal_to')
 	Operator string `json:"operator"`
