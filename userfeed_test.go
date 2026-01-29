@@ -61,6 +61,7 @@ func TestUserFeedListItemsWithOptionalParams(t *testing.T) {
 			After:              knock.F("after"),
 			Archived:           knock.F(knock.UserFeedListItemsParamsArchivedExclude),
 			Before:             knock.F("before"),
+			Exclude:            knock.F("exclude"),
 			HasTenant:          knock.F(true),
 			Locale:             knock.F("locale"),
 			PageSize:           knock.F(int64(0)),

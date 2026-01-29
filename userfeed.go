@@ -499,6 +499,10 @@ type UserFeedListItemsParams struct {
 	Archived param.Field[UserFeedListItemsParamsArchived] `query:"archived"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
+	// Comma-separated list of field paths to exclude from the response. Use dot
+	// notation for nested fields (e.g., `entries.archived_at`). Limited to 3 levels
+	// deep.
+	Exclude param.Field[string] `query:"exclude"`
 	// Whether the feed items have a tenant.
 	HasTenant param.Field[bool] `query:"has_tenant"`
 	// The locale to render the feed items in. Must be in the IETF 5646 format (e.g.
