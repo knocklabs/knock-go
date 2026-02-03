@@ -510,11 +510,6 @@ type UserFeedListItemsParams struct {
 	// rendered in. Only available for enterprise plan customers using custom
 	// translations.
 	Locale param.Field[string] `query:"locale"`
-	// The mode to render the feed items in. Can be `compact` or `rich`. Defaults to
-	// `rich`. When `mode` is `compact`, feed items will not have `activities` and
-	// `total_activities` fields, and the `data` field will not include nested arrays
-	// and objects.
-	Mode param.Field[UserFeedListItemsParamsMode] `query:"mode"`
 	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 	// The workflow key associated with the message in the feed.
@@ -550,25 +545,6 @@ const (
 func (r UserFeedListItemsParamsArchived) IsKnown() bool {
 	switch r {
 	case UserFeedListItemsParamsArchivedExclude, UserFeedListItemsParamsArchivedInclude, UserFeedListItemsParamsArchivedOnly:
-		return true
-	}
-	return false
-}
-
-// The mode to render the feed items in. Can be `compact` or `rich`. Defaults to
-// `rich`. When `mode` is `compact`, feed items will not have `activities` and
-// `total_activities` fields, and the `data` field will not include nested arrays
-// and objects.
-type UserFeedListItemsParamsMode string
-
-const (
-	UserFeedListItemsParamsModeCompact UserFeedListItemsParamsMode = "compact"
-	UserFeedListItemsParamsModeRich    UserFeedListItemsParamsMode = "rich"
-)
-
-func (r UserFeedListItemsParamsMode) IsKnown() bool {
-	switch r {
-	case UserFeedListItemsParamsModeCompact, UserFeedListItemsParamsModeRich:
 		return true
 	}
 	return false

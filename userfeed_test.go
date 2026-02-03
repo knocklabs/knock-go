@@ -64,7 +64,6 @@ func TestUserFeedListItemsWithOptionalParams(t *testing.T) {
 			Exclude:            knock.F("exclude"),
 			HasTenant:          knock.F(true),
 			Locale:             knock.F("locale"),
-			Mode:               knock.F(knock.UserFeedListItemsParamsModeCompact),
 			PageSize:           knock.F(int64(0)),
 			Source:             knock.F("source"),
 			Status:             knock.F(knock.UserFeedListItemsParamsStatusUnread),
