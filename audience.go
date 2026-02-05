@@ -137,7 +137,7 @@ func (r audienceListMembersResponseJSON) RawJSON() string {
 }
 
 type AudienceAddMembersParams struct {
-	// A list of audience members to add. Limited to 1,000 members per request.
+	// A list of audience members to add. You can add up to 1,000 members per request.
 	Members param.Field[[]AudienceAddMembersParamsMember] `json:"members,required"`
 }
 
@@ -161,7 +161,8 @@ func (r AudienceAddMembersParamsMember) MarshalJSON() (data []byte, err error) {
 }
 
 type AudienceRemoveMembersParams struct {
-	// A list of audience members to remove.
+	// A list of audience members to remove. You can remove up to 1,000 members per
+	// request.
 	Members param.Field[[]AudienceRemoveMembersParamsMember] `json:"members,required"`
 }
 
