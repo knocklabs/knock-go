@@ -569,13 +569,13 @@ func (r ObjectListMessagesParamsEngagementStatus) IsKnown() bool {
 }
 
 type ObjectListMessagesParamsInsertedAt struct {
-	// Limits the results to messages inserted after the given date.
+	// Limits the results to items inserted after the given date.
 	Gt param.Field[string] `query:"gt"`
-	// Limits the results to messages inserted after or on the given date.
+	// Limits the results to items inserted after or on the given date.
 	Gte param.Field[string] `query:"gte"`
-	// Limits the results to messages inserted before the given date.
+	// Limits the results to items inserted before the given date.
 	Lt param.Field[string] `query:"lt"`
-	// Limits the results to messages inserted before or on the given date.
+	// Limits the results to items inserted before or on the given date.
 	Lte param.Field[string] `query:"lte"`
 }
 
