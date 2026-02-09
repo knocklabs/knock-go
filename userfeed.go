@@ -504,7 +504,8 @@ type UserFeedListItemsParams struct {
 	// deep.
 	Exclude param.Field[string] `query:"exclude"`
 	// Whether the feed items have a tenant.
-	HasTenant param.Field[bool] `query:"has_tenant"`
+	HasTenant  param.Field[bool]                              `query:"has_tenant"`
+	InsertedAt param.Field[UserFeedListItemsParamsInsertedAt] `query:"inserted_at"`
 	// The locale to render the feed items in. Must be in the IETF 5646 format (e.g.
 	// `en-US`). When not provided, will default to the locale that the feed items were
 	// rendered in. Only available for enterprise plan customers using custom
@@ -548,6 +549,26 @@ func (r UserFeedListItemsParamsArchived) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type UserFeedListItemsParamsInsertedAt struct {
+	// Limits the results to items inserted after the given date.
+	Gt param.Field[string] `query:"gt"`
+	// Limits the results to items inserted after or on the given date.
+	Gte param.Field[string] `query:"gte"`
+	// Limits the results to items inserted before the given date.
+	Lt param.Field[string] `query:"lt"`
+	// Limits the results to items inserted before or on the given date.
+	Lte param.Field[string] `query:"lte"`
+}
+
+// URLQuery serializes [UserFeedListItemsParamsInsertedAt]'s query parameters as
+// `url.Values`.
+func (r UserFeedListItemsParamsInsertedAt) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 // The status of the feed items.
