@@ -511,6 +511,11 @@ type UserFeedListItemsParams struct {
 	// rendered in. Only available for enterprise plan customers using custom
 	// translations.
 	Locale param.Field[string] `query:"locale"`
+	// The mode to render the feed items in. Can be `compact` or `rich`. Defaults to
+	// `rich`. When `mode` is `compact`, feed items will not have `activities` and
+	// `total_activities` fields; the `data` field will not include nested arrays and
+	// objects; and the `actors` field will only have up to one actor.
+	Mode param.Field[UserFeedListItemsParamsMode] `query:"mode"`
 	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 	// The workflow key associated with the message in the feed.
@@ -569,6 +574,25 @@ func (r UserFeedListItemsParamsInsertedAt) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+// The mode to render the feed items in. Can be `compact` or `rich`. Defaults to
+// `rich`. When `mode` is `compact`, feed items will not have `activities` and
+// `total_activities` fields; the `data` field will not include nested arrays and
+// objects; and the `actors` field will only have up to one actor.
+type UserFeedListItemsParamsMode string
+
+const (
+	UserFeedListItemsParamsModeCompact UserFeedListItemsParamsMode = "compact"
+	UserFeedListItemsParamsModeRich    UserFeedListItemsParamsMode = "rich"
+)
+
+func (r UserFeedListItemsParamsMode) IsKnown() bool {
+	switch r {
+	case UserFeedListItemsParamsModeCompact, UserFeedListItemsParamsModeRich:
+		return true
+	}
+	return false
 }
 
 // The status of the feed items.
