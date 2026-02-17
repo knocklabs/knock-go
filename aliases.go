@@ -50,6 +50,12 @@ const ConditionOperatorEmpty = shared.ConditionOperatorEmpty
 const ConditionOperatorNotEmpty = shared.ConditionOperatorNotEmpty
 
 // This is an alias to an internal value.
+const ConditionOperatorExists = shared.ConditionOperatorExists
+
+// This is an alias to an internal value.
+const ConditionOperatorNotExists = shared.ConditionOperatorNotExists
+
+// This is an alias to an internal value.
 const ConditionOperatorContainsAll = shared.ConditionOperatorContainsAll
 
 // This is an alias to an internal value.
