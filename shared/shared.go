@@ -49,8 +49,6 @@ const (
 	ConditionOperatorNotContains              ConditionOperator = "not_contains"
 	ConditionOperatorEmpty                    ConditionOperator = "empty"
 	ConditionOperatorNotEmpty                 ConditionOperator = "not_empty"
-	ConditionOperatorExists                   ConditionOperator = "exists"
-	ConditionOperatorNotExists                ConditionOperator = "not_exists"
 	ConditionOperatorContainsAll              ConditionOperator = "contains_all"
 	ConditionOperatorIsTimestamp              ConditionOperator = "is_timestamp"
 	ConditionOperatorIsNotTimestamp           ConditionOperator = "is_not_timestamp"
@@ -65,7 +63,7 @@ const (
 
 func (r ConditionOperator) IsKnown() bool {
 	switch r {
-	case ConditionOperatorEqualTo, ConditionOperatorNotEqualTo, ConditionOperatorGreaterThan, ConditionOperatorLessThan, ConditionOperatorGreaterThanOrEqualTo, ConditionOperatorLessThanOrEqualTo, ConditionOperatorContains, ConditionOperatorNotContains, ConditionOperatorEmpty, ConditionOperatorNotEmpty, ConditionOperatorExists, ConditionOperatorNotExists, ConditionOperatorContainsAll, ConditionOperatorIsTimestamp, ConditionOperatorIsNotTimestamp, ConditionOperatorIsTimestampOnOrAfter, ConditionOperatorIsTimestampBefore, ConditionOperatorIsTimestampOnOrAfterDate, ConditionOperatorIsTimestampBeforeDate, ConditionOperatorIsTimestampBetween, ConditionOperatorIsAudienceMember, ConditionOperatorIsNotAudienceMember:
+	case ConditionOperatorEqualTo, ConditionOperatorNotEqualTo, ConditionOperatorGreaterThan, ConditionOperatorLessThan, ConditionOperatorGreaterThanOrEqualTo, ConditionOperatorLessThanOrEqualTo, ConditionOperatorContains, ConditionOperatorNotContains, ConditionOperatorEmpty, ConditionOperatorNotEmpty, ConditionOperatorContainsAll, ConditionOperatorIsTimestamp, ConditionOperatorIsNotTimestamp, ConditionOperatorIsTimestampOnOrAfter, ConditionOperatorIsTimestampBefore, ConditionOperatorIsTimestampOnOrAfterDate, ConditionOperatorIsTimestampBeforeDate, ConditionOperatorIsTimestampBetween, ConditionOperatorIsAudienceMember, ConditionOperatorIsNotAudienceMember:
 		return true
 	}
 	return false
