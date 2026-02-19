@@ -15,7 +15,7 @@ import (
 	"github.com/knocklabs/knock-go/shared"
 )
 
-func TestAudienceAddMembers(t *testing.T) {
+func TestAudienceAddMembersWithOptionalParams(t *testing.T) {
 	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -133,6 +133,7 @@ func TestAudienceAddMembers(t *testing.T) {
 				}),
 				Tenant: knock.F("ingen_isla_nublar"),
 			}}),
+			CreateAudience: knock.F(true),
 		},
 	)
 	if err != nil {
