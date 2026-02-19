@@ -14,7 +14,7 @@ import (
 )
 
 func TestProviderSlackCheckAuth(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -43,7 +43,7 @@ func TestProviderSlackCheckAuth(t *testing.T) {
 }
 
 func TestProviderSlackListChannelsWithOptionalParams(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -79,7 +79,7 @@ func TestProviderSlackListChannelsWithOptionalParams(t *testing.T) {
 }
 
 func TestProviderSlackRevokeAccess(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL

@@ -15,7 +15,7 @@ import (
 )
 
 func TestObjectListWithOptionalParams(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -47,7 +47,7 @@ func TestObjectListWithOptionalParams(t *testing.T) {
 }
 
 func TestObjectDelete(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -74,7 +74,7 @@ func TestObjectDelete(t *testing.T) {
 }
 
 func TestObjectAddSubscriptionsWithOptionalParams(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -107,7 +107,7 @@ func TestObjectAddSubscriptionsWithOptionalParams(t *testing.T) {
 }
 
 func TestObjectDeleteSubscriptions(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -137,7 +137,7 @@ func TestObjectDeleteSubscriptions(t *testing.T) {
 }
 
 func TestObjectGet(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -164,7 +164,7 @@ func TestObjectGet(t *testing.T) {
 }
 
 func TestObjectGetChannelData(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -192,7 +192,7 @@ func TestObjectGetChannelData(t *testing.T) {
 }
 
 func TestObjectGetPreferences(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -220,7 +220,7 @@ func TestObjectGetPreferences(t *testing.T) {
 }
 
 func TestObjectListMessagesWithOptionalParams(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -268,7 +268,7 @@ func TestObjectListMessagesWithOptionalParams(t *testing.T) {
 }
 
 func TestObjectListPreferences(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -295,7 +295,7 @@ func TestObjectListPreferences(t *testing.T) {
 }
 
 func TestObjectListSchedulesWithOptionalParams(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -329,7 +329,7 @@ func TestObjectListSchedulesWithOptionalParams(t *testing.T) {
 }
 
 func TestObjectListSubscriptionsWithOptionalParams(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -368,7 +368,7 @@ func TestObjectListSubscriptionsWithOptionalParams(t *testing.T) {
 }
 
 func TestObjectSetWithOptionalParams(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -488,7 +488,7 @@ func TestObjectSetWithOptionalParams(t *testing.T) {
 }
 
 func TestObjectSetChannelData(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -523,7 +523,7 @@ func TestObjectSetChannelData(t *testing.T) {
 }
 
 func TestObjectSetPreferencesWithOptionalParams(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -634,7 +634,7 @@ func TestObjectSetPreferencesWithOptionalParams(t *testing.T) {
 }
 
 func TestObjectUnsetChannelData(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
