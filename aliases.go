@@ -50,6 +50,12 @@ const ConditionOperatorEmpty = shared.ConditionOperatorEmpty
 const ConditionOperatorNotEmpty = shared.ConditionOperatorNotEmpty
 
 // This is an alias to an internal value.
+const ConditionOperatorExists = shared.ConditionOperatorExists
+
+// This is an alias to an internal value.
+const ConditionOperatorNotExists = shared.ConditionOperatorNotExists
+
+// This is an alias to an internal value.
 const ConditionOperatorContainsAll = shared.ConditionOperatorContainsAll
 
 // This is an alias to an internal value.
@@ -59,10 +65,16 @@ const ConditionOperatorIsTimestamp = shared.ConditionOperatorIsTimestamp
 const ConditionOperatorIsNotTimestamp = shared.ConditionOperatorIsNotTimestamp
 
 // This is an alias to an internal value.
-const ConditionOperatorIsTimestampAfter = shared.ConditionOperatorIsTimestampAfter
+const ConditionOperatorIsTimestampOnOrAfter = shared.ConditionOperatorIsTimestampOnOrAfter
 
 // This is an alias to an internal value.
 const ConditionOperatorIsTimestampBefore = shared.ConditionOperatorIsTimestampBefore
+
+// This is an alias to an internal value.
+const ConditionOperatorIsTimestampOnOrAfterDate = shared.ConditionOperatorIsTimestampOnOrAfterDate
+
+// This is an alias to an internal value.
+const ConditionOperatorIsTimestampBeforeDate = shared.ConditionOperatorIsTimestampBeforeDate
 
 // This is an alias to an internal value.
 const ConditionOperatorIsTimestampBetween = shared.ConditionOperatorIsTimestampBetween

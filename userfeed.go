@@ -69,6 +69,9 @@ func (r *UserFeedService) GetSettings(ctx context.Context, userID string, id str
 //     along with a user token.
 //   - This endpoint’s rate limit is always scoped per-user and per-environment. This
 //     is true even for requests made without a signed user token.
+//   - Any [attachments](/integrations/email/attachments) present in trigger data are
+//     automatically excluded from both the `data` and `activities` fields of
+//     `UserInAppFeedResponse`.
 func (r *UserFeedService) ListItems(ctx context.Context, userID string, id string, query UserFeedListItemsParams, opts ...option.RequestOption) (res *pagination.EntriesCursor[UserFeedListItemsResponse], err error) {
 	var raw *http.Response
 	opts = slices.Concat(r.Options, opts)
@@ -108,6 +111,9 @@ func (r *UserFeedService) ListItems(ctx context.Context, userID string, id strin
 //     along with a user token.
 //   - This endpoint’s rate limit is always scoped per-user and per-environment. This
 //     is true even for requests made without a signed user token.
+//   - Any [attachments](/integrations/email/attachments) present in trigger data are
+//     automatically excluded from both the `data` and `activities` fields of
+//     `UserInAppFeedResponse`.
 func (r *UserFeedService) ListItemsAutoPaging(ctx context.Context, userID string, id string, query UserFeedListItemsParams, opts ...option.RequestOption) *pagination.EntriesCursorAutoPager[UserFeedListItemsResponse] {
 	return pagination.NewEntriesCursorAutoPager(r.ListItems(ctx, userID, id, query, opts...))
 }
@@ -493,13 +499,23 @@ type UserFeedListItemsParams struct {
 	Archived param.Field[UserFeedListItemsParamsArchived] `query:"archived"`
 	// The cursor to fetch entries before.
 	Before param.Field[string] `query:"before"`
+	// Comma-separated list of field paths to exclude from the response. Use dot
+	// notation for nested fields (e.g., `entries.archived_at`). Limited to 3 levels
+	// deep.
+	Exclude param.Field[string] `query:"exclude"`
 	// Whether the feed items have a tenant.
-	HasTenant param.Field[bool] `query:"has_tenant"`
+	HasTenant  param.Field[bool]                              `query:"has_tenant"`
+	InsertedAt param.Field[UserFeedListItemsParamsInsertedAt] `query:"inserted_at"`
 	// The locale to render the feed items in. Must be in the IETF 5646 format (e.g.
 	// `en-US`). When not provided, will default to the locale that the feed items were
 	// rendered in. Only available for enterprise plan customers using custom
 	// translations.
 	Locale param.Field[string] `query:"locale"`
+	// The mode to render the feed items in. Can be `compact` or `rich`. Defaults to
+	// `rich`. When `mode` is `compact`, feed items will not have `activities` and
+	// `total_activities` fields; the `data` field will not include nested arrays and
+	// objects; and the `actors` field will only have up to one actor.
+	Mode param.Field[UserFeedListItemsParamsMode] `query:"mode"`
 	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 	// The workflow key associated with the message in the feed.
@@ -535,6 +551,45 @@ const (
 func (r UserFeedListItemsParamsArchived) IsKnown() bool {
 	switch r {
 	case UserFeedListItemsParamsArchivedExclude, UserFeedListItemsParamsArchivedInclude, UserFeedListItemsParamsArchivedOnly:
+		return true
+	}
+	return false
+}
+
+type UserFeedListItemsParamsInsertedAt struct {
+	// Limits the results to items inserted after the given date.
+	Gt param.Field[string] `query:"gt"`
+	// Limits the results to items inserted after or on the given date.
+	Gte param.Field[string] `query:"gte"`
+	// Limits the results to items inserted before the given date.
+	Lt param.Field[string] `query:"lt"`
+	// Limits the results to items inserted before or on the given date.
+	Lte param.Field[string] `query:"lte"`
+}
+
+// URLQuery serializes [UserFeedListItemsParamsInsertedAt]'s query parameters as
+// `url.Values`.
+func (r UserFeedListItemsParamsInsertedAt) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// The mode to render the feed items in. Can be `compact` or `rich`. Defaults to
+// `rich`. When `mode` is `compact`, feed items will not have `activities` and
+// `total_activities` fields; the `data` field will not include nested arrays and
+// objects; and the `actors` field will only have up to one actor.
+type UserFeedListItemsParamsMode string
+
+const (
+	UserFeedListItemsParamsModeCompact UserFeedListItemsParamsMode = "compact"
+	UserFeedListItemsParamsModeRich    UserFeedListItemsParamsMode = "rich"
+)
+
+func (r UserFeedListItemsParamsMode) IsKnown() bool {
+	switch r {
+	case UserFeedListItemsParamsModeCompact, UserFeedListItemsParamsModeRich:
 		return true
 	}
 	return false

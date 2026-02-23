@@ -14,7 +14,7 @@ import (
 )
 
 func TestUserFeedGetSettings(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -41,7 +41,7 @@ func TestUserFeedGetSettings(t *testing.T) {
 }
 
 func TestUserFeedListItemsWithOptionalParams(t *testing.T) {
-	t.Skip("Prism doesn't support callbacks yet")
+	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -58,11 +58,19 @@ func TestUserFeedListItemsWithOptionalParams(t *testing.T) {
 		"user_id",
 		"182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
 		knock.UserFeedListItemsParams{
-			After:              knock.F("after"),
-			Archived:           knock.F(knock.UserFeedListItemsParamsArchivedExclude),
-			Before:             knock.F("before"),
-			HasTenant:          knock.F(true),
+			After:     knock.F("after"),
+			Archived:  knock.F(knock.UserFeedListItemsParamsArchivedExclude),
+			Before:    knock.F("before"),
+			Exclude:   knock.F("exclude"),
+			HasTenant: knock.F(true),
+			InsertedAt: knock.F(knock.UserFeedListItemsParamsInsertedAt{
+				Gt:  knock.F("gt"),
+				Gte: knock.F("gte"),
+				Lt:  knock.F("lt"),
+				Lte: knock.F("lte"),
+			}),
 			Locale:             knock.F("locale"),
+			Mode:               knock.F(knock.UserFeedListItemsParamsModeCompact),
 			PageSize:           knock.F(int64(0)),
 			Source:             knock.F("source"),
 			Status:             knock.F(knock.UserFeedListItemsParamsStatusUnread),

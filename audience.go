@@ -7,10 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"slices"
 	"time"
 
 	"github.com/knocklabs/knock-go/internal/apijson"
+	"github.com/knocklabs/knock-go/internal/apiquery"
 	"github.com/knocklabs/knock-go/internal/param"
 	"github.com/knocklabs/knock-go/internal/requestconfig"
 	"github.com/knocklabs/knock-go/option"
@@ -37,7 +39,7 @@ func NewAudienceService(opts ...option.RequestOption) (r *AudienceService) {
 }
 
 // Adds one or more members to the specified audience.
-func (r *AudienceService) AddMembers(ctx context.Context, key string, body AudienceAddMembersParams, opts ...option.RequestOption) (err error) {
+func (r *AudienceService) AddMembers(ctx context.Context, key string, params AudienceAddMembersParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if key == "" {
@@ -45,7 +47,7 @@ func (r *AudienceService) AddMembers(ctx context.Context, key string, body Audie
 		return
 	}
 	path := fmt.Sprintf("v1/audiences/%s/members", key)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, nil, opts...)
 	return
 }
 
@@ -137,18 +139,32 @@ func (r audienceListMembersResponseJSON) RawJSON() string {
 }
 
 type AudienceAddMembersParams struct {
-	// A list of audience members to add. Limited to 1,000 members per request.
+	// A list of audience members to add. You can add up to 1,000 members per request.
 	Members param.Field[[]AudienceAddMembersParamsMember] `json:"members,required"`
+	// Create the audience if it does not exist.
+	CreateAudience param.Field[bool] `query:"create_audience"`
 }
 
 func (r AudienceAddMembersParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// URLQuery serializes [AudienceAddMembersParams]'s query parameters as
+// `url.Values`.
+func (r AudienceAddMembersParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatBrackets,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
 // An audience member.
 type AudienceAddMembersParamsMember struct {
-	// An object containing the user's ID.
-	User param.Field[AudienceAddMembersParamsMembersUser] `json:"user,required"`
+	// A set of parameters to inline-identify a user with. Inline identifying the user
+	// will ensure that the user is available before the request is executed in Knock.
+	// It will perform an upsert for the user you're supplying, replacing any
+	// properties specified.
+	User param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
 	// The unique identifier for the tenant.
 	Tenant param.Field[string] `json:"tenant"`
 }
@@ -157,18 +173,9 @@ func (r AudienceAddMembersParamsMember) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// An object containing the user's ID.
-type AudienceAddMembersParamsMembersUser struct {
-	// The unique identifier of the user.
-	ID param.Field[string] `json:"id"`
-}
-
-func (r AudienceAddMembersParamsMembersUser) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
 type AudienceRemoveMembersParams struct {
-	// A list of audience members to remove.
+	// A list of audience members to remove. You can remove up to 1,000 members per
+	// request.
 	Members param.Field[[]AudienceRemoveMembersParamsMember] `json:"members,required"`
 }
 
@@ -178,22 +185,15 @@ func (r AudienceRemoveMembersParams) MarshalJSON() (data []byte, err error) {
 
 // An audience member.
 type AudienceRemoveMembersParamsMember struct {
-	// An object containing the user's ID.
-	User param.Field[AudienceRemoveMembersParamsMembersUser] `json:"user,required"`
+	// A set of parameters to inline-identify a user with. Inline identifying the user
+	// will ensure that the user is available before the request is executed in Knock.
+	// It will perform an upsert for the user you're supplying, replacing any
+	// properties specified.
+	User param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
 	// The unique identifier for the tenant.
 	Tenant param.Field[string] `json:"tenant"`
 }
 
 func (r AudienceRemoveMembersParamsMember) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// An object containing the user's ID.
-type AudienceRemoveMembersParamsMembersUser struct {
-	// The unique identifier of the user.
-	ID param.Field[string] `json:"id"`
-}
-
-func (r AudienceRemoveMembersParamsMembersUser) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }

@@ -1,5 +1,55 @@
 # Changelog
 
+## 1.29.0 (2026-02-19)
+
+Full Changelog: [v1.28.0...v1.29.0](https://github.com/knocklabs/knock-go/compare/v1.28.0...v1.29.0)
+
+### Features
+
+* **api:** api update ([a943bff](https://github.com/knocklabs/knock-go/commit/a943bffa25e0380ab681c16760333c4a5ee6a0ec))
+* **api:** api update ([ad1e219](https://github.com/knocklabs/knock-go/commit/ad1e219bfc52253b1f3b6c20716b003079394008))
+* **api:** api update ([416dad7](https://github.com/knocklabs/knock-go/commit/416dad7ad864fb6aa71c03b182696409cacf4b38))
+* **api:** api update ([b79b754](https://github.com/knocklabs/knock-go/commit/b79b75475243edf952e1fcd8f2800f24be356ee3))
+* **api:** api update ([80eb12d](https://github.com/knocklabs/knock-go/commit/80eb12d49d1a26c035ccbe7941dc531816212e89))
+* **api:** api update ([3d5d6b3](https://github.com/knocklabs/knock-go/commit/3d5d6b384b06fa4b310a41a2b9666837e5a936cb))
+* **api:** api update ([599828c](https://github.com/knocklabs/knock-go/commit/599828c2417298386ea364ed7a53d3ad6faf1602))
+* **api:** api update ([d86de1c](https://github.com/knocklabs/knock-go/commit/d86de1c704b78191a346338d70dbcde2c8f1d841))
+* **api:** api update ([5d330cb](https://github.com/knocklabs/knock-go/commit/5d330cb00602915f86999f1e5ca064b7695a6436))
+* **api:** api update ([81e0ec3](https://github.com/knocklabs/knock-go/commit/81e0ec3baddaed33368766508bf2e974aee6bade))
+* **api:** api update ([a3567bf](https://github.com/knocklabs/knock-go/commit/a3567bfb750e9ac5cbfff5b51b9b511a54aaaa73))
+* **api:** api update ([4746b3b](https://github.com/knocklabs/knock-go/commit/4746b3b13424c4880b6685cc8c285ae64a435024))
+* **api:** api update ([69cf1c6](https://github.com/knocklabs/knock-go/commit/69cf1c642b44d1c751c41298626ea3a8dca53eb0))
+* **api:** api update ([c39dd89](https://github.com/knocklabs/knock-go/commit/c39dd895397c7068474ce01a3b6247ed1c01527b))
+* **api:** api update ([7c82f8a](https://github.com/knocklabs/knock-go/commit/7c82f8a3c959e8665bdecca0179effd38db1061e))
+* **api:** api update ([2303a5f](https://github.com/knocklabs/knock-go/commit/2303a5f8dc35bf61bf30dcadf166adfcf6f35d18))
+* **api:** api update ([dd84cd0](https://github.com/knocklabs/knock-go/commit/dd84cd0f06406105775368ba7d2692e46d89a2a9))
+* **api:** api update ([8186fef](https://github.com/knocklabs/knock-go/commit/8186fef8fbc67a0cb5b5c53c0ef1f71cb0025ecf))
+* **api:** api update ([9ca089c](https://github.com/knocklabs/knock-go/commit/9ca089cde4fa73973cd4e01431f6e472380b851b))
+* **api:** api update ([f5e0761](https://github.com/knocklabs/knock-go/commit/f5e07614de82f8a705b8cd1638142b63c7ce498e))
+* **api:** api update ([7b903f5](https://github.com/knocklabs/knock-go/commit/7b903f5070b9101e0721dc2b7d069501360e1c3e))
+* **api:** api update ([ce32ee2](https://github.com/knocklabs/knock-go/commit/ce32ee2e9a0e824cef814e79fc72c3ea616fa935))
+* **api:** api update ([b4692f0](https://github.com/knocklabs/knock-go/commit/b4692f0d01be1b291f206f8b4b82a125b750e409))
+* **api:** api update ([191e239](https://github.com/knocklabs/knock-go/commit/191e23928794dced50a9a39fc14a1855734ae9fa))
+* **api:** api update ([c175b92](https://github.com/knocklabs/knock-go/commit/c175b9216eef65e3f482cb8d353224d3c3c31d55))
+
+
+### Bug Fixes
+
+* allow canceling a request while it is waiting to retry ([eb46cd6](https://github.com/knocklabs/knock-go/commit/eb46cd650c037547a15293589363d59af92387bc))
+* **docs:** add missing pointer prefix to api.md return types ([6cba006](https://github.com/knocklabs/knock-go/commit/6cba006abc1557a20dd2d1c33c1bb9612648f015))
+* **mcp:** correct code tool API endpoint ([f03d64a](https://github.com/knocklabs/knock-go/commit/f03d64ac226b08bf975edb037220af6965bc52de))
+* rename param to avoid collision ([8784ca0](https://github.com/knocklabs/knock-go/commit/8784ca0b686c6d1b18976fe5283282f62df091fc))
+* skip usage tests that don't work with Prism ([759496c](https://github.com/knocklabs/knock-go/commit/759496cd3ff09e296cc389bc3b12522073f21428))
+
+
+### Chores
+
+* elide duplicate aliases ([ae708dd](https://github.com/knocklabs/knock-go/commit/ae708dd4bec43d49bc12e2a31fbdf5c61a02c0a6))
+* **internal:** codegen related update ([105f00e](https://github.com/knocklabs/knock-go/commit/105f00e1b006fa99ca3eb34e5bf660ae966fbf11))
+* **internal:** codegen related update ([c1beb77](https://github.com/knocklabs/knock-go/commit/c1beb771a7d4ebaf0a5f39b8367379170bf4fc36))
+* **internal:** update `actions/checkout` version ([cb03bf1](https://github.com/knocklabs/knock-go/commit/cb03bf1aa12f055d369d44751f3be80e331de308))
+* update mock server docs ([ce65677](https://github.com/knocklabs/knock-go/commit/ce65677a76e2bd39856a2d2dd4f4283836033ea7))
+
 ## 1.28.0 (2025-11-20)
 
 Full Changelog: [v1.27.0...v1.28.0](https://github.com/knocklabs/knock-go/compare/v1.27.0...v1.28.0)
