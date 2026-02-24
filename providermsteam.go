@@ -107,7 +107,7 @@ func (r *ProviderMsTeamService) RevokeAccess(ctx context.Context, channelID stri
 // The response from a Microsoft Teams auth check request.
 type ProviderMsTeamCheckAuthResponse struct {
 	// A Microsoft Teams connection object.
-	Connection ProviderMsTeamCheckAuthResponseConnection `json:"connection,required"`
+	Connection ProviderMsTeamCheckAuthResponseConnection `json:"connection" api:"required"`
 	JSON       providerMsTeamCheckAuthResponseJSON       `json:"-"`
 }
 
@@ -130,9 +130,9 @@ func (r providerMsTeamCheckAuthResponseJSON) RawJSON() string {
 // A Microsoft Teams connection object.
 type ProviderMsTeamCheckAuthResponseConnection struct {
 	// Whether the Microsoft Teams connection is valid.
-	Ok bool `json:"ok,required"`
+	Ok bool `json:"ok" api:"required"`
 	// The reason for the Microsoft Teams connection if it is not valid.
-	Reason string                                        `json:"reason,nullable"`
+	Reason string                                        `json:"reason" api:"nullable"`
 	JSON   providerMsTeamCheckAuthResponseConnectionJSON `json:"-"`
 }
 
@@ -157,7 +157,7 @@ func (r providerMsTeamCheckAuthResponseConnectionJSON) RawJSON() string {
 // channels.
 type ProviderMsTeamListChannelsResponse struct {
 	// List of Microsoft Teams channels.
-	MsTeamsChannels []ProviderMsTeamListChannelsResponseMsTeamsChannel `json:"ms_teams_channels,required"`
+	MsTeamsChannels []ProviderMsTeamListChannelsResponseMsTeamsChannel `json:"ms_teams_channels" api:"required"`
 	JSON            providerMsTeamListChannelsResponseJSON             `json:"-"`
 }
 
@@ -179,13 +179,13 @@ func (r providerMsTeamListChannelsResponseJSON) RawJSON() string {
 
 type ProviderMsTeamListChannelsResponseMsTeamsChannel struct {
 	// Microsoft Teams channel ID.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// Microsoft Teams channel name.
-	DisplayName string `json:"displayName,required"`
+	DisplayName string `json:"displayName" api:"required"`
 	// Microsoft Teams channel created date and time.
 	CreatedDateTime string `json:"createdDateTime"`
 	// Microsoft Teams channel description.
-	Description string `json:"description,nullable"`
+	Description string `json:"description" api:"nullable"`
 	// Whether the Microsoft Teams channel is archived.
 	IsArchived bool `json:"isArchived"`
 	// Microsoft Teams channel membership type.
@@ -216,11 +216,11 @@ func (r providerMsTeamListChannelsResponseMsTeamsChannelJSON) RawJSON() string {
 
 type ProviderMsTeamListTeamsResponse struct {
 	// Microsoft Teams team ID.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// Microsoft Teams team display name.
-	DisplayName string `json:"displayName,required"`
+	DisplayName string `json:"displayName" api:"required"`
 	// Microsoft Teams team description.
-	Description string                              `json:"description,nullable"`
+	Description string                              `json:"description" api:"nullable"`
 	JSON        providerMsTeamListTeamsResponseJSON `json:"-"`
 }
 
@@ -267,7 +267,7 @@ func (r providerMsTeamRevokeAccessResponseJSON) RawJSON() string {
 
 type ProviderMsTeamCheckAuthParams struct {
 	// A JSON encoded string containing the Microsoft Teams tenant object reference.
-	MsTeamsTenantObject param.Field[string] `query:"ms_teams_tenant_object,required"`
+	MsTeamsTenantObject param.Field[string] `query:"ms_teams_tenant_object" api:"required"`
 }
 
 // URLQuery serializes [ProviderMsTeamCheckAuthParams]'s query parameters as
@@ -281,9 +281,9 @@ func (r ProviderMsTeamCheckAuthParams) URLQuery() (v url.Values) {
 
 type ProviderMsTeamListChannelsParams struct {
 	// A JSON encoded string containing the Microsoft Teams tenant object reference.
-	MsTeamsTenantObject param.Field[string] `query:"ms_teams_tenant_object,required"`
+	MsTeamsTenantObject param.Field[string] `query:"ms_teams_tenant_object" api:"required"`
 	// Microsoft Teams team ID.
-	TeamID       param.Field[string]                                       `query:"team_id,required"`
+	TeamID       param.Field[string]                                       `query:"team_id" api:"required"`
 	QueryOptions param.Field[ProviderMsTeamListChannelsParamsQueryOptions] `query:"query_options"`
 }
 
@@ -316,7 +316,7 @@ func (r ProviderMsTeamListChannelsParamsQueryOptions) URLQuery() (v url.Values) 
 
 type ProviderMsTeamListTeamsParams struct {
 	// A JSON encoded string containing the Microsoft Teams tenant object reference.
-	MsTeamsTenantObject param.Field[string]                                    `query:"ms_teams_tenant_object,required"`
+	MsTeamsTenantObject param.Field[string]                                    `query:"ms_teams_tenant_object" api:"required"`
 	QueryOptions        param.Field[ProviderMsTeamListTeamsParamsQueryOptions] `query:"query_options"`
 }
 
@@ -355,7 +355,7 @@ func (r ProviderMsTeamListTeamsParamsQueryOptions) URLQuery() (v url.Values) {
 
 type ProviderMsTeamRevokeAccessParams struct {
 	// A JSON encoded string containing the Microsoft Teams tenant object reference.
-	MsTeamsTenantObject param.Field[string] `query:"ms_teams_tenant_object,required"`
+	MsTeamsTenantObject param.Field[string] `query:"ms_teams_tenant_object" api:"required"`
 }
 
 // URLQuery serializes [ProviderMsTeamRevokeAccessParams]'s query parameters as

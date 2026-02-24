@@ -280,9 +280,9 @@ type Activity struct {
 	// The typename of the schema.
 	Typename string `json:"__typename"`
 	// A recipient of a notification, which is either a user or an object.
-	Actor Recipient `json:"actor,nullable"`
+	Actor Recipient `json:"actor" api:"nullable"`
 	// The workflow trigger `data` payload associated with the activity.
-	Data map[string]interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data" api:"nullable"`
 	// Timestamp when the activity was created.
 	InsertedAt time.Time `json:"inserted_at" format:"date-time"`
 	// A recipient of a notification, which is either a user or an object.
@@ -317,61 +317,61 @@ func (r activityJSON) RawJSON() string {
 // channel.
 type Message struct {
 	// The unique identifier for the message.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// Deprecated, use channel.id instead.
 	//
 	// Deprecated: deprecated
-	ChannelID string `json:"channel_id,required" format:"uuid"`
+	ChannelID string `json:"channel_id" api:"required" format:"uuid"`
 	// A list of engagement statuses.
-	EngagementStatuses []MessageEngagementStatus `json:"engagement_statuses,required"`
+	EngagementStatuses []MessageEngagementStatus `json:"engagement_statuses" api:"required"`
 	// Timestamp when the resource was created.
-	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
+	InsertedAt time.Time `json:"inserted_at" api:"required" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
 	// reference (ID, collection).
-	Recipient RecipientReferenceUnion `json:"recipient,required"`
+	Recipient RecipientReferenceUnion `json:"recipient" api:"required"`
 	// The workflow or guide that triggered the message.
-	Source MessageSource `json:"source,required"`
+	Source MessageSource `json:"source" api:"required"`
 	// The message delivery status.
-	Status MessageStatus `json:"status,required"`
+	Status MessageStatus `json:"status" api:"required"`
 	// The timestamp when the resource was last updated.
-	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
+	UpdatedAt time.Time `json:"updated_at" api:"required" format:"date-time"`
 	// One or more actors that are associated with this message. Note: this is a list
 	// that can contain up to 10 actors if the message is produced from a
 	// [batch](/designing-workflows/batch-function).
 	Actors []RecipientReferenceUnion `json:"actors"`
 	// Timestamp when the message was archived.
-	ArchivedAt time.Time `json:"archived_at,nullable" format:"date-time"`
+	ArchivedAt time.Time `json:"archived_at" api:"nullable" format:"date-time"`
 	// A configured channel, which is a way to route messages to a provider.
 	Channel MessageChannel `json:"channel"`
 	// Timestamp when the message was clicked.
-	ClickedAt time.Time `json:"clicked_at,nullable" format:"date-time"`
+	ClickedAt time.Time `json:"clicked_at" api:"nullable" format:"date-time"`
 	// Data associated with the message’s workflow run. Includes the workflow trigger
 	// request’s `data` payload merged with any additional data returned by a
 	// [fetch function](/designing-workflows/fetch-function). For messages produced
 	// after a [batch step](/designing-workflows/batch-function), includes the payload
 	// `data` from the most-recent trigger request (the final `activity` in the batch).
-	Data map[string]interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data" api:"nullable"`
 	// Timestamp when the message was interacted with.
-	InteractedAt time.Time `json:"interacted_at,nullable" format:"date-time"`
+	InteractedAt time.Time `json:"interacted_at" api:"nullable" format:"date-time"`
 	// Timestamp when a link in the message was clicked.
-	LinkClickedAt time.Time `json:"link_clicked_at,nullable" format:"date-time"`
+	LinkClickedAt time.Time `json:"link_clicked_at" api:"nullable" format:"date-time"`
 	// The metadata associated with the message.
-	Metadata map[string]interface{} `json:"metadata,nullable"`
+	Metadata map[string]interface{} `json:"metadata" api:"nullable"`
 	// Timestamp when the message was read.
-	ReadAt time.Time `json:"read_at,nullable" format:"date-time"`
+	ReadAt time.Time `json:"read_at" api:"nullable" format:"date-time"`
 	// Timestamp when the message was scheduled to be sent.
-	ScheduledAt time.Time `json:"scheduled_at,nullable" format:"date-time"`
+	ScheduledAt time.Time `json:"scheduled_at" api:"nullable" format:"date-time"`
 	// Timestamp when the message was seen.
-	SeenAt time.Time `json:"seen_at,nullable" format:"date-time"`
+	SeenAt time.Time `json:"seen_at" api:"nullable" format:"date-time"`
 	// The ID of the `tenant` associated with the message. Only present when a `tenant`
 	// is provided on a workflow trigger request.
-	Tenant string `json:"tenant,nullable"`
+	Tenant string `json:"tenant" api:"nullable"`
 	// The key of the workflow that generated the message.
 	//
 	// Deprecated: deprecated
-	Workflow string      `json:"workflow,nullable"`
+	Workflow string      `json:"workflow" api:"nullable"`
 	JSON     messageJSON `json:"-"`
 }
 
@@ -433,23 +433,23 @@ func (r MessageEngagementStatus) IsKnown() bool {
 
 // The workflow or guide that triggered the message.
 type MessageSource struct {
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// The categories associated with the message.
-	Categories []string `json:"categories,required"`
+	Categories []string `json:"categories" api:"required"`
 	// The key of the workflow or guide that triggered the message.
-	Key string `json:"key,required"`
+	Key string `json:"key" api:"required"`
 	// The ID of the version of the workflow or guide that triggered the message.
-	VersionID string `json:"version_id,required" format:"uuid"`
+	VersionID string `json:"version_id" api:"required" format:"uuid"`
 	// The step reference for the step in the workflow that generated the message.
-	StepRef string `json:"step_ref,nullable"`
+	StepRef string `json:"step_ref" api:"nullable"`
 	// Whether this message was generated from a workflow, broadcast, or guide.
 	Type MessageSourceType `json:"type"`
 	// The unique identifier for the workflow recipient run that generated this
 	// message. Only present for workflow/broadcast messages.
-	WorkflowRecipientRunID string `json:"workflow_recipient_run_id,nullable" format:"uuid"`
+	WorkflowRecipientRunID string `json:"workflow_recipient_run_id" api:"nullable" format:"uuid"`
 	// The unique identifier for the workflow run that generated this message. Only
 	// present for workflow/broadcast messages.
-	WorkflowRunID string            `json:"workflow_run_id,nullable" format:"uuid"`
+	WorkflowRunID string            `json:"workflow_run_id" api:"nullable" format:"uuid"`
 	JSON          messageSourceJSON `json:"-"`
 }
 
@@ -516,19 +516,19 @@ func (r MessageStatus) IsKnown() bool {
 // A configured channel, which is a way to route messages to a provider.
 type MessageChannel struct {
 	// The unique identifier for the channel.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// The timestamp of when the channel was created.
-	CreatedAt time.Time `json:"created_at,required" format:"date-time"`
+	CreatedAt time.Time `json:"created_at" api:"required" format:"date-time"`
 	// The ID of the provider that this channel uses to deliver messages.
-	Provider string `json:"provider,required"`
+	Provider string `json:"provider" api:"required"`
 	// The type of channel, determining what kind of messages it can send.
-	Type MessageChannelType `json:"type,required"`
+	Type MessageChannelType `json:"type" api:"required"`
 	// The timestamp of when the channel was last updated.
-	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
+	UpdatedAt time.Time `json:"updated_at" api:"required" format:"date-time"`
 	// Unique identifier for the channel within a project (immutable once created).
-	Key string `json:"key,nullable"`
+	Key string `json:"key" api:"nullable"`
 	// The human-readable name of the channel.
-	Name string             `json:"name,nullable"`
+	Name string             `json:"name" api:"nullable"`
 	JSON messageChannelJSON `json:"-"`
 }
 
@@ -579,19 +579,19 @@ func (r MessageChannelType) IsKnown() bool {
 // and the `response` that was returned.
 type MessageDeliveryLog struct {
 	// The unique identifier for the message delivery log.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// The ID of the environment in which the message delivery occurred.
-	EnvironmentID string `json:"environment_id,required" format:"uuid"`
+	EnvironmentID string `json:"environment_id" api:"required" format:"uuid"`
 	// Timestamp when the message delivery log was created.
-	InsertedAt string `json:"inserted_at,required"`
+	InsertedAt string `json:"inserted_at" api:"required"`
 	// A message delivery log request.
-	Request MessageDeliveryLogRequest `json:"request,required"`
+	Request MessageDeliveryLogRequest `json:"request" api:"required"`
 	// A message delivery log response.
-	Response MessageDeliveryLogResponse `json:"response,required"`
+	Response MessageDeliveryLogResponse `json:"response" api:"required"`
 	// The name of the service that processed the delivery.
-	ServiceName string                 `json:"service_name,required"`
+	ServiceName string                 `json:"service_name" api:"required"`
 	JSON        messageDeliveryLogJSON `json:"-"`
 }
 
@@ -622,7 +622,7 @@ type MessageDeliveryLogRequest struct {
 	// The body content that was sent with the request.
 	Body MessageDeliveryLogRequestBodyUnion `json:"body"`
 	// The headers that were sent with the request.
-	Headers map[string]interface{} `json:"headers,nullable"`
+	Headers map[string]interface{} `json:"headers" api:"nullable"`
 	// The host to which the request was sent.
 	Host string `json:"host"`
 	// The HTTP method used for the request.
@@ -630,7 +630,7 @@ type MessageDeliveryLogRequest struct {
 	// The path of the URL that was requested.
 	Path string `json:"path"`
 	// The query string of the URL that was requested.
-	Query string                        `json:"query,nullable"`
+	Query string                        `json:"query" api:"nullable"`
 	JSON  messageDeliveryLogRequestJSON `json:"-"`
 }
 
@@ -705,7 +705,7 @@ type MessageDeliveryLogResponse struct {
 	// The body content that was received with the response.
 	Body MessageDeliveryLogResponseBodyUnion `json:"body"`
 	// The headers that were received with the response.
-	Headers map[string]interface{} `json:"headers,nullable"`
+	Headers map[string]interface{} `json:"headers" api:"nullable"`
 	// The HTTP status code of the response.
 	Status int64                          `json:"status"`
 	JSON   messageDeliveryLogResponseJSON `json:"-"`
@@ -759,18 +759,18 @@ func (r MessageDeliveryLogResponseBodyMap) ImplementsMessageDeliveryLogResponseB
 // [delivery or engagement status](/send-notifications/message-statuses) changes.
 type MessageEvent struct {
 	// The unique identifier for the message event.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// Timestamp when the event was created.
-	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
+	InsertedAt time.Time `json:"inserted_at" api:"required" format:"date-time"`
 	// A reference to a recipient, either a user identifier (string) or an object
 	// reference (ID, collection).
-	Recipient RecipientReferenceUnion `json:"recipient,required"`
+	Recipient RecipientReferenceUnion `json:"recipient" api:"required"`
 	// The type of event that occurred.
-	Type MessageEventType `json:"type,required"`
+	Type MessageEventType `json:"type" api:"required"`
 	// The data associated with the message event. Only present for some event types.
-	Data map[string]interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data" api:"nullable"`
 	JSON messageEventJSON       `json:"-"`
 }
 
@@ -826,13 +826,13 @@ func (r MessageEventType) IsKnown() bool {
 // The content of a message.
 type MessageGetContentResponse struct {
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// Content data specific to the channel type.
-	Data MessageGetContentResponseData `json:"data,required"`
+	Data MessageGetContentResponseData `json:"data" api:"required"`
 	// Timestamp when the message content was created.
-	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
+	InsertedAt time.Time `json:"inserted_at" api:"required" format:"date-time"`
 	// The unique identifier for the message content.
-	MessageID string                        `json:"message_id,required"`
+	MessageID string                        `json:"message_id" api:"required"`
 	JSON      messageGetContentResponseJSON `json:"-"`
 }
 
@@ -858,18 +858,18 @@ func (r messageGetContentResponseJSON) RawJSON() string {
 // Content data specific to the channel type.
 type MessageGetContentResponseData struct {
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// The device token to send the push notification to.
 	Token string `json:"token"`
 	// The BCC email addresses.
-	Bcc string `json:"bcc,nullable"`
+	Bcc string `json:"bcc" api:"nullable"`
 	// This field can have the runtime type of
 	// [[]MessageGetContentResponseDataMessageInAppFeedContentBlock].
 	Blocks interface{} `json:"blocks"`
 	// The content body of the SMS message.
 	Body string `json:"body"`
 	// The CC email addresses.
-	Cc string `json:"cc,nullable"`
+	Cc string `json:"cc" api:"nullable"`
 	// This field can have the runtime type of [map[string]interface{}].
 	Connection interface{} `json:"connection"`
 	// This field can have the runtime type of [map[string]interface{}].
@@ -881,7 +881,7 @@ type MessageGetContentResponseData struct {
 	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{} `json:"metadata"`
 	// The reply-to email address.
-	ReplyTo string `json:"reply_to,nullable"`
+	ReplyTo string `json:"reply_to" api:"nullable"`
 	// The subject line of the email message.
 	SubjectLine string `json:"subject_line"`
 	// This field can have the runtime type of
@@ -988,23 +988,23 @@ func init() {
 // The content of an email message.
 type MessageGetContentResponseDataMessageEmailContent struct {
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// The sender's email address.
-	From string `json:"from,required"`
+	From string `json:"from" api:"required"`
 	// The HTML body of the email message.
-	HTMLBody string `json:"html_body,required"`
+	HTMLBody string `json:"html_body" api:"required"`
 	// The subject line of the email message.
-	SubjectLine string `json:"subject_line,required"`
+	SubjectLine string `json:"subject_line" api:"required"`
 	// The text body of the email message.
-	TextBody string `json:"text_body,required"`
+	TextBody string `json:"text_body" api:"required"`
 	// The recipient's email address.
-	To string `json:"to,required"`
+	To string `json:"to" api:"required"`
 	// The BCC email addresses.
-	Bcc string `json:"bcc,nullable"`
+	Bcc string `json:"bcc" api:"nullable"`
 	// The CC email addresses.
-	Cc string `json:"cc,nullable"`
+	Cc string `json:"cc" api:"nullable"`
 	// The reply-to email address.
-	ReplyTo string                                               `json:"reply_to,nullable"`
+	ReplyTo string                                               `json:"reply_to" api:"nullable"`
 	JSON    messageGetContentResponseDataMessageEmailContentJSON `json:"-"`
 }
 
@@ -1037,11 +1037,11 @@ func (r MessageGetContentResponseDataMessageEmailContent) implementsMessageGetCo
 // The content of an SMS message.
 type MessageGetContentResponseDataMessageSMSContent struct {
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// The content body of the SMS message.
-	Body string `json:"body,required"`
+	Body string `json:"body" api:"required"`
 	// The phone number the SMS was sent to.
-	To   string                                             `json:"to,required"`
+	To   string                                             `json:"to" api:"required"`
 	JSON messageGetContentResponseDataMessageSMSContentJSON `json:"-"`
 }
 
@@ -1068,15 +1068,15 @@ func (r MessageGetContentResponseDataMessageSMSContent) implementsMessageGetCont
 // Push channel data.
 type MessageGetContentResponseDataMessagePushContent struct {
 	// The device token to send the push notification to.
-	Token string `json:"token,required"`
+	Token string `json:"token" api:"required"`
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// The content body of the push notification.
-	Body string `json:"body,required"`
+	Body string `json:"body" api:"required"`
 	// The title of the push notification.
-	Title string `json:"title,required"`
+	Title string `json:"title" api:"required"`
 	// Additional data payload for the push notification.
-	Data map[string]interface{}                              `json:"data,nullable"`
+	Data map[string]interface{}                              `json:"data" api:"nullable"`
 	JSON messageGetContentResponseDataMessagePushContentJSON `json:"-"`
 }
 
@@ -1105,13 +1105,13 @@ func (r MessageGetContentResponseDataMessagePushContent) implementsMessageGetCon
 // The content of a chat message.
 type MessageGetContentResponseDataMessageChatContent struct {
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// The channel data connection from the recipient to the underlying provider.
-	Connection map[string]interface{} `json:"connection,required"`
+	Connection map[string]interface{} `json:"connection" api:"required"`
 	// The template structure for the chat message.
-	Template MessageGetContentResponseDataMessageChatContentTemplate `json:"template,required"`
+	Template MessageGetContentResponseDataMessageChatContentTemplate `json:"template" api:"required"`
 	// Additional metadata associated with the chat message.
-	Metadata map[string]interface{}                              `json:"metadata,nullable"`
+	Metadata map[string]interface{}                              `json:"metadata" api:"nullable"`
 	JSON     messageGetContentResponseDataMessageChatContentJSON `json:"-"`
 }
 
@@ -1139,11 +1139,11 @@ func (r MessageGetContentResponseDataMessageChatContent) implementsMessageGetCon
 // The template structure for the chat message.
 type MessageGetContentResponseDataMessageChatContentTemplate struct {
 	// The blocks of the message in a chat.
-	Blocks []MessageGetContentResponseDataMessageChatContentTemplateBlock `json:"blocks,nullable"`
+	Blocks []MessageGetContentResponseDataMessageChatContentTemplateBlock `json:"blocks" api:"nullable"`
 	// The JSON content of the message.
-	JsonContent map[string]interface{} `json:"json_content,nullable"`
+	JsonContent map[string]interface{} `json:"json_content" api:"nullable"`
 	// The summary of the chat message.
-	Summary string                                                      `json:"summary,nullable"`
+	Summary string                                                      `json:"summary" api:"nullable"`
 	JSON    messageGetContentResponseDataMessageChatContentTemplateJSON `json:"-"`
 }
 
@@ -1169,11 +1169,11 @@ func (r messageGetContentResponseDataMessageChatContentTemplateJSON) RawJSON() s
 // A block in a message in a chat.
 type MessageGetContentResponseDataMessageChatContentTemplateBlock struct {
 	// The actual content of the block.
-	Content string `json:"content,required"`
+	Content string `json:"content" api:"required"`
 	// The name of the block for identification.
-	Name string `json:"name,required"`
+	Name string `json:"name" api:"required"`
 	// The type of block in a message in a chat (text or markdown).
-	Type MessageGetContentResponseDataMessageChatContentTemplateBlocksType `json:"type,required"`
+	Type MessageGetContentResponseDataMessageChatContentTemplateBlocksType `json:"type" api:"required"`
 	JSON messageGetContentResponseDataMessageChatContentTemplateBlockJSON  `json:"-"`
 }
 
@@ -1215,9 +1215,9 @@ func (r MessageGetContentResponseDataMessageChatContentTemplateBlocksType) IsKno
 // The content of an in-app feed message.
 type MessageGetContentResponseDataMessageInAppFeedContent struct {
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// The blocks of the message in an app feed.
-	Blocks []MessageGetContentResponseDataMessageInAppFeedContentBlock `json:"blocks,required"`
+	Blocks []MessageGetContentResponseDataMessageInAppFeedContentBlock `json:"blocks" api:"required"`
 	JSON   messageGetContentResponseDataMessageInAppFeedContentJSON    `json:"-"`
 }
 
@@ -1244,9 +1244,9 @@ func (r MessageGetContentResponseDataMessageInAppFeedContent) implementsMessageG
 // A block in a message in an app feed.
 type MessageGetContentResponseDataMessageInAppFeedContentBlock struct {
 	// The name of the block in a message in an app feed.
-	Name string `json:"name,required"`
+	Name string `json:"name" api:"required"`
 	// The type of block in a message in an app feed.
-	Type MessageGetContentResponseDataMessageInAppFeedContentBlocksType `json:"type,required"`
+	Type MessageGetContentResponseDataMessageInAppFeedContentBlocksType `json:"type" api:"required"`
 	// This field can have the runtime type of
 	// [[]MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton].
 	Buttons interface{} `json:"buttons"`
@@ -1323,13 +1323,13 @@ func init() {
 // A block in a message in an app feed.
 type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock struct {
 	// The content of the block in a message in an app feed.
-	Content string `json:"content,required"`
+	Content string `json:"content" api:"required"`
 	// The name of the block in a message in an app feed.
-	Name string `json:"name,required"`
+	Name string `json:"name" api:"required"`
 	// The rendered HTML version of the content.
-	Rendered string `json:"rendered,required"`
+	Rendered string `json:"rendered" api:"required"`
 	// The type of block in a message in an app feed.
-	Type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockType `json:"type,required"`
+	Type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockType `json:"type" api:"required"`
 	JSON messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockJSON `json:"-"`
 }
 
@@ -1375,11 +1375,11 @@ func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFe
 // A button set block in a message in an app feed.
 type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock struct {
 	// A list of buttons in an in app feed message.
-	Buttons []MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton `json:"buttons,required"`
+	Buttons []MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton `json:"buttons" api:"required"`
 	// The name of the button set in a message in an app feed.
-	Name string `json:"name,required"`
+	Name string `json:"name" api:"required"`
 	// The type of block in a message in an app feed.
-	Type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockType `json:"type,required"`
+	Type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockType `json:"type" api:"required"`
 	JSON messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockJSON `json:"-"`
 }
 
@@ -1408,11 +1408,11 @@ func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFe
 // A button in an in app feed message.
 type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton struct {
 	// The action to take when the button is clicked.
-	Action string `json:"action,required"`
+	Action string `json:"action" api:"required"`
 	// The label of the button.
-	Label string `json:"label,required"`
+	Label string `json:"label" api:"required"`
 	// The name of the button.
-	Name string                                                                                             `json:"name,required"`
+	Name string                                                                                             `json:"name" api:"required"`
 	JSON messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButtonJSON `json:"-"`
 }
 

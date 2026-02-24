@@ -121,7 +121,7 @@ func (r *UserFeedService) ListItemsAutoPaging(ctx context.Context, userID string
 // The response for the user's feed settings.
 type UserFeedGetSettingsResponse struct {
 	// Features configuration for the user's feed.
-	Features UserFeedGetSettingsResponseFeatures `json:"features,required"`
+	Features UserFeedGetSettingsResponseFeatures `json:"features" api:"required"`
 	JSON     userFeedGetSettingsResponseJSON     `json:"-"`
 }
 
@@ -144,7 +144,7 @@ func (r userFeedGetSettingsResponseJSON) RawJSON() string {
 // Features configuration for the user's feed.
 type UserFeedGetSettingsResponseFeatures struct {
 	// Whether branding is required for the user's feed.
-	BrandingRequired bool                                    `json:"branding_required,required"`
+	BrandingRequired bool                                    `json:"branding_required" api:"required"`
 	JSON             userFeedGetSettingsResponseFeaturesJSON `json:"-"`
 }
 
@@ -167,41 +167,41 @@ func (r userFeedGetSettingsResponseFeaturesJSON) RawJSON() string {
 // An in-app feed message in a user's feed.
 type UserFeedListItemsResponse struct {
 	// Unique identifier for the feed.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// List of activities associated with this feed item.
-	Activities []Activity `json:"activities,required"`
+	Activities []Activity `json:"activities" api:"required"`
 	// List of actors associated with this feed item.
-	Actors []Recipient `json:"actors,required"`
+	Actors []Recipient `json:"actors" api:"required"`
 	// Content blocks that make up the feed item.
-	Blocks []UserFeedListItemsResponseBlock `json:"blocks,required"`
+	Blocks []UserFeedListItemsResponseBlock `json:"blocks" api:"required"`
 	// Additional data associated with the feed item.
-	Data map[string]interface{} `json:"data,required,nullable"`
+	Data map[string]interface{} `json:"data" api:"required,nullable"`
 	// Timestamp when the resource was created.
-	InsertedAt string `json:"inserted_at,required"`
+	InsertedAt string `json:"inserted_at" api:"required"`
 	// Source information for the feed item.
-	Source UserFeedListItemsResponseSource `json:"source,required"`
+	Source UserFeedListItemsResponseSource `json:"source" api:"required"`
 	// Tenant ID that the feed item belongs to.
-	Tenant string `json:"tenant,required,nullable"`
+	Tenant string `json:"tenant" api:"required,nullable"`
 	// Total number of activities related to this feed item.
-	TotalActivities int64 `json:"total_activities,required"`
+	TotalActivities int64 `json:"total_activities" api:"required"`
 	// Total number of actors related to this feed item.
-	TotalActors int64 `json:"total_actors,required"`
+	TotalActors int64 `json:"total_actors" api:"required"`
 	// The timestamp when the resource was last updated.
-	UpdatedAt string `json:"updated_at,required"`
+	UpdatedAt string `json:"updated_at" api:"required"`
 	// Timestamp when the feed item was archived.
-	ArchivedAt string `json:"archived_at,nullable"`
+	ArchivedAt string `json:"archived_at" api:"nullable"`
 	// Timestamp when the feed item was clicked.
-	ClickedAt string `json:"clicked_at,nullable"`
+	ClickedAt string `json:"clicked_at" api:"nullable"`
 	// Timestamp when the feed item was interacted with.
-	InteractedAt string `json:"interacted_at,nullable"`
+	InteractedAt string `json:"interacted_at" api:"nullable"`
 	// Timestamp when a link within the feed item was clicked.
-	LinkClickedAt string `json:"link_clicked_at,nullable"`
+	LinkClickedAt string `json:"link_clicked_at" api:"nullable"`
 	// Timestamp when the feed item was marked as read.
-	ReadAt string `json:"read_at,nullable"`
+	ReadAt string `json:"read_at" api:"nullable"`
 	// Timestamp when the feed item was marked as seen.
-	SeenAt string                        `json:"seen_at,nullable"`
+	SeenAt string                        `json:"seen_at" api:"nullable"`
 	JSON   userFeedListItemsResponseJSON `json:"-"`
 }
 
@@ -241,9 +241,9 @@ func (r userFeedListItemsResponseJSON) RawJSON() string {
 // A content block for the feed, can be content or a button set.
 type UserFeedListItemsResponseBlock struct {
 	// The name of the block in a message in an app feed.
-	Name string `json:"name,required"`
+	Name string `json:"name" api:"required"`
 	// The type of block in a message in an app feed.
-	Type UserFeedListItemsResponseBlocksType `json:"type,required"`
+	Type UserFeedListItemsResponseBlocksType `json:"type" api:"required"`
 	// This field can have the runtime type of
 	// [[]UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton].
 	Buttons interface{} `json:"buttons"`
@@ -316,13 +316,13 @@ func init() {
 // A block in a message in an app feed.
 type UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock struct {
 	// The content of the block in a message in an app feed.
-	Content string `json:"content,required"`
+	Content string `json:"content" api:"required"`
 	// The name of the block in a message in an app feed.
-	Name string `json:"name,required"`
+	Name string `json:"name" api:"required"`
 	// The rendered HTML version of the content.
-	Rendered string `json:"rendered,required"`
+	Rendered string `json:"rendered" api:"required"`
 	// The type of block in a message in an app feed.
-	Type UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockType `json:"type,required"`
+	Type UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockType `json:"type" api:"required"`
 	JSON userFeedListItemsResponseBlocksMessageInAppFeedContentBlockJSON `json:"-"`
 }
 
@@ -368,11 +368,11 @@ func (r UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockType) IsKnown
 // A button set block in a message in an app feed.
 type UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock struct {
 	// A list of buttons in an in app feed message.
-	Buttons []UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton `json:"buttons,required"`
+	Buttons []UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton `json:"buttons" api:"required"`
 	// The name of the button set in a message in an app feed.
-	Name string `json:"name,required"`
+	Name string `json:"name" api:"required"`
 	// The type of block in a message in an app feed.
-	Type UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockType `json:"type,required"`
+	Type UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockType `json:"type" api:"required"`
 	JSON userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockJSON `json:"-"`
 }
 
@@ -401,11 +401,11 @@ func (r UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock) implement
 // A button in an in app feed message.
 type UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton struct {
 	// The action to take when the button is clicked.
-	Action string `json:"action,required"`
+	Action string `json:"action" api:"required"`
 	// The label of the button.
-	Label string `json:"label,required"`
+	Label string `json:"label" api:"required"`
 	// The name of the button.
-	Name string                                                                  `json:"name,required"`
+	Name string                                                                  `json:"name" api:"required"`
 	JSON userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButtonJSON `json:"-"`
 }
 
@@ -463,13 +463,13 @@ func (r UserFeedListItemsResponseBlocksType) IsKnown() bool {
 // Source information for the feed item.
 type UserFeedListItemsResponseSource struct {
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// Categories this workflow belongs to.
-	Categories []string `json:"categories,required"`
+	Categories []string `json:"categories" api:"required"`
 	// The key of the workflow.
-	Key string `json:"key,required"`
+	Key string `json:"key" api:"required"`
 	// The workflow version ID.
-	VersionID string                              `json:"version_id,required" format:"uuid"`
+	VersionID string                              `json:"version_id" api:"required" format:"uuid"`
 	JSON      userFeedListItemsResponseSourceJSON `json:"-"`
 }
 

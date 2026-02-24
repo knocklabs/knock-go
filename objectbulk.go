@@ -90,7 +90,7 @@ func (r *ObjectBulkService) Set(ctx context.Context, collection string, body Obj
 
 type ObjectBulkDeleteParams struct {
 	// List of object IDs to delete.
-	ObjectIDs param.Field[[]string] `json:"object_ids,required"`
+	ObjectIDs param.Field[[]string] `json:"object_ids" api:"required"`
 }
 
 func (r ObjectBulkDeleteParams) MarshalJSON() (data []byte, err error) {
@@ -99,7 +99,7 @@ func (r ObjectBulkDeleteParams) MarshalJSON() (data []byte, err error) {
 
 type ObjectBulkAddSubscriptionsParams struct {
 	// A nested list of subscriptions.
-	Subscriptions param.Field[[]ObjectBulkAddSubscriptionsParamsSubscription] `json:"subscriptions,required"`
+	Subscriptions param.Field[[]ObjectBulkAddSubscriptionsParamsSubscription] `json:"subscriptions" api:"required"`
 }
 
 func (r ObjectBulkAddSubscriptionsParams) MarshalJSON() (data []byte, err error) {
@@ -109,10 +109,10 @@ func (r ObjectBulkAddSubscriptionsParams) MarshalJSON() (data []byte, err error)
 // A list of subscriptions. 1 subscribed-to id, and N subscriber recipients.
 type ObjectBulkAddSubscriptionsParamsSubscription struct {
 	// Unique identifier for the object.
-	ID param.Field[string] `json:"id,required"`
+	ID param.Field[string] `json:"id" api:"required"`
 	// The recipients of the subscription. You can subscribe up to 100 recipients to an
 	// object at a time.
-	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
+	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients" api:"required"`
 	// The custom properties associated with the subscription relationship.
 	Properties param.Field[map[string]interface{}] `json:"properties"`
 }
@@ -123,7 +123,7 @@ func (r ObjectBulkAddSubscriptionsParamsSubscription) MarshalJSON() (data []byte
 
 type ObjectBulkDeleteSubscriptionsParams struct {
 	// A nested list of subscriptions.
-	Subscriptions param.Field[[]ObjectBulkDeleteSubscriptionsParamsSubscription] `json:"subscriptions,required"`
+	Subscriptions param.Field[[]ObjectBulkDeleteSubscriptionsParamsSubscription] `json:"subscriptions" api:"required"`
 }
 
 func (r ObjectBulkDeleteSubscriptionsParams) MarshalJSON() (data []byte, err error) {
@@ -133,10 +133,10 @@ func (r ObjectBulkDeleteSubscriptionsParams) MarshalJSON() (data []byte, err err
 // A list of subscriptions. 1 subscribed-to id, and N subscriber recipients.
 type ObjectBulkDeleteSubscriptionsParamsSubscription struct {
 	// Unique identifier for the object.
-	ID param.Field[string] `json:"id,required"`
+	ID param.Field[string] `json:"id" api:"required"`
 	// The recipients of the subscription. You can subscribe up to 100 recipients to an
 	// object at a time.
-	Recipients param.Field[[]RecipientReferenceUnionParam] `json:"recipients,required"`
+	Recipients param.Field[[]RecipientReferenceUnionParam] `json:"recipients" api:"required"`
 }
 
 func (r ObjectBulkDeleteSubscriptionsParamsSubscription) MarshalJSON() (data []byte, err error) {
@@ -145,7 +145,7 @@ func (r ObjectBulkDeleteSubscriptionsParamsSubscription) MarshalJSON() (data []b
 
 type ObjectBulkSetParams struct {
 	// A list of objects.
-	Objects param.Field[[]ObjectBulkSetParamsObject] `json:"objects,required"`
+	Objects param.Field[[]ObjectBulkSetParamsObject] `json:"objects" api:"required"`
 }
 
 func (r ObjectBulkSetParams) MarshalJSON() (data []byte, err error) {
@@ -155,7 +155,7 @@ func (r ObjectBulkSetParams) MarshalJSON() (data []byte, err error) {
 // A custom [Object](/concepts/objects) entity which belongs to a collection.
 type ObjectBulkSetParamsObject struct {
 	// Unique identifier for the object.
-	ID param.Field[string] `json:"id,required"`
+	ID param.Field[string] `json:"id" api:"required"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// Timestamp when the resource was created.

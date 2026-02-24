@@ -37,20 +37,20 @@ type InlinePreferenceSetRequestParam map[string]PreferenceSetRequestParam
 // recipient. A recipient can have multiple preference sets.
 type PreferenceSet struct {
 	// Unique identifier for the preference set.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// An object where the key is the category and the values are the preference
 	// settings for that category.
-	Categories map[string]PreferenceSetCategoriesUnion `json:"categories,nullable"`
+	Categories map[string]PreferenceSetCategoriesUnion `json:"categories" api:"nullable"`
 	// Channel type preferences.
-	ChannelTypes PreferenceSetChannelTypes `json:"channel_types,nullable"`
+	ChannelTypes PreferenceSetChannelTypes `json:"channel_types" api:"nullable"`
 	// Channel preferences.
-	Channels map[string]PreferenceSetChannelsUnion `json:"channels,nullable"`
+	Channels map[string]PreferenceSetChannelsUnion `json:"channels" api:"nullable"`
 	// Whether the recipient is subscribed to commercial communications. When false,
 	// the recipient will not receive commercial workflow notifications.
-	CommercialSubscribed bool `json:"commercial_subscribed,nullable"`
+	CommercialSubscribed bool `json:"commercial_subscribed" api:"nullable"`
 	// An object where the key is the workflow key and the values are the preference
 	// settings for that workflow.
-	Workflows map[string]PreferenceSetWorkflowsUnion `json:"workflows,nullable"`
+	Workflows map[string]PreferenceSetWorkflowsUnion `json:"workflows" api:"nullable"`
 	JSON      preferenceSetJSON                      `json:"-"`
 }
 
@@ -105,11 +105,11 @@ func init() {
 // types or conditions.
 type PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObject struct {
 	// Channel type preferences.
-	ChannelTypes PreferenceSetChannelTypes `json:"channel_types,nullable"`
+	ChannelTypes PreferenceSetChannelTypes `json:"channel_types" api:"nullable"`
 	// Channel preferences.
-	Channels map[string]PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnion `json:"channels,nullable"`
+	Channels map[string]PreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnion `json:"channels" api:"nullable"`
 	// A list of conditions to apply to a channel type.
-	Conditions []shared.Condition                                                    `json:"conditions,nullable"`
+	Conditions []shared.Condition                                                    `json:"conditions" api:"nullable"`
 	JSON       preferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectJSON `json:"-"`
 }
 
@@ -220,11 +220,11 @@ func init() {
 // types or conditions.
 type PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObject struct {
 	// Channel type preferences.
-	ChannelTypes PreferenceSetChannelTypes `json:"channel_types,nullable"`
+	ChannelTypes PreferenceSetChannelTypes `json:"channel_types" api:"nullable"`
 	// Channel preferences.
-	Channels map[string]PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnion `json:"channels,nullable"`
+	Channels map[string]PreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnion `json:"channels" api:"nullable"`
 	// A list of conditions to apply to a channel type.
-	Conditions []shared.Condition                                                   `json:"conditions,nullable"`
+	Conditions []shared.Condition                                                   `json:"conditions" api:"nullable"`
 	JSON       preferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectJSON `json:"-"`
 }
 
@@ -281,7 +281,7 @@ func init() {
 // conditions to apply.
 type PreferenceSetChannelSetting struct {
 	// A list of conditions to apply to a specific channel.
-	Conditions []shared.Condition              `json:"conditions,required"`
+	Conditions []shared.Condition              `json:"conditions" api:"required"`
 	JSON       preferenceSetChannelSettingJSON `json:"-"`
 }
 
@@ -313,7 +313,7 @@ func (r PreferenceSetChannelSetting) ImplementsPreferenceSetWorkflowsPreferenceS
 // conditions to apply.
 type PreferenceSetChannelSettingParam struct {
 	// A list of conditions to apply to a specific channel.
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
+	Conditions param.Field[[]shared.ConditionParam] `json:"conditions" api:"required"`
 }
 
 func (r PreferenceSetChannelSettingParam) MarshalJSON() (data []byte, err error) {
@@ -332,7 +332,7 @@ func (r PreferenceSetChannelSettingParam) ImplementsPreferenceSetRequestWorkflow
 // conditions to apply.
 type PreferenceSetChannelTypeSetting struct {
 	// A list of conditions to apply to a channel type.
-	Conditions []shared.Condition                  `json:"conditions,required"`
+	Conditions []shared.Condition                  `json:"conditions" api:"required"`
 	JSON       preferenceSetChannelTypeSettingJSON `json:"-"`
 }
 
@@ -368,7 +368,7 @@ func (r PreferenceSetChannelTypeSetting) ImplementsPreferenceSetChannelTypesSMSU
 // conditions to apply.
 type PreferenceSetChannelTypeSettingParam struct {
 	// A list of conditions to apply to a channel type.
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions,required"`
+	Conditions param.Field[[]shared.ConditionParam] `json:"conditions" api:"required"`
 }
 
 func (r PreferenceSetChannelTypeSettingParam) MarshalJSON() (data []byte, err error) {

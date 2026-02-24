@@ -110,14 +110,14 @@ type InlineTenantRequestUnionParam interface {
 // A tenant entity.
 type Tenant struct {
 	// The unique identifier for the tenant.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// An optional name for the tenant.
-	Name string `json:"name,nullable"`
+	Name string `json:"name" api:"nullable"`
 	// The settings for the tenant. Includes branding and preference set.
-	Settings    TenantSettings         `json:"settings,nullable"`
-	ExtraFields map[string]interface{} `json:"-,extras"`
+	Settings    TenantSettings         `json:"settings" api:"nullable"`
+	ExtraFields map[string]interface{} `json:"-" api:"extrafields"`
 	JSON        tenantJSON             `json:"-"`
 }
 
@@ -142,10 +142,10 @@ func (r tenantJSON) RawJSON() string {
 // The settings for the tenant. Includes branding and preference set.
 type TenantSettings struct {
 	// The branding for the tenant.
-	Branding TenantSettingsBranding `json:"branding,nullable"`
+	Branding TenantSettingsBranding `json:"branding" api:"nullable"`
 	// A preference set represents a specific set of notification preferences for a
 	// recipient. A recipient can have multiple preference sets.
-	PreferenceSet PreferenceSet      `json:"preference_set,nullable"`
+	PreferenceSet PreferenceSet      `json:"preference_set" api:"nullable"`
 	JSON          tenantSettingsJSON `json:"-"`
 }
 
@@ -169,14 +169,14 @@ func (r tenantSettingsJSON) RawJSON() string {
 type TenantSettingsBranding struct {
 	// The icon URL for the tenant. Must point to a valid image with an image MIME
 	// type.
-	IconURL string `json:"icon_url,nullable" format:"uri"`
+	IconURL string `json:"icon_url" api:"nullable" format:"uri"`
 	// The logo URL for the tenant. Must point to a valid image with an image MIME
 	// type.
-	LogoURL string `json:"logo_url,nullable" format:"uri"`
+	LogoURL string `json:"logo_url" api:"nullable" format:"uri"`
 	// The primary color for the tenant, provided as a hex value.
-	PrimaryColor string `json:"primary_color,nullable"`
+	PrimaryColor string `json:"primary_color" api:"nullable"`
 	// The primary color contrast for the tenant, provided as a hex value.
-	PrimaryColorContrast string                     `json:"primary_color_contrast,nullable"`
+	PrimaryColorContrast string                     `json:"primary_color_contrast" api:"nullable"`
 	JSON                 tenantSettingsBrandingJSON `json:"-"`
 }
 
@@ -203,7 +203,7 @@ func (r tenantSettingsBrandingJSON) RawJSON() string {
 // the tenant object.
 type TenantRequestParam struct {
 	// The unique identifier for the tenant.
-	ID param.Field[string] `json:"id,required"`
+	ID param.Field[string] `json:"id" api:"required"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// An optional name for the tenant.

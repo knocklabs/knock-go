@@ -64,7 +64,7 @@ func (r *UserBulkService) SetPreferences(ctx context.Context, body UserBulkSetPr
 
 type UserBulkDeleteParams struct {
 	// A list of user IDs.
-	UserIDs param.Field[[]string] `json:"user_ids,required"`
+	UserIDs param.Field[[]string] `json:"user_ids" api:"required"`
 }
 
 func (r UserBulkDeleteParams) MarshalJSON() (data []byte, err error) {
@@ -73,7 +73,7 @@ func (r UserBulkDeleteParams) MarshalJSON() (data []byte, err error) {
 
 type UserBulkIdentifyParams struct {
 	// A list of users.
-	Users param.Field[[]InlineIdentifyUserRequestParam] `json:"users,required"`
+	Users param.Field[[]InlineIdentifyUserRequestParam] `json:"users" api:"required"`
 }
 
 func (r UserBulkIdentifyParams) MarshalJSON() (data []byte, err error) {
@@ -82,9 +82,9 @@ func (r UserBulkIdentifyParams) MarshalJSON() (data []byte, err error) {
 
 type UserBulkSetPreferencesParams struct {
 	// A request to set a preference set for a recipient.
-	Preferences param.Field[PreferenceSetRequestParam] `json:"preferences,required"`
+	Preferences param.Field[PreferenceSetRequestParam] `json:"preferences" api:"required"`
 	// A list of user IDs.
-	UserIDs param.Field[[]string] `json:"user_ids,required"`
+	UserIDs param.Field[[]string] `json:"user_ids" api:"required"`
 }
 
 func (r UserBulkSetPreferencesParams) MarshalJSON() (data []byte, err error) {
