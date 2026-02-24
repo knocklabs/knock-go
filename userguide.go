@@ -107,13 +107,13 @@ func (r *UserGuideService) MarkMessageAsSeen(ctx context.Context, userID string,
 // A response for a list of guides.
 type UserGuideGetChannelResponse struct {
 	// A list of guides.
-	Entries []UserGuideGetChannelResponseEntry `json:"entries,required"`
+	Entries []UserGuideGetChannelResponseEntry `json:"entries" api:"required"`
 	// A map of guide group keys to their last display timestamps.
-	GuideGroupDisplayLogs map[string]time.Time `json:"guide_group_display_logs,required" format:"date-time"`
+	GuideGroupDisplayLogs map[string]time.Time `json:"guide_group_display_logs" api:"required" format:"date-time"`
 	// A list of guide groups with their display sequences and intervals.
-	GuideGroups []UserGuideGetChannelResponseGuideGroup `json:"guide_groups,required"`
+	GuideGroups []UserGuideGetChannelResponseGuideGroup `json:"guide_groups" api:"required"`
 	// Markers for guides the user is not eligible to see.
-	IneligibleGuides []UserGuideGetChannelResponseIneligibleGuide `json:"ineligible_guides,required"`
+	IneligibleGuides []UserGuideGetChannelResponseIneligibleGuide `json:"ineligible_guides" api:"required"`
 	JSON             userGuideGetChannelResponseJSON              `json:"-"`
 }
 
@@ -281,12 +281,12 @@ func (r userGuideGetChannelResponseEntriesStepJSON) RawJSON() string {
 }
 
 type UserGuideGetChannelResponseEntriesStepsMessage struct {
-	ID            string                                             `json:"id,nullable"`
-	ArchivedAt    time.Time                                          `json:"archived_at,nullable" format:"date-time"`
-	InteractedAt  time.Time                                          `json:"interacted_at,nullable" format:"date-time"`
-	LinkClickedAt time.Time                                          `json:"link_clicked_at,nullable" format:"date-time"`
-	ReadAt        time.Time                                          `json:"read_at,nullable" format:"date-time"`
-	SeenAt        time.Time                                          `json:"seen_at,nullable" format:"date-time"`
+	ID            string                                             `json:"id" api:"nullable"`
+	ArchivedAt    time.Time                                          `json:"archived_at" api:"nullable" format:"date-time"`
+	InteractedAt  time.Time                                          `json:"interacted_at" api:"nullable" format:"date-time"`
+	LinkClickedAt time.Time                                          `json:"link_clicked_at" api:"nullable" format:"date-time"`
+	ReadAt        time.Time                                          `json:"read_at" api:"nullable" format:"date-time"`
+	SeenAt        time.Time                                          `json:"seen_at" api:"nullable" format:"date-time"`
 	JSON          userGuideGetChannelResponseEntriesStepsMessageJSON `json:"-"`
 }
 
@@ -344,11 +344,11 @@ func (r userGuideGetChannelResponseGuideGroupJSON) RawJSON() string {
 
 type UserGuideGetChannelResponseIneligibleGuide struct {
 	// The guide's key identifier
-	Key string `json:"key,required"`
+	Key string `json:"key" api:"required"`
 	// Human-readable explanation of ineligibility
-	Message string `json:"message,required"`
+	Message string `json:"message" api:"required"`
 	// Reason code for ineligibility
-	Reason UserGuideGetChannelResponseIneligibleGuidesReason `json:"reason,required"`
+	Reason UserGuideGetChannelResponseIneligibleGuidesReason `json:"reason" api:"required"`
 	JSON   userGuideGetChannelResponseIneligibleGuideJSON    `json:"-"`
 }
 
@@ -391,7 +391,7 @@ func (r UserGuideGetChannelResponseIneligibleGuidesReason) IsKnown() bool {
 // A response for a guide action.
 type UserGuideMarkMessageAsArchivedResponse struct {
 	// The status of a guide's action.
-	Status string                                     `json:"status,required"`
+	Status string                                     `json:"status" api:"required"`
 	JSON   userGuideMarkMessageAsArchivedResponseJSON `json:"-"`
 }
 
@@ -414,7 +414,7 @@ func (r userGuideMarkMessageAsArchivedResponseJSON) RawJSON() string {
 // A response for a guide action.
 type UserGuideMarkMessageAsInteractedResponse struct {
 	// The status of a guide's action.
-	Status string                                       `json:"status,required"`
+	Status string                                       `json:"status" api:"required"`
 	JSON   userGuideMarkMessageAsInteractedResponseJSON `json:"-"`
 }
 
@@ -437,7 +437,7 @@ func (r userGuideMarkMessageAsInteractedResponseJSON) RawJSON() string {
 // A response for a guide action.
 type UserGuideMarkMessageAsSeenResponse struct {
 	// The status of a guide's action.
-	Status string                                 `json:"status,required"`
+	Status string                                 `json:"status" api:"required"`
 	JSON   userGuideMarkMessageAsSeenResponseJSON `json:"-"`
 }
 
@@ -477,13 +477,13 @@ func (r UserGuideGetChannelParams) URLQuery() (v url.Values) {
 
 type UserGuideMarkMessageAsArchivedParams struct {
 	// The unique identifier for the channel.
-	ChannelID param.Field[string] `json:"channel_id,required" format:"uuid"`
+	ChannelID param.Field[string] `json:"channel_id" api:"required" format:"uuid"`
 	// The unique identifier for the guide.
-	GuideID param.Field[string] `json:"guide_id,required" format:"uuid"`
+	GuideID param.Field[string] `json:"guide_id" api:"required" format:"uuid"`
 	// The key of the guide.
-	GuideKey param.Field[string] `json:"guide_key,required"`
+	GuideKey param.Field[string] `json:"guide_key" api:"required"`
 	// The step reference of the guide.
-	GuideStepRef param.Field[string] `json:"guide_step_ref,required"`
+	GuideStepRef param.Field[string] `json:"guide_step_ref" api:"required"`
 	// The content of the guide.
 	Content param.Field[map[string]interface{}] `json:"content"`
 	// The data of the guide.
@@ -502,13 +502,13 @@ func (r UserGuideMarkMessageAsArchivedParams) MarshalJSON() (data []byte, err er
 
 type UserGuideMarkMessageAsInteractedParams struct {
 	// The unique identifier for the channel.
-	ChannelID param.Field[string] `json:"channel_id,required" format:"uuid"`
+	ChannelID param.Field[string] `json:"channel_id" api:"required" format:"uuid"`
 	// The unique identifier for the guide.
-	GuideID param.Field[string] `json:"guide_id,required" format:"uuid"`
+	GuideID param.Field[string] `json:"guide_id" api:"required" format:"uuid"`
 	// The key of the guide.
-	GuideKey param.Field[string] `json:"guide_key,required"`
+	GuideKey param.Field[string] `json:"guide_key" api:"required"`
 	// The step reference of the guide.
-	GuideStepRef param.Field[string] `json:"guide_step_ref,required"`
+	GuideStepRef param.Field[string] `json:"guide_step_ref" api:"required"`
 	// The content of the guide.
 	Content param.Field[map[string]interface{}] `json:"content"`
 	// The data of the guide.
@@ -527,13 +527,13 @@ func (r UserGuideMarkMessageAsInteractedParams) MarshalJSON() (data []byte, err 
 
 type UserGuideMarkMessageAsSeenParams struct {
 	// The unique identifier for the channel.
-	ChannelID param.Field[string] `json:"channel_id,required" format:"uuid"`
+	ChannelID param.Field[string] `json:"channel_id" api:"required" format:"uuid"`
 	// The unique identifier for the guide.
-	GuideID param.Field[string] `json:"guide_id,required" format:"uuid"`
+	GuideID param.Field[string] `json:"guide_id" api:"required" format:"uuid"`
 	// The key of the guide.
-	GuideKey param.Field[string] `json:"guide_key,required"`
+	GuideKey param.Field[string] `json:"guide_key" api:"required"`
 	// The step reference of the guide.
-	GuideStepRef param.Field[string] `json:"guide_step_ref,required"`
+	GuideStepRef param.Field[string] `json:"guide_step_ref" api:"required"`
 	// The content of the guide.
 	Content param.Field[map[string]interface{}] `json:"content"`
 	// The data of the guide.

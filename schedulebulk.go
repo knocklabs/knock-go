@@ -45,7 +45,7 @@ func (r *ScheduleBulkService) New(ctx context.Context, body ScheduleBulkNewParam
 
 type ScheduleBulkNewParams struct {
 	// A list of schedules.
-	Schedules param.Field[[]ScheduleBulkNewParamsSchedule] `json:"schedules,required"`
+	Schedules param.Field[[]ScheduleBulkNewParamsSchedule] `json:"schedules" api:"required"`
 }
 
 func (r ScheduleBulkNewParams) MarshalJSON() (data []byte, err error) {
@@ -55,7 +55,7 @@ func (r ScheduleBulkNewParams) MarshalJSON() (data []byte, err error) {
 // A schedule represents a recurring workflow execution.
 type ScheduleBulkNewParamsSchedule struct {
 	// The key of the workflow.
-	Workflow param.Field[string] `json:"workflow,required"`
+	Workflow param.Field[string] `json:"workflow" api:"required"`
 	// Specifies a recipient in a request. This can either be a user identifier
 	// (string), an inline user request (object), or an inline object request, which is
 	// determined by the presence of a `collection` property.

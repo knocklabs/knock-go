@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.29.1 (2026-02-24)
+
+Full Changelog: [v1.29.0...v1.29.1](https://github.com/knocklabs/knock-go/compare/v1.29.0...v1.29.1)
+
+### Chores
+
+* **internal:** move custom custom `json` tags to `api` ([eadb433](https://github.com/knocklabs/knock-go/commit/eadb433b9ad3c878ed8aeb8696344ec8887f272e))
+
 ## 1.29.0 (2026-02-19)
 
 Full Changelog: [v1.28.0...v1.29.0](https://github.com/knocklabs/knock-go/compare/v1.28.0...v1.29.0)

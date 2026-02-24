@@ -388,9 +388,9 @@ func (r *ObjectService) UnsetChannelData(ctx context.Context, collection string,
 // A custom [Object](/concepts/objects) entity which belongs to a collection.
 type InlineObjectRequestParam struct {
 	// Unique identifier for the object.
-	ID param.Field[string] `json:"id,required"`
+	ID param.Field[string] `json:"id" api:"required"`
 	// The collection this object belongs to.
-	Collection param.Field[string] `json:"collection,required"`
+	Collection param.Field[string] `json:"collection" api:"required"`
 	// A request to set channel data for a type of channel inline.
 	ChannelData param.Field[InlineChannelDataRequestParam] `json:"channel_data"`
 	// Timestamp when the resource was created.
@@ -413,15 +413,15 @@ func (r InlineObjectRequestParam) ImplementsRecipientRequestUnionParam() {}
 // A custom [Object](/concepts/objects) entity which belongs to a collection.
 type Object struct {
 	// Unique identifier for the object.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// The collection this object belongs to.
-	Collection string `json:"collection,required"`
+	Collection string `json:"collection" api:"required"`
 	// The timestamp when the resource was last updated.
-	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
+	UpdatedAt time.Time `json:"updated_at" api:"required" format:"date-time"`
 	// Timestamp when the resource was created.
-	CreatedAt time.Time `json:"created_at,nullable" format:"date-time"`
+	CreatedAt time.Time `json:"created_at" api:"nullable" format:"date-time"`
 	// The custom properties associated with the object.
 	Properties map[string]interface{} `json:"properties"`
 	JSON       objectJSON             `json:"-"`
@@ -485,7 +485,7 @@ func (r ObjectListParamsInclude) IsKnown() bool {
 type ObjectAddSubscriptionsParams struct {
 	// The recipients of the subscription. You can subscribe up to 100 recipients to an
 	// object at a time.
-	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
+	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients" api:"required"`
 	// The custom properties associated with the subscription relationship.
 	Properties param.Field[map[string]interface{}] `json:"properties"`
 }
@@ -497,7 +497,7 @@ func (r ObjectAddSubscriptionsParams) MarshalJSON() (data []byte, err error) {
 type ObjectDeleteSubscriptionsParams struct {
 	// The recipients of the subscription. You can subscribe up to 100 recipients to an
 	// object at a time.
-	Recipients param.Field[[]RecipientReferenceUnionParam] `json:"recipients,required"`
+	Recipients param.Field[[]RecipientReferenceUnionParam] `json:"recipients" api:"required"`
 }
 
 func (r ObjectDeleteSubscriptionsParams) MarshalJSON() (data []byte, err error) {
@@ -732,7 +732,7 @@ func (r ObjectSetParams) MarshalJSON() (data []byte, err error) {
 
 type ObjectSetChannelDataParams struct {
 	// A request to set channel data for a type of channel.
-	ChannelDataRequest ChannelDataRequestParam `json:"channel_data_request,required"`
+	ChannelDataRequest ChannelDataRequestParam `json:"channel_data_request" api:"required"`
 }
 
 func (r ObjectSetChannelDataParams) MarshalJSON() (data []byte, err error) {
@@ -741,7 +741,7 @@ func (r ObjectSetChannelDataParams) MarshalJSON() (data []byte, err error) {
 
 type ObjectSetPreferencesParams struct {
 	// A request to set a preference set for a recipient.
-	PreferenceSetRequest PreferenceSetRequestParam `json:"preference_set_request,required"`
+	PreferenceSetRequest PreferenceSetRequestParam `json:"preference_set_request" api:"required"`
 }
 
 func (r ObjectSetPreferencesParams) MarshalJSON() (data []byte, err error) {

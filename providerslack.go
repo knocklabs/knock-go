@@ -91,7 +91,7 @@ func (r *ProviderSlackService) RevokeAccess(ctx context.Context, channelID strin
 // The response from a Slack auth check request.
 type ProviderSlackCheckAuthResponse struct {
 	// A Slack connection object.
-	Connection ProviderSlackCheckAuthResponseConnection `json:"connection,required"`
+	Connection ProviderSlackCheckAuthResponseConnection `json:"connection" api:"required"`
 	JSON       providerSlackCheckAuthResponseJSON       `json:"-"`
 }
 
@@ -114,9 +114,9 @@ func (r providerSlackCheckAuthResponseJSON) RawJSON() string {
 // A Slack connection object.
 type ProviderSlackCheckAuthResponseConnection struct {
 	// Whether the Slack connection is valid.
-	Ok bool `json:"ok,required"`
+	Ok bool `json:"ok" api:"required"`
 	// The reason for the Slack connection if it is not valid.
-	Reason string                                       `json:"reason,nullable"`
+	Reason string                                       `json:"reason" api:"nullable"`
 	JSON   providerSlackCheckAuthResponseConnectionJSON `json:"-"`
 }
 
@@ -140,15 +140,15 @@ func (r providerSlackCheckAuthResponseConnectionJSON) RawJSON() string {
 // A Slack channel.
 type ProviderSlackListChannelsResponse struct {
 	// A Slack channel ID from the Slack provider.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// The team ID that the Slack channel belongs to.
-	ContextTeamID string `json:"context_team_id,required"`
+	ContextTeamID string `json:"context_team_id" api:"required"`
 	// Whether the Slack channel is an IM channel.
-	IsIm bool `json:"is_im,required"`
+	IsIm bool `json:"is_im" api:"required"`
 	// Whether the Slack channel is private.
-	IsPrivate bool `json:"is_private,required"`
+	IsPrivate bool `json:"is_private" api:"required"`
 	// Slack channel name.
-	Name string                                `json:"name,required"`
+	Name string                                `json:"name" api:"required"`
 	JSON providerSlackListChannelsResponseJSON `json:"-"`
 }
 
@@ -197,7 +197,7 @@ func (r providerSlackRevokeAccessResponseJSON) RawJSON() string {
 
 type ProviderSlackCheckAuthParams struct {
 	// A JSON encoded string containing the access token object reference.
-	AccessTokenObject param.Field[string] `query:"access_token_object,required"`
+	AccessTokenObject param.Field[string] `query:"access_token_object" api:"required"`
 }
 
 // URLQuery serializes [ProviderSlackCheckAuthParams]'s query parameters as
@@ -211,7 +211,7 @@ func (r ProviderSlackCheckAuthParams) URLQuery() (v url.Values) {
 
 type ProviderSlackListChannelsParams struct {
 	// A JSON encoded string containing the access token object reference.
-	AccessTokenObject param.Field[string]                                      `query:"access_token_object,required"`
+	AccessTokenObject param.Field[string]                                      `query:"access_token_object" api:"required"`
 	QueryOptions      param.Field[ProviderSlackListChannelsParamsQueryOptions] `query:"query_options"`
 }
 
@@ -254,7 +254,7 @@ func (r ProviderSlackListChannelsParamsQueryOptions) URLQuery() (v url.Values) {
 
 type ProviderSlackRevokeAccessParams struct {
 	// A JSON encoded string containing the access token object reference.
-	AccessTokenObject param.Field[string] `query:"access_token_object,required"`
+	AccessTokenObject param.Field[string] `query:"access_token_object" api:"required"`
 }
 
 // URLQuery serializes [ProviderSlackRevokeAccessParams]'s query parameters as

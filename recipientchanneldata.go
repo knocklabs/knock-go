@@ -34,7 +34,7 @@ func NewRecipientChannelDataService(opts ...option.RequestOption) (r *RecipientC
 type AwsSnsPushChannelDataDevicesOnlyParam struct {
 	// A list of devices. Each device contains a target_arn, and optionally a locale
 	// and timezone.
-	Devices param.Field[[]AwsSnsPushChannelDataDevicesOnlyDeviceParam] `json:"devices,required"`
+	Devices param.Field[[]AwsSnsPushChannelDataDevicesOnlyDeviceParam] `json:"devices" api:"required"`
 }
 
 func (r AwsSnsPushChannelDataDevicesOnlyParam) MarshalJSON() (data []byte, err error) {
@@ -49,7 +49,7 @@ type AwsSnsPushChannelDataDevicesOnlyDeviceParam struct {
 	// The ARN of a platform endpoint associated with a platform application and a
 	// device token. See
 	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
-	TargetArn param.Field[string] `json:"target_arn,required"`
+	TargetArn param.Field[string] `json:"target_arn" api:"required"`
 	// The locale of the object. Used for
 	// [message localization](/concepts/translations).
 	Locale param.Field[string] `json:"locale"`
@@ -68,7 +68,7 @@ func (r AwsSnsPushChannelDataDevicesOnlyDeviceParam) MarshalJSON() (data []byte,
 type AwsSnsPushChannelDataTargetArnsOnlyParam struct {
 	// A list of platform endpoint ARNs. See
 	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
-	TargetArns param.Field[[]string] `json:"target_arns,required"`
+	TargetArns param.Field[[]string] `json:"target_arns" api:"required"`
 }
 
 func (r AwsSnsPushChannelDataTargetArnsOnlyParam) MarshalJSON() (data []byte, err error) {
@@ -83,11 +83,11 @@ func (r AwsSnsPushChannelDataTargetArnsOnlyParam) implementsInlineChannelDataReq
 // Channel data for a given channel type.
 type ChannelData struct {
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// The unique identifier for the channel.
-	ChannelID string `json:"channel_id,required" format:"uuid"`
+	ChannelID string `json:"channel_id" api:"required" format:"uuid"`
 	// Channel data for a given channel type.
-	Data ChannelDataData `json:"data,required"`
+	Data ChannelDataData `json:"data" api:"required"`
 	// The type of provider.
 	Provider ChannelDataProvider `json:"provider"`
 	JSON     channelDataJSON     `json:"-"`
@@ -123,7 +123,7 @@ type ChannelDataData struct {
 	// [[]ChannelDataDataAwssnsPushChannelDataFullDevice].
 	Devices interface{} `json:"devices"`
 	// Microsoft Teams tenant ID.
-	MsTeamsTenantID string `json:"ms_teams_tenant_id,nullable" format:"uuid"`
+	MsTeamsTenantID string `json:"ms_teams_tenant_id" api:"nullable" format:"uuid"`
 	// This field can have the runtime type of [[]string].
 	PlayerIDs interface{} `json:"player_ids"`
 	// This field can have the runtime type of [[]string].
@@ -214,9 +214,9 @@ func init() {
 type ChannelDataDataPushChannelDataFull struct {
 	// A list of devices. Each device contains a token, and optionally a locale and
 	// timezone.
-	Devices []ChannelDataDataPushChannelDataFullDevice `json:"devices,required"`
+	Devices []ChannelDataDataPushChannelDataFullDevice `json:"devices" api:"required"`
 	// A list of push channel tokens.
-	Tokens []string                               `json:"tokens,required"`
+	Tokens []string                               `json:"tokens" api:"required"`
 	JSON   channelDataDataPushChannelDataFullJSON `json:"-"`
 }
 
@@ -241,15 +241,15 @@ func (r ChannelDataDataPushChannelDataFull) implementsChannelDataData() {}
 
 type ChannelDataDataPushChannelDataFullDevice struct {
 	// The device token to send the push notification to.
-	Token string `json:"token,required"`
+	Token string `json:"token" api:"required"`
 	// The locale of the object. Used for
 	// [message localization](/concepts/translations).
-	Locale string `json:"locale,nullable"`
+	Locale string `json:"locale" api:"nullable"`
 	// The timezone of the object. Must be a
 	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 	// Used
 	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
-	Timezone string                                       `json:"timezone,nullable"`
+	Timezone string                                       `json:"timezone" api:"nullable"`
 	JSON     channelDataDataPushChannelDataFullDeviceJSON `json:"-"`
 }
 
@@ -275,10 +275,10 @@ func (r channelDataDataPushChannelDataFullDeviceJSON) RawJSON() string {
 type ChannelDataDataAwssnsPushChannelDataFull struct {
 	// A list of devices. Each device contains a target_arn, and optionally a locale
 	// and timezone.
-	Devices []ChannelDataDataAwssnsPushChannelDataFullDevice `json:"devices,required"`
+	Devices []ChannelDataDataAwssnsPushChannelDataFullDevice `json:"devices" api:"required"`
 	// A list of platform endpoint ARNs. See
 	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
-	TargetArns []string                                     `json:"target_arns,required"`
+	TargetArns []string                                     `json:"target_arns" api:"required"`
 	JSON       channelDataDataAwssnsPushChannelDataFullJSON `json:"-"`
 }
 
@@ -305,15 +305,15 @@ type ChannelDataDataAwssnsPushChannelDataFullDevice struct {
 	// The ARN of a platform endpoint associated with a platform application and a
 	// device token. See
 	// [Setting up an Amazon SNS platform endpoint for mobile notifications](https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html).
-	TargetArn string `json:"target_arn,required"`
+	TargetArn string `json:"target_arn" api:"required"`
 	// The locale of the object. Used for
 	// [message localization](/concepts/translations).
-	Locale string `json:"locale,nullable"`
+	Locale string `json:"locale" api:"nullable"`
 	// The timezone of the object. Must be a
 	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 	// Used
 	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
-	Timezone string                                             `json:"timezone,nullable"`
+	Timezone string                                             `json:"timezone" api:"nullable"`
 	JSON     channelDataDataAwssnsPushChannelDataFullDeviceJSON `json:"-"`
 }
 
@@ -361,7 +361,7 @@ func (r ChannelDataProvider) IsKnown() bool {
 // A request to set channel data for a type of channel.
 type ChannelDataRequestParam struct {
 	// Channel data for a given channel type.
-	Data param.Field[ChannelDataRequestDataUnionParam] `json:"data,required"`
+	Data param.Field[ChannelDataRequestDataUnionParam] `json:"data" api:"required"`
 }
 
 func (r ChannelDataRequestParam) MarshalJSON() (data []byte, err error) {
@@ -401,7 +401,7 @@ type ChannelDataRequestDataUnionParam interface {
 // Discord channel data.
 type DiscordChannelData struct {
 	// List of Discord channel connections.
-	Connections []DiscordChannelDataConnection `json:"connections,required"`
+	Connections []DiscordChannelDataConnection `json:"connections" api:"required"`
 	JSON        discordChannelDataJSON         `json:"-"`
 }
 
@@ -494,7 +494,7 @@ func init() {
 // Discord channel connection.
 type DiscordChannelDataConnectionsDiscordChannelConnection struct {
 	// Discord channel ID.
-	ChannelID string                                                    `json:"channel_id,required"`
+	ChannelID string                                                    `json:"channel_id" api:"required"`
 	JSON      discordChannelDataConnectionsDiscordChannelConnectionJSON `json:"-"`
 }
 
@@ -520,7 +520,7 @@ func (r DiscordChannelDataConnectionsDiscordChannelConnection) implementsDiscord
 // Discord incoming webhook connection.
 type DiscordChannelDataConnectionsDiscordIncomingWebhookConnection struct {
 	// Discord incoming webhook object.
-	IncomingWebhook DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhook `json:"incoming_webhook,required"`
+	IncomingWebhook DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhook `json:"incoming_webhook" api:"required"`
 	JSON            discordChannelDataConnectionsDiscordIncomingWebhookConnectionJSON            `json:"-"`
 }
 
@@ -547,7 +547,7 @@ func (r DiscordChannelDataConnectionsDiscordIncomingWebhookConnection) implement
 // Discord incoming webhook object.
 type DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhook struct {
 	// Incoming webhook URL.
-	URL  string                                                                           `json:"url,required"`
+	URL  string                                                                           `json:"url" api:"required"`
 	JSON discordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookJSON `json:"-"`
 }
 
@@ -571,7 +571,7 @@ func (r discordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWeb
 // Discord channel data.
 type DiscordChannelDataParam struct {
 	// List of Discord channel connections.
-	Connections param.Field[[]DiscordChannelDataConnectionsUnionParam] `json:"connections,required"`
+	Connections param.Field[[]DiscordChannelDataConnectionsUnionParam] `json:"connections" api:"required"`
 }
 
 func (r DiscordChannelDataParam) MarshalJSON() (data []byte, err error) {
@@ -609,7 +609,7 @@ type DiscordChannelDataConnectionsUnionParam interface {
 // Discord channel connection.
 type DiscordChannelDataConnectionsDiscordChannelConnectionParam struct {
 	// Discord channel ID.
-	ChannelID param.Field[string] `json:"channel_id,required"`
+	ChannelID param.Field[string] `json:"channel_id" api:"required"`
 }
 
 func (r DiscordChannelDataConnectionsDiscordChannelConnectionParam) MarshalJSON() (data []byte, err error) {
@@ -622,7 +622,7 @@ func (r DiscordChannelDataConnectionsDiscordChannelConnectionParam) implementsDi
 // Discord incoming webhook connection.
 type DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionParam struct {
 	// Discord incoming webhook object.
-	IncomingWebhook param.Field[DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookParam] `json:"incoming_webhook,required"`
+	IncomingWebhook param.Field[DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookParam] `json:"incoming_webhook" api:"required"`
 }
 
 func (r DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionParam) MarshalJSON() (data []byte, err error) {
@@ -635,7 +635,7 @@ func (r DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionParam) impl
 // Discord incoming webhook object.
 type DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookParam struct {
 	// Incoming webhook URL.
-	URL param.Field[string] `json:"url,required"`
+	URL param.Field[string] `json:"url" api:"required"`
 }
 
 func (r DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookParam) MarshalJSON() (data []byte, err error) {
@@ -677,9 +677,9 @@ type InlineChannelDataRequestItemUnionParam interface {
 // Microsoft Teams channel data.
 type MsTeamsChannelData struct {
 	// List of Microsoft Teams connections.
-	Connections []MsTeamsChannelDataConnection `json:"connections,required"`
+	Connections []MsTeamsChannelDataConnection `json:"connections" api:"required"`
 	// Microsoft Teams tenant ID.
-	MsTeamsTenantID string                 `json:"ms_teams_tenant_id,nullable" format:"uuid"`
+	MsTeamsTenantID string                 `json:"ms_teams_tenant_id" api:"nullable" format:"uuid"`
 	JSON            msTeamsChannelDataJSON `json:"-"`
 }
 
@@ -708,13 +708,13 @@ type MsTeamsChannelDataConnection struct {
 	// [MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook].
 	IncomingWebhook interface{} `json:"incoming_webhook"`
 	// Microsoft Teams channel ID.
-	MsTeamsChannelID string `json:"ms_teams_channel_id,nullable" format:"uuid"`
+	MsTeamsChannelID string `json:"ms_teams_channel_id" api:"nullable" format:"uuid"`
 	// Microsoft Teams team ID.
-	MsTeamsTeamID string `json:"ms_teams_team_id,nullable" format:"uuid"`
+	MsTeamsTeamID string `json:"ms_teams_team_id" api:"nullable" format:"uuid"`
 	// Microsoft Teams tenant ID.
-	MsTeamsTenantID string `json:"ms_teams_tenant_id,nullable" format:"uuid"`
+	MsTeamsTenantID string `json:"ms_teams_tenant_id" api:"nullable" format:"uuid"`
 	// Microsoft Teams user ID.
-	MsTeamsUserID string                           `json:"ms_teams_user_id,nullable" format:"uuid"`
+	MsTeamsUserID string                           `json:"ms_teams_user_id" api:"nullable" format:"uuid"`
 	JSON          msTeamsChannelDataConnectionJSON `json:"-"`
 	union         MsTeamsChannelDataConnectionsUnion
 }
@@ -780,13 +780,13 @@ func init() {
 // Microsoft Teams token connection.
 type MsTeamsChannelDataConnectionsMsTeamsTokenConnection struct {
 	// Microsoft Teams channel ID.
-	MsTeamsChannelID string `json:"ms_teams_channel_id,nullable" format:"uuid"`
+	MsTeamsChannelID string `json:"ms_teams_channel_id" api:"nullable" format:"uuid"`
 	// Microsoft Teams team ID.
-	MsTeamsTeamID string `json:"ms_teams_team_id,nullable" format:"uuid"`
+	MsTeamsTeamID string `json:"ms_teams_team_id" api:"nullable" format:"uuid"`
 	// Microsoft Teams tenant ID.
-	MsTeamsTenantID string `json:"ms_teams_tenant_id,nullable" format:"uuid"`
+	MsTeamsTenantID string `json:"ms_teams_tenant_id" api:"nullable" format:"uuid"`
 	// Microsoft Teams user ID.
-	MsTeamsUserID string                                                  `json:"ms_teams_user_id,nullable" format:"uuid"`
+	MsTeamsUserID string                                                  `json:"ms_teams_user_id" api:"nullable" format:"uuid"`
 	JSON          msTeamsChannelDataConnectionsMsTeamsTokenConnectionJSON `json:"-"`
 }
 
@@ -815,7 +815,7 @@ func (r MsTeamsChannelDataConnectionsMsTeamsTokenConnection) implementsMsTeamsCh
 // Microsoft Teams incoming webhook connection.
 type MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection struct {
 	// Microsoft Teams incoming webhook.
-	IncomingWebhook MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook `json:"incoming_webhook,required"`
+	IncomingWebhook MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook `json:"incoming_webhook" api:"required"`
 	JSON            msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionJSON            `json:"-"`
 }
 
@@ -842,7 +842,7 @@ func (r MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection) implement
 // Microsoft Teams incoming webhook.
 type MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook struct {
 	// Microsoft Teams incoming webhook URL.
-	URL  string                                                                           `json:"url,required"`
+	URL  string                                                                           `json:"url" api:"required"`
 	JSON msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookJSON `json:"-"`
 }
 
@@ -866,7 +866,7 @@ func (r msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWeb
 // Microsoft Teams channel data.
 type MsTeamsChannelDataParam struct {
 	// List of Microsoft Teams connections.
-	Connections param.Field[[]MsTeamsChannelDataConnectionsUnionParam] `json:"connections,required"`
+	Connections param.Field[[]MsTeamsChannelDataConnectionsUnionParam] `json:"connections" api:"required"`
 	// Microsoft Teams tenant ID.
 	MsTeamsTenantID param.Field[string] `json:"ms_teams_tenant_id" format:"uuid"`
 }
@@ -929,7 +929,7 @@ func (r MsTeamsChannelDataConnectionsMsTeamsTokenConnectionParam) implementsMsTe
 // Microsoft Teams incoming webhook connection.
 type MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionParam struct {
 	// Microsoft Teams incoming webhook.
-	IncomingWebhook param.Field[MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookParam] `json:"incoming_webhook,required"`
+	IncomingWebhook param.Field[MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookParam] `json:"incoming_webhook" api:"required"`
 }
 
 func (r MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionParam) MarshalJSON() (data []byte, err error) {
@@ -942,7 +942,7 @@ func (r MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionParam) impl
 // Microsoft Teams incoming webhook.
 type MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookParam struct {
 	// Microsoft Teams incoming webhook URL.
-	URL param.Field[string] `json:"url,required"`
+	URL param.Field[string] `json:"url" api:"required"`
 }
 
 func (r MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookParam) MarshalJSON() (data []byte, err error) {
@@ -952,7 +952,7 @@ func (r MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWeb
 // OneSignal channel data.
 type OneSignalChannelDataPlayerIDsOnly struct {
 	// A list of OneSignal player IDs.
-	PlayerIDs []string                              `json:"player_ids,required" format:"uuid"`
+	PlayerIDs []string                              `json:"player_ids" api:"required" format:"uuid"`
 	JSON      oneSignalChannelDataPlayerIDsOnlyJSON `json:"-"`
 }
 
@@ -977,7 +977,7 @@ func (r OneSignalChannelDataPlayerIDsOnly) implementsChannelDataData() {}
 // OneSignal channel data.
 type OneSignalChannelDataPlayerIDsOnlyParam struct {
 	// A list of OneSignal player IDs.
-	PlayerIDs param.Field[[]string] `json:"player_ids,required" format:"uuid"`
+	PlayerIDs param.Field[[]string] `json:"player_ids" api:"required" format:"uuid"`
 }
 
 func (r OneSignalChannelDataPlayerIDsOnlyParam) MarshalJSON() (data []byte, err error) {
@@ -992,7 +992,7 @@ func (r OneSignalChannelDataPlayerIDsOnlyParam) implementsInlineChannelDataReque
 type PushChannelDataDevicesOnlyParam struct {
 	// A list of devices. Each device contains a token, and optionally a locale and
 	// timezone.
-	Devices param.Field[[]PushChannelDataDevicesOnlyDeviceParam] `json:"devices,required"`
+	Devices param.Field[[]PushChannelDataDevicesOnlyDeviceParam] `json:"devices" api:"required"`
 }
 
 func (r PushChannelDataDevicesOnlyParam) MarshalJSON() (data []byte, err error) {
@@ -1005,7 +1005,7 @@ func (r PushChannelDataDevicesOnlyParam) implementsInlineChannelDataRequestItemU
 
 type PushChannelDataDevicesOnlyDeviceParam struct {
 	// The device token to send the push notification to.
-	Token param.Field[string] `json:"token,required"`
+	Token param.Field[string] `json:"token" api:"required"`
 	// The locale of the object. Used for
 	// [message localization](/concepts/translations).
 	Locale param.Field[string] `json:"locale"`
@@ -1023,7 +1023,7 @@ func (r PushChannelDataDevicesOnlyDeviceParam) MarshalJSON() (data []byte, err e
 // Push channel data.
 type PushChannelDataTokensOnlyParam struct {
 	// A list of push channel tokens.
-	Tokens param.Field[[]string] `json:"tokens,required"`
+	Tokens param.Field[[]string] `json:"tokens" api:"required"`
 }
 
 func (r PushChannelDataTokensOnlyParam) MarshalJSON() (data []byte, err error) {
@@ -1037,9 +1037,9 @@ func (r PushChannelDataTokensOnlyParam) implementsInlineChannelDataRequestItemUn
 // Slack channel data.
 type SlackChannelData struct {
 	// List of Slack channel connections.
-	Connections []SlackChannelDataConnection `json:"connections,required"`
+	Connections []SlackChannelDataConnection `json:"connections" api:"required"`
 	// A Slack connection token.
-	Token SlackChannelDataToken `json:"token,nullable"`
+	Token SlackChannelDataToken `json:"token" api:"nullable"`
 	JSON  slackChannelDataJSON  `json:"-"`
 }
 
@@ -1065,13 +1065,13 @@ func (r SlackChannelData) implementsChannelDataData() {}
 // A Slack connection, either an access token or an incoming webhook
 type SlackChannelDataConnection struct {
 	// A Slack access token.
-	AccessToken string `json:"access_token,nullable"`
+	AccessToken string `json:"access_token" api:"nullable"`
 	// A Slack channel ID from the Slack provider.
-	ChannelID string `json:"channel_id,nullable"`
+	ChannelID string `json:"channel_id" api:"nullable"`
 	// The URL of the incoming webhook for a Slack connection.
 	URL string `json:"url"`
 	// A Slack user ID from the Slack provider.
-	UserID string                         `json:"user_id,nullable"`
+	UserID string                         `json:"user_id" api:"nullable"`
 	JSON   slackChannelDataConnectionJSON `json:"-"`
 	union  SlackChannelDataConnectionsUnion
 }
@@ -1136,11 +1136,11 @@ func init() {
 // A Slack connection token.
 type SlackChannelDataConnectionsSlackTokenConnection struct {
 	// A Slack access token.
-	AccessToken string `json:"access_token,nullable"`
+	AccessToken string `json:"access_token" api:"nullable"`
 	// A Slack channel ID from the Slack provider.
-	ChannelID string `json:"channel_id,nullable"`
+	ChannelID string `json:"channel_id" api:"nullable"`
 	// A Slack user ID from the Slack provider.
-	UserID string                                              `json:"user_id,nullable"`
+	UserID string                                              `json:"user_id" api:"nullable"`
 	JSON   slackChannelDataConnectionsSlackTokenConnectionJSON `json:"-"`
 }
 
@@ -1167,7 +1167,7 @@ func (r SlackChannelDataConnectionsSlackTokenConnection) implementsSlackChannelD
 // A Slack connection incoming webhook.
 type SlackChannelDataConnectionsSlackIncomingWebhookConnection struct {
 	// The URL of the incoming webhook for a Slack connection.
-	URL  string                                                        `json:"url,required"`
+	URL  string                                                        `json:"url" api:"required"`
 	JSON slackChannelDataConnectionsSlackIncomingWebhookConnectionJSON `json:"-"`
 }
 
@@ -1194,7 +1194,7 @@ func (r SlackChannelDataConnectionsSlackIncomingWebhookConnection) implementsSla
 // A Slack connection token.
 type SlackChannelDataToken struct {
 	// A Slack access token.
-	AccessToken string                    `json:"access_token,required,nullable"`
+	AccessToken string                    `json:"access_token" api:"required,nullable"`
 	JSON        slackChannelDataTokenJSON `json:"-"`
 }
 
@@ -1217,7 +1217,7 @@ func (r slackChannelDataTokenJSON) RawJSON() string {
 // Slack channel data.
 type SlackChannelDataParam struct {
 	// List of Slack channel connections.
-	Connections param.Field[[]SlackChannelDataConnectionsUnionParam] `json:"connections,required"`
+	Connections param.Field[[]SlackChannelDataConnectionsUnionParam] `json:"connections" api:"required"`
 	// A Slack connection token.
 	Token param.Field[SlackChannelDataTokenParam] `json:"token"`
 }
@@ -1277,7 +1277,7 @@ func (r SlackChannelDataConnectionsSlackTokenConnectionParam) implementsSlackCha
 // A Slack connection incoming webhook.
 type SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam struct {
 	// The URL of the incoming webhook for a Slack connection.
-	URL param.Field[string] `json:"url,required"`
+	URL param.Field[string] `json:"url" api:"required"`
 }
 
 func (r SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam) MarshalJSON() (data []byte, err error) {
@@ -1290,7 +1290,7 @@ func (r SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam) implemen
 // A Slack connection token.
 type SlackChannelDataTokenParam struct {
 	// A Slack access token.
-	AccessToken param.Field[string] `json:"access_token,required"`
+	AccessToken param.Field[string] `json:"access_token" api:"required"`
 }
 
 func (r SlackChannelDataTokenParam) MarshalJSON() (data []byte, err error) {

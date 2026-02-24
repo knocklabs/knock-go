@@ -53,7 +53,7 @@ func (r *TenantBulkService) Set(ctx context.Context, body TenantBulkSetParams, o
 
 type TenantBulkDeleteParams struct {
 	// The IDs of the tenants to delete.
-	TenantIDs param.Field[[]string] `query:"tenant_ids,required"`
+	TenantIDs param.Field[[]string] `query:"tenant_ids" api:"required"`
 }
 
 // URLQuery serializes [TenantBulkDeleteParams]'s query parameters as `url.Values`.
@@ -66,7 +66,7 @@ func (r TenantBulkDeleteParams) URLQuery() (v url.Values) {
 
 type TenantBulkSetParams struct {
 	// The tenants to be upserted.
-	Tenants param.Field[[]InlineTenantRequestUnionParam] `json:"tenants,required"`
+	Tenants param.Field[[]InlineTenantRequestUnionParam] `json:"tenants" api:"required"`
 }
 
 func (r TenantBulkSetParams) MarshalJSON() (data []byte, err error) {

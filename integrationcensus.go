@@ -67,11 +67,11 @@ func (r integrationCensusCustomDestinationResponseJSON) RawJSON() string {
 
 type IntegrationCensusCustomDestinationParams struct {
 	// The unique identifier for the RPC request.
-	ID param.Field[string] `json:"id,required"`
+	ID param.Field[string] `json:"id" api:"required"`
 	// The JSON-RPC version.
-	Jsonrpc param.Field[string] `json:"jsonrpc,required"`
+	Jsonrpc param.Field[string] `json:"jsonrpc" api:"required"`
 	// The method name to execute.
-	Method param.Field[string] `json:"method,required"`
+	Method param.Field[string] `json:"method" api:"required"`
 	// The parameters for the method.
 	Params param.Field[map[string]interface{}] `json:"params"`
 }
