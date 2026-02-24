@@ -69,7 +69,7 @@ func (r *WorkflowService) Trigger(ctx context.Context, key string, body Workflow
 type WorkflowTriggerResponse struct {
 	// This value allows you to track individual messages associated with this trigger
 	// request.
-	WorkflowRunID string                      `json:"workflow_run_id,required" format:"uuid"`
+	WorkflowRunID string                      `json:"workflow_run_id" api:"required" format:"uuid"`
 	JSON          workflowTriggerResponseJSON `json:"-"`
 }
 
@@ -95,7 +95,7 @@ type WorkflowCancelParams struct {
 	// request. Must be provided while triggering a workflow in order to enable
 	// subsequent cancellation. Should be unique across trigger requests to avoid
 	// unintentional cancellations.
-	CancellationKey param.Field[string] `json:"cancellation_key,required"`
+	CancellationKey param.Field[string] `json:"cancellation_key" api:"required"`
 	// A list of recipients to cancel the notification for. If omitted, cancels for all
 	// recipients associated with the cancellation key.
 	Recipients param.Field[[]RecipientReferenceUnionParam] `json:"recipients"`
@@ -108,7 +108,7 @@ func (r WorkflowCancelParams) MarshalJSON() (data []byte, err error) {
 type WorkflowTriggerParams struct {
 	// The recipients to trigger the workflow for. Can inline identify users, objects,
 	// or use a list of user IDs. Limited to 1,000 recipients.
-	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
+	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients" api:"required"`
 	// Specifies a recipient in a request. This can either be a user identifier
 	// (string), an inline user request (object), or an inline object request, which is
 	// determined by the presence of a `collection` property.

@@ -348,7 +348,7 @@ func (r IdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
 // properties specified.
 type InlineIdentifyUserRequestParam struct {
 	// The unique identifier of the user.
-	ID param.Field[string] `json:"id,required"`
+	ID param.Field[string] `json:"id" api:"required"`
 	// A URL for the avatar of the user.
 	Avatar param.Field[string] `json:"avatar"`
 	// A request to set channel data for a type of channel inline.
@@ -387,28 +387,28 @@ func (r InlineIdentifyUserRequestParam) ImplementsRecipientRequestUnionParam() {
 // notifications and are always referenced by your internal identifier.
 type User struct {
 	// The unique identifier of the user.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// The timestamp when the resource was last updated.
-	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
+	UpdatedAt time.Time `json:"updated_at" api:"required" format:"date-time"`
 	// A URL for the avatar of the user.
-	Avatar string `json:"avatar,nullable"`
+	Avatar string `json:"avatar" api:"nullable"`
 	// The creation date of the user from your system.
-	CreatedAt time.Time `json:"created_at,nullable" format:"date-time"`
+	CreatedAt time.Time `json:"created_at" api:"nullable" format:"date-time"`
 	// The primary email address for the user.
-	Email string `json:"email,nullable"`
+	Email string `json:"email" api:"nullable"`
 	// Display name of the user.
-	Name string `json:"name,nullable"`
+	Name string `json:"name" api:"nullable"`
 	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
 	// user (required for SMS channels).
-	PhoneNumber string `json:"phone_number,nullable"`
+	PhoneNumber string `json:"phone_number" api:"nullable"`
 	// The timezone of the user. Must be a
 	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 	// Used
 	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
-	Timezone    string                 `json:"timezone,nullable"`
-	ExtraFields map[string]interface{} `json:"-,extras"`
+	Timezone    string                 `json:"timezone" api:"nullable"`
+	ExtraFields map[string]interface{} `json:"-" api:"extrafields"`
 	JSON        userJSON               `json:"-"`
 }
 
@@ -441,7 +441,7 @@ type UserUpdateParams struct {
 	// A set of parameters to identify a user with. Does not include the user ID, as
 	// that's specified elsewhere in the request. You can supply any additional
 	// properties you'd like to upsert for the user.
-	IdentifyUserRequest IdentifyUserRequestParam `json:"identify_user_request,required"`
+	IdentifyUserRequest IdentifyUserRequestParam `json:"identify_user_request" api:"required"`
 }
 
 func (r UserUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -658,7 +658,7 @@ func (r UserListSubscriptionsParamsInclude) IsKnown() bool {
 
 type UserMergeParams struct {
 	// The user ID to merge from.
-	FromUserID param.Field[string] `json:"from_user_id,required"`
+	FromUserID param.Field[string] `json:"from_user_id" api:"required"`
 }
 
 func (r UserMergeParams) MarshalJSON() (data []byte, err error) {
@@ -667,7 +667,7 @@ func (r UserMergeParams) MarshalJSON() (data []byte, err error) {
 
 type UserSetChannelDataParams struct {
 	// A request to set channel data for a type of channel.
-	ChannelDataRequest ChannelDataRequestParam `json:"channel_data_request,required"`
+	ChannelDataRequest ChannelDataRequestParam `json:"channel_data_request" api:"required"`
 }
 
 func (r UserSetChannelDataParams) MarshalJSON() (data []byte, err error) {
@@ -676,7 +676,7 @@ func (r UserSetChannelDataParams) MarshalJSON() (data []byte, err error) {
 
 type UserSetPreferencesParams struct {
 	// A request to set a preference set for a recipient.
-	PreferenceSetRequest PreferenceSetRequestParam `json:"preference_set_request,required"`
+	PreferenceSetRequest PreferenceSetRequestParam `json:"preference_set_request" api:"required"`
 }
 
 func (r UserSetPreferencesParams) MarshalJSON() (data []byte, err error) {

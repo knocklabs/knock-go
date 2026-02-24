@@ -10,11 +10,11 @@ import (
 // A condition to be evaluated.
 type Condition struct {
 	// The argument value to compare against in the condition.
-	Argument string `json:"argument,required,nullable"`
+	Argument string `json:"argument" api:"required,nullable"`
 	// The operator to use in the condition evaluation.
-	Operator ConditionOperator `json:"operator,required"`
+	Operator ConditionOperator `json:"operator" api:"required"`
 	// The variable to be evaluated in the condition.
-	Variable string        `json:"variable,required"`
+	Variable string        `json:"variable" api:"required"`
 	JSON     conditionJSON `json:"-"`
 }
 
@@ -74,11 +74,11 @@ func (r ConditionOperator) IsKnown() bool {
 // A condition to be evaluated.
 type ConditionParam struct {
 	// The argument value to compare against in the condition.
-	Argument param.Field[string] `json:"argument,required"`
+	Argument param.Field[string] `json:"argument" api:"required"`
 	// The operator to use in the condition evaluation.
-	Operator param.Field[ConditionOperator] `json:"operator,required"`
+	Operator param.Field[ConditionOperator] `json:"operator" api:"required"`
 	// The variable to be evaluated in the condition.
-	Variable param.Field[string] `json:"variable,required"`
+	Variable param.Field[string] `json:"variable" api:"required"`
 }
 
 func (r ConditionParam) MarshalJSON() (data []byte, err error) {
@@ -88,13 +88,13 @@ func (r ConditionParam) MarshalJSON() (data []byte, err error) {
 // Pagination information for a list of resources.
 type PageInfo struct {
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// The number of items per page (defaults to 50).
-	PageSize int64 `json:"page_size,required"`
+	PageSize int64 `json:"page_size" api:"required"`
 	// The cursor to fetch entries after.
-	After string `json:"after,nullable"`
+	After string `json:"after" api:"nullable"`
 	// The cursor to fetch entries before.
-	Before string       `json:"before,nullable"`
+	Before string       `json:"before" api:"nullable"`
 	JSON   pageInfoJSON `json:"-"`
 }
 

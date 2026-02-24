@@ -79,17 +79,17 @@ func (r *AudienceService) RemoveMembers(ctx context.Context, key string, body Au
 // An audience member.
 type AudienceMember struct {
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// Timestamp when the resource was created.
-	AddedAt time.Time `json:"added_at,required" format:"date-time"`
+	AddedAt time.Time `json:"added_at" api:"required" format:"date-time"`
 	// A [User](/concepts/users) represents an individual in your system who can
 	// receive notifications through Knock. Users are the most common recipients of
 	// notifications and are always referenced by your internal identifier.
-	User User `json:"user,required"`
+	User User `json:"user" api:"required"`
 	// The unique identifier of the user.
-	UserID string `json:"user_id,required"`
+	UserID string `json:"user_id" api:"required"`
 	// The unique identifier for the tenant.
-	Tenant string             `json:"tenant,nullable"`
+	Tenant string             `json:"tenant" api:"nullable"`
 	JSON   audienceMemberJSON `json:"-"`
 }
 
@@ -115,9 +115,9 @@ func (r audienceMemberJSON) RawJSON() string {
 // A paginated list of audience members.
 type AudienceListMembersResponse struct {
 	// A list of audience members.
-	Entries []AudienceMember `json:"entries,required"`
+	Entries []AudienceMember `json:"entries" api:"required"`
 	// Pagination information for a list of resources.
-	PageInfo shared.PageInfo                 `json:"page_info,required"`
+	PageInfo shared.PageInfo                 `json:"page_info" api:"required"`
 	JSON     audienceListMembersResponseJSON `json:"-"`
 }
 
@@ -140,7 +140,7 @@ func (r audienceListMembersResponseJSON) RawJSON() string {
 
 type AudienceAddMembersParams struct {
 	// A list of audience members to add. You can add up to 1,000 members per request.
-	Members param.Field[[]AudienceAddMembersParamsMember] `json:"members,required"`
+	Members param.Field[[]AudienceAddMembersParamsMember] `json:"members" api:"required"`
 	// Create the audience if it does not exist.
 	CreateAudience param.Field[bool] `query:"create_audience"`
 }
@@ -164,7 +164,7 @@ type AudienceAddMembersParamsMember struct {
 	// will ensure that the user is available before the request is executed in Knock.
 	// It will perform an upsert for the user you're supplying, replacing any
 	// properties specified.
-	User param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
+	User param.Field[InlineIdentifyUserRequestParam] `json:"user" api:"required"`
 	// The unique identifier for the tenant.
 	Tenant param.Field[string] `json:"tenant"`
 }
@@ -176,7 +176,7 @@ func (r AudienceAddMembersParamsMember) MarshalJSON() (data []byte, err error) {
 type AudienceRemoveMembersParams struct {
 	// A list of audience members to remove. You can remove up to 1,000 members per
 	// request.
-	Members param.Field[[]AudienceRemoveMembersParamsMember] `json:"members,required"`
+	Members param.Field[[]AudienceRemoveMembersParamsMember] `json:"members" api:"required"`
 }
 
 func (r AudienceRemoveMembersParams) MarshalJSON() (data []byte, err error) {
@@ -189,7 +189,7 @@ type AudienceRemoveMembersParamsMember struct {
 	// will ensure that the user is available before the request is executed in Knock.
 	// It will perform an upsert for the user you're supplying, replacing any
 	// properties specified.
-	User param.Field[InlineIdentifyUserRequestParam] `json:"user,required"`
+	User param.Field[InlineIdentifyUserRequestParam] `json:"user" api:"required"`
 	// The unique identifier for the tenant.
 	Tenant param.Field[string] `json:"tenant"`
 }

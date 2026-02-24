@@ -31,17 +31,17 @@ func NewRecipientSubscriptionService(opts ...option.RequestOption) (r *Recipient
 // A subscription object.
 type Subscription struct {
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// Timestamp when the resource was created.
-	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
+	InsertedAt time.Time `json:"inserted_at" api:"required" format:"date-time"`
 	// A custom [Object](/concepts/objects) entity which belongs to a collection.
-	Object Object `json:"object,required"`
+	Object Object `json:"object" api:"required"`
 	// A recipient of a notification, which is either a user or an object.
-	Recipient Recipient `json:"recipient,required"`
+	Recipient Recipient `json:"recipient" api:"required"`
 	// The timestamp when the resource was last updated.
-	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
+	UpdatedAt time.Time `json:"updated_at" api:"required" format:"date-time"`
 	// The custom properties associated with the subscription relationship.
-	Properties map[string]interface{} `json:"properties,nullable"`
+	Properties map[string]interface{} `json:"properties" api:"nullable"`
 	JSON       subscriptionJSON       `json:"-"`
 }
 

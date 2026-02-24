@@ -41,31 +41,31 @@ func NewRecipientService(opts ...option.RequestOption) (r *RecipientService) {
 // A recipient of a notification, which is either a user or an object.
 type Recipient struct {
 	// The unique identifier of the user.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// The typename of the schema.
-	Typename string `json:"__typename,required"`
+	Typename string `json:"__typename" api:"required"`
 	// The timestamp when the resource was last updated.
-	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
+	UpdatedAt time.Time `json:"updated_at" api:"required" format:"date-time"`
 	// A URL for the avatar of the user.
-	Avatar string `json:"avatar,nullable"`
+	Avatar string `json:"avatar" api:"nullable"`
 	// The collection this object belongs to.
 	Collection string `json:"collection"`
 	// The creation date of the user from your system.
-	CreatedAt time.Time `json:"created_at,nullable" format:"date-time"`
+	CreatedAt time.Time `json:"created_at" api:"nullable" format:"date-time"`
 	// The primary email address for the user.
-	Email string `json:"email,nullable"`
+	Email string `json:"email" api:"nullable"`
 	// Display name of the user.
-	Name string `json:"name,nullable"`
+	Name string `json:"name" api:"nullable"`
 	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
 	// user (required for SMS channels).
-	PhoneNumber string `json:"phone_number,nullable"`
+	PhoneNumber string `json:"phone_number" api:"nullable"`
 	// This field can have the runtime type of [map[string]interface{}].
 	Properties interface{} `json:"properties"`
 	// The timezone of the user. Must be a
 	// valid [tz database time zone string](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 	// Used
 	// for [recurring schedules](/concepts/schedules#scheduling-workflows-with-recurring-schedules-for-recipients).
-	Timezone string        `json:"timezone,nullable"`
+	Timezone string        `json:"timezone" api:"nullable"`
 	JSON     recipientJSON `json:"-"`
 	union    RecipientUnion
 }
@@ -208,7 +208,7 @@ func (r RecipientReferenceObjectReferenceParam) ImplementsRecipientReferenceUnio
 // determined by the presence of a `collection` property.
 type RecipientRequestParam struct {
 	// The unique identifier of the user.
-	ID param.Field[string] `json:"id,required"`
+	ID param.Field[string] `json:"id" api:"required"`
 	// A URL for the avatar of the user.
 	Avatar param.Field[string] `json:"avatar"`
 	// A request to set channel data for a type of channel inline.

@@ -99,34 +99,34 @@ func (r *ScheduleService) Delete(ctx context.Context, body ScheduleDeleteParams,
 // A schedule represents a recurring workflow execution.
 type Schedule struct {
 	// Unique identifier for the schedule.
-	ID string `json:"id,required" format:"uuid"`
+	ID string `json:"id" api:"required" format:"uuid"`
 	// Timestamp when the resource was created.
-	InsertedAt time.Time `json:"inserted_at,required" format:"date-time"`
+	InsertedAt time.Time `json:"inserted_at" api:"required" format:"date-time"`
 	// A recipient of a notification, which is either a user or an object.
-	Recipient Recipient `json:"recipient,required"`
+	Recipient Recipient `json:"recipient" api:"required"`
 	// The repeat rule for the schedule.
-	Repeats []ScheduleRepeatRule `json:"repeats,required"`
+	Repeats []ScheduleRepeatRule `json:"repeats" api:"required"`
 	// The timestamp when the resource was last updated.
-	UpdatedAt time.Time `json:"updated_at,required" format:"date-time"`
+	UpdatedAt time.Time `json:"updated_at" api:"required" format:"date-time"`
 	// The workflow the schedule is applied to.
-	Workflow string `json:"workflow,required"`
+	Workflow string `json:"workflow" api:"required"`
 	// The typename of the schema.
 	Typename string `json:"__typename"`
 	// A recipient of a notification, which is either a user or an object.
-	Actor Recipient `json:"actor,nullable"`
+	Actor Recipient `json:"actor" api:"nullable"`
 	// An optional map of data to pass into the workflow execution. There is a 10MB
 	// limit on the size of the full `data` payload. Any individual string value
 	// greater than 1024 bytes in length will be
 	// [truncated](/developer-tools/api-logs#log-truncation) in your logs.
-	Data map[string]interface{} `json:"data,nullable"`
+	Data map[string]interface{} `json:"data" api:"nullable"`
 	// The last occurrence of the schedule.
-	LastOccurrenceAt time.Time `json:"last_occurrence_at,nullable" format:"date-time"`
+	LastOccurrenceAt time.Time `json:"last_occurrence_at" api:"nullable" format:"date-time"`
 	// The next occurrence of the schedule.
-	NextOccurrenceAt time.Time `json:"next_occurrence_at,nullable" format:"date-time"`
+	NextOccurrenceAt time.Time `json:"next_occurrence_at" api:"nullable" format:"date-time"`
 	// The tenant to trigger the workflow for. Triggering with a tenant will use any
 	// tenant-level overrides associated with the tenant object, and all messages
 	// produced from workflow runs will be tagged with the tenant.
-	Tenant string       `json:"tenant,nullable"`
+	Tenant string       `json:"tenant" api:"nullable"`
 	JSON   scheduleJSON `json:"-"`
 }
 
@@ -159,19 +159,19 @@ func (r scheduleJSON) RawJSON() string {
 // The repeat rule for the schedule.
 type ScheduleRepeatRule struct {
 	// The frequency of the schedule.
-	Frequency ScheduleRepeatRuleFrequency `json:"frequency,required"`
+	Frequency ScheduleRepeatRuleFrequency `json:"frequency" api:"required"`
 	// The typename of the schema.
 	Typename string `json:"__typename"`
 	// The day of the month to repeat the schedule.
-	DayOfMonth int64 `json:"day_of_month,nullable"`
+	DayOfMonth int64 `json:"day_of_month" api:"nullable"`
 	// The days of the week to repeat the schedule.
-	Days []ScheduleRepeatRuleDay `json:"days,nullable"`
+	Days []ScheduleRepeatRuleDay `json:"days" api:"nullable"`
 	// The hour of the day to repeat the schedule.
-	Hours int64 `json:"hours,nullable"`
+	Hours int64 `json:"hours" api:"nullable"`
 	// The interval of the schedule.
 	Interval int64 `json:"interval"`
 	// The minute of the hour to repeat the schedule.
-	Minutes int64                  `json:"minutes,nullable"`
+	Minutes int64                  `json:"minutes" api:"nullable"`
 	JSON    scheduleRepeatRuleJSON `json:"-"`
 }
 
@@ -239,7 +239,7 @@ func (r ScheduleRepeatRuleDay) IsKnown() bool {
 // The repeat rule for the schedule.
 type ScheduleRepeatRuleParam struct {
 	// The frequency of the schedule.
-	Frequency param.Field[ScheduleRepeatRuleFrequency] `json:"frequency,required"`
+	Frequency param.Field[ScheduleRepeatRuleFrequency] `json:"frequency" api:"required"`
 	// The typename of the schema.
 	Typename param.Field[string] `json:"__typename"`
 	// The day of the month to repeat the schedule.
@@ -260,9 +260,9 @@ func (r ScheduleRepeatRuleParam) MarshalJSON() (data []byte, err error) {
 
 type ScheduleNewParams struct {
 	// The recipients to set the schedule for. Limited to 100 recipients per request.
-	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients,required"`
+	Recipients param.Field[[]RecipientRequestUnionParam] `json:"recipients" api:"required"`
 	// The key of the workflow.
-	Workflow param.Field[string] `json:"workflow,required"`
+	Workflow param.Field[string] `json:"workflow" api:"required"`
 	// Specifies a recipient in a request. This can either be a user identifier
 	// (string), an inline user request (object), or an inline object request, which is
 	// determined by the presence of a `collection` property.
@@ -288,7 +288,7 @@ func (r ScheduleNewParams) MarshalJSON() (data []byte, err error) {
 
 type ScheduleUpdateParams struct {
 	// A list of schedule IDs.
-	ScheduleIDs param.Field[[]string] `json:"schedule_ids,required" format:"uuid"`
+	ScheduleIDs param.Field[[]string] `json:"schedule_ids" api:"required" format:"uuid"`
 	// A reference to a recipient, either a user identifier (string) or an object
 	// reference (ID, collection).
 	Actor param.Field[RecipientReferenceUnionParam] `json:"actor"`
@@ -313,7 +313,7 @@ func (r ScheduleUpdateParams) MarshalJSON() (data []byte, err error) {
 
 type ScheduleListParams struct {
 	// Filter by workflow key.
-	Workflow param.Field[string] `query:"workflow,required"`
+	Workflow param.Field[string] `query:"workflow" api:"required"`
 	// The cursor to fetch entries after.
 	After param.Field[string] `query:"after"`
 	// The cursor to fetch entries before.
@@ -336,7 +336,7 @@ func (r ScheduleListParams) URLQuery() (v url.Values) {
 
 type ScheduleDeleteParams struct {
 	// A list of schedule IDs.
-	ScheduleIDs param.Field[[]string] `json:"schedule_ids,required"`
+	ScheduleIDs param.Field[[]string] `json:"schedule_ids" api:"required"`
 }
 
 func (r ScheduleDeleteParams) MarshalJSON() (data []byte, err error) {
