@@ -17,6 +17,9 @@ import (
 	"github.com/knocklabs/knock-go/packages/pagination"
 )
 
+// A schedule is a per-recipient, timezone-aware configuration for when to invoke a
+// workflow.
+//
 // ScheduleService contains methods and other services that help with interacting
 // with the knock API.
 //
@@ -25,7 +28,9 @@ import (
 // the [NewScheduleService] method instead.
 type ScheduleService struct {
 	Options []option.RequestOption
-	Bulk    *ScheduleBulkService
+	// A bulk operation is a set of changes applied across zero or more records
+	// triggered via a call to the Knock API and performed asynchronously.
+	Bulk *ScheduleBulkService
 }
 
 // NewScheduleService generates a new service that applies the given options to

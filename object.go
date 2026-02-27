@@ -19,6 +19,8 @@ import (
 	"github.com/knocklabs/knock-go/packages/pagination"
 )
 
+// An object represents a resource in your system that you want to map into Knock.
+//
 // ObjectService contains methods and other services that help with interacting
 // with the knock API.
 //
@@ -27,7 +29,9 @@ import (
 // the [NewObjectService] method instead.
 type ObjectService struct {
 	Options []option.RequestOption
-	Bulk    *ObjectBulkService
+	// A bulk operation is a set of changes applied across zero or more records
+	// triggered via a call to the Knock API and performed asynchronously.
+	Bulk *ObjectBulkService
 }
 
 // NewObjectService generates a new service that applies the given options to each

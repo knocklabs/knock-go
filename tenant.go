@@ -18,6 +18,9 @@ import (
 	"github.com/knocklabs/knock-go/packages/pagination"
 )
 
+// A tenant represents a top-level entity from your system, like a company,
+// organization, account, or workspace.
+//
 // TenantService contains methods and other services that help with interacting
 // with the knock API.
 //
@@ -26,7 +29,9 @@ import (
 // the [NewTenantService] method instead.
 type TenantService struct {
 	Options []option.RequestOption
-	Bulk    *TenantBulkService
+	// A bulk operation is a set of changes applied across zero or more records
+	// triggered via a call to the Knock API and performed asynchronously.
+	Bulk *TenantBulkService
 }
 
 // NewTenantService generates a new service that applies the given options to each

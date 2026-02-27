@@ -19,6 +19,8 @@ import (
 	"github.com/knocklabs/knock-go/shared"
 )
 
+// An Audience is a segment of users.
+//
 // AudienceService contains methods and other services that help with interacting
 // with the knock API.
 //
