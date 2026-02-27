@@ -13,6 +13,9 @@ import (
 	"github.com/knocklabs/knock-go/option"
 )
 
+// A bulk operation is a set of changes applied across zero or more records
+// triggered via a call to the Knock API and performed asynchronously.
+//
 // UserBulkService contains methods and other services that help with interacting
 // with the knock API.
 //

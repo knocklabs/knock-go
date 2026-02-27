@@ -20,6 +20,9 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// A user is an individual from your system, represented in Knock. They are most
+// commonly a recipient of a notification.
+//
 // UserFeedService contains methods and other services that help with interacting
 // with the knock API.
 //

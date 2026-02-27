@@ -19,6 +19,9 @@ import (
 	"github.com/knocklabs/knock-go/packages/pagination"
 )
 
+// A user is an individual from your system, represented in Knock. They are most
+// commonly a recipient of a notification.
+//
 // UserService contains methods and other services that help with interacting with
 // the knock API.
 //
@@ -27,9 +30,15 @@ import (
 // the [NewUserService] method instead.
 type UserService struct {
 	Options []option.RequestOption
-	Feeds   *UserFeedService
-	Guides  *UserGuideService
-	Bulk    *UserBulkService
+	// A user is an individual from your system, represented in Knock. They are most
+	// commonly a recipient of a notification.
+	Feeds *UserFeedService
+	// A user is an individual from your system, represented in Knock. They are most
+	// commonly a recipient of a notification.
+	Guides *UserGuideService
+	// A bulk operation is a set of changes applied across zero or more records
+	// triggered via a call to the Knock API and performed asynchronously.
+	Bulk *UserBulkService
 }
 
 // NewUserService generates a new service that applies the given options to each

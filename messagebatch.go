@@ -18,6 +18,8 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// A message sent to a single recipient on a channel.
+//
 // MessageBatchService contains methods and other services that help with
 // interacting with the knock API.
 //

@@ -22,6 +22,8 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// A message sent to a single recipient on a channel.
+//
 // MessageService contains methods and other services that help with interacting
 // with the knock API.
 //
@@ -30,7 +32,8 @@ import (
 // the [NewMessageService] method instead.
 type MessageService struct {
 	Options []option.RequestOption
-	Batch   *MessageBatchService
+	// A message sent to a single recipient on a channel.
+	Batch *MessageBatchService
 }
 
 // NewMessageService generates a new service that applies the given options to each

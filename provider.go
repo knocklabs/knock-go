@@ -14,7 +14,11 @@ import (
 // the [NewProviderService] method instead.
 type ProviderService struct {
 	Options []option.RequestOption
-	Slack   *ProviderSlackService
+	// A provider represents a third-party service that Knock integrates with and is
+	// configured via a channel.
+	Slack *ProviderSlackService
+	// A provider represents a third-party service that Knock integrates with and is
+	// configured via a channel.
 	MsTeams *ProviderMsTeamService
 }
 
