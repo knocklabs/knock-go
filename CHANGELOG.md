@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.29.2 (2026-02-27)
+
+Full Changelog: [v1.29.1...v1.29.2](https://github.com/knocklabs/knock-go/compare/v1.29.1...v1.29.2)
+
+### Chores
+
+* **docs:** add missing descriptions ([6baf913](https://github.com/knocklabs/knock-go/commit/6baf913f4e230669e5f133595d6bb9decf712b11))
+
 ## 1.29.1 (2026-02-24)
 
 Full Changelog: [v1.29.0...v1.29.1](https://github.com/knocklabs/knock-go/compare/v1.29.0...v1.29.1)

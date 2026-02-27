@@ -18,6 +18,9 @@ import (
 	"github.com/knocklabs/knock-go/packages/pagination"
 )
 
+// A provider represents a third-party service that Knock integrates with and is
+// configured via a channel.
+//
 // ProviderSlackService contains methods and other services that help with
 // interacting with the knock API.
 //

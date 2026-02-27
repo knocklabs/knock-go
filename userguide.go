@@ -18,6 +18,9 @@ import (
 	"github.com/knocklabs/knock-go/option"
 )
 
+// A user is an individual from your system, represented in Knock. They are most
+// commonly a recipient of a notification.
+//
 // UserGuideService contains methods and other services that help with interacting
 // with the knock API.
 //

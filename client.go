@@ -16,19 +16,32 @@ import (
 // interacting with the knock API. You should not instantiate this client directly,
 // and instead use the [NewClient] method instead.
 type Client struct {
-	Options        []option.RequestOption
-	Recipients     *RecipientService
-	Users          *UserService
-	Objects        *ObjectService
-	Tenants        *TenantService
+	Options    []option.RequestOption
+	Recipients *RecipientService
+	// A user is an individual from your system, represented in Knock. They are most
+	// commonly a recipient of a notification.
+	Users *UserService
+	// An object represents a resource in your system that you want to map into Knock.
+	Objects *ObjectService
+	// A tenant represents a top-level entity from your system, like a company,
+	// organization, account, or workspace.
+	Tenants *TenantService
+	// A bulk operation is a set of changes applied across zero or more records
+	// triggered via a call to the Knock API and performed asynchronously.
 	BulkOperations *BulkOperationService
-	Messages       *MessageService
-	Providers      *ProviderService
-	Integrations   *IntegrationService
-	Workflows      *WorkflowService
-	Schedules      *ScheduleService
-	Channels       *ChannelService
-	Audiences      *AudienceService
+	// A message sent to a single recipient on a channel.
+	Messages     *MessageService
+	Providers    *ProviderService
+	Integrations *IntegrationService
+	// A workflow is a structured set of steps that is triggered to produce
+	// notifications sent over channels.
+	Workflows *WorkflowService
+	// A schedule is a per-recipient, timezone-aware configuration for when to invoke a
+	// workflow.
+	Schedules *ScheduleService
+	Channels  *ChannelService
+	// An Audience is a segment of users.
+	Audiences *AudienceService
 }
 
 // DefaultClientOptions read from the environment (KNOCK_API_KEY, KNOCK_BRANCH,

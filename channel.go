@@ -14,7 +14,9 @@ import (
 // the [NewChannelService] method instead.
 type ChannelService struct {
 	Options []option.RequestOption
-	Bulk    *ChannelBulkService
+	// A bulk operation is a set of changes applied across zero or more records
+	// triggered via a call to the Knock API and performed asynchronously.
+	Bulk *ChannelBulkService
 }
 
 // NewChannelService generates a new service that applies the given options to each

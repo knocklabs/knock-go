@@ -15,6 +15,9 @@ import (
 	"github.com/knocklabs/knock-go/option"
 )
 
+// A workflow is a structured set of steps that is triggered to produce
+// notifications sent over channels.
+//
 // WorkflowService contains methods and other services that help with interacting
 // with the knock API.
 //
