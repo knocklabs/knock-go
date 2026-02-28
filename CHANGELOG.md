@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.29.3 (2026-02-28)
+
+Full Changelog: [v1.29.2...v1.29.3](https://github.com/knocklabs/knock-go/compare/v1.29.2...v1.29.3)
+
+### Chores
+
+* **ci:** add build step ([fae7da7](https://github.com/knocklabs/knock-go/commit/fae7da784ad04355228a8057d9ed74343f0d5b83))
+
 ## 1.29.2 (2026-02-27)
 
 Full Changelog: [v1.29.1...v1.29.2](https://github.com/knocklabs/knock-go/compare/v1.29.1...v1.29.2)
