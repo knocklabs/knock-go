@@ -151,12 +151,10 @@ type UserGuideGetChannelResponseEntry struct {
 	// if matched
 	ActivationURLRules []UserGuideGetChannelResponseEntriesActivationURLRule `json:"activation_url_rules"`
 	// Whether the guide is active.
-	Active                 bool   `json:"active"`
-	BypassGlobalGroupLimit bool   `json:"bypass_global_group_limit"`
-	ChannelID              string `json:"channel_id" format:"uuid"`
-	// URL to this guide in the Knock dashboard
-	DashboardURL string    `json:"dashboard_url"`
-	InsertedAt   time.Time `json:"inserted_at" format:"date-time"`
+	Active                 bool      `json:"active"`
+	BypassGlobalGroupLimit bool      `json:"bypass_global_group_limit"`
+	ChannelID              string    `json:"channel_id" format:"uuid"`
+	InsertedAt             time.Time `json:"inserted_at" format:"date-time"`
 	// The key of the guide.
 	Key    string                                   `json:"key"`
 	Semver string                                   `json:"semver"`
@@ -177,7 +175,6 @@ type userGuideGetChannelResponseEntryJSON struct {
 	Active                 apijson.Field
 	BypassGlobalGroupLimit apijson.Field
 	ChannelID              apijson.Field
-	DashboardURL           apijson.Field
 	InsertedAt             apijson.Field
 	Key                    apijson.Field
 	Semver                 apijson.Field
