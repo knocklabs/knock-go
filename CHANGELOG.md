@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.30.0 (2026-03-02)
+
+Full Changelog: [v1.29.3...v1.30.0](https://github.com/knocklabs/knock-go/compare/v1.29.3...v1.30.0)
+
+### Features
+
+* **api:** api update ([935b7fe](https://github.com/knocklabs/knock-go/commit/935b7fe698b20478386de104731138bdce928a95))
+* **api:** api update ([975c76b](https://github.com/knocklabs/knock-go/commit/975c76b6af55fc7521b7e774be7a2c19a2aa42dc))
+
 ## 1.29.3 (2026-02-28)
 
 Full Changelog: [v1.29.2...v1.29.3](https://github.com/knocklabs/knock-go/compare/v1.29.2...v1.29.3)
