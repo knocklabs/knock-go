@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.30.1 (2026-03-05)
+
+Full Changelog: [v1.30.0...v1.30.1](https://github.com/knocklabs/knock-go/compare/v1.30.0...v1.30.1)
+
+### Bug Fixes
+
+* fix request delays for retrying to be more respectful of high requested delays ([e8a5131](https://github.com/knocklabs/knock-go/commit/e8a51311dfaf9c4a918b896f6225846210c23b70))
+
+
+### Chores
+
+* **test:** do not count install time for mock server timeout ([8bf7966](https://github.com/knocklabs/knock-go/commit/8bf796637dd6eb31a1a6c79e1508bcaa91336339))
+
 ## 1.30.0 (2026-03-02)
 
 Full Changelog: [v1.29.3...v1.30.0](https://github.com/knocklabs/knock-go/compare/v1.29.3...v1.30.0)
