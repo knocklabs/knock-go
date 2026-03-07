@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.30.2 (2026-03-07)
+
+Full Changelog: [v1.30.1...v1.30.2](https://github.com/knocklabs/knock-go/compare/v1.30.1...v1.30.2)
+
+### Chores
+
+* **ci:** skip uploading artifacts on stainless-internal branches ([e8031c5](https://github.com/knocklabs/knock-go/commit/e8031c556f0c47ee311b097678c9b6a17a4dc5d0))
+
 ## 1.30.1 (2026-03-05)
 
 Full Changelog: [v1.30.0...v1.30.1](https://github.com/knocklabs/knock-go/compare/v1.30.0...v1.30.1)
