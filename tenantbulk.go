@@ -43,7 +43,7 @@ func (r *TenantBulkService) Delete(ctx context.Context, body TenantBulkDeletePar
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/tenants/bulk/delete"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Set or update up to 1,000 tenants in a single operation.
@@ -51,7 +51,7 @@ func (r *TenantBulkService) Set(ctx context.Context, body TenantBulkSetParams, o
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/tenants/bulk/set"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type TenantBulkDeleteParams struct {

@@ -47,15 +47,15 @@ func (r *UserFeedService) GetSettings(ctx context.Context, userID string, id str
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/feeds/%s/settings", userID, id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Returns a paginated list of feed items for a user in reverse chronological
@@ -81,11 +81,11 @@ func (r *UserFeedService) ListItems(ctx context.Context, userID string, id strin
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/feeds/%s", userID, id)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)

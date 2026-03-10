@@ -46,11 +46,11 @@ func (r *ProviderMsTeamService) CheckAuth(ctx context.Context, channelID string,
 	opts = slices.Concat(r.Options, opts)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/providers/ms-teams/%s/auth_check", channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // List the Microsoft Teams channels within a team. By default, archived and
@@ -59,11 +59,11 @@ func (r *ProviderMsTeamService) ListChannels(ctx context.Context, channelID stri
 	opts = slices.Concat(r.Options, opts)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/providers/ms-teams/%s/channels", channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // Get a list of teams belonging to the Microsoft Entra tenant. By default,
@@ -74,7 +74,7 @@ func (r *ProviderMsTeamService) ListTeams(ctx context.Context, channelID string,
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/providers/ms-teams/%s/teams", channelID)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -100,11 +100,11 @@ func (r *ProviderMsTeamService) RevokeAccess(ctx context.Context, channelID stri
 	opts = slices.Concat(r.Options, opts)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/providers/ms-teams/%s/revoke_access", channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // The response from a Microsoft Teams auth check request.

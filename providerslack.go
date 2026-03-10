@@ -45,11 +45,11 @@ func (r *ProviderSlackService) CheckAuth(ctx context.Context, channelID string, 
 	opts = slices.Concat(r.Options, opts)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/providers/slack/%s/auth_check", channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // List Slack channels for a Slack workspace.
@@ -59,7 +59,7 @@ func (r *ProviderSlackService) ListChannels(ctx context.Context, channelID strin
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/providers/slack/%s/channels", channelID)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -84,11 +84,11 @@ func (r *ProviderSlackService) RevokeAccess(ctx context.Context, channelID strin
 	opts = slices.Concat(r.Options, opts)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/providers/slack/%s/revoke_access", channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // The response from a Slack auth check request.

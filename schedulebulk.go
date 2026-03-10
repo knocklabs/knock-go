@@ -43,7 +43,7 @@ func (r *ScheduleBulkService) New(ctx context.Context, body ScheduleBulkNewParam
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/schedules/bulk/create"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type ScheduleBulkNewParams struct {

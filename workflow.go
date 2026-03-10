@@ -45,11 +45,11 @@ func (r *WorkflowService) Cancel(ctx context.Context, key string, body WorkflowC
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if key == "" {
 		err = errors.New("missing required key parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("v1/workflows/%s/cancel", key)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Trigger a workflow (specified by the key) to run for the given recipients, using
@@ -61,11 +61,11 @@ func (r *WorkflowService) Trigger(ctx context.Context, key string, body Workflow
 	opts = slices.Concat(r.Options, opts)
 	if key == "" {
 		err = errors.New("missing required key parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/workflows/%s/trigger", key)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // The response from triggering a workflow.

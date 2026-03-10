@@ -46,11 +46,11 @@ func (r *ChannelBulkService) UpdateMessageStatus(ctx context.Context, channelID 
 	opts = slices.Concat(r.Options, opts)
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/channels/%s/messages/bulk/%v", channelID, action)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type ChannelBulkUpdateMessageStatusParams struct {

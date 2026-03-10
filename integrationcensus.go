@@ -37,7 +37,7 @@ func (r *IntegrationCensusService) CustomDestination(ctx context.Context, body I
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/integrations/census/custom-destination"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type IntegrationCensusCustomDestinationResponse struct {

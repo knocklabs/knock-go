@@ -75,11 +75,11 @@ func (r *MessageService) Archive(ctx context.Context, messageID string, opts ...
 	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/messages/%s/archived", messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieves a specific message by its ID.
@@ -87,11 +87,11 @@ func (r *MessageService) Get(ctx context.Context, messageID string, opts ...opti
 	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/messages/%s", messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Returns the fully rendered contents of a message, where the response depends on
@@ -100,11 +100,11 @@ func (r *MessageService) GetContent(ctx context.Context, messageID string, opts 
 	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/messages/%s/content", messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Returns a paginated list of activities for the specified message.
@@ -114,7 +114,7 @@ func (r *MessageService) ListActivities(ctx context.Context, messageID string, q
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/messages/%s/activities", messageID)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -141,7 +141,7 @@ func (r *MessageService) ListDeliveryLogs(ctx context.Context, messageID string,
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/messages/%s/delivery_logs", messageID)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -168,7 +168,7 @@ func (r *MessageService) ListEvents(ctx context.Context, messageID string, query
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/messages/%s/events", messageID)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -197,11 +197,11 @@ func (r *MessageService) MarkAsInteracted(ctx context.Context, messageID string,
 	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/messages/%s/interacted", messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Marks a message as `read`. This indicates that the user has read the message
@@ -211,11 +211,11 @@ func (r *MessageService) MarkAsRead(ctx context.Context, messageID string, opts 
 	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/messages/%s/read", messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Marks a message as `seen`. This indicates that the user has viewed the message
@@ -225,11 +225,11 @@ func (r *MessageService) MarkAsSeen(ctx context.Context, messageID string, opts 
 	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/messages/%s/seen", messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Marks a message as `unread`. This reverses the `read` state. Read more about
@@ -239,11 +239,11 @@ func (r *MessageService) MarkAsUnread(ctx context.Context, messageID string, opt
 	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/messages/%s/read", messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Marks a message as `unseen`. This reverses the `seen` state. Read more about
@@ -253,11 +253,11 @@ func (r *MessageService) MarkAsUnseen(ctx context.Context, messageID string, opt
 	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/messages/%s/seen", messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Removes a message from the archived state, making it visible in the default
@@ -266,11 +266,11 @@ func (r *MessageService) Unarchive(ctx context.Context, messageID string, opts .
 	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/messages/%s/archived", messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // An activity associated with a workflow trigger request. Messages produced after

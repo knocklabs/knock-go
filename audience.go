@@ -46,11 +46,11 @@ func (r *AudienceService) AddMembers(ctx context.Context, key string, params Aud
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if key == "" {
 		err = errors.New("missing required key parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("v1/audiences/%s/members", key)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, nil, opts...)
-	return
+	return err
 }
 
 // Returns a paginated list of members for the specified audience.
@@ -58,11 +58,11 @@ func (r *AudienceService) ListMembers(ctx context.Context, key string, opts ...o
 	opts = slices.Concat(r.Options, opts)
 	if key == "" {
 		err = errors.New("missing required key parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/audiences/%s/members", key)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Removes one or more members from the specified audience.
@@ -71,11 +71,11 @@ func (r *AudienceService) RemoveMembers(ctx context.Context, key string, body Au
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if key == "" {
 		err = errors.New("missing required key parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("v1/audiences/%s/members", key)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, nil, opts...)
-	return
+	return err
 }
 
 // An audience member.
