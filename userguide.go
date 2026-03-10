@@ -45,15 +45,15 @@ func (r *UserGuideService) GetChannel(ctx context.Context, userID string, channe
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/guides/%s", userID, channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // Records that a guide has been archived by a user, triggering any associated
@@ -62,15 +62,15 @@ func (r *UserGuideService) MarkMessageAsArchived(ctx context.Context, userID str
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/guides/messages/%s/archived", userID, messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Records that a user has interacted with a guide, triggering any associated
@@ -79,15 +79,15 @@ func (r *UserGuideService) MarkMessageAsInteracted(ctx context.Context, userID s
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/guides/messages/%s/interacted", userID, messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Records that a guide has been seen by a user, triggering any associated seen
@@ -96,15 +96,15 @@ func (r *UserGuideService) MarkMessageAsSeen(ctx context.Context, userID string,
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/guides/messages/%s/seen", userID, messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // A response for a list of guides.

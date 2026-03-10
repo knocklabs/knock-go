@@ -43,11 +43,11 @@ func (r *ObjectBulkService) Delete(ctx context.Context, collection string, body 
 	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/bulk/delete", collection)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Add subscriptions for all objects in a single collection. If a subscription for
@@ -59,11 +59,11 @@ func (r *ObjectBulkService) AddSubscriptions(ctx context.Context, collection str
 	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/bulk/subscriptions/add", collection)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Delete subscriptions for many objects in a single collection type. If a
@@ -72,11 +72,11 @@ func (r *ObjectBulkService) DeleteSubscriptions(ctx context.Context, collection 
 	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/bulk/subscriptions/delete", collection)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Bulk sets up to 1,000 objects at a time in the specified collection.
@@ -84,11 +84,11 @@ func (r *ObjectBulkService) Set(ctx context.Context, collection string, body Obj
 	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/bulk/set", collection)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type ObjectBulkDeleteParams struct {
