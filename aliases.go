@@ -80,9 +80,6 @@ const ConditionOperatorIsTimestampBeforeDate = shared.ConditionOperatorIsTimesta
 const ConditionOperatorIsTimestampBetween = shared.ConditionOperatorIsTimestampBetween
 
 // This is an alias to an internal value.
-const ConditionOperatorIsBetween = shared.ConditionOperatorIsBetween
-
-// This is an alias to an internal value.
 const ConditionOperatorIsAudienceMember = shared.ConditionOperatorIsAudienceMember
 
 // This is an alias to an internal value.

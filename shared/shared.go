@@ -59,14 +59,13 @@ const (
 	ConditionOperatorIsTimestampOnOrAfterDate ConditionOperator = "is_timestamp_on_or_after_date"
 	ConditionOperatorIsTimestampBeforeDate    ConditionOperator = "is_timestamp_before_date"
 	ConditionOperatorIsTimestampBetween       ConditionOperator = "is_timestamp_between"
-	ConditionOperatorIsBetween                ConditionOperator = "is_between"
 	ConditionOperatorIsAudienceMember         ConditionOperator = "is_audience_member"
 	ConditionOperatorIsNotAudienceMember      ConditionOperator = "is_not_audience_member"
 )
 
 func (r ConditionOperator) IsKnown() bool {
 	switch r {
-	case ConditionOperatorEqualTo, ConditionOperatorNotEqualTo, ConditionOperatorGreaterThan, ConditionOperatorLessThan, ConditionOperatorGreaterThanOrEqualTo, ConditionOperatorLessThanOrEqualTo, ConditionOperatorContains, ConditionOperatorNotContains, ConditionOperatorEmpty, ConditionOperatorNotEmpty, ConditionOperatorExists, ConditionOperatorNotExists, ConditionOperatorContainsAll, ConditionOperatorIsTimestamp, ConditionOperatorIsNotTimestamp, ConditionOperatorIsTimestampOnOrAfter, ConditionOperatorIsTimestampBefore, ConditionOperatorIsTimestampOnOrAfterDate, ConditionOperatorIsTimestampBeforeDate, ConditionOperatorIsTimestampBetween, ConditionOperatorIsBetween, ConditionOperatorIsAudienceMember, ConditionOperatorIsNotAudienceMember:
+	case ConditionOperatorEqualTo, ConditionOperatorNotEqualTo, ConditionOperatorGreaterThan, ConditionOperatorLessThan, ConditionOperatorGreaterThanOrEqualTo, ConditionOperatorLessThanOrEqualTo, ConditionOperatorContains, ConditionOperatorNotContains, ConditionOperatorEmpty, ConditionOperatorNotEmpty, ConditionOperatorExists, ConditionOperatorNotExists, ConditionOperatorContainsAll, ConditionOperatorIsTimestamp, ConditionOperatorIsNotTimestamp, ConditionOperatorIsTimestampOnOrAfter, ConditionOperatorIsTimestampBefore, ConditionOperatorIsTimestampOnOrAfterDate, ConditionOperatorIsTimestampBeforeDate, ConditionOperatorIsTimestampBetween, ConditionOperatorIsAudienceMember, ConditionOperatorIsNotAudienceMember:
 		return true
 	}
 	return false
