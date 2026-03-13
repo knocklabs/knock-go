@@ -37,7 +37,7 @@ func (r *IntegrationHightouchService) EmbeddedDestination(ctx context.Context, b
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/integrations/hightouch/embedded-destination"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type IntegrationHightouchEmbeddedDestinationResponse struct {
