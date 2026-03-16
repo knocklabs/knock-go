@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.31.0 (2026-03-16)
+
+Full Changelog: [v1.30.1...v1.31.0](https://github.com/knocklabs/knock-go/compare/v1.30.1...v1.31.0)
+
+### Features
+
+* **api:** api update ([aacd1fe](https://github.com/knocklabs/knock-go/commit/aacd1fe09d305b5ec2a2db1ac30ce1d25d36ffb7))
+* **api:** api update ([ffd12e5](https://github.com/knocklabs/knock-go/commit/ffd12e5c4deb962fb55d45ed3f8558aac7fa728b))
+* **api:** api update ([4b7528e](https://github.com/knocklabs/knock-go/commit/4b7528effb5c366129bf4bef649cdc5193862b68))
+* **api:** api update ([fde7057](https://github.com/knocklabs/knock-go/commit/fde70578ec612c3efa3be87a40e51f001bbbf911))
+* **api:** api update ([3b4557e](https://github.com/knocklabs/knock-go/commit/3b4557ed2bc481f7665cd3c5440d726619781c4b))
+
+
+### Chores
+
+* **ci:** skip uploading artifacts on stainless-internal branches ([e8031c5](https://github.com/knocklabs/knock-go/commit/e8031c556f0c47ee311b097678c9b6a17a4dc5d0))
+* **internal:** minor cleanup ([ca78bb4](https://github.com/knocklabs/knock-go/commit/ca78bb498f3c2325fd1123af493587d771debfb1))
+* **internal:** tweak CI branches ([ee1ad28](https://github.com/knocklabs/knock-go/commit/ee1ad28caeee870fd19ae0c7e56ebf441ef263a3))
+* **internal:** use explicit returns ([37e40b2](https://github.com/knocklabs/knock-go/commit/37e40b241904bd83e569ee09788c08f2afe3f201))
+* **internal:** use explicit returns in more places ([4f3516d](https://github.com/knocklabs/knock-go/commit/4f3516d71d261df5566f0b03782081015944ccaa))
+
 ## 1.30.1 (2026-03-05)
 
 Full Changelog: [v1.30.0...v1.30.1](https://github.com/knocklabs/knock-go/compare/v1.30.0...v1.30.1)
