@@ -60,11 +60,11 @@ func (r *UserService) Update(ctx context.Context, userID string, body UserUpdate
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s", userID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve a paginated list of users in the environment. Defaults to 50 users per
@@ -98,11 +98,11 @@ func (r *UserService) Delete(ctx context.Context, userID string, opts ...option.
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("v1/users/%s", userID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // Retrieve a specific user by their ID.
@@ -110,11 +110,11 @@ func (r *UserService) Get(ctx context.Context, userID string, opts ...option.Req
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s", userID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieves the channel data for a specific user and channel ID.
@@ -122,15 +122,15 @@ func (r *UserService) GetChannelData(ctx context.Context, userID string, channel
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/channel_data/%s", userID, channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieves a specific preference set for a user identified by the preference set
@@ -139,15 +139,15 @@ func (r *UserService) GetPreferences(ctx context.Context, userID string, id stri
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/preferences/%s", userID, id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // Returns a paginated list of messages for a specific user. Messages are sorted
@@ -159,7 +159,7 @@ func (r *UserService) ListMessages(ctx context.Context, userID string, query Use
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/messages", userID)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -186,11 +186,11 @@ func (r *UserService) ListPreferences(ctx context.Context, userID string, opts .
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/preferences", userID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Returns a paginated list of schedules for a specific user, in descending order.
@@ -200,7 +200,7 @@ func (r *UserService) ListSchedules(ctx context.Context, userID string, query Us
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/schedules", userID)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -228,7 +228,7 @@ func (r *UserService) ListSubscriptions(ctx context.Context, userID string, quer
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/subscriptions", userID)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -255,11 +255,11 @@ func (r *UserService) Merge(ctx context.Context, userID string, body UserMergePa
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/merge", userID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Updates or creates channel data for a specific user and channel ID. If no user
@@ -269,15 +269,15 @@ func (r *UserService) SetChannelData(ctx context.Context, userID string, channel
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/channel_data/%s", userID, channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Updates a complete preference set for a user. By default, this is a destructive
@@ -288,15 +288,15 @@ func (r *UserService) SetPreferences(ctx context.Context, userID string, id stri
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return nil, err
 	}
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/users/%s/preferences/%s", userID, id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Deletes channel data for a specific user and channel ID.
@@ -305,15 +305,15 @@ func (r *UserService) UnsetChannelData(ctx context.Context, userID string, chann
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
-		return
+		return err
 	}
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("v1/users/%s/channel_data/%s", userID, channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // A set of parameters to identify a user with. Does not include the user ID, as

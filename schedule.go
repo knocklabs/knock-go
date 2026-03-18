@@ -52,7 +52,7 @@ func (r *ScheduleService) New(ctx context.Context, body ScheduleNewParams, opts 
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/schedules"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Updates one or more existing schedules with new timing, data, or other
@@ -64,7 +64,7 @@ func (r *ScheduleService) Update(ctx context.Context, body ScheduleUpdateParams,
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/schedules"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Returns a paginated list of schedules for the current environment, filtered by
@@ -98,7 +98,7 @@ func (r *ScheduleService) Delete(ctx context.Context, body ScheduleDeleteParams,
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/schedules"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // A schedule represents a recurring workflow execution.

@@ -40,7 +40,7 @@ func (r *UserBulkService) Delete(ctx context.Context, body UserBulkDeleteParams,
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/users/bulk/delete"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Identifies multiple users in a single operation. Allows creating or updating up
@@ -50,7 +50,7 @@ func (r *UserBulkService) Identify(ctx context.Context, body UserBulkIdentifyPar
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/users/bulk/identify"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Bulk sets the preferences for up to 1,000 users at a time. The preference
@@ -62,7 +62,7 @@ func (r *UserBulkService) SetPreferences(ctx context.Context, body UserBulkSetPr
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/users/bulk/preferences"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type UserBulkDeleteParams struct {

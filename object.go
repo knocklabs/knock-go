@@ -52,7 +52,7 @@ func (r *ObjectService) List(ctx context.Context, collection string, query Objec
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s", collection)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -80,15 +80,15 @@ func (r *ObjectService) Delete(ctx context.Context, collection string, id string
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return err
 	}
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s", collection, id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // Add subscriptions for an object. If a subscription already exists, it will be
@@ -99,15 +99,15 @@ func (r *ObjectService) AddSubscriptions(ctx context.Context, collection string,
 	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required object_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/subscriptions", collection, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Delete subscriptions for the specified recipients from an object. Returns the
@@ -116,15 +116,15 @@ func (r *ObjectService) DeleteSubscriptions(ctx context.Context, collection stri
 	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required object_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/subscriptions", collection, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieves a specific object by its ID from the specified collection. Returns the
@@ -133,15 +133,15 @@ func (r *ObjectService) Get(ctx context.Context, collection string, id string, o
 	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s", collection, id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Returns the channel data for the specified object and channel.
@@ -149,19 +149,19 @@ func (r *ObjectService) GetChannelData(ctx context.Context, collection string, o
 	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required object_id parameter")
-		return
+		return nil, err
 	}
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/channel_data/%s", collection, objectID, channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Returns the preference set for the specified object and preference set `id`.
@@ -169,19 +169,19 @@ func (r *ObjectService) GetPreferences(ctx context.Context, collection string, o
 	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required object_id parameter")
-		return
+		return nil, err
 	}
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/preferences/%s", collection, objectID, id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Returns a paginated list of messages for a specific object in the given
@@ -193,11 +193,11 @@ func (r *ObjectService) ListMessages(ctx context.Context, collection string, id 
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/messages", collection, id)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -224,15 +224,15 @@ func (r *ObjectService) ListPreferences(ctx context.Context, collection string, 
 	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required object_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/preferences", collection, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Returns a paginated list of schedules for an object.
@@ -242,11 +242,11 @@ func (r *ObjectService) ListSchedules(ctx context.Context, collection string, id
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/schedules", collection, id)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -275,11 +275,11 @@ func (r *ObjectService) ListSubscriptions(ctx context.Context, collection string
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required object_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/subscriptions", collection, objectID)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -308,15 +308,15 @@ func (r *ObjectService) Set(ctx context.Context, collection string, id string, b
 	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s", collection, id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Sets the channel data for the specified object and channel. If no object exists
@@ -326,19 +326,19 @@ func (r *ObjectService) SetChannelData(ctx context.Context, collection string, o
 	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required object_id parameter")
-		return
+		return nil, err
 	}
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/channel_data/%s", collection, objectID, channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Sets preferences within the given preference set. By default, this is a
@@ -353,19 +353,19 @@ func (r *ObjectService) SetPreferences(ctx context.Context, collection string, o
 	opts = slices.Concat(r.Options, opts)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required object_id parameter")
-		return
+		return nil, err
 	}
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/preferences/%s", collection, objectID, id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Unsets the channel data for the specified object and channel.
@@ -374,19 +374,19 @@ func (r *ObjectService) UnsetChannelData(ctx context.Context, collection string,
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if collection == "" {
 		err = errors.New("missing required collection parameter")
-		return
+		return err
 	}
 	if objectID == "" {
 		err = errors.New("missing required object_id parameter")
-		return
+		return err
 	}
 	if channelID == "" {
 		err = errors.New("missing required channel_id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("v1/objects/%s/%s/channel_data/%s", collection, objectID, channelID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // A custom [Object](/concepts/objects) entity which belongs to a collection.

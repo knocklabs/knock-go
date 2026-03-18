@@ -45,7 +45,7 @@ func (r *MessageBatchService) Archive(ctx context.Context, body MessageBatchArch
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/archived"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Get the contents of multiple messages in a single request.
@@ -53,7 +53,7 @@ func (r *MessageBatchService) GetContent(ctx context.Context, query MessageBatch
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/content"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // Marks the given messages as interacted with by the user. This can include any
@@ -65,7 +65,7 @@ func (r *MessageBatchService) MarkAsInteracted(ctx context.Context, body Message
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/interacted"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Marks the given messages as `read`. Read more about message engagement statuses
@@ -74,7 +74,7 @@ func (r *MessageBatchService) MarkAsRead(ctx context.Context, body MessageBatchM
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/read"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Marks the given messages as `seen`. This indicates that the user has viewed the
@@ -84,7 +84,7 @@ func (r *MessageBatchService) MarkAsSeen(ctx context.Context, body MessageBatchM
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/seen"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Marks the given messages as `unread`. This reverses the `read` state. Read more
@@ -94,7 +94,7 @@ func (r *MessageBatchService) MarkAsUnread(ctx context.Context, body MessageBatc
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/unread"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Marks the given messages as `unseen`. This reverses the `seen` state. Read more
@@ -104,7 +104,7 @@ func (r *MessageBatchService) MarkAsUnseen(ctx context.Context, body MessageBatc
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/unseen"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Marks the given messages as unarchived. This reverses the `archived` state.
@@ -114,7 +114,7 @@ func (r *MessageBatchService) Unarchive(ctx context.Context, body MessageBatchUn
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/messages/batch/unarchived"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // The content of a message.
