@@ -14,7 +14,6 @@ import (
 )
 
 func TestUserGuideGetChannelWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -46,7 +45,6 @@ func TestUserGuideGetChannelWithOptionalParams(t *testing.T) {
 }
 
 func TestUserGuideMarkMessageAsArchivedWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -95,7 +93,6 @@ func TestUserGuideMarkMessageAsArchivedWithOptionalParams(t *testing.T) {
 }
 
 func TestUserGuideMarkMessageAsInteractedWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -144,7 +141,6 @@ func TestUserGuideMarkMessageAsInteractedWithOptionalParams(t *testing.T) {
 }
 
 func TestUserGuideMarkMessageAsSeenWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
