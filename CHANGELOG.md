@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.32.0 (2026-03-27)
+
+Full Changelog: [v1.31.0...v1.32.0](https://github.com/knocklabs/knock-go/compare/v1.31.0...v1.32.0)
+
+### Features
+
+* **api:** api update ([c895686](https://github.com/knocklabs/knock-go/commit/c895686d78f649fa7e590518c661025948aee6bc))
+* **internal:** support comma format in multipart form encoding ([46993c2](https://github.com/knocklabs/knock-go/commit/46993c2b6e7014ce266fd31f5b6aa1c08a101d07))
+
+
+### Bug Fixes
+
+* prevent duplicate ? in query params ([dd07134](https://github.com/knocklabs/knock-go/commit/dd07134beb9941ff2b6048ad85efa5ba8dff931b))
+
+
+### Chores
+
+* **ci:** skip lint on metadata-only changes ([d29403c](https://github.com/knocklabs/knock-go/commit/d29403c3cc1ada62e479cbe1dfd410ea7bacac99))
+* **ci:** support opting out of skipping builds on metadata-only commits ([d059433](https://github.com/knocklabs/knock-go/commit/d0594337124a00b6ad2791e488aec308544351b6))
+* **internal:** update gitignore ([28ac774](https://github.com/knocklabs/knock-go/commit/28ac774bed539aefef877f9d4df3fbad6da59133))
+* remove unnecessary error check for url parsing ([816b669](https://github.com/knocklabs/knock-go/commit/816b669a481bc026571ffbc81b8d425a2217d5fc))
+* **tests:** bump steady to v0.19.4 ([86f1b26](https://github.com/knocklabs/knock-go/commit/86f1b26826740e4f87922eccf53320f1408ee120))
+* **tests:** bump steady to v0.19.5 ([d992654](https://github.com/knocklabs/knock-go/commit/d992654bf87d0a027518b9d3f54c5fecf17c3964))
+* **tests:** bump steady to v0.19.6 ([a0db184](https://github.com/knocklabs/knock-go/commit/a0db184cd697f88069242e8b365acd7792fafa44))
+* **tests:** bump steady to v0.19.7 ([d768b1d](https://github.com/knocklabs/knock-go/commit/d768b1d00c849262531d072265353581fc73c20e))
+
+
+### Refactors
+
+* **tests:** switch from prism to steady ([15e6b71](https://github.com/knocklabs/knock-go/commit/15e6b718c5e72d2dda1dc9e84163d33df3c076cd))
+
 ## 1.31.0 (2026-03-16)
 
 Full Changelog: [v1.30.1...v1.31.0](https://github.com/knocklabs/knock-go/compare/v1.30.1...v1.31.0)
