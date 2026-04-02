@@ -316,6 +316,23 @@ func (r *UserService) UnsetChannelData(ctx context.Context, userID string, chann
 	return err
 }
 
+// Unsets the preference set for the user, removing it entirely.
+func (r *UserService) UnsetPreferences(ctx context.Context, userID string, id string, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	if userID == "" {
+		err = errors.New("missing required user_id parameter")
+		return err
+	}
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return err
+	}
+	path := fmt.Sprintf("v1/users/%s/preferences/%s", userID, id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
+	return err
+}
+
 // A set of parameters to identify a user with. Does not include the user ID, as
 // that's specified elsewhere in the request. You can supply any additional
 // properties you'd like to upsert for the user.
