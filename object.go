@@ -389,6 +389,27 @@ func (r *ObjectService) UnsetChannelData(ctx context.Context, collection string,
 	return err
 }
 
+// Unsets the preference set for the object, removing it entirely.
+func (r *ObjectService) UnsetPreferences(ctx context.Context, collection string, objectID string, id string, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	if collection == "" {
+		err = errors.New("missing required collection parameter")
+		return err
+	}
+	if objectID == "" {
+		err = errors.New("missing required object_id parameter")
+		return err
+	}
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return err
+	}
+	path := fmt.Sprintf("v1/objects/%s/%s/preferences/%s", collection, objectID, id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
+	return err
+}
+
 // A custom [Object](/concepts/objects) entity which belongs to a collection.
 type InlineObjectRequestParam struct {
 	// Unique identifier for the object.
