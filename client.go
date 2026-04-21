@@ -36,6 +36,9 @@ type Client struct {
 	// A workflow is a structured set of steps that is triggered to produce
 	// notifications sent over channels.
 	Workflows *WorkflowService
+	// A workflow run represents an individual execution of a workflow for a specific
+	// recipient.
+	WorkflowRecipientRuns *WorkflowRecipientRunService
 	// A schedule is a per-recipient, timezone-aware configuration for when to invoke a
 	// workflow.
 	Schedules *ScheduleService
@@ -78,6 +81,7 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.Providers = NewProviderService(opts...)
 	r.Integrations = NewIntegrationService(opts...)
 	r.Workflows = NewWorkflowService(opts...)
+	r.WorkflowRecipientRuns = NewWorkflowRecipientRunService(opts...)
 	r.Schedules = NewScheduleService(opts...)
 	r.Channels = NewChannelService(opts...)
 	r.Audiences = NewAudienceService(opts...)

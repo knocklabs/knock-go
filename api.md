@@ -311,6 +311,19 @@ Methods:
 - <code title="post /v1/workflows/{key}/cancel">client.Workflows.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#WorkflowService.Cancel">Cancel</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, key <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#WorkflowCancelParams">WorkflowCancelParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
 - <code title="post /v1/workflows/{key}/trigger">client.Workflows.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#WorkflowService.Trigger">Trigger</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, key <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#WorkflowTriggerParams">WorkflowTriggerParams</a>) (\*<a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#WorkflowTriggerResponse">WorkflowTriggerResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
+# WorkflowRecipientRuns
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#WorkflowRecipientRun">WorkflowRecipientRun</a>
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#WorkflowRecipientRunDetail">WorkflowRecipientRunDetail</a>
+- <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#WorkflowRecipientRunEvent">WorkflowRecipientRunEvent</a>
+
+Methods:
+
+- <code title="get /v1/workflow_recipient_runs">client.WorkflowRecipientRuns.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#WorkflowRecipientRunService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#WorkflowRecipientRunListParams">WorkflowRecipientRunListParams</a>) (\*<a href="https://pkg.go.dev/github.com/knocklabs/knock-go/packages/pagination">pagination</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go/packages/pagination#ItemsCursor">ItemsCursor</a>[<a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#WorkflowRecipientRun">WorkflowRecipientRun</a>], <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="get /v1/workflow_recipient_runs/{id}">client.WorkflowRecipientRuns.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#WorkflowRecipientRunService.Get">Get</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/knocklabs/knock-go">knock</a>.<a href="https://pkg.go.dev/github.com/knocklabs/knock-go#WorkflowRecipientRunDetail">WorkflowRecipientRunDetail</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
 # Schedules
 
 Params Types:
