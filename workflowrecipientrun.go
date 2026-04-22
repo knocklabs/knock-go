@@ -100,8 +100,9 @@ type WorkflowRecipientRun struct {
 	// The identifier for the top-level workflow run shared across all recipients in a
 	// single trigger.
 	WorkflowRunID string `json:"workflow_run_id" api:"required" format:"uuid"`
-	// A recipient of a notification, which is either a user or an object.
-	Actor Recipient `json:"actor" api:"nullable"`
+	// A reference to a recipient, either a user identifier (string) or an object
+	// reference (ID, collection).
+	Actor RecipientReferenceUnion `json:"actor" api:"nullable"`
 	// The number of errors encountered during the workflow recipient run.
 	ErrorCount int64 `json:"error_count"`
 	// The tenant associated with the workflow recipient run.
