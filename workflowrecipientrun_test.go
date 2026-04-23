@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/knocklabs/knock-go"
 	"github.com/knocklabs/knock-go/internal/testutil"
@@ -14,7 +15,7 @@ import (
 	"github.com/knocklabs/knock-go/shared"
 )
 
-func TestWorkflowCancelWithOptionalParams(t *testing.T) {
+func TestWorkflowRecipientRunListWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -26,14 +27,18 @@ func TestWorkflowCancelWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Workflows.Cancel(
-		context.TODO(),
-		"key",
-		knock.WorkflowCancelParams{
-			CancellationKey: knock.F("cancel-workflow-123"),
-			Recipients:      knock.F([]knock.RecipientReferenceUnionParam{shared.UnionString("jhammond")}),
-		},
-	)
+	_, err := client.WorkflowRecipientRuns.List(context.TODO(), knock.WorkflowRecipientRunListParams{
+		After:      knock.F("after"),
+		Before:     knock.F("before"),
+		EndingAt:   knock.F(time.Now()),
+		HasErrors:  knock.F(true),
+		PageSize:   knock.F(int64(0)),
+		Recipient:  knock.F[knock.RecipientReferenceUnionParam](shared.UnionString("user_123")),
+		StartingAt: knock.F(time.Now()),
+		Status:     knock.F([]knock.WorkflowRecipientRunListParamsStatus{knock.WorkflowRecipientRunListParamsStatusQueued}),
+		Tenant:     knock.F("tenant"),
+		Workflow:   knock.F("workflow"),
+	})
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {
@@ -43,7 +48,7 @@ func TestWorkflowCancelWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestWorkflowTriggerWithOptionalParams(t *testing.T) {
+func TestWorkflowRecipientRunGet(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -55,24 +60,7 @@ func TestWorkflowTriggerWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Workflows.Trigger(
-		context.TODO(),
-		"key",
-		knock.WorkflowTriggerParams{
-			Recipients:      knock.F([]knock.RecipientRequestUnionParam{shared.UnionString("dr_grant"), shared.UnionString("dr_sattler"), shared.UnionString("dr_malcolm")}),
-			Actor:           knock.F[knock.RecipientRequestUnionParam](shared.UnionString("mr_dna")),
-			CancellationKey: knock.F("isla_nublar_incident_1993"),
-			Data: knock.F(map[string]interface{}{
-				"affected_areas":      "bar",
-				"attraction_id":       "bar",
-				"evacuation_protocol": "bar",
-				"message":             "bar",
-				"severity":            "bar",
-				"system_status":       "bar",
-			}),
-			Tenant: knock.F[knock.InlineTenantRequestUnionParam](shared.UnionString("ingen_isla_nublar")),
-		},
-	)
+	_, err := client.WorkflowRecipientRuns.Get(context.TODO(), "id")
 	if err != nil {
 		var apierr *knock.Error
 		if errors.As(err, &apierr) {

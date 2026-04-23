@@ -1,5 +1,51 @@
 # Changelog
 
+## 1.32.0 (2026-04-23)
+
+Full Changelog: [v1.31.0...v1.32.0](https://github.com/knocklabs/knock-go/compare/v1.31.0...v1.32.0)
+
+### Features
+
+* **api:** added new unset preferences methods ([0b70d79](https://github.com/knocklabs/knock-go/commit/0b70d791213a164c93b7c6d5ac2a395ff40c3ed5))
+* **api:** api update ([4ffa960](https://github.com/knocklabs/knock-go/commit/4ffa960ad385b85d9740ed2b81f1929965e68ad4))
+* **api:** api update ([dc9fe96](https://github.com/knocklabs/knock-go/commit/dc9fe96eb806e6fa2e8d7175d79afbb807eedb18))
+* **api:** api update ([be0c51f](https://github.com/knocklabs/knock-go/commit/be0c51fce230395fe31f413b82ad61856b71d40e))
+* **api:** api update ([c895686](https://github.com/knocklabs/knock-go/commit/c895686d78f649fa7e590518c661025948aee6bc))
+* **api:** skip tests for 2 endpoints in 2 languages ([abbc8b9](https://github.com/knocklabs/knock-go/commit/abbc8b9d6031d63bbf5d1df22bc1488988b5ac4c))
+* **internal:** support comma format in multipart form encoding ([46993c2](https://github.com/knocklabs/knock-go/commit/46993c2b6e7014ce266fd31f5b6aa1c08a101d07))
+* **KNO-12791:** Add workflow recipient run APIs ([59a6d5f](https://github.com/knocklabs/knock-go/commit/59a6d5f35a0f84e40ec78411ec2825e7e62a5c01))
+
+
+### Bug Fixes
+
+* prevent duplicate ? in query params ([dd07134](https://github.com/knocklabs/knock-go/commit/dd07134beb9941ff2b6048ad85efa5ba8dff931b))
+
+
+### Chores
+
+* **ci:** skip lint on metadata-only changes ([d29403c](https://github.com/knocklabs/knock-go/commit/d29403c3cc1ada62e479cbe1dfd410ea7bacac99))
+* **ci:** support opting out of skipping builds on metadata-only commits ([d059433](https://github.com/knocklabs/knock-go/commit/d0594337124a00b6ad2791e488aec308544351b6))
+* **internal:** more robust bootstrap script ([a5d9592](https://github.com/knocklabs/knock-go/commit/a5d9592c99317cff427a5888f23c0af3872e01e5))
+* **internal:** update gitignore ([28ac774](https://github.com/knocklabs/knock-go/commit/28ac774bed539aefef877f9d4df3fbad6da59133))
+* remove unnecessary error check for url parsing ([816b669](https://github.com/knocklabs/knock-go/commit/816b669a481bc026571ffbc81b8d425a2217d5fc))
+* **tests:** bump steady to v0.19.4 ([86f1b26](https://github.com/knocklabs/knock-go/commit/86f1b26826740e4f87922eccf53320f1408ee120))
+* **tests:** bump steady to v0.19.5 ([d992654](https://github.com/knocklabs/knock-go/commit/d992654bf87d0a027518b9d3f54c5fecf17c3964))
+* **tests:** bump steady to v0.19.6 ([a0db184](https://github.com/knocklabs/knock-go/commit/a0db184cd697f88069242e8b365acd7792fafa44))
+* **tests:** bump steady to v0.19.7 ([d768b1d](https://github.com/knocklabs/knock-go/commit/d768b1d00c849262531d072265353581fc73c20e))
+* **tests:** bump steady to v0.20.1 ([aeb7e7a](https://github.com/knocklabs/knock-go/commit/aeb7e7af03f6da27acf138d1c82f57bea8e5e155))
+* **tests:** bump steady to v0.20.2 ([c974a80](https://github.com/knocklabs/knock-go/commit/c974a80230b3851b78b89f709a79f1eb32eb0307))
+* **tests:** bump steady to v0.22.1 ([b72dc73](https://github.com/knocklabs/knock-go/commit/b72dc73917551bd383f9e41b8dc73cbf5676a8c6))
+
+
+### Documentation
+
+* improve examples ([7886da9](https://github.com/knocklabs/knock-go/commit/7886da9b2b3aadd00065312321256688bb40696e))
+
+
+### Refactors
+
+* **tests:** switch from prism to steady ([15e6b71](https://github.com/knocklabs/knock-go/commit/15e6b718c5e72d2dda1dc9e84163d33df3c076cd))
+
 ## 1.31.0 (2026-03-16)
 
 Full Changelog: [v1.30.1...v1.31.0](https://github.com/knocklabs/knock-go/compare/v1.30.1...v1.31.0)

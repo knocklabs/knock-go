@@ -16,7 +16,6 @@ import (
 )
 
 func TestScheduleNewWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -51,11 +50,35 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 						"marketing": shared.UnionBool(false),
 						"transactional": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
 							ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-								Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-								Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
-								HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-								Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+								Chat: knock.F[knock.PreferenceSetChannelTypesChatUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+									Conditions: knock.F([]shared.ConditionParam{{
+										Argument: knock.F("US"),
+										Operator: knock.F(shared.ConditionOperatorEqualTo),
+										Variable: knock.F("recipient.country_code"),
+									}}),
+								}),
+								Email: knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(false)),
+								HTTP: knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+									Conditions: knock.F([]shared.ConditionParam{{
+										Argument: knock.F("US"),
+										Operator: knock.F(shared.ConditionOperatorEqualTo),
+										Variable: knock.F("recipient.country_code"),
+									}}),
+								}),
+								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+									Conditions: knock.F([]shared.ConditionParam{{
+										Argument: knock.F("US"),
+										Operator: knock.F(shared.ConditionOperatorEqualTo),
+										Variable: knock.F("recipient.country_code"),
+									}}),
+								}),
+								Push: knock.F[knock.PreferenceSetChannelTypesPushUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+									Conditions: knock.F([]shared.ConditionParam{{
+										Argument: knock.F("US"),
+										Operator: knock.F(shared.ConditionOperatorEqualTo),
+										Variable: knock.F("recipient.country_code"),
+									}}),
+								}),
 								SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
 									Conditions: knock.F([]shared.ConditionParam{{
 										Argument: knock.F("US"),
@@ -75,11 +98,35 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 						},
 					}),
 					ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-						Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-						Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
-						HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-						InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-						Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+						Chat: knock.F[knock.PreferenceSetChannelTypesChatUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+							Conditions: knock.F([]shared.ConditionParam{{
+								Argument: knock.F("US"),
+								Operator: knock.F(shared.ConditionOperatorEqualTo),
+								Variable: knock.F("recipient.country_code"),
+							}}),
+						}),
+						Email: knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
+						HTTP: knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+							Conditions: knock.F([]shared.ConditionParam{{
+								Argument: knock.F("US"),
+								Operator: knock.F(shared.ConditionOperatorEqualTo),
+								Variable: knock.F("recipient.country_code"),
+							}}),
+						}),
+						InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+							Conditions: knock.F([]shared.ConditionParam{{
+								Argument: knock.F("US"),
+								Operator: knock.F(shared.ConditionOperatorEqualTo),
+								Variable: knock.F("recipient.country_code"),
+							}}),
+						}),
+						Push: knock.F[knock.PreferenceSetChannelTypesPushUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+							Conditions: knock.F([]shared.ConditionParam{{
+								Argument: knock.F("US"),
+								Operator: knock.F(shared.ConditionOperatorEqualTo),
+								Variable: knock.F("recipient.country_code"),
+							}}),
+						}),
 						SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
 							Conditions: knock.F([]shared.ConditionParam{{
 								Argument: knock.F("US"),
@@ -102,11 +149,35 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 					Workflows: knock.F(map[string]knock.PreferenceSetRequestWorkflowsUnionParam{
 						"dinosaurs-loose": knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
 							ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
-								Chat:      knock.F[knock.PreferenceSetChannelTypesChatUnionParam](shared.UnionBool(true)),
-								Email:     knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
-								HTTP:      knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](shared.UnionBool(true)),
-								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](shared.UnionBool(true)),
-								Push:      knock.F[knock.PreferenceSetChannelTypesPushUnionParam](shared.UnionBool(true)),
+								Chat: knock.F[knock.PreferenceSetChannelTypesChatUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+									Conditions: knock.F([]shared.ConditionParam{{
+										Argument: knock.F("US"),
+										Operator: knock.F(shared.ConditionOperatorEqualTo),
+										Variable: knock.F("recipient.country_code"),
+									}}),
+								}),
+								Email: knock.F[knock.PreferenceSetChannelTypesEmailUnionParam](shared.UnionBool(true)),
+								HTTP: knock.F[knock.PreferenceSetChannelTypesHTTPUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+									Conditions: knock.F([]shared.ConditionParam{{
+										Argument: knock.F("US"),
+										Operator: knock.F(shared.ConditionOperatorEqualTo),
+										Variable: knock.F("recipient.country_code"),
+									}}),
+								}),
+								InAppFeed: knock.F[knock.PreferenceSetChannelTypesInAppFeedUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+									Conditions: knock.F([]shared.ConditionParam{{
+										Argument: knock.F("US"),
+										Operator: knock.F(shared.ConditionOperatorEqualTo),
+										Variable: knock.F("recipient.country_code"),
+									}}),
+								}),
+								Push: knock.F[knock.PreferenceSetChannelTypesPushUnionParam](knock.PreferenceSetChannelTypeSettingParam{
+									Conditions: knock.F([]shared.ConditionParam{{
+										Argument: knock.F("US"),
+										Operator: knock.F(shared.ConditionOperatorEqualTo),
+										Variable: knock.F("recipient.country_code"),
+									}}),
+								}),
 								SMS: knock.F[knock.PreferenceSetChannelTypesSMSUnionParam](knock.PreferenceSetChannelTypeSettingParam{
 									Conditions: knock.F([]shared.ConditionParam{{
 										Argument: knock.F("US"),
@@ -155,7 +226,6 @@ func TestScheduleNewWithOptionalParams(t *testing.T) {
 }
 
 func TestScheduleUpdateWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -196,7 +266,6 @@ func TestScheduleUpdateWithOptionalParams(t *testing.T) {
 }
 
 func TestScheduleListWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -226,7 +295,6 @@ func TestScheduleListWithOptionalParams(t *testing.T) {
 }
 
 func TestScheduleDelete(t *testing.T) {
-	t.Skip("Mock server doesn't support callbacks yet")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
