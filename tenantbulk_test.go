@@ -15,6 +15,7 @@ import (
 )
 
 func TestTenantBulkDelete(t *testing.T) {
+	t.Skip("Steady does not support bracket-style array query params")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
