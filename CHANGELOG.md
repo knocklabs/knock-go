@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.33.0 (2026-04-24)
+
+Full Changelog: [v1.32.0...v1.33.0](https://github.com/knocklabs/knock-go/compare/v1.32.0...v1.33.0)
+
+### Features
+
+* **api:** api update ([a1ac8ca](https://github.com/knocklabs/knock-go/commit/a1ac8ca5565008ece66cdaacd6ba33217c1362d8))
+* **go:** add default http client with timeout ([be6f709](https://github.com/knocklabs/knock-go/commit/be6f7098a49fb8e991eb1c62039dda184445c81f))
+
 ## 1.32.0 (2026-04-23)
 
 Full Changelog: [v1.31.0...v1.32.0](https://github.com/knocklabs/knock-go/compare/v1.31.0...v1.32.0)
