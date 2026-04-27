@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"slices"
+	"strings"
 
 	"github.com/knocklabs/knock-go/internal/requestconfig"
 	"github.com/knocklabs/knock-go/option"
@@ -59,6 +60,14 @@ func DefaultClientOptions() []option.RequestOption {
 	}
 	if o, ok := os.LookupEnv("KNOCK_BRANCH"); ok {
 		defaults = append(defaults, option.WithBranch(o))
+	}
+	if o, ok := os.LookupEnv("KNOCK_CUSTOM_HEADERS"); ok {
+		for _, line := range strings.Split(o, "\n") {
+			colon := strings.Index(line, ":")
+			if colon >= 0 {
+				defaults = append(defaults, option.WithHeader(strings.TrimSpace(line[:colon]), strings.TrimSpace(line[colon+1:])))
+			}
+		}
 	}
 	return defaults
 }
