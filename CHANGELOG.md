@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.34.0 (2026-04-30)
+
+Full Changelog: [v1.33.0...v1.34.0](https://github.com/knocklabs/knock-go/compare/v1.33.0...v1.34.0)
+
+### Features
+
+* **api:** api update ([61803e1](https://github.com/knocklabs/knock-go/commit/61803e16cce64737a6e7fef55669ceb2b3226c36))
+* support setting headers via env ([3cc4d82](https://github.com/knocklabs/knock-go/commit/3cc4d829e7050b4ce90f06072b5b8ab30e853839))
+
+
+### Chores
+
+* avoid embedding reflect.Type for dead code elimination ([0bedd11](https://github.com/knocklabs/knock-go/commit/0bedd114f1b91121b451fe8b851361cb70d8609d))
+
 ## 1.33.0 (2026-04-24)
 
 Full Changelog: [v1.32.0...v1.33.0](https://github.com/knocklabs/knock-go/compare/v1.32.0...v1.33.0)
