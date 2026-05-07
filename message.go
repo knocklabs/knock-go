@@ -801,27 +801,27 @@ func (r messageEventJSON) RawJSON() string {
 type MessageEventType string
 
 const (
-	MessageEventTypeMessageArchived          MessageEventType = "message.archived"
-	MessageEventTypeMessageBounced           MessageEventType = "message.bounced"
-	MessageEventTypeMessageCreated           MessageEventType = "message.created"
-	MessageEventTypeMessageDelivered         MessageEventType = "message.delivered"
-	MessageEventTypeMessageDeliveryAttempted MessageEventType = "message.delivery_attempted"
-	MessageEventTypeMessageInteracted        MessageEventType = "message.interacted"
-	MessageEventTypeMessageLinkClicked       MessageEventType = "message.link_clicked"
-	MessageEventTypeMessageNotSent           MessageEventType = "message.not_sent"
-	MessageEventTypeMessageQueued            MessageEventType = "message.queued"
 	MessageEventTypeMessageRead              MessageEventType = "message.read"
-	MessageEventTypeMessageSeen              MessageEventType = "message.seen"
 	MessageEventTypeMessageSent              MessageEventType = "message.sent"
-	MessageEventTypeMessageUnarchived        MessageEventType = "message.unarchived"
+	MessageEventTypeMessageSeen              MessageEventType = "message.seen"
+	MessageEventTypeMessageCreated           MessageEventType = "message.created"
+	MessageEventTypeMessageQueued            MessageEventType = "message.queued"
+	MessageEventTypeMessageDelivered         MessageEventType = "message.delivered"
+	MessageEventTypeMessageBounced           MessageEventType = "message.bounced"
 	MessageEventTypeMessageUndelivered       MessageEventType = "message.undelivered"
-	MessageEventTypeMessageUnread            MessageEventType = "message.unread"
+	MessageEventTypeMessageNotSent           MessageEventType = "message.not_sent"
+	MessageEventTypeMessageDeliveryAttempted MessageEventType = "message.delivery_attempted"
+	MessageEventTypeMessageArchived          MessageEventType = "message.archived"
+	MessageEventTypeMessageLinkClicked       MessageEventType = "message.link_clicked"
+	MessageEventTypeMessageInteracted        MessageEventType = "message.interacted"
 	MessageEventTypeMessageUnseen            MessageEventType = "message.unseen"
+	MessageEventTypeMessageUnread            MessageEventType = "message.unread"
+	MessageEventTypeMessageUnarchived        MessageEventType = "message.unarchived"
 )
 
 func (r MessageEventType) IsKnown() bool {
 	switch r {
-	case MessageEventTypeMessageArchived, MessageEventTypeMessageBounced, MessageEventTypeMessageCreated, MessageEventTypeMessageDelivered, MessageEventTypeMessageDeliveryAttempted, MessageEventTypeMessageInteracted, MessageEventTypeMessageLinkClicked, MessageEventTypeMessageNotSent, MessageEventTypeMessageQueued, MessageEventTypeMessageRead, MessageEventTypeMessageSeen, MessageEventTypeMessageSent, MessageEventTypeMessageUnarchived, MessageEventTypeMessageUndelivered, MessageEventTypeMessageUnread, MessageEventTypeMessageUnseen:
+	case MessageEventTypeMessageRead, MessageEventTypeMessageSent, MessageEventTypeMessageSeen, MessageEventTypeMessageCreated, MessageEventTypeMessageQueued, MessageEventTypeMessageDelivered, MessageEventTypeMessageBounced, MessageEventTypeMessageUndelivered, MessageEventTypeMessageNotSent, MessageEventTypeMessageDeliveryAttempted, MessageEventTypeMessageArchived, MessageEventTypeMessageLinkClicked, MessageEventTypeMessageInteracted, MessageEventTypeMessageUnseen, MessageEventTypeMessageUnread, MessageEventTypeMessageUnarchived:
 		return true
 	}
 	return false
