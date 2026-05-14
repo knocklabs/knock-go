@@ -93,11 +93,11 @@ func (r workflowTriggerResponseJSON) RawJSON() string {
 }
 
 type WorkflowCancelParams struct {
-	// An optional key that is used to reference a specific workflow trigger request
-	// when issuing a [workflow cancellation](/send-notifications/canceling-workflows)
-	// request. Must be provided while triggering a workflow in order to enable
-	// subsequent cancellation. Should be unique across trigger requests to avoid
-	// unintentional cancellations.
+	// A key that is used to reference a specific workflow trigger request when issuing
+	// a [workflow cancellation](/send-notifications/canceling-workflows) request. Must
+	// be provided while triggering a workflow in order to enable subsequent
+	// cancellation. Should be unique across trigger requests to avoid unintentional
+	// cancellations.
 	CancellationKey param.Field[string] `json:"cancellation_key" api:"required"`
 	// A list of recipients to cancel the notification for. If omitted, cancels for all
 	// recipients associated with the cancellation key.
@@ -116,11 +116,11 @@ type WorkflowTriggerParams struct {
 	// (string), an inline user request (object), or an inline object request, which is
 	// determined by the presence of a `collection` property.
 	Actor param.Field[RecipientRequestUnionParam] `json:"actor"`
-	// An optional key that is used to reference a specific workflow trigger request
-	// when issuing a [workflow cancellation](/send-notifications/canceling-workflows)
-	// request. Must be provided while triggering a workflow in order to enable
-	// subsequent cancellation. Should be unique across trigger requests to avoid
-	// unintentional cancellations.
+	// A key that is used to reference a specific workflow trigger request when issuing
+	// a [workflow cancellation](/send-notifications/canceling-workflows) request. Must
+	// be provided while triggering a workflow in order to enable subsequent
+	// cancellation. Should be unique across trigger requests to avoid unintentional
+	// cancellations.
 	CancellationKey param.Field[string] `json:"cancellation_key"`
 	// An optional map of data to pass into the workflow execution. There is a 10MB
 	// limit on the size of the full `data` payload. Any individual string value
