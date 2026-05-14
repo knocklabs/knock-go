@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.34.0 (2026-05-14)
+
+Full Changelog: [v1.33.0...v1.34.0](https://github.com/knocklabs/knock-go/compare/v1.33.0...v1.34.0)
+
+### Features
+
+* **api:** api update ([f9bfdc9](https://github.com/knocklabs/knock-go/commit/f9bfdc97668081761f3a7d9488d13080d46913a5))
+* **api:** api update ([61803e1](https://github.com/knocklabs/knock-go/commit/61803e16cce64737a6e7fef55669ceb2b3226c36))
+* support setting headers via env ([3cc4d82](https://github.com/knocklabs/knock-go/commit/3cc4d829e7050b4ce90f06072b5b8ab30e853839))
+
+
+### Bug Fixes
+
+* **go:** avoid panic when http.DefaultTransport is wrapped ([9295180](https://github.com/knocklabs/knock-go/commit/9295180843c549fb929a0d9fd919660e59a559a7))
+
+
+### Chores
+
+* avoid embedding reflect.Type for dead code elimination ([0bedd11](https://github.com/knocklabs/knock-go/commit/0bedd114f1b91121b451fe8b851361cb70d8609d))
+* redact api-key headers in debug logs ([86cc0b7](https://github.com/knocklabs/knock-go/commit/86cc0b7cb27a946acd1af8021887d722e5bd0d8d))
+
 ## 1.33.0 (2026-04-24)
 
 Full Changelog: [v1.32.0...v1.33.0](https://github.com/knocklabs/knock-go/compare/v1.32.0...v1.33.0)
