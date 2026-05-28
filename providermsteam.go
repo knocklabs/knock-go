@@ -134,6 +134,8 @@ func (r providerMsTeamCheckAuthResponseJSON) RawJSON() string {
 type ProviderMsTeamCheckAuthResponseConnection struct {
 	// Whether the Microsoft Teams connection is valid.
 	Ok bool `json:"ok" api:"required"`
+	// The Microsoft Teams tenant ID for the connected tenant.
+	MsTeamsTenantID string `json:"ms_teams_tenant_id" api:"nullable"`
 	// The reason for the Microsoft Teams connection if it is not valid.
 	Reason string                                        `json:"reason" api:"nullable"`
 	JSON   providerMsTeamCheckAuthResponseConnectionJSON `json:"-"`
@@ -142,10 +144,11 @@ type ProviderMsTeamCheckAuthResponseConnection struct {
 // providerMsTeamCheckAuthResponseConnectionJSON contains the JSON metadata for the
 // struct [ProviderMsTeamCheckAuthResponseConnection]
 type providerMsTeamCheckAuthResponseConnectionJSON struct {
-	Ok          apijson.Field
-	Reason      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Ok              apijson.Field
+	MsTeamsTenantID apijson.Field
+	Reason          apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
 }
 
 func (r *ProviderMsTeamCheckAuthResponseConnection) UnmarshalJSON(data []byte) (err error) {
