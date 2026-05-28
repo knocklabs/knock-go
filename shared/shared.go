@@ -52,6 +52,7 @@ const (
 	ConditionOperatorExists                   ConditionOperator = "exists"
 	ConditionOperatorNotExists                ConditionOperator = "not_exists"
 	ConditionOperatorContainsAll              ConditionOperator = "contains_all"
+	ConditionOperatorNotContainsAll           ConditionOperator = "not_contains_all"
 	ConditionOperatorIsTimestamp              ConditionOperator = "is_timestamp"
 	ConditionOperatorIsNotTimestamp           ConditionOperator = "is_not_timestamp"
 	ConditionOperatorIsTimestampOnOrAfter     ConditionOperator = "is_timestamp_on_or_after"
@@ -66,7 +67,7 @@ const (
 
 func (r ConditionOperator) IsKnown() bool {
 	switch r {
-	case ConditionOperatorEqualTo, ConditionOperatorNotEqualTo, ConditionOperatorGreaterThan, ConditionOperatorLessThan, ConditionOperatorGreaterThanOrEqualTo, ConditionOperatorLessThanOrEqualTo, ConditionOperatorContains, ConditionOperatorNotContains, ConditionOperatorEmpty, ConditionOperatorNotEmpty, ConditionOperatorExists, ConditionOperatorNotExists, ConditionOperatorContainsAll, ConditionOperatorIsTimestamp, ConditionOperatorIsNotTimestamp, ConditionOperatorIsTimestampOnOrAfter, ConditionOperatorIsTimestampBefore, ConditionOperatorIsTimestampOnOrAfterDate, ConditionOperatorIsTimestampBeforeDate, ConditionOperatorIsTimestampBetween, ConditionOperatorIsBetween, ConditionOperatorIsAudienceMember, ConditionOperatorIsNotAudienceMember:
+	case ConditionOperatorEqualTo, ConditionOperatorNotEqualTo, ConditionOperatorGreaterThan, ConditionOperatorLessThan, ConditionOperatorGreaterThanOrEqualTo, ConditionOperatorLessThanOrEqualTo, ConditionOperatorContains, ConditionOperatorNotContains, ConditionOperatorEmpty, ConditionOperatorNotEmpty, ConditionOperatorExists, ConditionOperatorNotExists, ConditionOperatorContainsAll, ConditionOperatorNotContainsAll, ConditionOperatorIsTimestamp, ConditionOperatorIsNotTimestamp, ConditionOperatorIsTimestampOnOrAfter, ConditionOperatorIsTimestampBefore, ConditionOperatorIsTimestampOnOrAfterDate, ConditionOperatorIsTimestampBeforeDate, ConditionOperatorIsTimestampBetween, ConditionOperatorIsBetween, ConditionOperatorIsAudienceMember, ConditionOperatorIsNotAudienceMember:
 		return true
 	}
 	return false
