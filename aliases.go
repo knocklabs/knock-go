@@ -59,9 +59,6 @@ const ConditionOperatorNotExists = shared.ConditionOperatorNotExists
 const ConditionOperatorContainsAll = shared.ConditionOperatorContainsAll
 
 // This is an alias to an internal value.
-const ConditionOperatorNotContainsAll = shared.ConditionOperatorNotContainsAll
-
-// This is an alias to an internal value.
 const ConditionOperatorIsTimestamp = shared.ConditionOperatorIsTimestamp
 
 // This is an alias to an internal value.
