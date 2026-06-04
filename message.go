@@ -364,6 +364,9 @@ type Message struct {
 	Metadata map[string]interface{} `json:"metadata" api:"nullable"`
 	// Timestamp when the message was read.
 	ReadAt time.Time `json:"read_at" api:"nullable" format:"date-time"`
+	// Recipient contact information captured at email send time. Null for non-email
+	// channels.
+	RecipientSnapshot MessageRecipientSnapshot `json:"recipient_snapshot" api:"nullable"`
 	// Timestamp when the message was scheduled to be sent.
 	ScheduledAt time.Time `json:"scheduled_at" api:"nullable" format:"date-time"`
 	// Timestamp when the message was seen.
@@ -398,6 +401,7 @@ type messageJSON struct {
 	LinkClickedAt      apijson.Field
 	Metadata           apijson.Field
 	ReadAt             apijson.Field
+	RecipientSnapshot  apijson.Field
 	ScheduledAt        apijson.Field
 	SeenAt             apijson.Field
 	Tenant             apijson.Field
@@ -576,6 +580,33 @@ func (r MessageChannelType) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+// Recipient contact information captured at email send time. Null for non-email
+// channels.
+type MessageRecipientSnapshot struct {
+	// The email address the message was delivered to
+	Email string `json:"email"`
+	// The recipient name at send time
+	Name string                       `json:"name" api:"nullable"`
+	JSON messageRecipientSnapshotJSON `json:"-"`
+}
+
+// messageRecipientSnapshotJSON contains the JSON metadata for the struct
+// [MessageRecipientSnapshot]
+type messageRecipientSnapshotJSON struct {
+	Email       apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageRecipientSnapshot) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageRecipientSnapshotJSON) RawJSON() string {
+	return r.raw
 }
 
 // A message delivery log contains a `request` from Knock to a downstream provider
