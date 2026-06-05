@@ -364,6 +364,9 @@ type Message struct {
 	Metadata map[string]interface{} `json:"metadata" api:"nullable"`
 	// Timestamp when the message was read.
 	ReadAt time.Time `json:"read_at" api:"nullable" format:"date-time"`
+	// Recipient contact information captured at email send time. Null for non-email
+	// channels.
+	RecipientSnapshot MessageRecipientSnapshot `json:"recipient_snapshot" api:"nullable"`
 	// Timestamp when the message was scheduled to be sent.
 	ScheduledAt time.Time `json:"scheduled_at" api:"nullable" format:"date-time"`
 	// Timestamp when the message was seen.
@@ -398,6 +401,7 @@ type messageJSON struct {
 	LinkClickedAt      apijson.Field
 	Metadata           apijson.Field
 	ReadAt             apijson.Field
+	RecipientSnapshot  apijson.Field
 	ScheduledAt        apijson.Field
 	SeenAt             apijson.Field
 	Tenant             apijson.Field
@@ -576,6 +580,33 @@ func (r MessageChannelType) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+// Recipient contact information captured at email send time. Null for non-email
+// channels.
+type MessageRecipientSnapshot struct {
+	// The email address the message was delivered to
+	Email string `json:"email"`
+	// The recipient name at send time
+	Name string                       `json:"name" api:"nullable"`
+	JSON messageRecipientSnapshotJSON `json:"-"`
+}
+
+// messageRecipientSnapshotJSON contains the JSON metadata for the struct
+// [MessageRecipientSnapshot]
+type messageRecipientSnapshotJSON struct {
+	Email       apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageRecipientSnapshot) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageRecipientSnapshotJSON) RawJSON() string {
+	return r.raw
 }
 
 // A message delivery log contains a `request` from Knock to a downstream provider
@@ -804,24 +835,24 @@ const (
 	MessageEventTypeMessageRead              MessageEventType = "message.read"
 	MessageEventTypeMessageSent              MessageEventType = "message.sent"
 	MessageEventTypeMessageSeen              MessageEventType = "message.seen"
-	MessageEventTypeMessageArchived          MessageEventType = "message.archived"
+	MessageEventTypeMessageCreated           MessageEventType = "message.created"
 	MessageEventTypeMessageQueued            MessageEventType = "message.queued"
 	MessageEventTypeMessageDelivered         MessageEventType = "message.delivered"
-	MessageEventTypeMessageNotSent           MessageEventType = "message.not_sent"
 	MessageEventTypeMessageBounced           MessageEventType = "message.bounced"
 	MessageEventTypeMessageUndelivered       MessageEventType = "message.undelivered"
+	MessageEventTypeMessageNotSent           MessageEventType = "message.not_sent"
 	MessageEventTypeMessageDeliveryAttempted MessageEventType = "message.delivery_attempted"
+	MessageEventTypeMessageArchived          MessageEventType = "message.archived"
 	MessageEventTypeMessageLinkClicked       MessageEventType = "message.link_clicked"
 	MessageEventTypeMessageInteracted        MessageEventType = "message.interacted"
-	MessageEventTypeMessageUnarchived        MessageEventType = "message.unarchived"
 	MessageEventTypeMessageUnseen            MessageEventType = "message.unseen"
 	MessageEventTypeMessageUnread            MessageEventType = "message.unread"
-	MessageEventTypeMessageCreated           MessageEventType = "message.created"
+	MessageEventTypeMessageUnarchived        MessageEventType = "message.unarchived"
 )
 
 func (r MessageEventType) IsKnown() bool {
 	switch r {
-	case MessageEventTypeMessageRead, MessageEventTypeMessageSent, MessageEventTypeMessageSeen, MessageEventTypeMessageArchived, MessageEventTypeMessageQueued, MessageEventTypeMessageDelivered, MessageEventTypeMessageNotSent, MessageEventTypeMessageBounced, MessageEventTypeMessageUndelivered, MessageEventTypeMessageDeliveryAttempted, MessageEventTypeMessageLinkClicked, MessageEventTypeMessageInteracted, MessageEventTypeMessageUnarchived, MessageEventTypeMessageUnseen, MessageEventTypeMessageUnread, MessageEventTypeMessageCreated:
+	case MessageEventTypeMessageRead, MessageEventTypeMessageSent, MessageEventTypeMessageSeen, MessageEventTypeMessageCreated, MessageEventTypeMessageQueued, MessageEventTypeMessageDelivered, MessageEventTypeMessageBounced, MessageEventTypeMessageUndelivered, MessageEventTypeMessageNotSent, MessageEventTypeMessageDeliveryAttempted, MessageEventTypeMessageArchived, MessageEventTypeMessageLinkClicked, MessageEventTypeMessageInteracted, MessageEventTypeMessageUnseen, MessageEventTypeMessageUnread, MessageEventTypeMessageUnarchived:
 		return true
 	}
 	return false
