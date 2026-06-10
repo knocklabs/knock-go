@@ -70,6 +70,9 @@ func TestWorkflowTriggerWithOptionalParams(t *testing.T) {
 				"severity":            "bar",
 				"system_status":       "bar",
 			}),
+			Settings: knock.F(knock.WorkflowTriggerParamsSettings{
+				SandboxMode: knock.F(true),
+			}),
 			Tenant: knock.F[knock.InlineTenantRequestUnionParam](shared.UnionString("ingen_isla_nublar")),
 		},
 	)

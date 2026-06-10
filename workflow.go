@@ -127,10 +127,24 @@ type WorkflowTriggerParams struct {
 	// greater than 1024 bytes in length will be
 	// [truncated](/developer-tools/api-logs#log-truncation) in your logs.
 	Data param.Field[map[string]interface{}] `json:"data"`
+	// Optional settings that control how this workflow trigger is executed.
+	Settings param.Field[WorkflowTriggerParamsSettings] `json:"settings"`
 	// An request to set a tenant inline.
 	Tenant param.Field[InlineTenantRequestUnionParam] `json:"tenant"`
 }
 
 func (r WorkflowTriggerParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Optional settings that control how this workflow trigger is executed.
+type WorkflowTriggerParamsSettings struct {
+	// When set to true, overrides the sandbox mode for all channels in this workflow
+	// run, messages are not delivered to the underlying providers. If false or not
+	// set, the workflow delivers messages normally.
+	SandboxMode param.Field[bool] `json:"sandbox_mode"`
+}
+
+func (r WorkflowTriggerParamsSettings) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
