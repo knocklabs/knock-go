@@ -143,9 +143,6 @@ type WorkflowTriggerParamsSettings struct {
 	// run, messages are not delivered to the underlying providers. If false or not
 	// set, the workflow delivers messages normally.
 	SandboxMode param.Field[bool] `json:"sandbox_mode"`
-	// When set to true, skips all delay steps in the workflow for this trigger
-	// request. If false or not set, delay steps execute normally.
-	SkipDelay param.Field[bool] `json:"skip_delay"`
 }
 
 func (r WorkflowTriggerParamsSettings) MarshalJSON() (data []byte, err error) {
