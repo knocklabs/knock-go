@@ -72,6 +72,7 @@ func TestWorkflowTriggerWithOptionalParams(t *testing.T) {
 			}),
 			Settings: knock.F(knock.WorkflowTriggerParamsSettings{
 				SandboxMode: knock.F(true),
+				SkipDelay:   knock.F(true),
 			}),
 			Tenant: knock.F[knock.InlineTenantRequestUnionParam](shared.UnionString("ingen_isla_nublar")),
 		},
