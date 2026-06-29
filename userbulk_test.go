@@ -245,11 +245,11 @@ func TestUserBulkSetPreferencesWithOptionalParams(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Users.Bulk.SetPreferences(context.TODO(), knock.UserBulkSetPreferencesParams{
-		Preferences: knock.F(knock.PreferenceSetRequestParam{
-			PersistenceStrategy: knock.F(knock.PreferenceSetRequest_PersistenceStrategyMerge),
-			Categories: knock.F(map[string]knock.PreferenceSetRequestCategoriesUnionParam{
+		Preferences: knock.F(knock.UserBulkSetPreferencesParamsPreferences{
+			ID: knock.F("default"),
+			Categories: knock.F(map[string]knock.UserBulkSetPreferencesParamsPreferencesCategoriesUnion{
 				"marketing": shared.UnionBool(false),
-				"transactional": knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectParam{
+				"transactional": knock.UserBulkSetPreferencesParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObject{
 					ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
 						Chat: knock.F[knock.PreferenceSetChannelTypesChatUnionParam](knock.PreferenceSetChannelTypeSettingParam{
 							Conditions: knock.F([]shared.ConditionParam{{
@@ -288,7 +288,7 @@ func TestUserBulkSetPreferencesWithOptionalParams(t *testing.T) {
 							}}),
 						}),
 					}),
-					Channels: knock.F(map[string]knock.PreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam{
+					Channels: knock.F(map[string]knock.UserBulkSetPreferencesParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnion{
 						"aef6e715-df82-4ab6-b61e-b743e249f7b6": shared.UnionBool(true),
 					}),
 					Conditions: knock.F([]shared.ConditionParam{{
@@ -336,7 +336,7 @@ func TestUserBulkSetPreferencesWithOptionalParams(t *testing.T) {
 					}}),
 				}),
 			}),
-			Channels: knock.F(map[string]knock.PreferenceSetRequestChannelsUnionParam{
+			Channels: knock.F(map[string]knock.UserBulkSetPreferencesParamsPreferencesChannelsUnion{
 				"2f641633-95d3-4555-9222-9f1eb7888a80": knock.PreferenceSetChannelSettingParam{
 					Conditions: knock.F([]shared.ConditionParam{{
 						Argument: knock.F("US"),
@@ -347,8 +347,8 @@ func TestUserBulkSetPreferencesWithOptionalParams(t *testing.T) {
 				"aef6e715-df82-4ab6-b61e-b743e249f7b6": shared.UnionBool(true),
 			}),
 			CommercialSubscribed: knock.F(true),
-			Workflows: knock.F(map[string]knock.PreferenceSetRequestWorkflowsUnionParam{
-				"dinosaurs-loose": knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
+			Workflows: knock.F(map[string]knock.UserBulkSetPreferencesParamsPreferencesWorkflowsUnion{
+				"dinosaurs-loose": knock.UserBulkSetPreferencesParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObject{
 					ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
 						Chat: knock.F[knock.PreferenceSetChannelTypesChatUnionParam](knock.PreferenceSetChannelTypeSettingParam{
 							Conditions: knock.F([]shared.ConditionParam{{
@@ -387,7 +387,7 @@ func TestUserBulkSetPreferencesWithOptionalParams(t *testing.T) {
 							}}),
 						}),
 					}),
-					Channels: knock.F(map[string]knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam{
+					Channels: knock.F(map[string]knock.UserBulkSetPreferencesParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnion{
 						"aef6e715-df82-4ab6-b61e-b743e249f7b6": shared.UnionBool(true),
 					}),
 					Conditions: knock.F([]shared.ConditionParam{{
