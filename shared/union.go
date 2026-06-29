@@ -39,3 +39,10 @@ func (UnionBool) ImplementsPreferenceSetRequestChannelsUnionParam()  {}
 func (UnionBool) ImplementsPreferenceSetRequestWorkflowsUnionParam() {}
 func (UnionBool) ImplementsPreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam() {
 }
+func (UnionBool) ImplementsUserBulkSetPreferencesParamsPreferencesCategoriesUnion() {}
+func (UnionBool) ImplementsUserBulkSetPreferencesParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
+}
+func (UnionBool) ImplementsUserBulkSetPreferencesParamsPreferencesChannelsUnion()  {}
+func (UnionBool) ImplementsUserBulkSetPreferencesParamsPreferencesWorkflowsUnion() {}
+func (UnionBool) ImplementsUserBulkSetPreferencesParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
+}
