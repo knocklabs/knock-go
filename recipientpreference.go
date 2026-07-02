@@ -328,6 +328,15 @@ func (r PreferenceSetChannelSettingParam) ImplementsPreferenceSetRequestChannels
 func (r PreferenceSetChannelSettingParam) ImplementsPreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam() {
 }
 
+func (r PreferenceSetChannelSettingParam) ImplementsUserBulkSetPreferencesParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
+}
+
+func (r PreferenceSetChannelSettingParam) ImplementsUserBulkSetPreferencesParamsPreferencesChannelsUnion() {
+}
+
+func (r PreferenceSetChannelSettingParam) ImplementsUserBulkSetPreferencesParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
+}
+
 // A set of settings for a channel type. Currently, this can only be a list of
 // conditions to apply.
 type PreferenceSetChannelTypeSetting struct {

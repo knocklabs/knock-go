@@ -216,10 +216,14 @@ func TestTenantBulkSet(t *testing.T) {
 			}),
 			Settings: knock.F(knock.TenantRequestSettingsParam{
 				Branding: knock.F(knock.TenantRequestSettingsBrandingParam{
-					IconURL:              knock.F("https://example.com/icon.png"),
-					LogoURL:              knock.F("https://example.com/logo.png"),
-					PrimaryColor:         knock.F("#000000"),
-					PrimaryColorContrast: knock.F("#FFFFFF"),
+					DarkIconURL:              knock.F("https://example.com/icon_dark.png"),
+					DarkLogoURL:              knock.F("https://example.com/logo_dark.png"),
+					DarkPrimaryColor:         knock.F("#FFFFFF"),
+					DarkPrimaryColorContrast: knock.F("#000000"),
+					IconURL:                  knock.F("https://example.com/icon.png"),
+					LogoURL:                  knock.F("https://example.com/logo.png"),
+					PrimaryColor:             knock.F("#000000"),
+					PrimaryColorContrast:     knock.F("#FFFFFF"),
 				}),
 				PreferenceSet: knock.F(knock.PreferenceSetRequestParam{
 					PersistenceStrategy: knock.F(knock.PreferenceSetRequest_PersistenceStrategyMerge),

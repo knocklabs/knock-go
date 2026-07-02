@@ -1,5 +1,55 @@
 # Changelog
 
+## 1.34.0 (2026-07-02)
+
+Full Changelog: [v1.33.0...v1.34.0](https://github.com/knocklabs/knock-go/compare/v1.33.0...v1.34.0)
+
+### Features
+
+* **api:** api update ([e7de29f](https://github.com/knocklabs/knock-go/commit/e7de29f0dbdc52544d624b350e31ad759621a5a9))
+* **api:** api update ([12c7951](https://github.com/knocklabs/knock-go/commit/12c7951d4fb97e5e49531c15b9c3818ff356f398))
+* **api:** api update ([b2de903](https://github.com/knocklabs/knock-go/commit/b2de90367798bcf675a33fc71e0107070db3b073))
+* **api:** api update ([c79bf25](https://github.com/knocklabs/knock-go/commit/c79bf25bdfd802ab3b439e11bf0546a2787d965f))
+* **api:** api update ([508fe46](https://github.com/knocklabs/knock-go/commit/508fe46c5004b9560fcb5cebddae150f4aee463a))
+* **api:** api update ([7952694](https://github.com/knocklabs/knock-go/commit/7952694e882a02f445bde5cdd189f33a1ae8f741))
+* **api:** api update ([44b78b5](https://github.com/knocklabs/knock-go/commit/44b78b596fd1a6de90d17dc7f8ecf359a998619b))
+* **api:** api update ([f874bac](https://github.com/knocklabs/knock-go/commit/f874bac390ade3ec00b314a00afc8a8200809a25))
+* **api:** api update ([2150f04](https://github.com/knocklabs/knock-go/commit/2150f049362946180b4bea6e08828209d0cd584e))
+* **api:** api update ([46d4bd4](https://github.com/knocklabs/knock-go/commit/46d4bd44e52c77c36e4c793e275e30fb6635335b))
+* **api:** api update ([c17b75e](https://github.com/knocklabs/knock-go/commit/c17b75e9e5af9f9b6fbd488595f0e872b30d9122))
+* **api:** api update ([71e105f](https://github.com/knocklabs/knock-go/commit/71e105fc4f0275c08c219dd5ce0bdf8afdaf6755))
+* **api:** api update ([74a21dc](https://github.com/knocklabs/knock-go/commit/74a21dc32be597e03b8143d5a5c6c6449a882ff8))
+* **api:** api update ([0cb391a](https://github.com/knocklabs/knock-go/commit/0cb391a253d95f78b112870ea9c4857e6479da69))
+* **api:** api update ([8eb4172](https://github.com/knocklabs/knock-go/commit/8eb41729bd192a45e66878751d75dab838a15d3a))
+* **api:** api update ([8a83f9f](https://github.com/knocklabs/knock-go/commit/8a83f9f5061b8d53ab724b825f01f7af714f5dec))
+* **api:** api update ([404d5d1](https://github.com/knocklabs/knock-go/commit/404d5d1bc5a0acff6bf3fd042b88057a1a0a0204))
+* **api:** api update ([322dd3f](https://github.com/knocklabs/knock-go/commit/322dd3f38d216a664d873898962ac6270955fbd8))
+* **api:** api update ([721b267](https://github.com/knocklabs/knock-go/commit/721b2677e54053048ce1dac2e6093b59d2537926))
+* **api:** api update ([69b82f7](https://github.com/knocklabs/knock-go/commit/69b82f73122df1c4242ae788f029c4ae02624043))
+* **api:** api update ([59f4617](https://github.com/knocklabs/knock-go/commit/59f46178fec427227751962d0f87c9f725b69117))
+* **api:** api update ([c685d66](https://github.com/knocklabs/knock-go/commit/c685d66d5427d06f04cf568df286e6cdc182514a))
+* **api:** api update ([dc5ff2f](https://github.com/knocklabs/knock-go/commit/dc5ff2fc6207b2c3aef6c41f3636055d659a30b5))
+* **api:** api update ([fb3ab58](https://github.com/knocklabs/knock-go/commit/fb3ab58410fbcd141011f4a81e3e16421d79452c))
+* **api:** api update ([e4d9321](https://github.com/knocklabs/knock-go/commit/e4d9321ccb87ff554b260c5890d8b7c7d1069a34))
+* **api:** api update ([46acdca](https://github.com/knocklabs/knock-go/commit/46acdca2c965884025be0809106c3e793b7b3242))
+* **api:** api update ([4521399](https://github.com/knocklabs/knock-go/commit/4521399c698888fe8fc8d4cc90b3940de40a682d))
+* **api:** api update ([7b1e2af](https://github.com/knocklabs/knock-go/commit/7b1e2af70356208e1fdd23894f5068f2be89c5b6))
+* **api:** api update ([a3541fa](https://github.com/knocklabs/knock-go/commit/a3541fa4c0951f7bb9319ed4fdddd4a0a00a4d9d))
+* **api:** api update ([f9bfdc9](https://github.com/knocklabs/knock-go/commit/f9bfdc97668081761f3a7d9488d13080d46913a5))
+* **api:** api update ([61803e1](https://github.com/knocklabs/knock-go/commit/61803e16cce64737a6e7fef55669ceb2b3226c36))
+* support setting headers via env ([3cc4d82](https://github.com/knocklabs/knock-go/commit/3cc4d829e7050b4ce90f06072b5b8ab30e853839))
+
+
+### Bug Fixes
+
+* **go:** avoid panic when http.DefaultTransport is wrapped ([9295180](https://github.com/knocklabs/knock-go/commit/9295180843c549fb929a0d9fd919660e59a559a7))
+
+
+### Chores
+
+* avoid embedding reflect.Type for dead code elimination ([0bedd11](https://github.com/knocklabs/knock-go/commit/0bedd114f1b91121b451fe8b851361cb70d8609d))
+* redact api-key headers in debug logs ([86cc0b7](https://github.com/knocklabs/knock-go/commit/86cc0b7cb27a946acd1af8021887d722e5bd0d8d))
+
 ## 1.33.0 (2026-04-24)
 
 Full Changelog: [v1.32.0...v1.33.0](https://github.com/knocklabs/knock-go/compare/v1.32.0...v1.33.0)

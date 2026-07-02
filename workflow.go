@@ -93,11 +93,11 @@ func (r workflowTriggerResponseJSON) RawJSON() string {
 }
 
 type WorkflowCancelParams struct {
-	// An optional key that is used to reference a specific workflow trigger request
-	// when issuing a [workflow cancellation](/send-notifications/canceling-workflows)
-	// request. Must be provided while triggering a workflow in order to enable
-	// subsequent cancellation. Should be unique across trigger requests to avoid
-	// unintentional cancellations.
+	// A key that is used to reference a specific workflow trigger request when issuing
+	// a [workflow cancellation](/send-notifications/canceling-workflows) request. Must
+	// be provided while triggering a workflow in order to enable subsequent
+	// cancellation. Should be unique across trigger requests to avoid unintentional
+	// cancellations.
 	CancellationKey param.Field[string] `json:"cancellation_key" api:"required"`
 	// A list of recipients to cancel the notification for. If omitted, cancels for all
 	// recipients associated with the cancellation key.
@@ -116,21 +116,38 @@ type WorkflowTriggerParams struct {
 	// (string), an inline user request (object), or an inline object request, which is
 	// determined by the presence of a `collection` property.
 	Actor param.Field[RecipientRequestUnionParam] `json:"actor"`
-	// An optional key that is used to reference a specific workflow trigger request
-	// when issuing a [workflow cancellation](/send-notifications/canceling-workflows)
-	// request. Must be provided while triggering a workflow in order to enable
-	// subsequent cancellation. Should be unique across trigger requests to avoid
-	// unintentional cancellations.
+	// A key that is used to reference a specific workflow trigger request when issuing
+	// a [workflow cancellation](/send-notifications/canceling-workflows) request. Must
+	// be provided while triggering a workflow in order to enable subsequent
+	// cancellation. Should be unique across trigger requests to avoid unintentional
+	// cancellations.
 	CancellationKey param.Field[string] `json:"cancellation_key"`
 	// An optional map of data to pass into the workflow execution. There is a 10MB
 	// limit on the size of the full `data` payload. Any individual string value
 	// greater than 1024 bytes in length will be
 	// [truncated](/developer-tools/api-logs#log-truncation) in your logs.
 	Data param.Field[map[string]interface{}] `json:"data"`
+	// Optional settings that control how this workflow trigger is executed.
+	Settings param.Field[WorkflowTriggerParamsSettings] `json:"settings"`
 	// An request to set a tenant inline.
 	Tenant param.Field[InlineTenantRequestUnionParam] `json:"tenant"`
 }
 
 func (r WorkflowTriggerParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Optional settings that control how this workflow trigger is executed.
+type WorkflowTriggerParamsSettings struct {
+	// When set to true, overrides the sandbox mode for all channels in this workflow
+	// run, messages are not delivered to the underlying providers. If false or not
+	// set, the workflow delivers messages normally.
+	SandboxMode param.Field[bool] `json:"sandbox_mode"`
+	// When set to true, skips all delay steps in the workflow for this trigger
+	// request. If false or not set, delay steps execute normally.
+	SkipDelay param.Field[bool] `json:"skip_delay"`
+}
+
+func (r WorkflowTriggerParamsSettings) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
