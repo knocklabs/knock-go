@@ -172,6 +172,16 @@ func (r tenantSettingsJSON) RawJSON() string {
 
 // The branding for the tenant.
 type TenantSettingsBranding struct {
+	// The icon URL for the tenant in dark mode. Falls back to `icon_url` if unset.
+	DarkIconURL string `json:"dark_icon_url" api:"nullable" format:"uri"`
+	// The logo URL for the tenant in dark mode. Falls back to `logo_url` if unset.
+	DarkLogoURL string `json:"dark_logo_url" api:"nullable" format:"uri"`
+	// The primary color for the tenant in dark mode, provided as a hex value. Defaults
+	// to `#FFFFFF`.
+	DarkPrimaryColor string `json:"dark_primary_color" api:"nullable"`
+	// The primary color contrast for the tenant in dark mode, provided as a hex value.
+	// Defaults to `#000000`.
+	DarkPrimaryColorContrast string `json:"dark_primary_color_contrast" api:"nullable"`
 	// The icon URL for the tenant. Must point to a valid image with an image MIME
 	// type.
 	IconURL string `json:"icon_url" api:"nullable" format:"uri"`
@@ -188,12 +198,16 @@ type TenantSettingsBranding struct {
 // tenantSettingsBrandingJSON contains the JSON metadata for the struct
 // [TenantSettingsBranding]
 type tenantSettingsBrandingJSON struct {
-	IconURL              apijson.Field
-	LogoURL              apijson.Field
-	PrimaryColor         apijson.Field
-	PrimaryColorContrast apijson.Field
-	raw                  string
-	ExtraFields          map[string]apijson.Field
+	DarkIconURL              apijson.Field
+	DarkLogoURL              apijson.Field
+	DarkPrimaryColor         apijson.Field
+	DarkPrimaryColorContrast apijson.Field
+	IconURL                  apijson.Field
+	LogoURL                  apijson.Field
+	PrimaryColor             apijson.Field
+	PrimaryColorContrast     apijson.Field
+	raw                      string
+	ExtraFields              map[string]apijson.Field
 }
 
 func (r *TenantSettingsBranding) UnmarshalJSON(data []byte) (err error) {
@@ -242,6 +256,16 @@ func (r TenantRequestSettingsParam) MarshalJSON() (data []byte, err error) {
 
 // The branding for the tenant.
 type TenantRequestSettingsBrandingParam struct {
+	// The icon URL for the tenant in dark mode. Falls back to `icon_url` if unset.
+	DarkIconURL param.Field[string] `json:"dark_icon_url"`
+	// The logo URL for the tenant in dark mode. Falls back to `logo_url` if unset.
+	DarkLogoURL param.Field[string] `json:"dark_logo_url"`
+	// The primary color for the tenant in dark mode, provided as a hex value. Defaults
+	// to `#FFFFFF`.
+	DarkPrimaryColor param.Field[string] `json:"dark_primary_color"`
+	// The primary color contrast for the tenant in dark mode, provided as a hex value.
+	// Defaults to `#000000`.
+	DarkPrimaryColorContrast param.Field[string] `json:"dark_primary_color_contrast"`
 	// The icon URL for the tenant. Must point to a valid image with an image MIME
 	// type.
 	IconURL param.Field[string] `json:"icon_url"`
