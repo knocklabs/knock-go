@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.36.0 (2026-07-14)
+
+Full Changelog: [v1.35.0...v1.36.0](https://github.com/knocklabs/knock-go/compare/v1.35.0...v1.36.0)
+
+### Features
+
+* set publish release settings ([863f177](https://github.com/knocklabs/knock-go/commit/863f177fa4f2455d1dde6ae4189efadfcb68612f))
+* set up stlc automation workflows/actions ([86f092d](https://github.com/knocklabs/knock-go/commit/86f092d0e0046139e004a62e02bb1ee938a5b374))
+
+
+### Chores
+
+* trivial test changes ([cdf8884](https://github.com/knocklabs/knock-go/commit/cdf888417e4ff84e82045f7e8bd86fe4b27ffd67))
+
 ## 1.35.0 (2026-07-13)
 
 Full Changelog: [v1.34.0...v1.35.0](https://github.com/knocklabs/knock-go/compare/v1.34.0...v1.35.0)
