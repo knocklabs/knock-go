@@ -54,7 +54,7 @@ type Recipient struct {
 	CreatedAt time.Time `json:"created_at" api:"nullable" format:"date-time"`
 	// The primary email address for the user.
 	Email string `json:"email" api:"nullable"`
-	// Display name of the user.
+	// The display name of the user.
 	Name string `json:"name" api:"nullable"`
 	// The [E.164](https://www.twilio.com/docs/glossary/what-e164) phone number of the
 	// user (required for SMS channels).
