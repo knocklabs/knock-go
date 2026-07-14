@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.36.0 (2026-07-14)
+
+Full Changelog: [v1.35.0...v1.36.0](https://github.com/knocklabs/knock-go/compare/v1.35.0...v1.36.0)
+
+### Features
+
+* set up stlc automation workflows/actions ([86f092d](https://github.com/knocklabs/knock-go/commit/86f092d0e0046139e004a62e02bb1ee938a5b374))
+
 ## 1.35.0 (2026-07-13)
 
 Full Changelog: [v1.34.0...v1.35.0](https://github.com/knocklabs/knock-go/compare/v1.34.0...v1.35.0)
