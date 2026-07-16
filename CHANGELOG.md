@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.36.1](https://github.com/knocklabs/knock-go/compare/v1.36.0...v1.36.1) (2026-07-16)
+
+
+### Chores
+
+* forward SDK_WRITE_TOKEN to the back-sync workflow ([ad040dd](https://github.com/knocklabs/knock-go/commit/ad040dd3b8fb703523bfbb5e1399624d1cc58121))
+
 ## [1.36.0](https://github.com/knocklabs/knock-go/compare/v1.35.0...v1.36.0) (2026-07-16)
 
 
