@@ -490,16 +490,13 @@ type UserGuideMarkMessageAsArchivedParams struct {
 	GuideKey param.Field[string] `json:"guide_key" api:"required"`
 	// The step reference of the guide.
 	GuideStepRef param.Field[string] `json:"guide_step_ref" api:"required"`
-	// The content of the guide.
-	Content param.Field[map[string]interface{}] `json:"content"`
-	// The data of the guide.
-	Data param.Field[map[string]interface{}] `json:"data"`
 	// Whether the guide is final.
 	IsFinal param.Field[bool] `json:"is_final"`
-	// The metadata of the guide.
-	Metadata param.Field[map[string]interface{}] `json:"metadata"`
 	// The tenant ID of the guide.
 	Tenant param.Field[string] `json:"tenant"`
+	// Whether the guide bypasses its guide group's throttle settings. When true,
+	// archiving the guide does not open a new throttle window.
+	Unthrottled param.Field[bool] `json:"unthrottled"`
 }
 
 func (r UserGuideMarkMessageAsArchivedParams) MarshalJSON() (data []byte, err error) {
@@ -515,13 +512,7 @@ type UserGuideMarkMessageAsInteractedParams struct {
 	GuideKey param.Field[string] `json:"guide_key" api:"required"`
 	// The step reference of the guide.
 	GuideStepRef param.Field[string] `json:"guide_step_ref" api:"required"`
-	// The content of the guide.
-	Content param.Field[map[string]interface{}] `json:"content"`
-	// The data of the guide.
-	Data param.Field[map[string]interface{}] `json:"data"`
-	// Whether the guide is final.
-	IsFinal param.Field[bool] `json:"is_final"`
-	// The metadata of the guide.
+	// Metadata about the interaction.
 	Metadata param.Field[map[string]interface{}] `json:"metadata"`
 	// The tenant ID of the guide.
 	Tenant param.Field[string] `json:"tenant"`
@@ -534,20 +525,16 @@ func (r UserGuideMarkMessageAsInteractedParams) MarshalJSON() (data []byte, err 
 type UserGuideMarkMessageAsSeenParams struct {
 	// The unique identifier for the channel.
 	ChannelID param.Field[string] `json:"channel_id" api:"required" format:"uuid"`
+	// The content of the guide.
+	Content param.Field[map[string]interface{}] `json:"content" api:"required"`
 	// The unique identifier for the guide.
 	GuideID param.Field[string] `json:"guide_id" api:"required" format:"uuid"`
 	// The key of the guide.
 	GuideKey param.Field[string] `json:"guide_key" api:"required"`
 	// The step reference of the guide.
 	GuideStepRef param.Field[string] `json:"guide_step_ref" api:"required"`
-	// The content of the guide.
-	Content param.Field[map[string]interface{}] `json:"content"`
 	// The data of the guide.
 	Data param.Field[map[string]interface{}] `json:"data"`
-	// Whether the guide is final.
-	IsFinal param.Field[bool] `json:"is_final"`
-	// The metadata of the guide.
-	Metadata param.Field[map[string]interface{}] `json:"metadata"`
 	// The tenant ID of the guide.
 	Tenant param.Field[string] `json:"tenant"`
 }

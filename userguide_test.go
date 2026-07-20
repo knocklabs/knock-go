@@ -65,22 +65,9 @@ func TestUserGuideMarkMessageAsArchivedWithOptionalParams(t *testing.T) {
 			GuideID:      knock.F("7e9dc78c-b3b1-4127-a54e-71f1899b831a"),
 			GuideKey:     knock.F("tour_notification"),
 			GuideStepRef: knock.F("lab_tours"),
-			Content: knock.F(map[string]interface{}{
-				"body":  "bar",
-				"title": "bar",
-			}),
-			Data: knock.F(map[string]interface{}{
-				"next_time":  "bar",
-				"spots_left": "bar",
-				"tour_id":    "bar",
-			}),
-			IsFinal: knock.F(false),
-			Metadata: knock.F(map[string]interface{}{
-				"cta":   "bar",
-				"theme": "bar",
-				"type":  "bar",
-			}),
-			Tenant: knock.F("ingen_isla_nublar"),
+			IsFinal:      knock.F(false),
+			Tenant:       knock.F("ingen_isla_nublar"),
+			Unthrottled:  knock.F(false),
 		},
 	)
 	if err != nil {
@@ -113,16 +100,6 @@ func TestUserGuideMarkMessageAsInteractedWithOptionalParams(t *testing.T) {
 			GuideID:      knock.F("7e9dc78c-b3b1-4127-a54e-71f1899b831a"),
 			GuideKey:     knock.F("tour_notification"),
 			GuideStepRef: knock.F("lab_tours"),
-			Content: knock.F(map[string]interface{}{
-				"body":  "bar",
-				"title": "bar",
-			}),
-			Data: knock.F(map[string]interface{}{
-				"next_time":  "bar",
-				"spots_left": "bar",
-				"tour_id":    "bar",
-			}),
-			IsFinal: knock.F(false),
 			Metadata: knock.F(map[string]interface{}{
 				"cta":   "bar",
 				"theme": "bar",
@@ -157,24 +134,18 @@ func TestUserGuideMarkMessageAsSeenWithOptionalParams(t *testing.T) {
 		"user_id",
 		"message_id",
 		knock.UserGuideMarkMessageAsSeenParams{
-			ChannelID:    knock.F("123e4567-e89b-12d3-a456-426614174000"),
-			GuideID:      knock.F("7e9dc78c-b3b1-4127-a54e-71f1899b831a"),
-			GuideKey:     knock.F("tour_notification"),
-			GuideStepRef: knock.F("lab_tours"),
+			ChannelID: knock.F("123e4567-e89b-12d3-a456-426614174000"),
 			Content: knock.F(map[string]interface{}{
 				"body":  "bar",
 				"title": "bar",
 			}),
+			GuideID:      knock.F("7e9dc78c-b3b1-4127-a54e-71f1899b831a"),
+			GuideKey:     knock.F("tour_notification"),
+			GuideStepRef: knock.F("lab_tours"),
 			Data: knock.F(map[string]interface{}{
 				"next_time":  "bar",
 				"spots_left": "bar",
 				"tour_id":    "bar",
-			}),
-			IsFinal: knock.F(false),
-			Metadata: knock.F(map[string]interface{}{
-				"cta":   "bar",
-				"theme": "bar",
-				"type":  "bar",
 			}),
 			Tenant: knock.F("ingen_isla_nublar"),
 		},
