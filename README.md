@@ -24,7 +24,7 @@ Or to pin the version:
 <!-- x-release-please-start-version -->
 
 ```sh
-go get -u 'github.com/knocklabs/knock-go@v1.36.0'
+go get -u 'github.com/knocklabs/knock-go@v1.37.0'
 ```
 
 <!-- x-release-please-end -->
