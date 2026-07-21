@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.37.0](https://github.com/knocklabs/knock-go/compare/v1.36.0...v1.37.0) (2026-07-21)
+
+
+### Features
+
+* update api spec to v0.1.1599 ([0fa1a7e](https://github.com/knocklabs/knock-go/commit/0fa1a7eb89cb6d93391c0f8c5b30134d02f98a72))
+* update api spec to v0.1.1605 ([2b2094d](https://github.com/knocklabs/knock-go/commit/2b2094dcf538d272b4654cc7a8d4eb363ea73a43))
+* update api spec to v0.1.1607 ([9688995](https://github.com/knocklabs/knock-go/commit/96889951d3fbf92811e08dadcd4083981854ebd4))
+* update api spec to v0.1.1608 ([5667965](https://github.com/knocklabs/knock-go/commit/5667965beb6b2939cefab48d464283fcc662aff1))
+* update api spec to v0.1.1609 ([af1a7be](https://github.com/knocklabs/knock-go/commit/af1a7be7b8a6c01dddf7b033f58e23743abe4f43))
+
+
+### Chores
+
+* forward SDK_WRITE_TOKEN to the back-sync workflow ([ad040dd](https://github.com/knocklabs/knock-go/commit/ad040dd3b8fb703523bfbb5e1399624d1cc58121))
+
 ## [1.36.0](https://github.com/knocklabs/knock-go/compare/v1.35.0...v1.36.0) (2026-07-16)
 
 
