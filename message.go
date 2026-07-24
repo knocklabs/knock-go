@@ -364,8 +364,9 @@ type Message struct {
 	Metadata map[string]interface{} `json:"metadata" api:"nullable"`
 	// Timestamp when the message was read.
 	ReadAt time.Time `json:"read_at" api:"nullable" format:"date-time"`
-	// Recipient contact information captured at email send time. Null for non-email
-	// channels.
+	// The destination the message was delivered to, captured at send time. Email
+	// channels carry `email`/`name`; chat channels carry the destination `channel_id`
+	// or `user_id`, or `via_incoming_webhook`. Null when no snapshot was captured.
 	RecipientSnapshot MessageRecipientSnapshot `json:"recipient_snapshot" api:"nullable"`
 	// Timestamp when the message was scheduled to be sent.
 	ScheduledAt time.Time `json:"scheduled_at" api:"nullable" format:"date-time"`
@@ -582,23 +583,33 @@ func (r MessageChannelType) IsKnown() bool {
 	return false
 }
 
-// Recipient contact information captured at email send time. Null for non-email
-// channels.
+// The destination the message was delivered to, captured at send time. Email
+// channels carry `email`/`name`; chat channels carry the destination `channel_id`
+// or `user_id`, or `via_incoming_webhook`. Null when no snapshot was captured.
 type MessageRecipientSnapshot struct {
-	// The email address the message was delivered to
-	Email string `json:"email"`
-	// The recipient name at send time
-	Name string                       `json:"name" api:"nullable"`
-	JSON messageRecipientSnapshotJSON `json:"-"`
+	// The chat channel the message was delivered to (chat channels)
+	ChannelID string `json:"channel_id" api:"nullable"`
+	// The email address the message was delivered to (email channels)
+	Email string `json:"email" api:"nullable"`
+	// The recipient name at send time (email channels)
+	Name string `json:"name" api:"nullable"`
+	// The chat user the message was direct-messaged to (chat channels)
+	UserID string `json:"user_id" api:"nullable"`
+	// Whether the chat message was delivered via an incoming webhook
+	ViaIncomingWebhook bool                         `json:"via_incoming_webhook" api:"nullable"`
+	JSON               messageRecipientSnapshotJSON `json:"-"`
 }
 
 // messageRecipientSnapshotJSON contains the JSON metadata for the struct
 // [MessageRecipientSnapshot]
 type messageRecipientSnapshotJSON struct {
-	Email       apijson.Field
-	Name        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	ChannelID          apijson.Field
+	Email              apijson.Field
+	Name               apijson.Field
+	UserID             apijson.Field
+	ViaIncomingWebhook apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *MessageRecipientSnapshot) UnmarshalJSON(data []byte) (err error) {
