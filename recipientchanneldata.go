@@ -1068,6 +1068,8 @@ type SlackChannelDataConnection struct {
 	AccessToken string `json:"access_token" api:"nullable"`
 	// A Slack channel ID from the Slack provider.
 	ChannelID string `json:"channel_id" api:"nullable"`
+	// Slack channel name.
+	ChannelName string `json:"channel_name" api:"nullable"`
 	// This field can have the runtime type of
 	// [SlackChannelDataConnectionsSlackIncomingWebhookConnectionIncomingWebhook].
 	IncomingWebhook interface{} `json:"incoming_webhook"`
@@ -1082,6 +1084,7 @@ type SlackChannelDataConnection struct {
 type slackChannelDataConnectionJSON struct {
 	AccessToken     apijson.Field
 	ChannelID       apijson.Field
+	ChannelName     apijson.Field
 	IncomingWebhook apijson.Field
 	UserID          apijson.Field
 	raw             string
@@ -1140,6 +1143,8 @@ type SlackChannelDataConnectionsSlackTokenConnection struct {
 	AccessToken string `json:"access_token" api:"nullable"`
 	// A Slack channel ID from the Slack provider.
 	ChannelID string `json:"channel_id" api:"nullable"`
+	// Slack channel name.
+	ChannelName string `json:"channel_name" api:"nullable"`
 	// A Slack user ID from the Slack provider.
 	UserID string                                              `json:"user_id" api:"nullable"`
 	JSON   slackChannelDataConnectionsSlackTokenConnectionJSON `json:"-"`
@@ -1150,6 +1155,7 @@ type SlackChannelDataConnectionsSlackTokenConnection struct {
 type slackChannelDataConnectionsSlackTokenConnectionJSON struct {
 	AccessToken apijson.Field
 	ChannelID   apijson.Field
+	ChannelName apijson.Field
 	UserID      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -1260,7 +1266,9 @@ type SlackChannelDataConnectionParam struct {
 	// A Slack access token.
 	AccessToken param.Field[string] `json:"access_token"`
 	// A Slack channel ID from the Slack provider.
-	ChannelID       param.Field[string]      `json:"channel_id"`
+	ChannelID param.Field[string] `json:"channel_id"`
+	// Slack channel name.
+	ChannelName     param.Field[string]      `json:"channel_name"`
 	IncomingWebhook param.Field[interface{}] `json:"incoming_webhook"`
 	// A Slack user ID from the Slack provider.
 	UserID param.Field[string] `json:"user_id"`
@@ -1287,6 +1295,8 @@ type SlackChannelDataConnectionsSlackTokenConnectionParam struct {
 	AccessToken param.Field[string] `json:"access_token"`
 	// A Slack channel ID from the Slack provider.
 	ChannelID param.Field[string] `json:"channel_id"`
+	// Slack channel name.
+	ChannelName param.Field[string] `json:"channel_name"`
 	// A Slack user ID from the Slack provider.
 	UserID param.Field[string] `json:"user_id"`
 }
