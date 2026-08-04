@@ -176,7 +176,7 @@ func TestObjectBulkAddSubscriptions(t *testing.T) {
 								},
 								"aef6e715-df82-4ab6-b61e-b743e249f7b6": shared.UnionBool(true),
 							}),
-							CommercialSubscribed: knock.F[knock.PreferenceSetRequestCommercialSubscribedUnionParam](shared.UnionBool(true)),
+							CommercialSubscribed: knock.F(true),
 							Workflows: knock.F(map[string]knock.PreferenceSetRequestWorkflowsUnionParam{
 								"dinosaurs-loose": knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
 									ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
@@ -409,7 +409,7 @@ func TestObjectBulkSet(t *testing.T) {
 							},
 							"aef6e715-df82-4ab6-b61e-b743e249f7b6": shared.UnionBool(true),
 						}),
-						CommercialSubscribed: knock.F[knock.PreferenceSetRequestCommercialSubscribedUnionParam](shared.UnionBool(true)),
+						CommercialSubscribed: knock.F(true),
 						Workflows: knock.F(map[string]knock.PreferenceSetRequestWorkflowsUnionParam{
 							"dinosaurs-loose": knock.PreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectParam{
 								ChannelTypes: knock.F(knock.PreferenceSetChannelTypesParam{
