@@ -109,8 +109,10 @@ type UserBulkSetPreferencesParamsPreferences struct {
 	// Channel preferences.
 	Channels param.Field[map[string]UserBulkSetPreferencesParamsPreferencesChannelsUnion] `json:"channels"`
 	// Whether the recipient is subscribed to commercial communications. When false,
-	// the recipient will not receive commercial workflow notifications.
-	CommercialSubscribed param.Field[bool] `json:"commercial_subscribed"`
+	// the recipient will not receive commercial workflow notifications. Can also be
+	// set to a settings object with conditions that are evaluated at notification send
+	// time.
+	CommercialSubscribed param.Field[UserBulkSetPreferencesParamsPreferencesCommercialSubscribedUnion] `json:"commercial_subscribed"`
 	// An object where the key is the workflow key and the values are the preference
 	// settings for that workflow.
 	Workflows param.Field[map[string]UserBulkSetPreferencesParamsPreferencesWorkflowsUnion] `json:"workflows"`
@@ -160,6 +162,31 @@ type UserBulkSetPreferencesParamsPreferencesCategoriesPreferenceSetWorkflowCateg
 // Satisfied by [shared.UnionBool], [PreferenceSetChannelSettingParam].
 type UserBulkSetPreferencesParamsPreferencesChannelsUnion interface {
 	ImplementsUserBulkSetPreferencesParamsPreferencesChannelsUnion()
+}
+
+// Whether the recipient is subscribed to commercial communications. When false,
+// the recipient will not receive commercial workflow notifications. Can also be
+// set to a settings object with conditions that are evaluated at notification send
+// time.
+//
+// Satisfied by [shared.UnionBool],
+// [UserBulkSetPreferencesParamsPreferencesCommercialSubscribedPreferenceSetCommercialSubscribedSetting].
+type UserBulkSetPreferencesParamsPreferencesCommercialSubscribedUnion interface {
+	ImplementsUserBulkSetPreferencesParamsPreferencesCommercialSubscribedUnion()
+}
+
+// A set of settings for the commercial subscribed preference. Currently, this can
+// only be a list of conditions to apply.
+type UserBulkSetPreferencesParamsPreferencesCommercialSubscribedPreferenceSetCommercialSubscribedSetting struct {
+	// A list of conditions to apply to the commercial subscribed preference.
+	Conditions param.Field[[]shared.ConditionParam] `json:"conditions" api:"required"`
+}
+
+func (r UserBulkSetPreferencesParamsPreferencesCommercialSubscribedPreferenceSetCommercialSubscribedSetting) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r UserBulkSetPreferencesParamsPreferencesCommercialSubscribedPreferenceSetCommercialSubscribedSetting) ImplementsUserBulkSetPreferencesParamsPreferencesCommercialSubscribedUnion() {
 }
 
 // Workflow or category preferences within a preference set

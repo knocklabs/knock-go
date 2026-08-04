@@ -16,8 +16,9 @@ type UnionBool bool
 func (UnionBool) ImplementsPreferenceSetCategoriesUnion() {}
 func (UnionBool) ImplementsPreferenceSetCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
 }
-func (UnionBool) ImplementsPreferenceSetChannelsUnion()  {}
-func (UnionBool) ImplementsPreferenceSetWorkflowsUnion() {}
+func (UnionBool) ImplementsPreferenceSetChannelsUnion()             {}
+func (UnionBool) ImplementsPreferenceSetCommercialSubscribedUnion() {}
+func (UnionBool) ImplementsPreferenceSetWorkflowsUnion()            {}
 func (UnionBool) ImplementsPreferenceSetWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
 }
 func (UnionBool) ImplementsPreferenceSetChannelTypesChatUnionParam()      {}
@@ -35,14 +36,16 @@ func (UnionBool) ImplementsPreferenceSetChannelTypesSMSUnion()            {}
 func (UnionBool) ImplementsPreferenceSetRequestCategoriesUnionParam()     {}
 func (UnionBool) ImplementsPreferenceSetRequestCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam() {
 }
-func (UnionBool) ImplementsPreferenceSetRequestChannelsUnionParam()  {}
-func (UnionBool) ImplementsPreferenceSetRequestWorkflowsUnionParam() {}
+func (UnionBool) ImplementsPreferenceSetRequestChannelsUnionParam()             {}
+func (UnionBool) ImplementsPreferenceSetRequestCommercialSubscribedUnionParam() {}
+func (UnionBool) ImplementsPreferenceSetRequestWorkflowsUnionParam()            {}
 func (UnionBool) ImplementsPreferenceSetRequestWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnionParam() {
 }
 func (UnionBool) ImplementsUserBulkSetPreferencesParamsPreferencesCategoriesUnion() {}
 func (UnionBool) ImplementsUserBulkSetPreferencesParamsPreferencesCategoriesPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
 }
-func (UnionBool) ImplementsUserBulkSetPreferencesParamsPreferencesChannelsUnion()  {}
-func (UnionBool) ImplementsUserBulkSetPreferencesParamsPreferencesWorkflowsUnion() {}
+func (UnionBool) ImplementsUserBulkSetPreferencesParamsPreferencesChannelsUnion()             {}
+func (UnionBool) ImplementsUserBulkSetPreferencesParamsPreferencesCommercialSubscribedUnion() {}
+func (UnionBool) ImplementsUserBulkSetPreferencesParamsPreferencesWorkflowsUnion()            {}
 func (UnionBool) ImplementsUserBulkSetPreferencesParamsPreferencesWorkflowsPreferenceSetWorkflowCategorySettingObjectChannelsUnion() {
 }
