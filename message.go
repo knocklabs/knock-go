@@ -849,10 +849,10 @@ const (
 	MessageEventTypeMessageCreated           MessageEventType = "message.created"
 	MessageEventTypeMessageQueued            MessageEventType = "message.queued"
 	MessageEventTypeMessageDelivered         MessageEventType = "message.delivered"
-	MessageEventTypeMessageBounced           MessageEventType = "message.bounced"
-	MessageEventTypeMessageUndelivered       MessageEventType = "message.undelivered"
-	MessageEventTypeMessageNotSent           MessageEventType = "message.not_sent"
 	MessageEventTypeMessageDeliveryAttempted MessageEventType = "message.delivery_attempted"
+	MessageEventTypeMessageUndelivered       MessageEventType = "message.undelivered"
+	MessageEventTypeMessageBounced           MessageEventType = "message.bounced"
+	MessageEventTypeMessageNotSent           MessageEventType = "message.not_sent"
 	MessageEventTypeMessageArchived          MessageEventType = "message.archived"
 	MessageEventTypeMessageLinkClicked       MessageEventType = "message.link_clicked"
 	MessageEventTypeMessageInteracted        MessageEventType = "message.interacted"
@@ -863,7 +863,7 @@ const (
 
 func (r MessageEventType) IsKnown() bool {
 	switch r {
-	case MessageEventTypeMessageRead, MessageEventTypeMessageSent, MessageEventTypeMessageSeen, MessageEventTypeMessageCreated, MessageEventTypeMessageQueued, MessageEventTypeMessageDelivered, MessageEventTypeMessageBounced, MessageEventTypeMessageUndelivered, MessageEventTypeMessageNotSent, MessageEventTypeMessageDeliveryAttempted, MessageEventTypeMessageArchived, MessageEventTypeMessageLinkClicked, MessageEventTypeMessageInteracted, MessageEventTypeMessageUnseen, MessageEventTypeMessageUnread, MessageEventTypeMessageUnarchived:
+	case MessageEventTypeMessageRead, MessageEventTypeMessageSent, MessageEventTypeMessageSeen, MessageEventTypeMessageCreated, MessageEventTypeMessageQueued, MessageEventTypeMessageDelivered, MessageEventTypeMessageDeliveryAttempted, MessageEventTypeMessageUndelivered, MessageEventTypeMessageBounced, MessageEventTypeMessageNotSent, MessageEventTypeMessageArchived, MessageEventTypeMessageLinkClicked, MessageEventTypeMessageInteracted, MessageEventTypeMessageUnseen, MessageEventTypeMessageUnread, MessageEventTypeMessageUnarchived:
 		return true
 	}
 	return false
