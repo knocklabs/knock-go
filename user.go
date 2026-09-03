@@ -17,6 +17,7 @@ import (
 	"github.com/knocklabs/knock-go/internal/requestconfig"
 	"github.com/knocklabs/knock-go/option"
 	"github.com/knocklabs/knock-go/packages/pagination"
+	"github.com/knocklabs/knock-go/shared"
 )
 
 // A user is an individual from your system, represented in Knock. They are most
@@ -39,6 +40,9 @@ type UserService struct {
 	// A bulk operation is a set of changes applied across zero or more records
 	// triggered via a call to the Knock API and performed asynchronously.
 	Bulk *UserBulkService
+	// The preference center is a hosted page where users can manage their notification
+	// preferences.
+	PreferenceCenter *UserPreferenceCenterService
 }
 
 // NewUserService generates a new service that applies the given options to each
@@ -50,6 +54,7 @@ func NewUserService(opts ...option.RequestOption) (r *UserService) {
 	r.Feeds = NewUserFeedService(opts...)
 	r.Guides = NewUserGuideService(opts...)
 	r.Bulk = NewUserBulkService(opts...)
+	r.PreferenceCenter = NewUserPreferenceCenterService(opts...)
 	return
 }
 
@@ -407,6 +412,102 @@ func (r InlineIdentifyUserRequestParam) MarshalJSON() (data []byte, err error) {
 }
 
 func (r InlineIdentifyUserRequestParam) ImplementsRecipientRequestUnionParam() {}
+
+// A response containing a list of schedules.
+type ListSchedulesResponse struct {
+	// A list of schedules.
+	Entries []Schedule `json:"entries" api:"required"`
+	// Pagination information for a list of resources.
+	PageInfo shared.PageInfo           `json:"page_info" api:"required"`
+	JSON     listSchedulesResponseJSON `json:"-"`
+}
+
+// listSchedulesResponseJSON contains the JSON metadata for the struct
+// [ListSchedulesResponse]
+type listSchedulesResponseJSON struct {
+	Entries     apijson.Field
+	PageInfo    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ListSchedulesResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r listSchedulesResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// A response containing a list of subscriptions.
+type ListSubscriptionsResponse struct {
+	// A list of subscriptions.
+	Entries []Subscription `json:"entries" api:"required"`
+	// Pagination information for a list of resources.
+	PageInfo shared.PageInfo               `json:"page_info" api:"required"`
+	JSON     listSubscriptionsResponseJSON `json:"-"`
+}
+
+// listSubscriptionsResponseJSON contains the JSON metadata for the struct
+// [ListSubscriptionsResponse]
+type listSubscriptionsResponseJSON struct {
+	Entries     apijson.Field
+	PageInfo    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ListSubscriptionsResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r listSubscriptionsResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// A set of settings for the commercial subscribed preference. Currently, this can
+// only be a list of conditions to apply.
+type PreferenceSetCommercialSubscribedSetting struct {
+	// A list of conditions to apply to the commercial subscribed preference.
+	Conditions []shared.Condition                           `json:"conditions" api:"required"`
+	JSON       preferenceSetCommercialSubscribedSettingJSON `json:"-"`
+}
+
+// preferenceSetCommercialSubscribedSettingJSON contains the JSON metadata for the
+// struct [PreferenceSetCommercialSubscribedSetting]
+type preferenceSetCommercialSubscribedSettingJSON struct {
+	Conditions  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PreferenceSetCommercialSubscribedSetting) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r preferenceSetCommercialSubscribedSettingJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r PreferenceSetCommercialSubscribedSetting) ImplementsPreferenceSetCommercialSubscribedUnion() {
+}
+
+// A set of settings for the commercial subscribed preference. Currently, this can
+// only be a list of conditions to apply.
+type PreferenceSetCommercialSubscribedSettingParam struct {
+	// A list of conditions to apply to the commercial subscribed preference.
+	Conditions param.Field[[]shared.ConditionParam] `json:"conditions" api:"required"`
+}
+
+func (r PreferenceSetCommercialSubscribedSettingParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r PreferenceSetCommercialSubscribedSettingParam) ImplementsPreferenceSetRequestCommercialSubscribedUnionParam() {
+}
+
+func (r PreferenceSetCommercialSubscribedSettingParam) ImplementsUserBulkSetPreferencesParamsPreferencesCommercialSubscribedUnion() {
+}
 
 // A [User](/concepts/users) represents an individual in your system who can
 // receive notifications through Knock. Users are the most common recipients of

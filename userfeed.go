@@ -248,7 +248,7 @@ type UserFeedListItemsResponseBlock struct {
 	// The type of block in a message in an app feed.
 	Type UserFeedListItemsResponseBlocksType `json:"type" api:"required"`
 	// This field can have the runtime type of
-	// [[]UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton].
+	// [[]MessageInAppFeedButtonSetBlockButton].
 	Buttons interface{} `json:"buttons"`
 	// The content of the block in a message in an app feed.
 	Content string `json:"content"`
@@ -286,17 +286,16 @@ func (r *UserFeedListItemsResponseBlock) UnmarshalJSON(data []byte) (err error) 
 // AsUnion returns a [UserFeedListItemsResponseBlocksUnion] interface which you can
 // cast to the specific types for more type safety.
 //
-// Possible runtime types of the union are
-// [UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock],
-// [UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock].
+// Possible runtime types of the union are [MessageInAppFeedContentBlock],
+// [MessageInAppFeedButtonSetBlock].
 func (r UserFeedListItemsResponseBlock) AsUnion() UserFeedListItemsResponseBlocksUnion {
 	return r.union
 }
 
 // A content block for the feed, can be content or a button set.
 //
-// Union satisfied by [UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock]
-// or [UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock].
+// Union satisfied by [MessageInAppFeedContentBlock] or
+// [MessageInAppFeedButtonSetBlock].
 type UserFeedListItemsResponseBlocksUnion interface {
 	implementsUserFeedListItemsResponseBlock()
 }
@@ -307,143 +306,13 @@ func init() {
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock{}),
+			Type:       reflect.TypeOf(MessageInAppFeedContentBlock{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock{}),
+			Type:       reflect.TypeOf(MessageInAppFeedButtonSetBlock{}),
 		},
 	)
-}
-
-// A block in a message in an app feed.
-type UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock struct {
-	// The content of the block in a message in an app feed.
-	Content string `json:"content" api:"required"`
-	// The name of the block in a message in an app feed.
-	Name string `json:"name" api:"required"`
-	// The rendered HTML version of the content.
-	Rendered string `json:"rendered" api:"required"`
-	// The type of block in a message in an app feed.
-	Type UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockType `json:"type" api:"required"`
-	JSON userFeedListItemsResponseBlocksMessageInAppFeedContentBlockJSON `json:"-"`
-}
-
-// userFeedListItemsResponseBlocksMessageInAppFeedContentBlockJSON contains the
-// JSON metadata for the struct
-// [UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock]
-type userFeedListItemsResponseBlocksMessageInAppFeedContentBlockJSON struct {
-	Content     apijson.Field
-	Name        apijson.Field
-	Rendered    apijson.Field
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedListItemsResponseBlocksMessageInAppFeedContentBlockJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r UserFeedListItemsResponseBlocksMessageInAppFeedContentBlock) implementsUserFeedListItemsResponseBlock() {
-}
-
-// The type of block in a message in an app feed.
-type UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockType string
-
-const (
-	UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockTypeMarkdown UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockType = "markdown"
-	UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockTypeText     UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockType = "text"
-)
-
-func (r UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockType) IsKnown() bool {
-	switch r {
-	case UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockTypeMarkdown, UserFeedListItemsResponseBlocksMessageInAppFeedContentBlockTypeText:
-		return true
-	}
-	return false
-}
-
-// A button set block in a message in an app feed.
-type UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock struct {
-	// A list of buttons in an in app feed message.
-	Buttons []UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton `json:"buttons" api:"required"`
-	// The name of the button set in a message in an app feed.
-	Name string `json:"name" api:"required"`
-	// The type of block in a message in an app feed.
-	Type UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockType `json:"type" api:"required"`
-	JSON userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockJSON `json:"-"`
-}
-
-// userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockJSON contains the
-// JSON metadata for the struct
-// [UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock]
-type userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockJSON struct {
-	Buttons     apijson.Field
-	Name        apijson.Field
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlock) implementsUserFeedListItemsResponseBlock() {
-}
-
-// A button in an in app feed message.
-type UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton struct {
-	// The action to take when the button is clicked.
-	Action string `json:"action" api:"required"`
-	// The label of the button.
-	Label string `json:"label" api:"required"`
-	// The name of the button.
-	Name string                                                                  `json:"name" api:"required"`
-	JSON userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButtonJSON `json:"-"`
-}
-
-// userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButtonJSON contains
-// the JSON metadata for the struct
-// [UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton]
-type userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButtonJSON struct {
-	Action      apijson.Field
-	Label       apijson.Field
-	Name        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButton) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockButtonJSON) RawJSON() string {
-	return r.raw
-}
-
-// The type of block in a message in an app feed.
-type UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockType string
-
-const (
-	UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockTypeButtonSet UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockType = "button_set"
-)
-
-func (r UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockType) IsKnown() bool {
-	switch r {
-	case UserFeedListItemsResponseBlocksMessageInAppFeedButtonSetBlockTypeButtonSet:
-		return true
-	}
-	return false
 }
 
 // The type of block in a message in an app feed.

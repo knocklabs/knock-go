@@ -31,7 +31,7 @@ func TestAudienceAddMembersWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"key",
 		knock.AudienceAddMembersParams{
-			Members: knock.F([]knock.AudienceAddMembersParamsMember{{
+			Members: knock.F([]knock.AudienceMemberRequestParam{{
 				User: knock.F(knock.InlineIdentifyUserRequestParam{
 					ID:     knock.F("dr_sattler"),
 					Avatar: knock.F("avatar"),
@@ -254,7 +254,7 @@ func TestAudienceRemoveMembers(t *testing.T) {
 		context.TODO(),
 		"key",
 		knock.AudienceRemoveMembersParams{
-			Members: knock.F([]knock.AudienceRemoveMembersParamsMember{{
+			Members: knock.F([]knock.AudienceMemberRequestParam{{
 				User: knock.F(knock.InlineIdentifyUserRequestParam{
 					ID:     knock.F("dr_sattler"),
 					Avatar: knock.F("avatar"),

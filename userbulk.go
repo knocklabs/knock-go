@@ -170,23 +170,9 @@ type UserBulkSetPreferencesParamsPreferencesChannelsUnion interface {
 // time.
 //
 // Satisfied by [shared.UnionBool],
-// [UserBulkSetPreferencesParamsPreferencesCommercialSubscribedPreferenceSetCommercialSubscribedSetting].
+// [PreferenceSetCommercialSubscribedSettingParam].
 type UserBulkSetPreferencesParamsPreferencesCommercialSubscribedUnion interface {
 	ImplementsUserBulkSetPreferencesParamsPreferencesCommercialSubscribedUnion()
-}
-
-// A set of settings for the commercial subscribed preference. Currently, this can
-// only be a list of conditions to apply.
-type UserBulkSetPreferencesParamsPreferencesCommercialSubscribedPreferenceSetCommercialSubscribedSetting struct {
-	// A list of conditions to apply to the commercial subscribed preference.
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions" api:"required"`
-}
-
-func (r UserBulkSetPreferencesParamsPreferencesCommercialSubscribedPreferenceSetCommercialSubscribedSetting) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r UserBulkSetPreferencesParamsPreferencesCommercialSubscribedPreferenceSetCommercialSubscribedSetting) ImplementsUserBulkSetPreferencesParamsPreferencesCommercialSubscribedUnion() {
 }
 
 // Workflow or category preferences within a preference set

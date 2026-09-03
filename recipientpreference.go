@@ -197,7 +197,7 @@ func init() {
 // time.
 //
 // Union satisfied by [shared.UnionBool] or
-// [PreferenceSetCommercialSubscribedPreferenceSetCommercialSubscribedSetting].
+// [PreferenceSetCommercialSubscribedSetting].
 type PreferenceSetCommercialSubscribedUnion interface {
 	ImplementsPreferenceSetCommercialSubscribedUnion()
 }
@@ -216,37 +216,9 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PreferenceSetCommercialSubscribedPreferenceSetCommercialSubscribedSetting{}),
+			Type:       reflect.TypeOf(PreferenceSetCommercialSubscribedSetting{}),
 		},
 	)
-}
-
-// A set of settings for the commercial subscribed preference. Currently, this can
-// only be a list of conditions to apply.
-type PreferenceSetCommercialSubscribedPreferenceSetCommercialSubscribedSetting struct {
-	// A list of conditions to apply to the commercial subscribed preference.
-	Conditions []shared.Condition                                                            `json:"conditions" api:"required"`
-	JSON       preferenceSetCommercialSubscribedPreferenceSetCommercialSubscribedSettingJSON `json:"-"`
-}
-
-// preferenceSetCommercialSubscribedPreferenceSetCommercialSubscribedSettingJSON
-// contains the JSON metadata for the struct
-// [PreferenceSetCommercialSubscribedPreferenceSetCommercialSubscribedSetting]
-type preferenceSetCommercialSubscribedPreferenceSetCommercialSubscribedSettingJSON struct {
-	Conditions  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PreferenceSetCommercialSubscribedPreferenceSetCommercialSubscribedSetting) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r preferenceSetCommercialSubscribedPreferenceSetCommercialSubscribedSettingJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r PreferenceSetCommercialSubscribedPreferenceSetCommercialSubscribedSetting) ImplementsPreferenceSetCommercialSubscribedUnion() {
 }
 
 // Workflow or category preferences within a preference set
@@ -804,23 +776,9 @@ type PreferenceSetRequestChannelsUnionParam interface {
 // time.
 //
 // Satisfied by [shared.UnionBool],
-// [PreferenceSetRequestCommercialSubscribedPreferenceSetCommercialSubscribedSettingParam].
+// [PreferenceSetCommercialSubscribedSettingParam].
 type PreferenceSetRequestCommercialSubscribedUnionParam interface {
 	ImplementsPreferenceSetRequestCommercialSubscribedUnionParam()
-}
-
-// A set of settings for the commercial subscribed preference. Currently, this can
-// only be a list of conditions to apply.
-type PreferenceSetRequestCommercialSubscribedPreferenceSetCommercialSubscribedSettingParam struct {
-	// A list of conditions to apply to the commercial subscribed preference.
-	Conditions param.Field[[]shared.ConditionParam] `json:"conditions" api:"required"`
-}
-
-func (r PreferenceSetRequestCommercialSubscribedPreferenceSetCommercialSubscribedSettingParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r PreferenceSetRequestCommercialSubscribedPreferenceSetCommercialSubscribedSettingParam) ImplementsPreferenceSetRequestCommercialSubscribedUnionParam() {
 }
 
 // Workflow or category preferences within a preference set

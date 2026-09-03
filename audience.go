@@ -114,6 +114,21 @@ func (r audienceMemberJSON) RawJSON() string {
 	return r.raw
 }
 
+// An audience member.
+type AudienceMemberRequestParam struct {
+	// A set of parameters to inline-identify a user with. Inline identifying the user
+	// will ensure that the user is available before the request is executed in Knock.
+	// It will perform an upsert for the user you're supplying, replacing any
+	// properties specified.
+	User param.Field[InlineIdentifyUserRequestParam] `json:"user" api:"required"`
+	// The unique identifier for the tenant.
+	Tenant param.Field[string] `json:"tenant"`
+}
+
+func (r AudienceMemberRequestParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 // A paginated list of audience members.
 type AudienceListMembersResponse struct {
 	// A list of audience members.
@@ -142,7 +157,7 @@ func (r audienceListMembersResponseJSON) RawJSON() string {
 
 type AudienceAddMembersParams struct {
 	// A list of audience members to add. You can add up to 1,000 members per request.
-	Members param.Field[[]AudienceAddMembersParamsMember] `json:"members" api:"required"`
+	Members param.Field[[]AudienceMemberRequestParam] `json:"members" api:"required"`
 	// Create the audience if it does not exist.
 	CreateAudience param.Field[bool] `query:"create_audience"`
 }
@@ -160,42 +175,12 @@ func (r AudienceAddMembersParams) URLQuery() (v url.Values) {
 	})
 }
 
-// An audience member.
-type AudienceAddMembersParamsMember struct {
-	// A set of parameters to inline-identify a user with. Inline identifying the user
-	// will ensure that the user is available before the request is executed in Knock.
-	// It will perform an upsert for the user you're supplying, replacing any
-	// properties specified.
-	User param.Field[InlineIdentifyUserRequestParam] `json:"user" api:"required"`
-	// The unique identifier for the tenant.
-	Tenant param.Field[string] `json:"tenant"`
-}
-
-func (r AudienceAddMembersParamsMember) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
 type AudienceRemoveMembersParams struct {
 	// A list of audience members to remove. You can remove up to 1,000 members per
 	// request.
-	Members param.Field[[]AudienceRemoveMembersParamsMember] `json:"members" api:"required"`
+	Members param.Field[[]AudienceMemberRequestParam] `json:"members" api:"required"`
 }
 
 func (r AudienceRemoveMembersParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// An audience member.
-type AudienceRemoveMembersParamsMember struct {
-	// A set of parameters to inline-identify a user with. Inline identifying the user
-	// will ensure that the user is available before the request is executed in Knock.
-	// It will perform an upsert for the user you're supplying, replacing any
-	// properties specified.
-	User param.Field[InlineIdentifyUserRequestParam] `json:"user" api:"required"`
-	// The unique identifier for the tenant.
-	Tenant param.Field[string] `json:"tenant"`
-}
-
-func (r AudienceRemoveMembersParamsMember) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }

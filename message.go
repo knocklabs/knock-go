@@ -96,7 +96,7 @@ func (r *MessageService) Get(ctx context.Context, messageID string, opts ...opti
 
 // Returns the fully rendered contents of a message, where the response depends on
 // which channel the message was sent through.
-func (r *MessageService) GetContent(ctx context.Context, messageID string, opts ...option.RequestOption) (res *MessageGetContentResponse, err error) {
+func (r *MessageService) GetContent(ctx context.Context, messageID string, opts ...option.RequestOption) (res *MessageContents, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if messageID == "" {
 		err = errors.New("missing required message_id parameter")
@@ -313,6 +313,32 @@ func (r *Activity) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r activityJSON) RawJSON() string {
+	return r.raw
+}
+
+// A paginated list of messages.
+type ListMessagesResponse struct {
+	// A list of messages.
+	Items []Message `json:"items" api:"required"`
+	// Pagination information for a list of resources.
+	PageInfo shared.PageInfo          `json:"page_info" api:"required"`
+	JSON     listMessagesResponseJSON `json:"-"`
+}
+
+// listMessagesResponseJSON contains the JSON metadata for the struct
+// [ListMessagesResponse]
+type listMessagesResponseJSON struct {
+	Items       apijson.Field
+	PageInfo    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ListMessagesResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r listMessagesResponseJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -620,6 +646,509 @@ func (r messageRecipientSnapshotJSON) RawJSON() string {
 	return r.raw
 }
 
+// The content of a message.
+type MessageContents struct {
+	// The typename of the schema.
+	Typename string `json:"__typename" api:"required"`
+	// Content data specific to the channel type.
+	Data MessageContentsData `json:"data" api:"required"`
+	// Timestamp when the message content was created.
+	InsertedAt time.Time `json:"inserted_at" api:"required" format:"date-time"`
+	// The unique identifier for the message content.
+	MessageID string              `json:"message_id" api:"required"`
+	JSON      messageContentsJSON `json:"-"`
+}
+
+// messageContentsJSON contains the JSON metadata for the struct [MessageContents]
+type messageContentsJSON struct {
+	Typename    apijson.Field
+	Data        apijson.Field
+	InsertedAt  apijson.Field
+	MessageID   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageContents) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageContentsJSON) RawJSON() string {
+	return r.raw
+}
+
+// Content data specific to the channel type.
+type MessageContentsData struct {
+	// The typename of the schema.
+	Typename string `json:"__typename" api:"required"`
+	// The device token to send the push notification to.
+	Token string `json:"token"`
+	// The BCC email addresses.
+	Bcc string `json:"bcc" api:"nullable"`
+	// This field can have the runtime type of
+	// [[]MessageContentsDataMessageInAppFeedContentBlock].
+	Blocks interface{} `json:"blocks"`
+	// The content body of the SMS message.
+	Body string `json:"body"`
+	// The CC email addresses.
+	Cc string `json:"cc" api:"nullable"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Connection interface{} `json:"connection"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Data interface{} `json:"data"`
+	// The sender's email address.
+	From string `json:"from"`
+	// The HTML body of the email message.
+	HTMLBody string `json:"html_body"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{} `json:"metadata"`
+	// The reply-to email address.
+	ReplyTo string `json:"reply_to" api:"nullable"`
+	// The subject line of the email message.
+	SubjectLine string `json:"subject_line"`
+	// This field can have the runtime type of
+	// [MessageContentsDataMessageChatContentTemplate].
+	Template interface{} `json:"template"`
+	// The text body of the email message.
+	TextBody string `json:"text_body"`
+	// The title of the push notification.
+	Title string `json:"title"`
+	// The recipient's email address.
+	To    string                  `json:"to"`
+	JSON  messageContentsDataJSON `json:"-"`
+	union MessageContentsDataUnion
+}
+
+// messageContentsDataJSON contains the JSON metadata for the struct
+// [MessageContentsData]
+type messageContentsDataJSON struct {
+	Typename    apijson.Field
+	Token       apijson.Field
+	Bcc         apijson.Field
+	Blocks      apijson.Field
+	Body        apijson.Field
+	Cc          apijson.Field
+	Connection  apijson.Field
+	Data        apijson.Field
+	From        apijson.Field
+	HTMLBody    apijson.Field
+	Metadata    apijson.Field
+	ReplyTo     apijson.Field
+	SubjectLine apijson.Field
+	Template    apijson.Field
+	TextBody    apijson.Field
+	Title       apijson.Field
+	To          apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r messageContentsDataJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *MessageContentsData) UnmarshalJSON(data []byte) (err error) {
+	*r = MessageContentsData{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [MessageContentsDataUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are
+// [MessageContentsDataMessageEmailContent],
+// [MessageContentsDataMessageSMSContent], [MessageContentsDataMessagePushContent],
+// [MessageContentsDataMessageChatContent],
+// [MessageContentsDataMessageInAppFeedContent].
+func (r MessageContentsData) AsUnion() MessageContentsDataUnion {
+	return r.union
+}
+
+// Content data specific to the channel type.
+//
+// Union satisfied by [MessageContentsDataMessageEmailContent],
+// [MessageContentsDataMessageSMSContent], [MessageContentsDataMessagePushContent],
+// [MessageContentsDataMessageChatContent] or
+// [MessageContentsDataMessageInAppFeedContent].
+type MessageContentsDataUnion interface {
+	implementsMessageContentsData()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*MessageContentsDataUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(MessageContentsDataMessageEmailContent{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(MessageContentsDataMessageSMSContent{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(MessageContentsDataMessagePushContent{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(MessageContentsDataMessageChatContent{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(MessageContentsDataMessageInAppFeedContent{}),
+		},
+	)
+}
+
+// The content of an email message.
+type MessageContentsDataMessageEmailContent struct {
+	// The typename of the schema.
+	Typename string `json:"__typename" api:"required"`
+	// The sender's email address.
+	From string `json:"from" api:"required"`
+	// The HTML body of the email message.
+	HTMLBody string `json:"html_body" api:"required"`
+	// The subject line of the email message.
+	SubjectLine string `json:"subject_line" api:"required"`
+	// The text body of the email message.
+	TextBody string `json:"text_body" api:"required"`
+	// The recipient's email address.
+	To string `json:"to" api:"required"`
+	// The BCC email addresses.
+	Bcc string `json:"bcc" api:"nullable"`
+	// The CC email addresses.
+	Cc string `json:"cc" api:"nullable"`
+	// The reply-to email address.
+	ReplyTo string                                     `json:"reply_to" api:"nullable"`
+	JSON    messageContentsDataMessageEmailContentJSON `json:"-"`
+}
+
+// messageContentsDataMessageEmailContentJSON contains the JSON metadata for the
+// struct [MessageContentsDataMessageEmailContent]
+type messageContentsDataMessageEmailContentJSON struct {
+	Typename    apijson.Field
+	From        apijson.Field
+	HTMLBody    apijson.Field
+	SubjectLine apijson.Field
+	TextBody    apijson.Field
+	To          apijson.Field
+	Bcc         apijson.Field
+	Cc          apijson.Field
+	ReplyTo     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageContentsDataMessageEmailContent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageContentsDataMessageEmailContentJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r MessageContentsDataMessageEmailContent) implementsMessageContentsData() {}
+
+// The content of an SMS message.
+type MessageContentsDataMessageSMSContent struct {
+	// The typename of the schema.
+	Typename string `json:"__typename" api:"required"`
+	// The content body of the SMS message.
+	Body string `json:"body" api:"required"`
+	// The phone number the SMS was sent to.
+	To   string                                   `json:"to" api:"required"`
+	JSON messageContentsDataMessageSMSContentJSON `json:"-"`
+}
+
+// messageContentsDataMessageSMSContentJSON contains the JSON metadata for the
+// struct [MessageContentsDataMessageSMSContent]
+type messageContentsDataMessageSMSContentJSON struct {
+	Typename    apijson.Field
+	Body        apijson.Field
+	To          apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageContentsDataMessageSMSContent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageContentsDataMessageSMSContentJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r MessageContentsDataMessageSMSContent) implementsMessageContentsData() {}
+
+// Push channel data.
+type MessageContentsDataMessagePushContent struct {
+	// The device token to send the push notification to.
+	Token string `json:"token" api:"required"`
+	// The typename of the schema.
+	Typename string `json:"__typename" api:"required"`
+	// The content body of the push notification.
+	Body string `json:"body" api:"required"`
+	// The title of the push notification.
+	Title string `json:"title" api:"required"`
+	// Additional data payload for the push notification.
+	Data map[string]interface{}                    `json:"data" api:"nullable"`
+	JSON messageContentsDataMessagePushContentJSON `json:"-"`
+}
+
+// messageContentsDataMessagePushContentJSON contains the JSON metadata for the
+// struct [MessageContentsDataMessagePushContent]
+type messageContentsDataMessagePushContentJSON struct {
+	Token       apijson.Field
+	Typename    apijson.Field
+	Body        apijson.Field
+	Title       apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageContentsDataMessagePushContent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageContentsDataMessagePushContentJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r MessageContentsDataMessagePushContent) implementsMessageContentsData() {}
+
+// The content of a chat message.
+type MessageContentsDataMessageChatContent struct {
+	// The typename of the schema.
+	Typename string `json:"__typename" api:"required"`
+	// The channel data connection from the recipient to the underlying provider.
+	Connection map[string]interface{} `json:"connection" api:"required"`
+	// The template structure for the chat message.
+	Template MessageContentsDataMessageChatContentTemplate `json:"template" api:"required"`
+	// Additional metadata associated with the chat message.
+	Metadata map[string]interface{}                    `json:"metadata" api:"nullable"`
+	JSON     messageContentsDataMessageChatContentJSON `json:"-"`
+}
+
+// messageContentsDataMessageChatContentJSON contains the JSON metadata for the
+// struct [MessageContentsDataMessageChatContent]
+type messageContentsDataMessageChatContentJSON struct {
+	Typename    apijson.Field
+	Connection  apijson.Field
+	Template    apijson.Field
+	Metadata    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageContentsDataMessageChatContent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageContentsDataMessageChatContentJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r MessageContentsDataMessageChatContent) implementsMessageContentsData() {}
+
+// The template structure for the chat message.
+type MessageContentsDataMessageChatContentTemplate struct {
+	// The blocks of the message in a chat.
+	Blocks []MessageContentsDataMessageChatContentTemplateBlock `json:"blocks" api:"nullable"`
+	// The JSON content of the message.
+	JsonContent map[string]interface{} `json:"json_content" api:"nullable"`
+	// The summary of the chat message.
+	Summary string                                            `json:"summary" api:"nullable"`
+	JSON    messageContentsDataMessageChatContentTemplateJSON `json:"-"`
+}
+
+// messageContentsDataMessageChatContentTemplateJSON contains the JSON metadata for
+// the struct [MessageContentsDataMessageChatContentTemplate]
+type messageContentsDataMessageChatContentTemplateJSON struct {
+	Blocks      apijson.Field
+	JsonContent apijson.Field
+	Summary     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageContentsDataMessageChatContentTemplate) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageContentsDataMessageChatContentTemplateJSON) RawJSON() string {
+	return r.raw
+}
+
+// A block in a message in a chat.
+type MessageContentsDataMessageChatContentTemplateBlock struct {
+	// The actual content of the block.
+	Content string `json:"content" api:"required"`
+	// The name of the block for identification.
+	Name string `json:"name" api:"required"`
+	// The type of block in a message in a chat (text or markdown).
+	Type MessageContentsDataMessageChatContentTemplateBlocksType `json:"type" api:"required"`
+	JSON messageContentsDataMessageChatContentTemplateBlockJSON  `json:"-"`
+}
+
+// messageContentsDataMessageChatContentTemplateBlockJSON contains the JSON
+// metadata for the struct [MessageContentsDataMessageChatContentTemplateBlock]
+type messageContentsDataMessageChatContentTemplateBlockJSON struct {
+	Content     apijson.Field
+	Name        apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageContentsDataMessageChatContentTemplateBlock) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageContentsDataMessageChatContentTemplateBlockJSON) RawJSON() string {
+	return r.raw
+}
+
+// The type of block in a message in a chat (text or markdown).
+type MessageContentsDataMessageChatContentTemplateBlocksType string
+
+const (
+	MessageContentsDataMessageChatContentTemplateBlocksTypeText     MessageContentsDataMessageChatContentTemplateBlocksType = "text"
+	MessageContentsDataMessageChatContentTemplateBlocksTypeMarkdown MessageContentsDataMessageChatContentTemplateBlocksType = "markdown"
+)
+
+func (r MessageContentsDataMessageChatContentTemplateBlocksType) IsKnown() bool {
+	switch r {
+	case MessageContentsDataMessageChatContentTemplateBlocksTypeText, MessageContentsDataMessageChatContentTemplateBlocksTypeMarkdown:
+		return true
+	}
+	return false
+}
+
+// The content of an in-app feed message.
+type MessageContentsDataMessageInAppFeedContent struct {
+	// The typename of the schema.
+	Typename string `json:"__typename" api:"required"`
+	// The blocks of the message in an app feed.
+	Blocks []MessageContentsDataMessageInAppFeedContentBlock `json:"blocks" api:"required"`
+	JSON   messageContentsDataMessageInAppFeedContentJSON    `json:"-"`
+}
+
+// messageContentsDataMessageInAppFeedContentJSON contains the JSON metadata for
+// the struct [MessageContentsDataMessageInAppFeedContent]
+type messageContentsDataMessageInAppFeedContentJSON struct {
+	Typename    apijson.Field
+	Blocks      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageContentsDataMessageInAppFeedContent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageContentsDataMessageInAppFeedContentJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r MessageContentsDataMessageInAppFeedContent) implementsMessageContentsData() {}
+
+// A block in a message in an app feed.
+type MessageContentsDataMessageInAppFeedContentBlock struct {
+	// The name of the block in a message in an app feed.
+	Name string `json:"name" api:"required"`
+	// The type of block in a message in an app feed.
+	Type MessageContentsDataMessageInAppFeedContentBlocksType `json:"type" api:"required"`
+	// This field can have the runtime type of
+	// [[]MessageInAppFeedButtonSetBlockButton].
+	Buttons interface{} `json:"buttons"`
+	// The content of the block in a message in an app feed.
+	Content string `json:"content"`
+	// The rendered HTML version of the content.
+	Rendered string                                              `json:"rendered"`
+	JSON     messageContentsDataMessageInAppFeedContentBlockJSON `json:"-"`
+	union    MessageContentsDataMessageInAppFeedContentBlocksUnion
+}
+
+// messageContentsDataMessageInAppFeedContentBlockJSON contains the JSON metadata
+// for the struct [MessageContentsDataMessageInAppFeedContentBlock]
+type messageContentsDataMessageInAppFeedContentBlockJSON struct {
+	Name        apijson.Field
+	Type        apijson.Field
+	Buttons     apijson.Field
+	Content     apijson.Field
+	Rendered    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r messageContentsDataMessageInAppFeedContentBlockJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *MessageContentsDataMessageInAppFeedContentBlock) UnmarshalJSON(data []byte) (err error) {
+	*r = MessageContentsDataMessageInAppFeedContentBlock{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [MessageContentsDataMessageInAppFeedContentBlocksUnion]
+// interface which you can cast to the specific types for more type safety.
+//
+// Possible runtime types of the union are [MessageInAppFeedContentBlock],
+// [MessageInAppFeedButtonSetBlock].
+func (r MessageContentsDataMessageInAppFeedContentBlock) AsUnion() MessageContentsDataMessageInAppFeedContentBlocksUnion {
+	return r.union
+}
+
+// A block in a message in an app feed.
+//
+// Union satisfied by [MessageInAppFeedContentBlock] or
+// [MessageInAppFeedButtonSetBlock].
+type MessageContentsDataMessageInAppFeedContentBlocksUnion interface {
+	implementsMessageContentsDataMessageInAppFeedContentBlock()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*MessageContentsDataMessageInAppFeedContentBlocksUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(MessageInAppFeedContentBlock{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(MessageInAppFeedButtonSetBlock{}),
+		},
+	)
+}
+
+// The type of block in a message in an app feed.
+type MessageContentsDataMessageInAppFeedContentBlocksType string
+
+const (
+	MessageContentsDataMessageInAppFeedContentBlocksTypeMarkdown  MessageContentsDataMessageInAppFeedContentBlocksType = "markdown"
+	MessageContentsDataMessageInAppFeedContentBlocksTypeText      MessageContentsDataMessageInAppFeedContentBlocksType = "text"
+	MessageContentsDataMessageInAppFeedContentBlocksTypeButtonSet MessageContentsDataMessageInAppFeedContentBlocksType = "button_set"
+)
+
+func (r MessageContentsDataMessageInAppFeedContentBlocksType) IsKnown() bool {
+	switch r {
+	case MessageContentsDataMessageInAppFeedContentBlocksTypeMarkdown, MessageContentsDataMessageInAppFeedContentBlocksTypeText, MessageContentsDataMessageInAppFeedContentBlocksTypeButtonSet:
+		return true
+	}
+	return false
+}
+
 // A message delivery log contains a `request` from Knock to a downstream provider
 // and the `response` that was returned.
 type MessageDeliveryLog struct {
@@ -869,570 +1398,20 @@ func (r MessageEventType) IsKnown() bool {
 	return false
 }
 
-// The content of a message.
-type MessageGetContentResponse struct {
-	// The typename of the schema.
-	Typename string `json:"__typename" api:"required"`
-	// Content data specific to the channel type.
-	Data MessageGetContentResponseData `json:"data" api:"required"`
-	// Timestamp when the message content was created.
-	InsertedAt time.Time `json:"inserted_at" api:"required" format:"date-time"`
-	// The unique identifier for the message content.
-	MessageID string                        `json:"message_id" api:"required"`
-	JSON      messageGetContentResponseJSON `json:"-"`
-}
-
-// messageGetContentResponseJSON contains the JSON metadata for the struct
-// [MessageGetContentResponse]
-type messageGetContentResponseJSON struct {
-	Typename    apijson.Field
-	Data        apijson.Field
-	InsertedAt  apijson.Field
-	MessageID   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *MessageGetContentResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageGetContentResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// Content data specific to the channel type.
-type MessageGetContentResponseData struct {
-	// The typename of the schema.
-	Typename string `json:"__typename" api:"required"`
-	// The device token to send the push notification to.
-	Token string `json:"token"`
-	// The BCC email addresses.
-	Bcc string `json:"bcc" api:"nullable"`
-	// This field can have the runtime type of
-	// [[]MessageGetContentResponseDataMessageInAppFeedContentBlock].
-	Blocks interface{} `json:"blocks"`
-	// The content body of the SMS message.
-	Body string `json:"body"`
-	// The CC email addresses.
-	Cc string `json:"cc" api:"nullable"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Connection interface{} `json:"connection"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Data interface{} `json:"data"`
-	// The sender's email address.
-	From string `json:"from"`
-	// The HTML body of the email message.
-	HTMLBody string `json:"html_body"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{} `json:"metadata"`
-	// The reply-to email address.
-	ReplyTo string `json:"reply_to" api:"nullable"`
-	// The subject line of the email message.
-	SubjectLine string `json:"subject_line"`
-	// This field can have the runtime type of
-	// [MessageGetContentResponseDataMessageChatContentTemplate].
-	Template interface{} `json:"template"`
-	// The text body of the email message.
-	TextBody string `json:"text_body"`
-	// The title of the push notification.
-	Title string `json:"title"`
-	// The recipient's email address.
-	To    string                            `json:"to"`
-	JSON  messageGetContentResponseDataJSON `json:"-"`
-	union MessageGetContentResponseDataUnion
-}
-
-// messageGetContentResponseDataJSON contains the JSON metadata for the struct
-// [MessageGetContentResponseData]
-type messageGetContentResponseDataJSON struct {
-	Typename    apijson.Field
-	Token       apijson.Field
-	Bcc         apijson.Field
-	Blocks      apijson.Field
-	Body        apijson.Field
-	Cc          apijson.Field
-	Connection  apijson.Field
-	Data        apijson.Field
-	From        apijson.Field
-	HTMLBody    apijson.Field
-	Metadata    apijson.Field
-	ReplyTo     apijson.Field
-	SubjectLine apijson.Field
-	Template    apijson.Field
-	TextBody    apijson.Field
-	Title       apijson.Field
-	To          apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r messageGetContentResponseDataJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *MessageGetContentResponseData) UnmarshalJSON(data []byte) (err error) {
-	*r = MessageGetContentResponseData{}
-	err = apijson.UnmarshalRoot(data, &r.union)
-	if err != nil {
-		return err
-	}
-	return apijson.Port(r.union, &r)
-}
-
-// AsUnion returns a [MessageGetContentResponseDataUnion] interface which you can
-// cast to the specific types for more type safety.
-//
-// Possible runtime types of the union are
-// [MessageGetContentResponseDataMessageEmailContent],
-// [MessageGetContentResponseDataMessageSMSContent],
-// [MessageGetContentResponseDataMessagePushContent],
-// [MessageGetContentResponseDataMessageChatContent],
-// [MessageGetContentResponseDataMessageInAppFeedContent].
-func (r MessageGetContentResponseData) AsUnion() MessageGetContentResponseDataUnion {
-	return r.union
-}
-
-// Content data specific to the channel type.
-//
-// Union satisfied by [MessageGetContentResponseDataMessageEmailContent],
-// [MessageGetContentResponseDataMessageSMSContent],
-// [MessageGetContentResponseDataMessagePushContent],
-// [MessageGetContentResponseDataMessageChatContent] or
-// [MessageGetContentResponseDataMessageInAppFeedContent].
-type MessageGetContentResponseDataUnion interface {
-	implementsMessageGetContentResponseData()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*MessageGetContentResponseDataUnion)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageGetContentResponseDataMessageEmailContent{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageGetContentResponseDataMessageSMSContent{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageGetContentResponseDataMessagePushContent{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageGetContentResponseDataMessageChatContent{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageGetContentResponseDataMessageInAppFeedContent{}),
-		},
-	)
-}
-
-// The content of an email message.
-type MessageGetContentResponseDataMessageEmailContent struct {
-	// The typename of the schema.
-	Typename string `json:"__typename" api:"required"`
-	// The sender's email address.
-	From string `json:"from" api:"required"`
-	// The HTML body of the email message.
-	HTMLBody string `json:"html_body" api:"required"`
-	// The subject line of the email message.
-	SubjectLine string `json:"subject_line" api:"required"`
-	// The text body of the email message.
-	TextBody string `json:"text_body" api:"required"`
-	// The recipient's email address.
-	To string `json:"to" api:"required"`
-	// The BCC email addresses.
-	Bcc string `json:"bcc" api:"nullable"`
-	// The CC email addresses.
-	Cc string `json:"cc" api:"nullable"`
-	// The reply-to email address.
-	ReplyTo string                                               `json:"reply_to" api:"nullable"`
-	JSON    messageGetContentResponseDataMessageEmailContentJSON `json:"-"`
-}
-
-// messageGetContentResponseDataMessageEmailContentJSON contains the JSON metadata
-// for the struct [MessageGetContentResponseDataMessageEmailContent]
-type messageGetContentResponseDataMessageEmailContentJSON struct {
-	Typename    apijson.Field
-	From        apijson.Field
-	HTMLBody    apijson.Field
-	SubjectLine apijson.Field
-	TextBody    apijson.Field
-	To          apijson.Field
-	Bcc         apijson.Field
-	Cc          apijson.Field
-	ReplyTo     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *MessageGetContentResponseDataMessageEmailContent) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageGetContentResponseDataMessageEmailContentJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r MessageGetContentResponseDataMessageEmailContent) implementsMessageGetContentResponseData() {}
-
-// The content of an SMS message.
-type MessageGetContentResponseDataMessageSMSContent struct {
-	// The typename of the schema.
-	Typename string `json:"__typename" api:"required"`
-	// The content body of the SMS message.
-	Body string `json:"body" api:"required"`
-	// The phone number the SMS was sent to.
-	To   string                                             `json:"to" api:"required"`
-	JSON messageGetContentResponseDataMessageSMSContentJSON `json:"-"`
-}
-
-// messageGetContentResponseDataMessageSMSContentJSON contains the JSON metadata
-// for the struct [MessageGetContentResponseDataMessageSMSContent]
-type messageGetContentResponseDataMessageSMSContentJSON struct {
-	Typename    apijson.Field
-	Body        apijson.Field
-	To          apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *MessageGetContentResponseDataMessageSMSContent) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageGetContentResponseDataMessageSMSContentJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r MessageGetContentResponseDataMessageSMSContent) implementsMessageGetContentResponseData() {}
-
-// Push channel data.
-type MessageGetContentResponseDataMessagePushContent struct {
-	// The device token to send the push notification to.
-	Token string `json:"token" api:"required"`
-	// The typename of the schema.
-	Typename string `json:"__typename" api:"required"`
-	// The content body of the push notification.
-	Body string `json:"body" api:"required"`
-	// The title of the push notification.
-	Title string `json:"title" api:"required"`
-	// Additional data payload for the push notification.
-	Data map[string]interface{}                              `json:"data" api:"nullable"`
-	JSON messageGetContentResponseDataMessagePushContentJSON `json:"-"`
-}
-
-// messageGetContentResponseDataMessagePushContentJSON contains the JSON metadata
-// for the struct [MessageGetContentResponseDataMessagePushContent]
-type messageGetContentResponseDataMessagePushContentJSON struct {
-	Token       apijson.Field
-	Typename    apijson.Field
-	Body        apijson.Field
-	Title       apijson.Field
-	Data        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *MessageGetContentResponseDataMessagePushContent) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageGetContentResponseDataMessagePushContentJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r MessageGetContentResponseDataMessagePushContent) implementsMessageGetContentResponseData() {}
-
-// The content of a chat message.
-type MessageGetContentResponseDataMessageChatContent struct {
-	// The typename of the schema.
-	Typename string `json:"__typename" api:"required"`
-	// The channel data connection from the recipient to the underlying provider.
-	Connection map[string]interface{} `json:"connection" api:"required"`
-	// The template structure for the chat message.
-	Template MessageGetContentResponseDataMessageChatContentTemplate `json:"template" api:"required"`
-	// Additional metadata associated with the chat message.
-	Metadata map[string]interface{}                              `json:"metadata" api:"nullable"`
-	JSON     messageGetContentResponseDataMessageChatContentJSON `json:"-"`
-}
-
-// messageGetContentResponseDataMessageChatContentJSON contains the JSON metadata
-// for the struct [MessageGetContentResponseDataMessageChatContent]
-type messageGetContentResponseDataMessageChatContentJSON struct {
-	Typename    apijson.Field
-	Connection  apijson.Field
-	Template    apijson.Field
-	Metadata    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *MessageGetContentResponseDataMessageChatContent) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageGetContentResponseDataMessageChatContentJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r MessageGetContentResponseDataMessageChatContent) implementsMessageGetContentResponseData() {}
-
-// The template structure for the chat message.
-type MessageGetContentResponseDataMessageChatContentTemplate struct {
-	// The blocks of the message in a chat.
-	Blocks []MessageGetContentResponseDataMessageChatContentTemplateBlock `json:"blocks" api:"nullable"`
-	// The JSON content of the message.
-	JsonContent map[string]interface{} `json:"json_content" api:"nullable"`
-	// The summary of the chat message.
-	Summary string                                                      `json:"summary" api:"nullable"`
-	JSON    messageGetContentResponseDataMessageChatContentTemplateJSON `json:"-"`
-}
-
-// messageGetContentResponseDataMessageChatContentTemplateJSON contains the JSON
-// metadata for the struct
-// [MessageGetContentResponseDataMessageChatContentTemplate]
-type messageGetContentResponseDataMessageChatContentTemplateJSON struct {
-	Blocks      apijson.Field
-	JsonContent apijson.Field
-	Summary     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *MessageGetContentResponseDataMessageChatContentTemplate) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageGetContentResponseDataMessageChatContentTemplateJSON) RawJSON() string {
-	return r.raw
-}
-
-// A block in a message in a chat.
-type MessageGetContentResponseDataMessageChatContentTemplateBlock struct {
-	// The actual content of the block.
-	Content string `json:"content" api:"required"`
-	// The name of the block for identification.
-	Name string `json:"name" api:"required"`
-	// The type of block in a message in a chat (text or markdown).
-	Type MessageGetContentResponseDataMessageChatContentTemplateBlocksType `json:"type" api:"required"`
-	JSON messageGetContentResponseDataMessageChatContentTemplateBlockJSON  `json:"-"`
-}
-
-// messageGetContentResponseDataMessageChatContentTemplateBlockJSON contains the
-// JSON metadata for the struct
-// [MessageGetContentResponseDataMessageChatContentTemplateBlock]
-type messageGetContentResponseDataMessageChatContentTemplateBlockJSON struct {
-	Content     apijson.Field
-	Name        apijson.Field
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *MessageGetContentResponseDataMessageChatContentTemplateBlock) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageGetContentResponseDataMessageChatContentTemplateBlockJSON) RawJSON() string {
-	return r.raw
-}
-
-// The type of block in a message in a chat (text or markdown).
-type MessageGetContentResponseDataMessageChatContentTemplateBlocksType string
-
-const (
-	MessageGetContentResponseDataMessageChatContentTemplateBlocksTypeText     MessageGetContentResponseDataMessageChatContentTemplateBlocksType = "text"
-	MessageGetContentResponseDataMessageChatContentTemplateBlocksTypeMarkdown MessageGetContentResponseDataMessageChatContentTemplateBlocksType = "markdown"
-)
-
-func (r MessageGetContentResponseDataMessageChatContentTemplateBlocksType) IsKnown() bool {
-	switch r {
-	case MessageGetContentResponseDataMessageChatContentTemplateBlocksTypeText, MessageGetContentResponseDataMessageChatContentTemplateBlocksTypeMarkdown:
-		return true
-	}
-	return false
-}
-
-// The content of an in-app feed message.
-type MessageGetContentResponseDataMessageInAppFeedContent struct {
-	// The typename of the schema.
-	Typename string `json:"__typename" api:"required"`
-	// The blocks of the message in an app feed.
-	Blocks []MessageGetContentResponseDataMessageInAppFeedContentBlock `json:"blocks" api:"required"`
-	JSON   messageGetContentResponseDataMessageInAppFeedContentJSON    `json:"-"`
-}
-
-// messageGetContentResponseDataMessageInAppFeedContentJSON contains the JSON
-// metadata for the struct [MessageGetContentResponseDataMessageInAppFeedContent]
-type messageGetContentResponseDataMessageInAppFeedContentJSON struct {
-	Typename    apijson.Field
-	Blocks      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *MessageGetContentResponseDataMessageInAppFeedContent) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageGetContentResponseDataMessageInAppFeedContentJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r MessageGetContentResponseDataMessageInAppFeedContent) implementsMessageGetContentResponseData() {
-}
-
-// A block in a message in an app feed.
-type MessageGetContentResponseDataMessageInAppFeedContentBlock struct {
-	// The name of the block in a message in an app feed.
-	Name string `json:"name" api:"required"`
-	// The type of block in a message in an app feed.
-	Type MessageGetContentResponseDataMessageInAppFeedContentBlocksType `json:"type" api:"required"`
-	// This field can have the runtime type of
-	// [[]MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton].
-	Buttons interface{} `json:"buttons"`
-	// The content of the block in a message in an app feed.
-	Content string `json:"content"`
-	// The rendered HTML version of the content.
-	Rendered string                                                        `json:"rendered"`
-	JSON     messageGetContentResponseDataMessageInAppFeedContentBlockJSON `json:"-"`
-	union    MessageGetContentResponseDataMessageInAppFeedContentBlocksUnion
-}
-
-// messageGetContentResponseDataMessageInAppFeedContentBlockJSON contains the JSON
-// metadata for the struct
-// [MessageGetContentResponseDataMessageInAppFeedContentBlock]
-type messageGetContentResponseDataMessageInAppFeedContentBlockJSON struct {
-	Name        apijson.Field
-	Type        apijson.Field
-	Buttons     apijson.Field
-	Content     apijson.Field
-	Rendered    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r messageGetContentResponseDataMessageInAppFeedContentBlockJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *MessageGetContentResponseDataMessageInAppFeedContentBlock) UnmarshalJSON(data []byte) (err error) {
-	*r = MessageGetContentResponseDataMessageInAppFeedContentBlock{}
-	err = apijson.UnmarshalRoot(data, &r.union)
-	if err != nil {
-		return err
-	}
-	return apijson.Port(r.union, &r)
-}
-
-// AsUnion returns a
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksUnion] interface
-// which you can cast to the specific types for more type safety.
-//
-// Possible runtime types of the union are
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock],
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock].
-func (r MessageGetContentResponseDataMessageInAppFeedContentBlock) AsUnion() MessageGetContentResponseDataMessageInAppFeedContentBlocksUnion {
-	return r.union
-}
-
-// A block in a message in an app feed.
-//
-// Union satisfied by
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock]
-// or
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock].
-type MessageGetContentResponseDataMessageInAppFeedContentBlocksUnion interface {
-	implementsMessageGetContentResponseDataMessageInAppFeedContentBlock()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*MessageGetContentResponseDataMessageInAppFeedContentBlocksUnion)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock{}),
-		},
-	)
-}
-
-// A block in a message in an app feed.
-type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock struct {
-	// The content of the block in a message in an app feed.
-	Content string `json:"content" api:"required"`
-	// The name of the block in a message in an app feed.
-	Name string `json:"name" api:"required"`
-	// The rendered HTML version of the content.
-	Rendered string `json:"rendered" api:"required"`
-	// The type of block in a message in an app feed.
-	Type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockType `json:"type" api:"required"`
-	JSON messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockJSON `json:"-"`
-}
-
-// messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockJSON
-// contains the JSON metadata for the struct
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock]
-type messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockJSON struct {
-	Content     apijson.Field
-	Name        apijson.Field
-	Rendered    apijson.Field
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlock) implementsMessageGetContentResponseDataMessageInAppFeedContentBlock() {
-}
-
-// The type of block in a message in an app feed.
-type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockType string
-
-const (
-	MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockTypeMarkdown MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockType = "markdown"
-	MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockTypeText     MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockType = "text"
-)
-
-func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockType) IsKnown() bool {
-	switch r {
-	case MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockTypeMarkdown, MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedContentBlockTypeText:
-		return true
-	}
-	return false
-}
-
 // A button set block in a message in an app feed.
-type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock struct {
+type MessageInAppFeedButtonSetBlock struct {
 	// A list of buttons in an in app feed message.
-	Buttons []MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton `json:"buttons" api:"required"`
+	Buttons []MessageInAppFeedButtonSetBlockButton `json:"buttons" api:"required"`
 	// The name of the button set in a message in an app feed.
 	Name string `json:"name" api:"required"`
 	// The type of block in a message in an app feed.
-	Type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockType `json:"type" api:"required"`
-	JSON messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockJSON `json:"-"`
+	Type MessageInAppFeedButtonSetBlockType `json:"type" api:"required"`
+	JSON messageInAppFeedButtonSetBlockJSON `json:"-"`
 }
 
-// messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockJSON
-// contains the JSON metadata for the struct
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock]
-type messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockJSON struct {
+// messageInAppFeedButtonSetBlockJSON contains the JSON metadata for the struct
+// [MessageInAppFeedButtonSetBlock]
+type messageInAppFeedButtonSetBlockJSON struct {
 	Buttons     apijson.Field
 	Name        apijson.Field
 	Type        apijson.Field
@@ -1440,32 +1419,32 @@ type messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedB
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageInAppFeedButtonSetBlock) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockJSON) RawJSON() string {
+func (r messageInAppFeedButtonSetBlockJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlock) implementsMessageGetContentResponseDataMessageInAppFeedContentBlock() {
-}
+func (r MessageInAppFeedButtonSetBlock) implementsUserFeedListItemsResponseBlock() {}
+
+func (r MessageInAppFeedButtonSetBlock) implementsMessageContentsDataMessageInAppFeedContentBlock() {}
 
 // A button in an in app feed message.
-type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton struct {
+type MessageInAppFeedButtonSetBlockButton struct {
 	// The action to take when the button is clicked.
 	Action string `json:"action" api:"required"`
 	// The label of the button.
 	Label string `json:"label" api:"required"`
 	// The name of the button.
-	Name string                                                                                             `json:"name" api:"required"`
-	JSON messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButtonJSON `json:"-"`
+	Name string                                   `json:"name" api:"required"`
+	JSON messageInAppFeedButtonSetBlockButtonJSON `json:"-"`
 }
 
-// messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButtonJSON
-// contains the JSON metadata for the struct
-// [MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton]
-type messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButtonJSON struct {
+// messageInAppFeedButtonSetBlockButtonJSON contains the JSON metadata for the
+// struct [MessageInAppFeedButtonSetBlockButton]
+type messageInAppFeedButtonSetBlockButtonJSON struct {
 	Action      apijson.Field
 	Label       apijson.Field
 	Name        apijson.Field
@@ -1473,41 +1452,76 @@ type messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedB
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButton) UnmarshalJSON(data []byte) (err error) {
+func (r *MessageInAppFeedButtonSetBlockButton) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r messageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockButtonJSON) RawJSON() string {
+func (r messageInAppFeedButtonSetBlockButtonJSON) RawJSON() string {
 	return r.raw
 }
 
 // The type of block in a message in an app feed.
-type MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockType string
+type MessageInAppFeedButtonSetBlockType string
 
 const (
-	MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockTypeButtonSet MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockType = "button_set"
+	MessageInAppFeedButtonSetBlockTypeButtonSet MessageInAppFeedButtonSetBlockType = "button_set"
 )
 
-func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockType) IsKnown() bool {
+func (r MessageInAppFeedButtonSetBlockType) IsKnown() bool {
 	switch r {
-	case MessageGetContentResponseDataMessageInAppFeedContentBlocksMessageInAppFeedButtonSetBlockTypeButtonSet:
+	case MessageInAppFeedButtonSetBlockTypeButtonSet:
 		return true
 	}
 	return false
 }
 
+// A block in a message in an app feed.
+type MessageInAppFeedContentBlock struct {
+	// The content of the block in a message in an app feed.
+	Content string `json:"content" api:"required"`
+	// The name of the block in a message in an app feed.
+	Name string `json:"name" api:"required"`
+	// The rendered HTML version of the content.
+	Rendered string `json:"rendered" api:"required"`
+	// The type of block in a message in an app feed.
+	Type MessageInAppFeedContentBlockType `json:"type" api:"required"`
+	JSON messageInAppFeedContentBlockJSON `json:"-"`
+}
+
+// messageInAppFeedContentBlockJSON contains the JSON metadata for the struct
+// [MessageInAppFeedContentBlock]
+type messageInAppFeedContentBlockJSON struct {
+	Content     apijson.Field
+	Name        apijson.Field
+	Rendered    apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageInAppFeedContentBlock) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageInAppFeedContentBlockJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r MessageInAppFeedContentBlock) implementsUserFeedListItemsResponseBlock() {}
+
+func (r MessageInAppFeedContentBlock) implementsMessageContentsDataMessageInAppFeedContentBlock() {}
+
 // The type of block in a message in an app feed.
-type MessageGetContentResponseDataMessageInAppFeedContentBlocksType string
+type MessageInAppFeedContentBlockType string
 
 const (
-	MessageGetContentResponseDataMessageInAppFeedContentBlocksTypeMarkdown  MessageGetContentResponseDataMessageInAppFeedContentBlocksType = "markdown"
-	MessageGetContentResponseDataMessageInAppFeedContentBlocksTypeText      MessageGetContentResponseDataMessageInAppFeedContentBlocksType = "text"
-	MessageGetContentResponseDataMessageInAppFeedContentBlocksTypeButtonSet MessageGetContentResponseDataMessageInAppFeedContentBlocksType = "button_set"
+	MessageInAppFeedContentBlockTypeMarkdown MessageInAppFeedContentBlockType = "markdown"
+	MessageInAppFeedContentBlockTypeText     MessageInAppFeedContentBlockType = "text"
 )
 
-func (r MessageGetContentResponseDataMessageInAppFeedContentBlocksType) IsKnown() bool {
+func (r MessageInAppFeedContentBlockType) IsKnown() bool {
 	switch r {
-	case MessageGetContentResponseDataMessageInAppFeedContentBlocksTypeMarkdown, MessageGetContentResponseDataMessageInAppFeedContentBlocksTypeText, MessageGetContentResponseDataMessageInAppFeedContentBlocksTypeButtonSet:
+	case MessageInAppFeedContentBlockTypeMarkdown, MessageInAppFeedContentBlockTypeText:
 		return true
 	}
 	return false

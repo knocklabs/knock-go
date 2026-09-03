@@ -58,53 +58,155 @@ func (r *UserGuideService) GetChannel(ctx context.Context, userID string, channe
 
 // Records that a guide has been archived by a user, triggering any associated
 // archived events.
-func (r *UserGuideService) MarkMessageAsArchived(ctx context.Context, userID string, messageID string, body UserGuideMarkMessageAsArchivedParams, opts ...option.RequestOption) (res *UserGuideMarkMessageAsArchivedResponse, err error) {
+func (r *UserGuideService) MarkMessageAsArchived(ctx context.Context, userID string, body UserGuideMarkMessageAsArchivedParams, opts ...option.RequestOption) (res *GuideActionResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return nil, err
 	}
-	if messageID == "" {
-		err = errors.New("missing required message_id parameter")
-		return nil, err
-	}
-	path := fmt.Sprintf("v1/users/%s/guides/messages/%s/archived", userID, messageID)
+	path := fmt.Sprintf("v1/users/%s/guides/messages/archived", userID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
 	return res, err
 }
 
 // Records that a user has interacted with a guide, triggering any associated
 // interacted events.
-func (r *UserGuideService) MarkMessageAsInteracted(ctx context.Context, userID string, messageID string, body UserGuideMarkMessageAsInteractedParams, opts ...option.RequestOption) (res *UserGuideMarkMessageAsInteractedResponse, err error) {
+func (r *UserGuideService) MarkMessageAsInteracted(ctx context.Context, userID string, body UserGuideMarkMessageAsInteractedParams, opts ...option.RequestOption) (res *GuideActionResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return nil, err
 	}
-	if messageID == "" {
-		err = errors.New("missing required message_id parameter")
-		return nil, err
-	}
-	path := fmt.Sprintf("v1/users/%s/guides/messages/%s/interacted", userID, messageID)
+	path := fmt.Sprintf("v1/users/%s/guides/messages/interacted", userID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
 	return res, err
 }
 
 // Records that a guide has been seen by a user, triggering any associated seen
 // events.
-func (r *UserGuideService) MarkMessageAsSeen(ctx context.Context, userID string, messageID string, body UserGuideMarkMessageAsSeenParams, opts ...option.RequestOption) (res *UserGuideMarkMessageAsSeenResponse, err error) {
+func (r *UserGuideService) MarkMessageAsSeen(ctx context.Context, userID string, body UserGuideMarkMessageAsSeenParams, opts ...option.RequestOption) (res *GuideActionResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if userID == "" {
 		err = errors.New("missing required user_id parameter")
 		return nil, err
 	}
-	if messageID == "" {
-		err = errors.New("missing required message_id parameter")
-		return nil, err
-	}
-	path := fmt.Sprintf("v1/users/%s/guides/messages/%s/seen", userID, messageID)
+	path := fmt.Sprintf("v1/users/%s/guides/messages/seen", userID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
 	return res, err
+}
+
+// Resets the engagement state of a guide for a user, removing the guide's
+// engagement log entry so the next interaction creates a fresh engagement.
+func (r *UserGuideService) ResetGuideEngagements(ctx context.Context, userID string, body UserGuideResetGuideEngagementsParams, opts ...option.RequestOption) (res *GuideActionResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if userID == "" {
+		err = errors.New("missing required user_id parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("v1/users/%s/guides/engagements/reset", userID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
+	return res, err
+}
+
+// Records that a guide has been unarchived, triggering any associated unarchived
+// events.
+func (r *UserGuideService) UnarchiveGuideMessage(ctx context.Context, userID string, body UserGuideUnarchiveGuideMessageParams, opts ...option.RequestOption) (res *GuideActionResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if userID == "" {
+		err = errors.New("missing required user_id parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("v1/users/%s/guides/messages/archived", userID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
+	return res, err
+}
+
+// A response for a guide action.
+type GuideActionResponse struct {
+	// The status of a guide's action.
+	Status string                  `json:"status" api:"required"`
+	JSON   guideActionResponseJSON `json:"-"`
+}
+
+// guideActionResponseJSON contains the JSON metadata for the struct
+// [GuideActionResponse]
+type guideActionResponseJSON struct {
+	Status      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *GuideActionResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r guideActionResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// A request to mark a guide as archived.
+type GuideArchivedRequestParam struct {
+	// The unique identifier for the channel.
+	ChannelID param.Field[string] `json:"channel_id" api:"required" format:"uuid"`
+	// The unique identifier for the guide.
+	GuideID param.Field[string] `json:"guide_id" api:"required" format:"uuid"`
+	// The key of the guide.
+	GuideKey param.Field[string] `json:"guide_key" api:"required"`
+	// The step reference of the guide.
+	GuideStepRef param.Field[string] `json:"guide_step_ref" api:"required"`
+	// Whether the guide is final.
+	IsFinal param.Field[bool] `json:"is_final"`
+	// The tenant ID of the guide.
+	Tenant param.Field[string] `json:"tenant"`
+	// Whether the guide bypasses its guide group's throttle settings. When true,
+	// archiving the guide does not open a new throttle window.
+	Unthrottled param.Field[bool] `json:"unthrottled"`
+}
+
+func (r GuideArchivedRequestParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// A request to mark a guide as interacted with.
+type GuideInteractedRequestParam struct {
+	// The unique identifier for the channel.
+	ChannelID param.Field[string] `json:"channel_id" api:"required" format:"uuid"`
+	// The unique identifier for the guide.
+	GuideID param.Field[string] `json:"guide_id" api:"required" format:"uuid"`
+	// The key of the guide.
+	GuideKey param.Field[string] `json:"guide_key" api:"required"`
+	// The step reference of the guide.
+	GuideStepRef param.Field[string] `json:"guide_step_ref" api:"required"`
+	// Metadata about the interaction.
+	Metadata param.Field[map[string]interface{}] `json:"metadata"`
+	// The tenant ID of the guide.
+	Tenant param.Field[string] `json:"tenant"`
+}
+
+func (r GuideInteractedRequestParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// A request to mark a guide as seen.
+type GuideSeenRequestParam struct {
+	// The unique identifier for the channel.
+	ChannelID param.Field[string] `json:"channel_id" api:"required" format:"uuid"`
+	// The content of the guide.
+	Content param.Field[map[string]interface{}] `json:"content" api:"required"`
+	// The unique identifier for the guide.
+	GuideID param.Field[string] `json:"guide_id" api:"required" format:"uuid"`
+	// The key of the guide.
+	GuideKey param.Field[string] `json:"guide_key" api:"required"`
+	// The step reference of the guide.
+	GuideStepRef param.Field[string] `json:"guide_step_ref" api:"required"`
+	// The data of the guide.
+	Data param.Field[map[string]interface{}] `json:"data"`
+	// The tenant ID of the guide.
+	Tenant param.Field[string] `json:"tenant"`
+}
+
+func (r GuideSeenRequestParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 // A response for a list of guides.
@@ -394,75 +496,6 @@ func (r UserGuideGetChannelResponseIneligibleGuidesReason) IsKnown() bool {
 	return false
 }
 
-// A response for a guide action.
-type UserGuideMarkMessageAsArchivedResponse struct {
-	// The status of a guide's action.
-	Status string                                     `json:"status" api:"required"`
-	JSON   userGuideMarkMessageAsArchivedResponseJSON `json:"-"`
-}
-
-// userGuideMarkMessageAsArchivedResponseJSON contains the JSON metadata for the
-// struct [UserGuideMarkMessageAsArchivedResponse]
-type userGuideMarkMessageAsArchivedResponseJSON struct {
-	Status      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserGuideMarkMessageAsArchivedResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userGuideMarkMessageAsArchivedResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// A response for a guide action.
-type UserGuideMarkMessageAsInteractedResponse struct {
-	// The status of a guide's action.
-	Status string                                       `json:"status" api:"required"`
-	JSON   userGuideMarkMessageAsInteractedResponseJSON `json:"-"`
-}
-
-// userGuideMarkMessageAsInteractedResponseJSON contains the JSON metadata for the
-// struct [UserGuideMarkMessageAsInteractedResponse]
-type userGuideMarkMessageAsInteractedResponseJSON struct {
-	Status      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserGuideMarkMessageAsInteractedResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userGuideMarkMessageAsInteractedResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// A response for a guide action.
-type UserGuideMarkMessageAsSeenResponse struct {
-	// The status of a guide's action.
-	Status string                                 `json:"status" api:"required"`
-	JSON   userGuideMarkMessageAsSeenResponseJSON `json:"-"`
-}
-
-// userGuideMarkMessageAsSeenResponseJSON contains the JSON metadata for the struct
-// [UserGuideMarkMessageAsSeenResponse]
-type userGuideMarkMessageAsSeenResponseJSON struct {
-	Status      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserGuideMarkMessageAsSeenResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userGuideMarkMessageAsSeenResponseJSON) RawJSON() string {
-	return r.raw
-}
-
 type UserGuideGetChannelParams struct {
 	// The data (JSON encoded object) to use for targeting and rendering guides.
 	Data param.Field[string] `query:"data"`
@@ -482,63 +515,50 @@ func (r UserGuideGetChannelParams) URLQuery() (v url.Values) {
 }
 
 type UserGuideMarkMessageAsArchivedParams struct {
-	// The unique identifier for the channel.
-	ChannelID param.Field[string] `json:"channel_id" api:"required" format:"uuid"`
-	// The unique identifier for the guide.
-	GuideID param.Field[string] `json:"guide_id" api:"required" format:"uuid"`
-	// The key of the guide.
-	GuideKey param.Field[string] `json:"guide_key" api:"required"`
-	// The step reference of the guide.
-	GuideStepRef param.Field[string] `json:"guide_step_ref" api:"required"`
-	// Whether the guide is final.
-	IsFinal param.Field[bool] `json:"is_final"`
-	// The tenant ID of the guide.
-	Tenant param.Field[string] `json:"tenant"`
-	// Whether the guide bypasses its guide group's throttle settings. When true,
-	// archiving the guide does not open a new throttle window.
-	Unthrottled param.Field[bool] `json:"unthrottled"`
+	// A request to mark a guide as archived.
+	GuideArchivedRequest GuideArchivedRequestParam `json:"guide_archived_request" api:"required"`
 }
 
 func (r UserGuideMarkMessageAsArchivedParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+	return apijson.MarshalRoot(r.GuideArchivedRequest)
 }
 
 type UserGuideMarkMessageAsInteractedParams struct {
-	// The unique identifier for the channel.
-	ChannelID param.Field[string] `json:"channel_id" api:"required" format:"uuid"`
-	// The unique identifier for the guide.
-	GuideID param.Field[string] `json:"guide_id" api:"required" format:"uuid"`
-	// The key of the guide.
-	GuideKey param.Field[string] `json:"guide_key" api:"required"`
-	// The step reference of the guide.
-	GuideStepRef param.Field[string] `json:"guide_step_ref" api:"required"`
-	// Metadata about the interaction.
-	Metadata param.Field[map[string]interface{}] `json:"metadata"`
-	// The tenant ID of the guide.
-	Tenant param.Field[string] `json:"tenant"`
+	// A request to mark a guide as interacted with.
+	GuideInteractedRequest GuideInteractedRequestParam `json:"guide_interacted_request" api:"required"`
 }
 
 func (r UserGuideMarkMessageAsInteractedParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+	return apijson.MarshalRoot(r.GuideInteractedRequest)
 }
 
 type UserGuideMarkMessageAsSeenParams struct {
-	// The unique identifier for the channel.
-	ChannelID param.Field[string] `json:"channel_id" api:"required" format:"uuid"`
-	// The content of the guide.
-	Content param.Field[map[string]interface{}] `json:"content" api:"required"`
-	// The unique identifier for the guide.
-	GuideID param.Field[string] `json:"guide_id" api:"required" format:"uuid"`
+	// A request to mark a guide as seen.
+	GuideSeenRequest GuideSeenRequestParam `json:"guide_seen_request" api:"required"`
+}
+
+func (r UserGuideMarkMessageAsSeenParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r.GuideSeenRequest)
+}
+
+type UserGuideResetGuideEngagementsParams struct {
 	// The key of the guide.
 	GuideKey param.Field[string] `json:"guide_key" api:"required"`
-	// The step reference of the guide.
-	GuideStepRef param.Field[string] `json:"guide_step_ref" api:"required"`
-	// The data of the guide.
-	Data param.Field[map[string]interface{}] `json:"data"`
 	// The tenant ID of the guide.
 	Tenant param.Field[string] `json:"tenant"`
 }
 
-func (r UserGuideMarkMessageAsSeenParams) MarshalJSON() (data []byte, err error) {
+func (r UserGuideResetGuideEngagementsParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type UserGuideUnarchiveGuideMessageParams struct {
+	// The key of the guide.
+	GuideKey param.Field[string] `json:"guide_key" api:"required"`
+	// The tenant ID of the guide.
+	Tenant param.Field[string] `json:"tenant"`
+}
+
+func (r UserGuideUnarchiveGuideMessageParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }

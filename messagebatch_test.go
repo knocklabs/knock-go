@@ -26,7 +26,9 @@ func TestMessageBatchArchive(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.Archive(context.TODO(), knock.MessageBatchArchiveParams{
-		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
+		BatchMessagesStatusRequest: knock.BatchMessagesStatusRequestParam{
+			MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
+		},
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -102,7 +104,9 @@ func TestMessageBatchMarkAsRead(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.MarkAsRead(context.TODO(), knock.MessageBatchMarkAsReadParams{
-		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
+		BatchMessagesStatusRequest: knock.BatchMessagesStatusRequestParam{
+			MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
+		},
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -126,7 +130,9 @@ func TestMessageBatchMarkAsSeen(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.MarkAsSeen(context.TODO(), knock.MessageBatchMarkAsSeenParams{
-		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
+		BatchMessagesStatusRequest: knock.BatchMessagesStatusRequestParam{
+			MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
+		},
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -150,7 +156,9 @@ func TestMessageBatchMarkAsUnread(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.MarkAsUnread(context.TODO(), knock.MessageBatchMarkAsUnreadParams{
-		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
+		BatchMessagesStatusRequest: knock.BatchMessagesStatusRequestParam{
+			MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
+		},
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -174,7 +182,9 @@ func TestMessageBatchMarkAsUnseen(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.MarkAsUnseen(context.TODO(), knock.MessageBatchMarkAsUnseenParams{
-		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
+		BatchMessagesStatusRequest: knock.BatchMessagesStatusRequestParam{
+			MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
+		},
 	})
 	if err != nil {
 		var apierr *knock.Error
@@ -198,7 +208,9 @@ func TestMessageBatchUnarchive(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Messages.Batch.Unarchive(context.TODO(), knock.MessageBatchUnarchiveParams{
-		MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
+		BatchMessagesStatusRequest: knock.BatchMessagesStatusRequestParam{
+			MessageIDs: knock.F([]string{"2w3YUpTTOxuDvZFji8OMsKrG176", "2w3YVRbPXMIh8Zq6oBFcVDA5xes"}),
+		},
 	})
 	if err != nil {
 		var apierr *knock.Error
