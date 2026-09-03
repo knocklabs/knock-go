@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.39.0](https://github.com/knocklabs/knock-go/compare/v1.38.0...v1.39.0) (2026-09-03)
+
+
+### Features
+
+* **stlc:** refresh API stainless config with stlc autoconfig ([d5ea7b9](https://github.com/knocklabs/knock-go/commit/d5ea7b94e585707f2ddaf5eeed403290569a0d3a))
+* update api spec to v0.1.1614 ([564aa21](https://github.com/knocklabs/knock-go/commit/564aa2133ea3b86f711859247f90de9bfee889e9))
+* update api spec to v0.1.1616 ([9082cd4](https://github.com/knocklabs/knock-go/commit/9082cd416937f53ad3ae97cbd967568e7731f3db))
+* update api spec to v0.1.1617 ([e170993](https://github.com/knocklabs/knock-go/commit/e170993705a03d9e04303009c5ae1f0da9542304))
+* update api spec to v0.1.1618 ([4589c89](https://github.com/knocklabs/knock-go/commit/4589c89030d190c36d5cd024ec75bbe6c1a6b1f8))
+* update api spec to v0.1.1624 ([83566df](https://github.com/knocklabs/knock-go/commit/83566df481e2c6804f6d4f737f9e7df9c1eee439))
+* update api spec to v0.1.1627 ([9176c8a](https://github.com/knocklabs/knock-go/commit/9176c8af29ddd6f060af228c7b5e30fdaf5b0e18))
+* update api spec to v0.1.1629 ([107e988](https://github.com/knocklabs/knock-go/commit/107e98855c7c322f2dc2ad0ef1da6863a1cc7e63))
+* update api spec to v0.1.1630 ([8dc0e92](https://github.com/knocklabs/knock-go/commit/8dc0e925add4abe14d5b57b4f69bdafa9b685c5e))
+* update api spec to v0.1.1631 ([aa2e2c2](https://github.com/knocklabs/knock-go/commit/aa2e2c2542f10ba0838f718035bc6c6f294335ed))
+* update api spec to v0.1.1632 ([f22efd3](https://github.com/knocklabs/knock-go/commit/f22efd3cf72d4ec2dfaa6a852331bc33965ef905))
+* update api spec to v0.1.1636 ([38d2e25](https://github.com/knocklabs/knock-go/commit/38d2e259f96990ce3116c3bbb47b4bdc098ca15c))
+* update api spec to v0.1.1640 ([bec1970](https://github.com/knocklabs/knock-go/commit/bec1970b119d231bc1aa7a341311e30c74d9f763))
+* update api spec to v0.1.1641 ([99ee332](https://github.com/knocklabs/knock-go/commit/99ee33203a1337a0f2b4bacdac84075d794464b3))
+* update api spec to v0.1.1642 ([1c809e4](https://github.com/knocklabs/knock-go/commit/1c809e408eedc1d1663033e615ed6aa8a08246d7))
+* update api spec to v0.1.1644 ([e452534](https://github.com/knocklabs/knock-go/commit/e452534d8d92d71a5a3c47b40231edb72d50288d))
+* update api spec to v0.1.1649 ([6bfceba](https://github.com/knocklabs/knock-go/commit/6bfceba6d8ae242cdecef05b724a90051f707af9))
+* update api spec to v0.1.1651 ([aea57da](https://github.com/knocklabs/knock-go/commit/aea57da4b6e3dc74287be1d9a9b2a4f3d25610a9))
+* update api spec to v0.1.1661 ([4aa28c7](https://github.com/knocklabs/knock-go/commit/4aa28c7f20531a9e3750215839cb56d80023530d))
+* update api spec to v0.1.1662 ([7c74521](https://github.com/knocklabs/knock-go/commit/7c74521118c6b1d57eed12ca5b5a282abd01c62f))
+* update api spec to v0.1.1664 ([d02ced8](https://github.com/knocklabs/knock-go/commit/d02ced84e262bd413edd03f9ab4bab1b4d111e89))
+* update api spec to v0.1.1667 ([7216eb2](https://github.com/knocklabs/knock-go/commit/7216eb2eb18650162eb82d84f5e43d62ca8fb444))
+* update api spec to v0.1.1683 ([6bfa495](https://github.com/knocklabs/knock-go/commit/6bfa49561374eaa9a9e68ca38929e5411dc4a89e))
+* update api spec to v0.1.1686 ([beca373](https://github.com/knocklabs/knock-go/commit/beca3730ea1943ed7513f0f55766fa562a30e841))
+* update api spec to v0.1.1687 ([7395c6d](https://github.com/knocklabs/knock-go/commit/7395c6dcca2a5a61b235efeddc452c401068f7b8))
+
 ## [1.38.0](https://github.com/knocklabs/knock-go/compare/v1.37.0...v1.38.0) (2026-07-22)
 
 
