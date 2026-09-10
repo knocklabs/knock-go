@@ -1372,27 +1372,27 @@ func (r messageEventJSON) RawJSON() string {
 type MessageEventType string
 
 const (
-	MessageEventTypeMessageRead              MessageEventType = "message.read"
-	MessageEventTypeMessageSent              MessageEventType = "message.sent"
-	MessageEventTypeMessageSeen              MessageEventType = "message.seen"
 	MessageEventTypeMessageCreated           MessageEventType = "message.created"
 	MessageEventTypeMessageQueued            MessageEventType = "message.queued"
+	MessageEventTypeMessageSent              MessageEventType = "message.sent"
+	MessageEventTypeMessageNotSent           MessageEventType = "message.not_sent"
 	MessageEventTypeMessageDelivered         MessageEventType = "message.delivered"
 	MessageEventTypeMessageDeliveryAttempted MessageEventType = "message.delivery_attempted"
 	MessageEventTypeMessageUndelivered       MessageEventType = "message.undelivered"
 	MessageEventTypeMessageBounced           MessageEventType = "message.bounced"
-	MessageEventTypeMessageNotSent           MessageEventType = "message.not_sent"
-	MessageEventTypeMessageArchived          MessageEventType = "message.archived"
-	MessageEventTypeMessageLinkClicked       MessageEventType = "message.link_clicked"
-	MessageEventTypeMessageInteracted        MessageEventType = "message.interacted"
+	MessageEventTypeMessageRead              MessageEventType = "message.read"
 	MessageEventTypeMessageUnread            MessageEventType = "message.unread"
+	MessageEventTypeMessageSeen              MessageEventType = "message.seen"
 	MessageEventTypeMessageUnseen            MessageEventType = "message.unseen"
+	MessageEventTypeMessageArchived          MessageEventType = "message.archived"
 	MessageEventTypeMessageUnarchived        MessageEventType = "message.unarchived"
+	MessageEventTypeMessageInteracted        MessageEventType = "message.interacted"
+	MessageEventTypeMessageLinkClicked       MessageEventType = "message.link_clicked"
 )
 
 func (r MessageEventType) IsKnown() bool {
 	switch r {
-	case MessageEventTypeMessageRead, MessageEventTypeMessageSent, MessageEventTypeMessageSeen, MessageEventTypeMessageCreated, MessageEventTypeMessageQueued, MessageEventTypeMessageDelivered, MessageEventTypeMessageDeliveryAttempted, MessageEventTypeMessageUndelivered, MessageEventTypeMessageBounced, MessageEventTypeMessageNotSent, MessageEventTypeMessageArchived, MessageEventTypeMessageLinkClicked, MessageEventTypeMessageInteracted, MessageEventTypeMessageUnread, MessageEventTypeMessageUnseen, MessageEventTypeMessageUnarchived:
+	case MessageEventTypeMessageCreated, MessageEventTypeMessageQueued, MessageEventTypeMessageSent, MessageEventTypeMessageNotSent, MessageEventTypeMessageDelivered, MessageEventTypeMessageDeliveryAttempted, MessageEventTypeMessageUndelivered, MessageEventTypeMessageBounced, MessageEventTypeMessageRead, MessageEventTypeMessageUnread, MessageEventTypeMessageSeen, MessageEventTypeMessageUnseen, MessageEventTypeMessageArchived, MessageEventTypeMessageUnarchived, MessageEventTypeMessageInteracted, MessageEventTypeMessageLinkClicked:
 		return true
 	}
 	return false
