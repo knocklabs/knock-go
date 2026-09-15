@@ -430,9 +430,13 @@ type DiscordChannelDataConnection struct {
 	ChannelID string `json:"channel_id"`
 	// This field can have the runtime type of
 	// [DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhook].
-	IncomingWebhook interface{}                      `json:"incoming_webhook"`
-	JSON            discordChannelDataConnectionJSON `json:"-"`
-	union           DiscordChannelDataConnectionsUnion
+	IncomingWebhook interface{} `json:"incoming_webhook"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID string                           `json:"knock_tenant_id" api:"nullable"`
+	JSON          discordChannelDataConnectionJSON `json:"-"`
+	union         DiscordChannelDataConnectionsUnion
 }
 
 // discordChannelDataConnectionJSON contains the JSON metadata for the struct
@@ -440,6 +444,7 @@ type DiscordChannelDataConnection struct {
 type discordChannelDataConnectionJSON struct {
 	ChannelID       apijson.Field
 	IncomingWebhook apijson.Field
+	KnockTenantID   apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
 }
@@ -494,16 +499,21 @@ func init() {
 // Discord channel connection.
 type DiscordChannelDataConnectionsDiscordChannelConnection struct {
 	// Discord channel ID.
-	ChannelID string                                                    `json:"channel_id" api:"required"`
-	JSON      discordChannelDataConnectionsDiscordChannelConnectionJSON `json:"-"`
+	ChannelID string `json:"channel_id" api:"required"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID string                                                    `json:"knock_tenant_id" api:"nullable"`
+	JSON          discordChannelDataConnectionsDiscordChannelConnectionJSON `json:"-"`
 }
 
 // discordChannelDataConnectionsDiscordChannelConnectionJSON contains the JSON
 // metadata for the struct [DiscordChannelDataConnectionsDiscordChannelConnection]
 type discordChannelDataConnectionsDiscordChannelConnectionJSON struct {
-	ChannelID   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	ChannelID     apijson.Field
+	KnockTenantID apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
 }
 
 func (r *DiscordChannelDataConnectionsDiscordChannelConnection) UnmarshalJSON(data []byte) (err error) {
@@ -521,7 +531,11 @@ func (r DiscordChannelDataConnectionsDiscordChannelConnection) implementsDiscord
 type DiscordChannelDataConnectionsDiscordIncomingWebhookConnection struct {
 	// Discord incoming webhook object.
 	IncomingWebhook DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhook `json:"incoming_webhook" api:"required"`
-	JSON            discordChannelDataConnectionsDiscordIncomingWebhookConnectionJSON            `json:"-"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID string                                                            `json:"knock_tenant_id" api:"nullable"`
+	JSON          discordChannelDataConnectionsDiscordIncomingWebhookConnectionJSON `json:"-"`
 }
 
 // discordChannelDataConnectionsDiscordIncomingWebhookConnectionJSON contains the
@@ -529,6 +543,7 @@ type DiscordChannelDataConnectionsDiscordIncomingWebhookConnection struct {
 // [DiscordChannelDataConnectionsDiscordIncomingWebhookConnection]
 type discordChannelDataConnectionsDiscordIncomingWebhookConnectionJSON struct {
 	IncomingWebhook apijson.Field
+	KnockTenantID   apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
 }
@@ -588,6 +603,10 @@ type DiscordChannelDataConnectionParam struct {
 	// Discord channel ID.
 	ChannelID       param.Field[string]      `json:"channel_id"`
 	IncomingWebhook param.Field[interface{}] `json:"incoming_webhook"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID param.Field[string] `json:"knock_tenant_id"`
 }
 
 func (r DiscordChannelDataConnectionParam) MarshalJSON() (data []byte, err error) {
@@ -610,6 +629,10 @@ type DiscordChannelDataConnectionsUnionParam interface {
 type DiscordChannelDataConnectionsDiscordChannelConnectionParam struct {
 	// Discord channel ID.
 	ChannelID param.Field[string] `json:"channel_id" api:"required"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID param.Field[string] `json:"knock_tenant_id"`
 }
 
 func (r DiscordChannelDataConnectionsDiscordChannelConnectionParam) MarshalJSON() (data []byte, err error) {
@@ -623,6 +646,10 @@ func (r DiscordChannelDataConnectionsDiscordChannelConnectionParam) implementsDi
 type DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionParam struct {
 	// Discord incoming webhook object.
 	IncomingWebhook param.Field[DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionIncomingWebhookParam] `json:"incoming_webhook" api:"required"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID param.Field[string] `json:"knock_tenant_id"`
 }
 
 func (r DiscordChannelDataConnectionsDiscordIncomingWebhookConnectionParam) MarshalJSON() (data []byte, err error) {
@@ -707,6 +734,10 @@ type MsTeamsChannelDataConnection struct {
 	// This field can have the runtime type of
 	// [MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook].
 	IncomingWebhook interface{} `json:"incoming_webhook"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID string `json:"knock_tenant_id" api:"nullable"`
 	// Microsoft Teams channel ID.
 	MsTeamsChannelID string `json:"ms_teams_channel_id" api:"nullable" format:"uuid"`
 	// Microsoft Teams team ID.
@@ -723,6 +754,7 @@ type MsTeamsChannelDataConnection struct {
 // [MsTeamsChannelDataConnection]
 type msTeamsChannelDataConnectionJSON struct {
 	IncomingWebhook  apijson.Field
+	KnockTenantID    apijson.Field
 	MsTeamsChannelID apijson.Field
 	MsTeamsTeamID    apijson.Field
 	MsTeamsTenantID  apijson.Field
@@ -779,6 +811,10 @@ func init() {
 
 // Microsoft Teams token connection.
 type MsTeamsChannelDataConnectionsMsTeamsTokenConnection struct {
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID string `json:"knock_tenant_id" api:"nullable"`
 	// Microsoft Teams channel ID.
 	MsTeamsChannelID string `json:"ms_teams_channel_id" api:"nullable" format:"uuid"`
 	// Microsoft Teams team ID.
@@ -793,6 +829,7 @@ type MsTeamsChannelDataConnectionsMsTeamsTokenConnection struct {
 // msTeamsChannelDataConnectionsMsTeamsTokenConnectionJSON contains the JSON
 // metadata for the struct [MsTeamsChannelDataConnectionsMsTeamsTokenConnection]
 type msTeamsChannelDataConnectionsMsTeamsTokenConnectionJSON struct {
+	KnockTenantID    apijson.Field
 	MsTeamsChannelID apijson.Field
 	MsTeamsTeamID    apijson.Field
 	MsTeamsTenantID  apijson.Field
@@ -816,7 +853,11 @@ func (r MsTeamsChannelDataConnectionsMsTeamsTokenConnection) implementsMsTeamsCh
 type MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection struct {
 	// Microsoft Teams incoming webhook.
 	IncomingWebhook MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhook `json:"incoming_webhook" api:"required"`
-	JSON            msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionJSON            `json:"-"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID string                                                            `json:"knock_tenant_id" api:"nullable"`
+	JSON          msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionJSON `json:"-"`
 }
 
 // msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionJSON contains the
@@ -824,6 +865,7 @@ type MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection struct {
 // [MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnection]
 type msTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionJSON struct {
 	IncomingWebhook apijson.Field
+	KnockTenantID   apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
 }
@@ -882,6 +924,10 @@ func (r MsTeamsChannelDataParam) implementsInlineChannelDataRequestItemUnionPara
 // Microsoft Teams token connection.
 type MsTeamsChannelDataConnectionParam struct {
 	IncomingWebhook param.Field[interface{}] `json:"incoming_webhook"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID param.Field[string] `json:"knock_tenant_id"`
 	// Microsoft Teams channel ID.
 	MsTeamsChannelID param.Field[string] `json:"ms_teams_channel_id" format:"uuid"`
 	// Microsoft Teams team ID.
@@ -909,6 +955,10 @@ type MsTeamsChannelDataConnectionsUnionParam interface {
 
 // Microsoft Teams token connection.
 type MsTeamsChannelDataConnectionsMsTeamsTokenConnectionParam struct {
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID param.Field[string] `json:"knock_tenant_id"`
 	// Microsoft Teams channel ID.
 	MsTeamsChannelID param.Field[string] `json:"ms_teams_channel_id" format:"uuid"`
 	// Microsoft Teams team ID.
@@ -930,6 +980,10 @@ func (r MsTeamsChannelDataConnectionsMsTeamsTokenConnectionParam) implementsMsTe
 type MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionParam struct {
 	// Microsoft Teams incoming webhook.
 	IncomingWebhook param.Field[MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionIncomingWebhookParam] `json:"incoming_webhook" api:"required"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID param.Field[string] `json:"knock_tenant_id"`
 }
 
 func (r MsTeamsChannelDataConnectionsMsTeamsIncomingWebhookConnectionParam) MarshalJSON() (data []byte, err error) {
@@ -1073,6 +1127,10 @@ type SlackChannelDataConnection struct {
 	// This field can have the runtime type of
 	// [SlackChannelDataConnectionsSlackIncomingWebhookConnectionIncomingWebhook].
 	IncomingWebhook interface{} `json:"incoming_webhook"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID string `json:"knock_tenant_id" api:"nullable"`
 	// A Slack user ID from the Slack provider.
 	UserID string                         `json:"user_id" api:"nullable"`
 	JSON   slackChannelDataConnectionJSON `json:"-"`
@@ -1086,6 +1144,7 @@ type slackChannelDataConnectionJSON struct {
 	ChannelID       apijson.Field
 	ChannelName     apijson.Field
 	IncomingWebhook apijson.Field
+	KnockTenantID   apijson.Field
 	UserID          apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
@@ -1145,6 +1204,10 @@ type SlackChannelDataConnectionsSlackTokenConnection struct {
 	ChannelID string `json:"channel_id" api:"nullable"`
 	// Slack channel name.
 	ChannelName string `json:"channel_name" api:"nullable"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID string `json:"knock_tenant_id" api:"nullable"`
 	// A Slack user ID from the Slack provider.
 	UserID string                                              `json:"user_id" api:"nullable"`
 	JSON   slackChannelDataConnectionsSlackTokenConnectionJSON `json:"-"`
@@ -1153,12 +1216,13 @@ type SlackChannelDataConnectionsSlackTokenConnection struct {
 // slackChannelDataConnectionsSlackTokenConnectionJSON contains the JSON metadata
 // for the struct [SlackChannelDataConnectionsSlackTokenConnection]
 type slackChannelDataConnectionsSlackTokenConnectionJSON struct {
-	AccessToken apijson.Field
-	ChannelID   apijson.Field
-	ChannelName apijson.Field
-	UserID      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	AccessToken   apijson.Field
+	ChannelID     apijson.Field
+	ChannelName   apijson.Field
+	KnockTenantID apijson.Field
+	UserID        apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
 }
 
 func (r *SlackChannelDataConnectionsSlackTokenConnection) UnmarshalJSON(data []byte) (err error) {
@@ -1175,7 +1239,11 @@ func (r SlackChannelDataConnectionsSlackTokenConnection) implementsSlackChannelD
 type SlackChannelDataConnectionsSlackIncomingWebhookConnection struct {
 	// A Slack connection incoming webhook.
 	IncomingWebhook SlackChannelDataConnectionsSlackIncomingWebhookConnectionIncomingWebhook `json:"incoming_webhook" api:"required"`
-	JSON            slackChannelDataConnectionsSlackIncomingWebhookConnectionJSON            `json:"-"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID string                                                        `json:"knock_tenant_id" api:"nullable"`
+	JSON          slackChannelDataConnectionsSlackIncomingWebhookConnectionJSON `json:"-"`
 }
 
 // slackChannelDataConnectionsSlackIncomingWebhookConnectionJSON contains the JSON
@@ -1183,6 +1251,7 @@ type SlackChannelDataConnectionsSlackIncomingWebhookConnection struct {
 // [SlackChannelDataConnectionsSlackIncomingWebhookConnection]
 type slackChannelDataConnectionsSlackIncomingWebhookConnectionJSON struct {
 	IncomingWebhook apijson.Field
+	KnockTenantID   apijson.Field
 	raw             string
 	ExtraFields     map[string]apijson.Field
 }
@@ -1270,6 +1339,10 @@ type SlackChannelDataConnectionParam struct {
 	// Slack channel name.
 	ChannelName     param.Field[string]      `json:"channel_name"`
 	IncomingWebhook param.Field[interface{}] `json:"incoming_webhook"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID param.Field[string] `json:"knock_tenant_id"`
 	// A Slack user ID from the Slack provider.
 	UserID param.Field[string] `json:"user_id"`
 }
@@ -1297,6 +1370,10 @@ type SlackChannelDataConnectionsSlackTokenConnectionParam struct {
 	ChannelID param.Field[string] `json:"channel_id"`
 	// Slack channel name.
 	ChannelName param.Field[string] `json:"channel_name"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID param.Field[string] `json:"knock_tenant_id"`
 	// A Slack user ID from the Slack provider.
 	UserID param.Field[string] `json:"user_id"`
 }
@@ -1312,6 +1389,10 @@ func (r SlackChannelDataConnectionsSlackTokenConnectionParam) implementsSlackCha
 type SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam struct {
 	// A Slack connection incoming webhook.
 	IncomingWebhook param.Field[SlackChannelDataConnectionsSlackIncomingWebhookConnectionIncomingWebhookParam] `json:"incoming_webhook" api:"required"`
+	// An optional Knock tenant ID (`knock_tenant_id`) that scopes this connection.
+	// Distinct from provider-specific tenant IDs. When a workflow is triggered with
+	// this tenant, Knock prefers this connection over untagged connections.
+	KnockTenantID param.Field[string] `json:"knock_tenant_id"`
 }
 
 func (r SlackChannelDataConnectionsSlackIncomingWebhookConnectionParam) MarshalJSON() (data []byte, err error) {
