@@ -1380,6 +1380,7 @@ const (
 	MessageEventTypeMessageDeliveryAttempted MessageEventType = "message.delivery_attempted"
 	MessageEventTypeMessageUndelivered       MessageEventType = "message.undelivered"
 	MessageEventTypeMessageBounced           MessageEventType = "message.bounced"
+	MessageEventTypeMessageComplaint         MessageEventType = "message.complaint"
 	MessageEventTypeMessageRead              MessageEventType = "message.read"
 	MessageEventTypeMessageUnread            MessageEventType = "message.unread"
 	MessageEventTypeMessageSeen              MessageEventType = "message.seen"
@@ -1392,7 +1393,7 @@ const (
 
 func (r MessageEventType) IsKnown() bool {
 	switch r {
-	case MessageEventTypeMessageCreated, MessageEventTypeMessageQueued, MessageEventTypeMessageSent, MessageEventTypeMessageNotSent, MessageEventTypeMessageDelivered, MessageEventTypeMessageDeliveryAttempted, MessageEventTypeMessageUndelivered, MessageEventTypeMessageBounced, MessageEventTypeMessageRead, MessageEventTypeMessageUnread, MessageEventTypeMessageSeen, MessageEventTypeMessageUnseen, MessageEventTypeMessageArchived, MessageEventTypeMessageUnarchived, MessageEventTypeMessageInteracted, MessageEventTypeMessageLinkClicked:
+	case MessageEventTypeMessageCreated, MessageEventTypeMessageQueued, MessageEventTypeMessageSent, MessageEventTypeMessageNotSent, MessageEventTypeMessageDelivered, MessageEventTypeMessageDeliveryAttempted, MessageEventTypeMessageUndelivered, MessageEventTypeMessageBounced, MessageEventTypeMessageComplaint, MessageEventTypeMessageRead, MessageEventTypeMessageUnread, MessageEventTypeMessageSeen, MessageEventTypeMessageUnseen, MessageEventTypeMessageArchived, MessageEventTypeMessageUnarchived, MessageEventTypeMessageInteracted, MessageEventTypeMessageLinkClicked:
 		return true
 	}
 	return false
