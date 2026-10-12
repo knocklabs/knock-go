@@ -59,7 +59,7 @@ func NewUserService(opts ...option.RequestOption) (r *UserService) {
 }
 
 // Create or update a user with the provided identification data. When you identify
-// an existing user, the system merges the properties you specific with what is
+// an existing user, the system merges the properties you specify with what is
 // currently set on the user, updating only the fields included in your requests.
 func (r *UserService) Update(ctx context.Context, userID string, body UserUpdateParams, opts ...option.RequestOption) (res *User, err error) {
 	opts = slices.Concat(r.Options, opts)
