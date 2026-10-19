@@ -474,6 +474,10 @@ type MessageSource struct {
 	Key string `json:"key" api:"required"`
 	// The ID of the version of the workflow or guide that triggered the message.
 	VersionID string `json:"version_id" api:"required" format:"uuid"`
+	// The branch ancestry of the step that generated the message, outermost first.
+	// Each segment is the branching step and the branch taken. Omitted when the step
+	// is not nested under a branch.
+	BranchPath []MessageSourceBranchPath `json:"branch_path" api:"nullable"`
 	// The step reference for the step in the workflow that generated the message.
 	StepRef string `json:"step_ref" api:"nullable"`
 	// Whether this message was generated from a workflow, broadcast, or guide.
@@ -493,6 +497,7 @@ type messageSourceJSON struct {
 	Categories             apijson.Field
 	Key                    apijson.Field
 	VersionID              apijson.Field
+	BranchPath             apijson.Field
 	StepRef                apijson.Field
 	Type                   apijson.Field
 	WorkflowRecipientRunID apijson.Field
@@ -506,6 +511,34 @@ func (r *MessageSource) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r messageSourceJSON) RawJSON() string {
+	return r.raw
+}
+
+type MessageSourceBranchPath struct {
+	// The ID of the branch taken.
+	BranchID string `json:"branch_id" api:"required" format:"uuid"`
+	// The reference of the branching step.
+	StepRef string `json:"step_ref" api:"required"`
+	// The type of the branching step.
+	StepType string                      `json:"step_type" api:"required"`
+	JSON     messageSourceBranchPathJSON `json:"-"`
+}
+
+// messageSourceBranchPathJSON contains the JSON metadata for the struct
+// [MessageSourceBranchPath]
+type messageSourceBranchPathJSON struct {
+	BranchID    apijson.Field
+	StepRef     apijson.Field
+	StepType    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageSourceBranchPath) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageSourceBranchPathJSON) RawJSON() string {
 	return r.raw
 }
 
