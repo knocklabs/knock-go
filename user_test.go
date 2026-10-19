@@ -227,6 +227,7 @@ func TestUserListWithOptionalParams(t *testing.T) {
 		After:    knock.F("after"),
 		Before:   knock.F("before"),
 		Include:  knock.F([]knock.UserListParamsInclude{knock.UserListParamsIncludePreferences}),
+		Order:    knock.F(knock.UserListParamsOrderAsc),
 		PageSize: knock.F(int64(0)),
 	})
 	if err != nil {
