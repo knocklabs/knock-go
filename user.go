@@ -582,6 +582,9 @@ type UserListParams struct {
 	Before param.Field[string] `query:"before"`
 	// Associated resources to include in the response.
 	Include param.Field[[]UserListParamsInclude] `query:"include"`
+	// Sort by insertion order. Pass `asc` for oldest first, or `desc` for newest
+	// first. Defaults to oldest first when omitted.
+	Order param.Field[UserListParamsOrder] `query:"order"`
 	// The number of items per page (defaults to 50).
 	PageSize param.Field[int64] `query:"page_size"`
 }
@@ -603,6 +606,23 @@ const (
 func (r UserListParamsInclude) IsKnown() bool {
 	switch r {
 	case UserListParamsIncludePreferences:
+		return true
+	}
+	return false
+}
+
+// Sort by insertion order. Pass `asc` for oldest first, or `desc` for newest
+// first. Defaults to oldest first when omitted.
+type UserListParamsOrder string
+
+const (
+	UserListParamsOrderAsc  UserListParamsOrder = "asc"
+	UserListParamsOrderDesc UserListParamsOrder = "desc"
+)
+
+func (r UserListParamsOrder) IsKnown() bool {
+	switch r {
+	case UserListParamsOrderAsc, UserListParamsOrderDesc:
 		return true
 	}
 	return false
