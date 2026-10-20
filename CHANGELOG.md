@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.44.0](https://github.com/knocklabs/knock-go/compare/v1.43.0...v1.44.0) (2026-10-20)
+
+
+### Features
+
+* List users can now be sorted with the optional order parameter (v0.1.1783) ([f2c369d](https://github.com/knocklabs/knock-go/commit/f2c369d011718d087f467fb808c9dca5d8c91bec))
+
 ## [1.43.0](https://github.com/knocklabs/knock-go/compare/v1.42.0...v1.43.0) (2026-10-19)
 
 
