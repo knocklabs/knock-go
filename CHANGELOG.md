@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.45.0](https://github.com/knocklabs/knock-go/compare/v1.44.0...v1.45.0) (2026-11-16)
+
+
+### Features
+
+* Filter and read workflow recipient runs with the new exited status (v0.1.1835) ([ceb3bc2](https://github.com/knocklabs/knock-go/commit/ceb3bc2dbe870baee3ee8eb23c69bdffeedcd4ed))
+
 ## [1.44.0](https://github.com/knocklabs/knock-go/compare/v1.43.0...v1.44.0) (2026-10-20)
 
 
