@@ -147,11 +147,12 @@ const (
 	WorkflowRecipientRunStatusPaused     WorkflowRecipientRunStatus = "paused"
 	WorkflowRecipientRunStatusCompleted  WorkflowRecipientRunStatus = "completed"
 	WorkflowRecipientRunStatusCancelled  WorkflowRecipientRunStatus = "cancelled"
+	WorkflowRecipientRunStatusExited     WorkflowRecipientRunStatus = "exited"
 )
 
 func (r WorkflowRecipientRunStatus) IsKnown() bool {
 	switch r {
-	case WorkflowRecipientRunStatusQueued, WorkflowRecipientRunStatusProcessing, WorkflowRecipientRunStatusPaused, WorkflowRecipientRunStatusCompleted, WorkflowRecipientRunStatusCancelled:
+	case WorkflowRecipientRunStatusQueued, WorkflowRecipientRunStatusProcessing, WorkflowRecipientRunStatusPaused, WorkflowRecipientRunStatusCompleted, WorkflowRecipientRunStatusCancelled, WorkflowRecipientRunStatusExited:
 		return true
 	}
 	return false
@@ -341,11 +342,12 @@ const (
 	WorkflowRecipientRunListParamsStatusPaused     WorkflowRecipientRunListParamsStatus = "paused"
 	WorkflowRecipientRunListParamsStatusCompleted  WorkflowRecipientRunListParamsStatus = "completed"
 	WorkflowRecipientRunListParamsStatusCancelled  WorkflowRecipientRunListParamsStatus = "cancelled"
+	WorkflowRecipientRunListParamsStatusExited     WorkflowRecipientRunListParamsStatus = "exited"
 )
 
 func (r WorkflowRecipientRunListParamsStatus) IsKnown() bool {
 	switch r {
-	case WorkflowRecipientRunListParamsStatusQueued, WorkflowRecipientRunListParamsStatusProcessing, WorkflowRecipientRunListParamsStatusPaused, WorkflowRecipientRunListParamsStatusCompleted, WorkflowRecipientRunListParamsStatusCancelled:
+	case WorkflowRecipientRunListParamsStatusQueued, WorkflowRecipientRunListParamsStatusProcessing, WorkflowRecipientRunListParamsStatusPaused, WorkflowRecipientRunListParamsStatusCompleted, WorkflowRecipientRunListParamsStatusCancelled, WorkflowRecipientRunListParamsStatusExited:
 		return true
 	}
 	return false
